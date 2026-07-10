@@ -172,24 +172,25 @@ def build_index():
         trows += (f"<tr{top}><td><b>{ph}</b></td><td class='muted'>{what}</td>"
                   f"<td style='white-space:nowrap'>{tm}</td><td><span class='pill {cls}'>{conf}</span></td></tr>")
 
-    # inline, theme-aware diagram: the validated cryptographic module is a small
-    # boundary inside a much larger product. Styled with the page's CSS variables.
-    feats = [("User interface", 34, 60), ("Networking", 189, 60), ("Storage", 344, 60), ("Logging", 499, 60),
-             ("Config / updates", 34, 148), ("Business logic", 189, 148), ("OS / runtime", 344, 148)]
-    fcells = "".join(
-        f"<rect x='{x}' y='{y}' width='143' height='78' rx='8' fill='var(--surface)' stroke='var(--line)'/>"
-        f"<text x='{x+71}' y='{y+44}' text-anchor='middle' font-size='12.5' fill='var(--ink-2)'>{esc(lbl)}</text>"
-        for lbl, x, y in feats)
+    # inline, theme-aware diagram: three nested scopes. The validated scope is only
+    # the FIPS-approved functions, inside the module, inside the product.
     boundary_svg = (
-        "<svg viewBox='0 0 676 258' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
-        "aria-label='The FIPS-validated cryptographic module is a small defined boundary inside a much larger product'>"
-        "<text x='22' y='30' font-size='11' letter-spacing='1.6' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
-        "<rect x='18' y='42' width='640' height='202' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
-        + fcells +
-        "<rect x='499' y='148' width='143' height='78' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
-        "<text x='570' y='177' text-anchor='middle' font-size='13' font-weight='600' fill='var(--accent-2)'>Cryptographic</text>"
-        "<text x='570' y='194' text-anchor='middle' font-size='13' font-weight='600' fill='var(--accent-2)'>module</text>"
-        "<text x='570' y='212' text-anchor='middle' font-size='10' fill='var(--accent-2)'>the validated boundary</text>"
+        "<svg viewBox='0 0 676 262' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
+        "aria-label='The validated scope is only the FIPS-approved functions, inside the cryptographic module, "
+        "which is itself a small part of the product'>"
+        "<text x='22' y='30' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
+        "<rect x='18' y='42' width='640' height='208' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
+        "<text x='40' y='72' font-size='12' fill='var(--ink-2)'>user interface &#183; networking &#183; storage &#183; "
+        "logging &#183; configuration &#183; updates</text>"
+        "<text x='40' y='92' font-size='12' fill='var(--ink-2)'>business logic &#183; OS and runtime &#183; admin APIs "
+        "&#183; everything else the product does</text>"
+        "<rect x='150' y='112' width='376' height='126' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
+        "<text x='166' y='134' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
+        "<text x='166' y='150' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
+        "<rect x='168' y='162' width='340' height='62' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
+        "<text x='338' y='188' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
+        "FIPS-approved functions, in approved mode</text>"
+        "<text x='338' y='206' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
         "</svg>")
 
     body = (
@@ -211,10 +212,12 @@ def build_index():
         "<b>approved mode</b> of operation, protects its keys, and runs its self-tests. Every validation names a "
         "specific module <b>version</b>, configuration, and operational environment.</p>"
         "<div class='panel' style='padding:18px 20px'>" + boundary_svg +
-        "<p class='muted' style='margin-top:6px'>A validation covers only the <b>cryptographic module</b>: a small, "
-        "defined boundary of approved algorithms, key management, random-number generation, and self-tests. Everything "
-        "else the product does sits <b>outside</b> that boundary and is not part of the validation. That is why a "
-        "product can be built around a validated module and still run cryptography that was never validated.</p></div>"
+        "<p class='muted' style='margin-top:6px'>The scope narrows twice. A validation covers only the "
+        "<b>cryptographic module</b>, a small boundary inside the product; and within that, only the "
+        "<b>FIPS-approved functions operated in the approved mode</b>. Non-approved algorithms can sit inside the same "
+        "module and are not part of the validation, and everything the product does outside the module is not covered "
+        "at all. That is why a product can be built around a validated module and still run cryptography that was "
+        "never validated.</p></div>"
         "<p class='muted'>The four security levels roughly escalate from “the cryptography is implemented correctly” to "
         "increasingly strong physical protection:</p>"
         "<div class='tw'><table><thead><tr><th>level</th><th>roughly</th><th>what it adds</th></tr></thead><tbody>"
