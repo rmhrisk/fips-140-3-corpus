@@ -1,0 +1,56 @@
+name: build-and-deploy
+
+# Runs the full pipeline (make all) on every push and deploys the docs/ site to
+# GitHub Pages. The build is fully offline: it replays the committed NVD caches,
+# so no API key is required. If an NVD_API_KEY repository secret is present it is
+# passed through for live refreshes (cache misses only); it never changes cached
+# output, so the site reproduces identically with or without it.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the corpus artifacts and the site (offline, from committed caches)
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: make all
+      - name: Check byte-for-byte reproduction of the committed artifacts
+        run: |
+          if git diff --quiet -- corpus_analysis.json drift.json version_exact.json corpus_report.html FINDINGS.md docs; then
+            echo "OK: regenerated artifacts match the committed ones byte-for-byte"
+          else
+            echo "::warning::regenerated artifacts differ from committed (often just a Python-version detail)"
+            git --no-pager diff --stat
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

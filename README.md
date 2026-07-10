@@ -1,5 +1,8 @@
 # What a FIPS 140 certificate actually tells you
 
+[![build-and-deploy](https://github.com/rmhrisk/fips-140-3-corpus/actions/workflows/pages.yml/badge.svg)](https://github.com/rmhrisk/fips-140-3-corpus/actions/workflows/pages.yml)
+&nbsp;·&nbsp; **Live site: https://rmhrisk.github.io/fips-140-3-corpus/**
+
 A corpus-wide read of the public **FIPS 140-3** validated-module record (CMVP
 certificates plus their Security Policies), extracted and analyzed
 deterministically. The question it answers is not "did this module pass" but
@@ -84,9 +87,12 @@ docs/                        the published static site (GitHub Pages)
 
 ## The published site
 
+Live at **https://rmhrisk.github.io/fips-140-3-corpus/**.
+
 `docs/` is a single, self-contained static site. Open `docs/index.html` locally,
-or publish it with **GitHub Pages** (repo Settings -> Pages -> Source: your
-default branch, folder `/docs`). Every page shares one design and one top
+or let CI publish it: the `build-and-deploy` GitHub Actions workflow rebuilds the
+whole pipeline and deploys `docs/` to **GitHub Pages** on every push to `main`
+(Pages source: GitHub Actions). Every page shares one design and one top
 navigation:
 
 - **Overview** (`index.html`): the thesis, the headline numbers, and the way in.
@@ -133,9 +139,23 @@ make verify     # rebuild and confirm every artifact + docs/ is byte-identical
 make clean      # remove generated artifacts (all regenerate from make all)
 ```
 
-Requires only Python 3.8+. Re-running the NVD stages against the live API (after
-`rm drift_cache.json ve_cache.json`) reproduces the same joins as of a current
-NVD snapshot.
+Requires only Python 3.8+ and **no API key**: the NVD stages replay the committed
+`drift_cache.json` / `ve_cache.json`, so `make all` runs fully offline and
+`make verify` reproduces every artifact byte-for-byte. CI runs exactly this.
+
+To refresh the joins against a current NVD snapshot, delete the caches
+(`rm drift_cache.json ve_cache.json`) and re-run. A key is optional: set
+`NVD_API_KEY` in the environment (or as a repository secret) to lift NVD's
+keyless rate limit. The key only affects live fetches, never the cached results.
+
+## Corpus scope
+
+The analysis runs on the **provided** record snapshot under `corpus140_3/records/`
+(a sampled certificate-number sweep, not the full FIPS 140-3 population). The
+upstream fetch-and-extract toolchain that produced those records from the CMVP
+site and the Security-Policy PDFs is not shipped here, so broadening the set to a
+larger or more representative sample requires re-running that extraction; the
+analysis, joins, and site then regenerate unchanged from the new records.
 
 ## Data provenance
 

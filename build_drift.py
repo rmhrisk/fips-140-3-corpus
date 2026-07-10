@@ -24,12 +24,18 @@ def qbounds(y,q):
     end = f"{y}-{m1:02d}-01" if m1<=12 else f"{y+1}-01-01"
     return f"{y}-{m0:02d}-01T00:00:00.000", f"{end}T00:00:00.000"
 
+# Optional NVD API key: only used for LIVE fetches (cache misses). It raises the
+# NVD rate limit but changes nothing about the cached results, so committed caches
+# still reproduce byte-for-byte with no key set.
+_NVD_KEY = os.environ.get("NVD_API_KEY", "").strip()
+
 def nvd_count(cpe,s,e):
     url="https://services.nvd.nist.gov/rest/json/cves/2.0?"+urllib.parse.urlencode(
         {"virtualMatchString":cpe,"pubStartDate":s,"pubEndDate":e,"resultsPerPage":1})
+    req=urllib.request.Request(url, headers={"apiKey":_NVD_KEY} if _NVD_KEY else {})
     for a in range(5):
         try:
-            with urllib.request.urlopen(url,timeout=40) as r:
+            with urllib.request.urlopen(req,timeout=40) as r:
                 return json.load(r).get("totalResults",0)
         except Exception as ex:
             if a<4: time.sleep(12); continue

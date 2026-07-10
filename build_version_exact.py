@@ -22,13 +22,17 @@ def clean_ver(sw):
         if m: return m.group(1)
     return None
 
+# Optional NVD API key: live fetches only; committed caches reproduce with no key.
+_NVD_KEY = os.environ.get("NVD_API_KEY", "").strip()
+
 def nvd_all(cpe_ver):
     """All CVEs whose affected CPE range includes cpe_ver → [(id, published, status)]."""
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0?" + urllib.parse.urlencode(
         {"virtualMatchString": cpe_ver, "resultsPerPage": 2000})
+    req = urllib.request.Request(url, headers={"apiKey": _NVD_KEY} if _NVD_KEY else {})
     for a in range(5):
         try:
-            with urllib.request.urlopen(url, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=60) as r:
                 d = json.load(r)
             out = []
             for v in d.get("vulnerabilities", []):
