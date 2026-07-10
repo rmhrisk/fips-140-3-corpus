@@ -173,25 +173,28 @@ def build_index():
         trows += (f"<tr{top}><td><b>{ph}</b></td><td class='muted'>{what}</td>"
                   f"<td style='white-space:nowrap'>{tm}</td><td><span class='pill {cls}'>{conf}</span></td></tr>")
 
-    # inline, theme-aware diagram: three nested scopes. The validated scope is only
-    # the FIPS-approved functions, inside the module, inside the product.
+    # inline, theme-aware diagram: the product's functionality as feature blocks, then
+    # the scope narrowing twice into the module and into the approved functions.
+    feats = [("User interface", 36, 58), ("Networking", 189, 58), ("Storage", 342, 58), ("Logging", 495, 58),
+             ("Config / updates", 36, 104), ("Business logic", 189, 104), ("OS / runtime", 342, 104)]
+    fcells = "".join(
+        f"<rect x='{x}' y='{y}' width='143' height='40' rx='8' fill='var(--surface)' stroke='var(--line)'/>"
+        f"<text x='{x+71}' y='{y+25}' text-anchor='middle' font-size='12' fill='var(--ink-2)'>{esc(lbl)}</text>"
+        for lbl, x, y in feats)
     boundary_svg = (
-        "<svg viewBox='0 0 676 262' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
+        "<svg viewBox='0 0 676 296' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
         "aria-label='The validated scope is only the FIPS-approved functions, inside the cryptographic module, "
         "which is itself a small part of the product'>"
         "<text x='22' y='30' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
-        "<rect x='18' y='42' width='640' height='208' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
-        "<text x='40' y='72' font-size='12' fill='var(--ink-2)'>user interface &#183; networking &#183; storage &#183; "
-        "logging &#183; configuration &#183; updates</text>"
-        "<text x='40' y='92' font-size='12' fill='var(--ink-2)'>business logic &#183; OS and runtime &#183; admin APIs "
-        "&#183; everything else the product does</text>"
-        "<rect x='150' y='112' width='376' height='126' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
-        "<text x='166' y='134' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
-        "<text x='166' y='150' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
-        "<rect x='168' y='162' width='340' height='62' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
-        "<text x='338' y='188' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
+        "<rect x='18' y='42' width='640' height='246' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
+        + fcells +
+        "<rect x='150' y='158' width='376' height='118' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
+        "<text x='166' y='180' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
+        "<text x='166' y='196' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
+        "<rect x='168' y='206' width='340' height='58' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
+        "<text x='338' y='231' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
         "FIPS-approved functions, in approved mode</text>"
-        "<text x='338' y='206' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
+        "<text x='338' y='249' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
         "</svg>")
 
     body = (
