@@ -108,6 +108,13 @@ th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line-2)} td
 th{font:600 11px/1.2 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 tbody tr:hover{background:var(--surface-2)} tbody tr[data-href]{cursor:pointer} td .cn{font:600 12.5px var(--mono);color:var(--ink-3)}
 tr:last-child td{border-bottom:0}
+.mbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 2px;align-items:center}
+.mbar input,.mbar select{font:14px var(--sans);padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.mbar input{flex:1 1 220px;min-width:180px}
+.mbar input:focus,.mbar select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+th[data-k]{cursor:pointer;user-select:none;white-space:nowrap} th[data-k]:hover{color:var(--accent)}
+th[data-k]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+th[aria-sort=ascending]::after{content:' ▲';font-size:9px} th[aria-sort=descending]::after{content:' ▼';font-size:9px}
 
 .crumb{font-size:13px;color:var(--ink-3);margin:0 0 6px} .crumb a{color:var(--ink-2)}
 .foot{border-top:1px solid var(--line);background:var(--surface);margin-top:44px}
@@ -427,28 +434,83 @@ def build_index():
     return page("FIPS 140-3 validation, in practice", "", "home", body)
 
 # ---- module index ----------------------------------------------------------
+MODULES_JS = """<script>
+(function(){
+ var tb=document.querySelector('tbody'), rows=[].slice.call(tb.querySelectorAll('tr'));
+ var q=document.getElementById('q'),fa=document.getElementById('fa'),fl=document.getElementById('fl'),fe=document.getElementById('fe');
+ var shown=document.getElementById('shown'),none=document.getElementById('noresult'),N=rows.length,dir={};
+ function apply(){
+  var s=q.value.trim().toLowerCase(),a=fa.value,l=fl.value,e=fe.value,n=0;
+  rows.forEach(function(r){
+   var d=r.dataset, ok=(!s||d.search.indexOf(s)>=0)&&(!a||d.arch===a)&&(!l||d.level===l)&&(!e||d.full===e);
+   r.style.display=ok?'':'none'; if(ok)n++;
+  });
+  shown.textContent=(n===N?'All '+N:n+' of '+N);
+  none.style.display=n?'none':'';
+ }
+ [q,fa,fl,fe].forEach(function(el){el.addEventListener('input',apply);el.addEventListener('change',apply);});
+ function sortBy(th){
+  var k=th.dataset.k,num=(k==='cert'||k==='surfaces'||k==='stale'),d=dir[k]=-(dir[k]||1);
+  rows.sort(function(x,y){var xv=x.dataset[k],yv=y.dataset[k];
+   if(num)return (parseFloat(xv)-parseFloat(yv))*d; return xv<yv?-d:xv>yv?d:0;});
+  rows.forEach(function(r){tb.appendChild(r);});
+  document.querySelectorAll('th[data-k]').forEach(function(t){t.removeAttribute('aria-sort');});
+  th.setAttribute('aria-sort',d>0?'ascending':'descending');
+ }
+ document.querySelectorAll('th[data-k]').forEach(function(th){
+  th.setAttribute('tabindex','0'); th.setAttribute('role','button');
+  th.addEventListener('click',function(){sortBy(th);});
+  th.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();sortBy(th);}});
+ });
+ rows.forEach(function(r){r.addEventListener('click',function(e){if(e.target.closest('a'))return;location.href=r.dataset.href;});});
+})();
+</script>"""
+
 def build_modules_index():
     rows = sorted(RECS, key=lambda r: -(r.get("months_since_last_validation") or 0))
+    archs = sorted({r.get("archetype") for r in RECS if r.get("archetype")})
+    levels = sorted({str(r.get("level")) for r in RECS if r.get("level") not in (None, "")})
     tr = ""
     for r in rows:
         surfaces = len(r.get("motifs") or [])
-        stale = r.get('months_since_last_validation')
-        tr += (f"<tr data-href='{r['cert']}.html'>"
+        stale = r.get("months_since_last_validation")
+        full = bool(r.get("full_extraction"))
+        srch = f"#{r['cert']} {r.get('module') or ''} {r.get('vendor') or ''} {r.get('archetype') or ''}".lower()
+        # TCB surfaces are only computed for full-extraction records; mark the rest n/a
+        surf_cell = (str(surfaces) if surfaces else "") if full else "<span class='muted'>n/a</span>"
+        tr += (f"<tr data-href='{r['cert']}.html' data-cert='{r['cert']}' "
+               f"data-module=\"{esc((r.get('module') or '').lower())}\" data-vendor=\"{esc((r.get('vendor') or '').lower())}\" "
+               f"data-arch=\"{esc(r.get('archetype') or '')}\" data-level=\"{esc(str(r.get('level') or ''))}\" "
+               f"data-surfaces='{surfaces}' data-stale='{stale if stale is not None else -1}' "
+               f"data-full='{'1' if full else '0'}' data-search=\"{esc(srch)}\">"
                f"<td><span class='cn'><a href='{r['cert']}.html'>#{r['cert']}</a></span></td>"
                f"<td>{esc(r['module'])}</td><td class='muted'>{esc(r['vendor'])}</td>"
                f"<td>{esc(r['archetype'])}</td>"
-               f"<td>{surfaces or ''}</td>"
+               f"<td>{surf_cell}</td>"
                f"<td>{esc(stale)}{' mo' if stale is not None else ''}</td></tr>")
+    lvl_opts = "".join(f"<option value='{esc(l)}'>Level {esc(l)}</option>" for l in levels)
+    arch_opts = "".join(f"<option value=\"{esc(a)}\">{esc(a)}</option>" for a in archs)
+    controls = (
+        "<div class='mbar'>"
+        "<input id='q' type='search' placeholder='Search module, vendor, or cert #…' aria-label='Search modules'>"
+        f"<select id='fa' aria-label='Filter by archetype'><option value=''>All archetypes</option>{arch_opts}</select>"
+        f"<select id='fl' aria-label='Filter by security level'><option value=''>All levels</option>{lvl_opts}</select>"
+        "<select id='fe' aria-label='Filter by extraction'><option value=''>All records</option>"
+        "<option value='1'>Full SP extraction</option><option value='0'>Metadata + text</option></select>"
+        "</div>")
     body = ("<main>"
             "<p class='crumb'><a href='../index.html'>Overview</a> &nbsp;/&nbsp; Modules</p>"
-            f"<h1>All {N} modules</h1>"
-            "<p class='dek'>Sorted by time since last validation. Each row opens the module's full Security Policy, "
+            f"<h1><span id='shown'>All {N}</span> modules</h1>"
+            "<p class='dek'>Search, sort, and filter the corpus. Each row opens the module's full Security Policy, "
             "with the analysis signals folded into the top.</p>"
-            "<div class='tw'><table><thead><tr><th>cert</th><th>module</th><th>vendor</th><th>archetype</th>"
-            "<th>TCB surfaces</th><th>since last val.</th></tr></thead>"
-            f"<tbody>{tr}</tbody></table></div></main>"
-            "<script>document.querySelectorAll('tr[data-href]').forEach(function(r){"
-            "r.addEventListener('click',function(e){if(e.target.closest('a'))return;location.href=r.dataset.href;});});</script>")
+            + controls +
+            "<div class='tw'><table><thead><tr>"
+            "<th data-k='cert'>cert</th><th data-k='module'>module</th><th data-k='vendor'>vendor</th>"
+            "<th data-k='arch'>archetype</th><th data-k='surfaces'>TCB surfaces</th>"
+            "<th data-k='stale'>since last val.</th></tr></thead>"
+            f"<tbody>{tr}</tbody></table></div>"
+            "<p class='muted' id='noresult' style='display:none;padding:16px 2px'>No modules match those filters.</p>"
+            "</main>" + MODULES_JS)
     return page(f"All {N} modules", "../", "modules", body)
 
 # ---- per-module Security-Policy document view (render_html, re-skinned) -----
