@@ -78,6 +78,9 @@ a.card:hover{border-color:var(--accent-line);background:var(--surface-2)}
 .card p{font-size:13.5px;color:var(--ink-2);margin:6px 0 0}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.pull{margin:18px 0 8px;padding:6px 0 6px 22px;border-left:3px solid var(--accent);max-width:60ch}
+.pull p{margin:0;max-width:none;font:italic 400 21px/1.4 var(--serif);color:var(--ink);text-wrap:balance}
+.pull p+p{margin-top:12px;font-size:17px;line-height:1.5;color:var(--ink-2)}
 .panel h3{color:var(--accent)} .panel p{font-size:14px;margin:6px 0 0}
 .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
@@ -191,10 +194,10 @@ def build_index():
         "<rect x='36' y='170' width='602' height='94' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
         "<text x='52' y='196' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
         "<text x='52' y='214' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
-        "<rect x='495' y='192' width='143' height='44' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
-        "<text x='566' y='210' text-anchor='middle' font-size='10' font-weight='600' fill='var(--accent-2)'>FIPS-approved functions</text>"
-        "<text x='566' y='224' text-anchor='middle' font-size='8.5' fill='var(--accent-2)'>in approved mode</text>"
-        "<text x='566' y='252' text-anchor='middle' font-size='9' fill='var(--accent-2)'>the validated scope</text>"
+        "<rect x='489' y='184' width='133' height='64' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
+        "<text x='555' y='206' text-anchor='middle' font-size='10' font-weight='600' fill='var(--accent-2)'>FIPS-approved functions</text>"
+        "<text x='555' y='221' text-anchor='middle' font-size='8.5' fill='var(--accent-2)'>in approved mode</text>"
+        "<text x='555' y='239' text-anchor='middle' font-size='9' font-style='italic' fill='var(--accent-2)'>the validated scope</text>"
         "</svg>")
 
     body = (
@@ -284,6 +287,13 @@ def build_index():
         "current action may sit with NIST, the lab, or the vendor. Money tracks time: accredited-lab fees plus the "
         "internal engineering to scope, remediate, and evidence a module make validation a substantial investment "
         "well before the certificate is posted.</p>"
+        "<p>This lag is now a live constraint on the post-quantum transition. Google has said it wants to be "
+        "post-quantum ready by 2029, and a recent White House executive order set a 2030 federal target, five years "
+        "earlier than the prior goal. Yet at the time of writing (July 2026) not a single FIPS certificate has been "
+        "issued for the core post-quantum algorithms, apart from ML-KEM used in TLS and SLH-DSA, whose utility so far "
+        "is narrow and targeted. The time and cost of validation are themselves holding the rollout back. It is a bit "
+        "like waiting on a permit in a big city: for months the answer has been “any day now,” with no firm date "
+        "anyone can point to.</p>"
 
         "<h2>Certified once, attacked continuously</h2>"
         "<p>Validation is slow and static; the threat landscape is neither. For decades Patch Tuesday has delivered a "
@@ -333,6 +343,9 @@ def build_index():
         "usage models it implements, and that choice is often where the real security lives.</p>"
 
         "<h2>Where this corpus fits</h2>"
+        "<blockquote class='pull'><p>A FIPS certificate is an unexpectedly rich source of architectural intelligence.</p>"
+        "<p>If you read enough Security Policies, you can start to understand how the industry actually builds "
+        "cryptographic systems.</p></blockquote>"
         "<p>This static site reads the public CMVP certificates and Security Policies for a sampled certificate-number "
         "sweep of FIPS 140-3 modules. It turns the abstractions above into something you can inspect: what a given "
         "module actually had validated, how long its certified state has stood, and where the public record stops and "

@@ -38,7 +38,7 @@ def main():
     win = lc["exposure_window_months (validation->sunset)"]
     kpi_strip = "".join([
         kpi("modules analyzed", s["n"], esc(cov['cert_number_span'])),
-        kpi("median cert window", f"{win['median']:.0f} mo", "validation → sunset"),
+        kpi("median active window", f"{win['median']:.0f} mo", "listed-valid: validation → sunset"),
         kpi("no recorded update", f"{100-rc['pct_with_updates']:.0f}%", f"{s['n']-rc['modules_with_updates']} of {s['n']} certificates"),
         kpi("lattice PQC present", f"{pq['by_kind_pct'].get('ML-KEM (FIPS 203)',0):.0f}%", "ML-KEM / ML-DSA / SLH-DSA"),
         kpi("carry a legacy primitive", f"{al['modules_with_any_legacy_pct']:.0f}%", "SHA-1 / ECB / 3DES"),
@@ -112,8 +112,10 @@ def main():
     P.append("<h2>1 · Lifecycle &amp; certificate window</h2>")
     P.append("<div class='cols'>")
     P.append(f"<div class='card'><h3>CMVP certificate active window (n={win['n']})</h3>"
-             f"<p class='big'>{win['median']:.0f} months</p><p class='muted'>median initial-validation → sunset "
-             f"(mean {win['mean']:.0f}). This is <i>certificate lifetime</i> — not vulnerability exposure (see §9).</p></div>")
+             f"<p class='big'>{win['median']:.0f} months</p><p class='muted'>median (mean {win['mean']:.0f}). The "
+             f"<b>active window</b> is how long CMVP lists a certificate as valid, from initial validation to sunset "
+             f"(its removal from the active list). It is the module's certification lifetime, not an X.509 certificate's "
+             f"validity period, and it measures the certified state's shelf life, not vulnerability exposure (see §9).</p></div>")
     P.append(f"<div class='card'><h3>Development→certificate <span class='muted'>(directional, n={sub['n']})</span></h3>"
              f"<p class='big'>~{sub['median']:.0f} mo</p><p class='muted'>where the SP ships a dated revision table (small sample — anecdote, "
              f"not a corpus statistic). Consistent with a published <i>external</i> industry estimate (~19 mo post-submission / ~24–36 mo end-to-end; provided, not corpus-derived).</p></div>")
@@ -508,7 +510,7 @@ def main():
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
     .mast{border-bottom:1px solid var(--line);background:var(--surface)}
-    .mast-in{max-width:1120px;margin:0 auto;padding:44px 32px 30px}
+    .mast-in{max-width:900px;margin:0 auto;padding:44px 32px 30px}
     .eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
     .mast h1{font:600 40px/1.08 var(--serif);letter-spacing:-.015em;margin:0;text-wrap:balance;max-width:18ch}
     .dek{font-size:17px;line-height:1.5;color:var(--ink-2);margin:14px 0 0;max-width:62ch}
@@ -520,8 +522,12 @@ def main():
     .kv{font:600 27px/1.05 var(--serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--ink)}
     .kl{font-size:12.5px;color:var(--ink-2);margin-top:5px;font-weight:500} .ks{font-size:11px;color:var(--ink-3);margin-top:3px}
 
-    .wrap{max-width:1120px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:216px minmax(0,1fr);gap:44px;align-items:start}
-    .toc{position:sticky;top:0;max-height:100vh;overflow:auto;padding:34px 0;font-size:13px}
+    /* Content is a single 900px column centered on the page, identical to the
+       overview and the module pages, so navigating between them does not shift
+       or resize the text. The section TOC lives in the left gutter (fixed) only
+       when the viewport is wide enough to hold it beside that column. */
+    .wrap{max-width:900px;margin:0 auto;padding:0 32px}
+    .toc{position:fixed;top:70px;left:calc(50% - 694px);width:216px;max-height:calc(100vh - 90px);overflow:auto;padding:6px 0;font-size:13px}
     .toc-h{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:0 0 4px 12px;margin-bottom:8px}
     .toc a{display:flex;gap:9px;align-items:baseline;text-decoration:none;color:var(--ink-2);padding:5px 12px;border-left:2px solid transparent;line-height:1.3;border-bottom:0}
     .toc a:hover{color:var(--ink);border-left-color:var(--accent-line);background:var(--surface-2)}
@@ -579,10 +585,19 @@ def main():
     .foot{border-top:1px solid var(--line);background:var(--surface);margin-top:44px}
     .foot-in{max-width:1120px;margin:0 auto;padding:26px 32px 40px;font-size:12.5px;color:var(--ink-3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 
+    /* Not enough gutter for the fixed sidebar: collapse the TOC to an inline
+       pill list above the content. The content column itself stays centered and
+       the same width, so there is still no cross-page jump. */
+    @media(max-width:1439px){
+      .toc{position:static;left:auto;width:auto;max-height:none;padding:18px 0 6px;margin:0;
+           display:flex;flex-wrap:wrap;gap:6px 4px;border-bottom:1px solid var(--line)}
+      .toc-h{flex-basis:100%;padding-left:0;margin-bottom:2px}
+      .toc-part{flex-basis:100%;border-top:0;margin-top:2px;padding:10px 0 2px}
+      .toc a{display:inline-flex;border-left:0;border-radius:20px;padding:4px 10px;margin:0;background:var(--surface-2)}
+      .toc a.on{border-left:0;background:var(--accent-wash)}
+    }
     @media(max-width:860px){
-      .wrap{grid-template-columns:1fr;gap:0;padding:0 20px} .mast-in{padding:32px 20px 24px} .mast h1{font-size:31px}
-      .toc{position:static;max-height:none;padding:20px 0 6px;border-bottom:1px solid var(--line);margin-bottom:8px}
-      .toc a{display:inline-flex;border-left:0;border-radius:20px;padding:4px 10px;margin:0 4px 4px 0;background:var(--surface-2)}
+      .wrap{padding:0 20px} .mast-in{padding:32px 20px 24px} .mast h1{font-size:31px}
       main{padding:14px 0} h2{padding-top:32px}
     }
     """
