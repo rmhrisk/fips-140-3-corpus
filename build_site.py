@@ -300,6 +300,9 @@ POLICY_SKIN = (
     # render_html hardcodes light zebra/header backgrounds; theme them so dark mode is readable
     "table tbody tr:nth-child(even) td{background:var(--pill)!important}"
     "table thead th{background:var(--pill)!important}"
+    # the typed-table first column used the bright accent for the whole cell; make it
+    # readable ink so only the standard links stay teal
+    ".typed td:first-child{color:var(--ink)}"
     "</style>")
 
 def _placeholder_fig(fig):

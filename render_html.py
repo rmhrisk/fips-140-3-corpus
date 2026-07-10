@@ -681,7 +681,8 @@ DOCUMENT = """<!DOCTYPE html>
 </style></head><body>{body}
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({{startOnLoad:false, securityLevel:'loose', flowchart:{{useMaxWidth:true}}}});
+  mermaid.initialize({{startOnLoad:false, securityLevel:'loose', flowchart:{{useMaxWidth:true}},
+                       theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'neutral')}});
   mermaid.run({{querySelector:'.mermaid'}}).catch(function(e){{console.error(e);}});
 </script>
 <noscript>The review-risk graph renders with JavaScript enabled.</noscript>
