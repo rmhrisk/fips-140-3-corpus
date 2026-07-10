@@ -1,0 +1,1509 @@
+Corsec Security, Inc.
+CorSSL™ FIPS Object Module
+Software Version: 2.0.16.001
+
+
+
+
+FIPS 140-3 Non-Proprietary Security Policy
+FIPS Security Level: 1
+Document Version: 0.2
+
+
+
+
+                               Prepared by:
+
+
+
+
+                               Corsec Security, Inc.
+                               12600 Fair Lakes Circle
+                               Suite 210
+                               Fairfax, VA 22033
+                               United States of America
+
+                               Phone: +1 703 267 6050
+                               www.corsec.com
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+                                                            Abstract
+This is a non-proprietary Cryptographic Module Security Policy for the CorSSL™ FIPS Object Module (version
+2.0.16.001) from Corsec Security, Inc. (Corsec). This Security Policy describes how the CorSSL™ FIPS Object Module
+meets the security requirements of Federal Information Processing Standards (FIPS) Publication 140-3, which
+details the U.S. and Canadian government requirements for cryptographic modules. More information about the
+FIPS 140-3 standard and validation program is available on the National Institute of Standards and Technology
+(NIST) and the Canadian Centre for Cyber Security (CCCS) Cryptographic Module Validation Program (CMVP)
+website at http://csrc.nist.gov/groups/STM/cmvp.
+
+This document also describes how to run the module in its Approved mode of operation. This policy was prepared
+as part of the Level 1 FIPS 140-3 validation of the module. The CorSSL™ FIPS Object Module is referred to in this
+document as CorSSL FOM or the module.
+
+
+
+
+                                                          References
+This document deals only with operations and capabilities of the module in the technical terms of a FIPS 140-3
+cryptographic module security policy. More information is available on the module from the following sources:
+
+    •    The Corsec website www.corsec.com contains information on the full line of services and solutions from
+         Corsec.
+
+    •    The search page on the CMVP website (https://csrc.nist.gov/Projects/cryptographic-module-validation-
+         program/Validated-Modules/Search) can be used to locate and obtain vendor contact information for
+         technical or sales-related questions about the module.
+
+
+
+
+                                               Document Organization
+ISO/IEC 19790 Annex B uses the same section naming convention as ISO/IEC 19790 section 7 - Security
+requirements. For example, Annex B section B.2.1 is named “General” and B.2.2 is named “Cryptographic module
+specification,” which is the same as ISO/IEC 19790 section 7.1 and section 7.2, respectively. Therefore, the format
+of this Security Policy is presented in the same order as indicated in Annex B, starting with “General” and ending
+with “Mitigation of other attacks.” If sections are not applicable, they have been marked as such in this document.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                            Page 2 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                                  June 11, 2024
+
+
+
+Table of Contents
+1.     General..................................................................................................................................................5
+2.     Cryptographic Module Specification .......................................................................................................7
+       2.1   Operational Environments ......................................................................................................................7
+       2.2   Algorithm Implementations ....................................................................................................................7
+       2.3   Cryptographic Boundary ...................................................................................................................... 11
+       2.4   Modes of Operation............................................................................................................................. 13
+3.     Cryptographic Module Interfaces ......................................................................................................... 14
+4.     Roles, Services, and Authentication ...................................................................................................... 15
+       4.1    Authorized Roles .................................................................................................................................. 15
+       4.2    Authentication Methods ...................................................................................................................... 16
+       4.3    Services ................................................................................................................................................ 16
+5.     Software/Firmware Security ................................................................................................................ 19
+6.     Operational Environment ..................................................................................................................... 20
+7.     Physical Security .................................................................................................................................. 21
+8.     Non-Invasive Security .......................................................................................................................... 22
+9.     Sensitive Security Parameter Management .......................................................................................... 23
+       9.1    Keys and Other SSPs ............................................................................................................................ 23
+       9.2    DRBGs................................................................................................................................................... 25
+       9.3    SSP Storage Techniques ....................................................................................................................... 25
+       9.4    SSP Zeroization Methods ..................................................................................................................... 25
+       9.5    RBG Entropy Sources ........................................................................................................................... 25
+10. Self-Tests ............................................................................................................................................. 27
+    10.1 Pre-Operational Self-Tests ................................................................................................................... 27
+    10.2 Conditional Self-Tests .......................................................................................................................... 27
+    10.3 Self-Test Failure Handling .................................................................................................................... 28
+11. Life-Cycle Assurance............................................................................................................................. 29
+    11.1 Secure Installation ............................................................................................................................... 29
+    11.2 Initialization ......................................................................................................................................... 29
+    11.3 Startup 29
+    11.4 Administrator Guidance....................................................................................................................... 29
+    11.5 Non-Administrator Guidance ............................................................................................................... 30
+12. Mitigation of Other Attacks .................................................................................................................. 32
+Appendix A.                  Acronyms and Abbreviations .......................................................................................... 33
+
+
+
+
+                                                  CorSSL™ FIPS Object Module 2.0.16.001
+                                                       ©2024 Corsec Security, Inc.
+                   This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                               Page 3 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                                   June 11, 2024
+
+
+
+
+List of Tables
+Table 1 – Security Levels.............................................................................................................................................5
+Table 2 – Tested Operational Environments ..............................................................................................................7
+Table 3 – Approved Algorithms ..................................................................................................................................8
+Table 4 – Non-Approved Algorithms Allowed in the Approved Mode of Operation .............................................. 11
+Table 5 – Ports and Interfaces ................................................................................................................................. 14
+Table 6 – Roles, Service Commands, Input and Output .......................................................................................... 15
+Table 7 – Approved Services ................................................................................................................................... 16
+Table 8 – SSPs .......................................................................................................................................................... 23
+Table 9 – Acronyms and Abbreviations ................................................................................................................... 33
+
+
+
+
+List of Figures
+Figure 1 – GPC Block Diagram ................................................................................................................................. 12
+Figure 2 – Module Block Diagram (with Cryptographic Boundary) ......................................................................... 13
+
+
+
+
+                                                   CorSSL™ FIPS Object Module 2.0.16.001
+                                                        ©2024 Corsec Security, Inc.
+                    This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                                Page 4 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                       June 11, 2024
+
+
+
+1.               General
+Corsec Security, Inc is a privately owned company dedicated to assisting organizations through the security
+certification and validation process. Over the past 22 years, Corsec has grown significantly, becoming a global
+leader in product and corporate security, offering critical guidance and expertise to meet important business
+challenges in product security and third-party certifications and security validations, including FIPS 140-2, FIPS
+140-3, Common Criteria, and the DoDIN1 APL2.
+
+Corsec’s certification methodology helps open doors to new markets and increase revenue for clients with
+products ranging from mobile phones to satellites. Corsec’s broad knowledge safeguards against common pitfalls
+and thwarts delays, translating to a swift and seamless path to certification. Corsec has created the benchmark
+for providing business leaders with fast, flexible access to industry knowledge on security certifications and
+validations.
+
+The CorSSL™ FIPS Object Module (also called “CorSSL FOM”) version 2.0.16.001 is a software library providing a C
+language API 3 for use by other applications requiring cryptographic functionality. The CorSSL FOM offers
+symmetric encryption/decryption, digital signature generation/verification, hashing, cryptographic key
+generation, random number generation, message authentication, and SSP establishment functions to secure data-
+at-rest/data-in-flight and to support industry-standard secure communications protocols.
+
+The CorSSL FOM is built upon the OpenSSL FIPS Object Module 2.0.16 code base, providing engineering teams
+with a completely compatible cryptographic engine, allowing quick “drop-in” replacement into any existing
+OpenSSL FIPS Object Module solutions. The CorSSL FOM does not modify the OpenSSL interface, maintaining
+complete compatibility, and eliminating engineering development time to meet FIPS 140-3 requirements.
+
+The CorSSL FOM is validated at the FIPS 140-3 section levels shown in Table 1.
+
+                                                           Table 1 – Security Levels
+
+                    ISO/IEC 24759 Section 6.     FIPS 140-3 Section Title                            Security Level
+                    [Number Below]
+                    1                            General                                             1
+                    2                            Cryptographic Module Specification                  1
+                    3                            Cryptographic Module Interfaces                     1
+                    4                            Roles, Services, and Authentication                 1
+                    5                            Software/Firmware Security                          1
+                    6                            Operational Environment                             1
+                    7                            Physical Security                                   N/A
+                    8                            Non-Invasive Security                               N/A
+                    9                            Sensitive Security Parameter Management             1
+
+
+
+1
+    DoDIN – Department of Defense Information Network
+2 APL – Approved Product List
+3 API – Application Programming Interface
+
+                                                  CorSSL™ FIPS Object Module 2.0.16.001
+                                                       ©2024 Corsec Security, Inc.
+                   This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                               Page 5 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+                 ISO/IEC 24759 Section 6.     FIPS 140-3 Section Title                            Security Level
+                 [Number Below]
+                 10                           Self-Tests                                          1
+                 11                           Life-Cycle Assurance                                1
+                 12                           Mitigation of Other Attacks                         N/A
+
+
+
+The module has an overall security level of 1.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                            Page 6 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                     June 11, 2024
+
+
+
+2.             Cryptographic Module Specification
+The CorSSL™ FIPS Object Module is a software module with a multi-chip standalone embodiment. The module is
+designed to operate within a modifiable operational environment.
+
+
+2.1            Operational Environments
+The module was tested and found to be compliant with FIPS 140-3 requirements on the environments listed in
+Table 2.
+
+                                               Table 2 – Tested Operational Environments
+
+     #           Operating System                    Hardware Platform         Processor                   PAA/Acceleration
+     1           Debian 9                            Dell PowerEdge R440       Intel® Xeon Silver 4214R    With
+     2           Debian 9                            Dell PowerEdge R440       Intel® Xeon Silver 4214R    Without
+
+
+
+The module is designed to utilize the AES-NI4 extended instruction set when available by the host platform’s CPU
+for processor algorithm acceleration (PAA) of its AES implementation.
+
+There are no vendor-affirmed operational environments claimed.
+
+The cryptographic module maintains validation compliance when operating on any general-purpose computer
+(GPC) provided that the GPC uses any operating system/mode specified on the validation certificate, or another
+compatible operating system. The CMVP makes no statement as to the correct operation of the module or the
+security strengths of the generated keys when ported to an operational environment not listed on the validation
+certificate.
+
+
+2.2            Algorithm Implementations
+The module implements the Approved algorithms listed in Table 3.
+
+
+
+
+4 AES-NI – Advanced Encryption Algorithm New Instructions
+
+                                                CorSSL™ FIPS Object Module 2.0.16.001
+                                                     ©2024 Corsec Security, Inc.
+                 This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                             Page 7 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                June 11, 2024
+
+                                                          Table 3 – Approved Algorithms
+
+      CAVP              Algorithm and             Mode / Method                Description / Key Size(s) /   Use / Function
+      Certificate5      Standard                                               Key Strengths
+
+          A3356         AES                       CBC7, CFB18, CFB8,           128, 192, 256                 Encryption/decryption
+                        FIPS PUB6 197             CFB128, CTR9, ECB10,
+                        NIST SP 800-38A           OFB11
+          A3356         AES                       CMAC12                       128, 192, 256                 MAC generation/verification
+                        NIST SP 800-38B
+
+          A3356         AES                       CCM13                        128, 192, 256                 Encryption/decryption
+                        NIST SP 800-38C
+
+          A3356         AES                       GCM14 (internal IV)          128, 192, 256                 Encryption/decryption
+                        NIST SP 80- 38D
+
+          A3356         AES                       XTS15,16,17                  128, 256                      Encryption/decryption
+                        NIST SP 800-38E
+                                                                                                             This algorithm must only be used for
+                                                                                                             storage applications.
+
+          Vendor        CKG18                     -                            -                             Cryptographic key generation
+         Affirmed       NIST SP 800-133rev2
+
+          A3356         DRBG19                    Counter-based                128, 192, 256-bit AES-CTR     Deterministic random bit
+                        NIST SP 800-90Arev1                                                                  generation
+                                                  Hash-based                   SHA-1, SHA2-224, SHA2-256, Deterministic random bit
+                                                                               SHA2-384, SHA2-512         generation
+                                                  HMAC-based                   SHA-1, SHA2-224, SHA2-256, Deterministic random bit
+                                                                               SHA2-384, SHA2-512         generation
+          A3356         DSA20                     -                            2048/224, 2048/256,           Domain parameter generation
+                        FIPS PUB 186-4                                         3072/256 (SHA2-224, SHA2-
+                                                                               256, SHA2-384, SHA2-512)
+                                                  -                            1024/160, 2048/224,        Domain parameter verification
+                                                                               2048/256, 3072/256 (SHA-1,
+                                                                               SHA2-224, SHA2-256, SHA2-
+                                                                               384, SHA2-512)
+                                                  -                            2048/224, 2048/256,           Key pair generation
+                                                                               3072/256
+
+
+
+
+5 This table includes vendor-affirmed algorithms that are approved but CAVP testing is not yet available.
+6 PUB – Publication
+7
+    CBC – Cipher Block Chaining
+8 CFB – Cipher Feedback
+9 CTR – Counter
+10
+     ECB – Electronic Code Book
+11 OFB – Output Feedback
+12 CMAC – Cipher-Based Message Authentication Code
+13 CCM – Counter with Cipher Block Chaining - Message Authentication Code
+14
+     GCM – Galois Counter Mode
+15 XOR – Exclusive OR
+16 XEX – XOR Encrypt XOR
+17 XTS – XEX-Based Tweaked-Codebook Mode with Ciphertext Stealing
+18
+     CKG – Cryptographic Key Generation
+19 DRBG – Deterministic Random Bit Generator
+20 DSA – Digital Signature Algorithm
+
+                                                    CorSSL™ FIPS Object Module 2.0.16.001
+                                                         ©2024 Corsec Security, Inc.
+                     This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                                 Page 8 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                           June 11, 2024
+
+
+      CAVP              Algorithm and             Mode / Method            Description / Key Size(s) /   Use / Function
+      Certificate5      Standard                                           Key Strengths
+
+                                                  -                        2048/224, 2048/256,           Digital signature generation
+                                                                           3072/256 (SHA2-224, SHA2-
+                                                                           256, SHA2-384, SHA2-512)
+                                                  -                        1024/160, 2048/224,        Digital signature verification
+                                                                           2048/256, 3072/256 (SHA-1,
+                                                                           SHA2-224, SHA2-256, SHA2-
+                                                                           384, SHA2-512)
+          A3356         ECDSA21                   Testing candidates       B-233, B-283, B-409, B-571,   Key pair generation
+                        FIPS PUB 186-4                                     K-233, K-283, K-409, K-571,
+                                                                           P-224, P-256, P-384, P-521
+                                                  -                        B-163, B-233, B-283, B-409,   Public key validation
+                                                                           B-571, K-163, K-233, K-283,
+                                                                           K-409, K-571, P-192, P-224,
+                                                                           P-256, P-384, P-521
+                                                  -                        B-233, B-283, B-409, B-571, Digital signature generation
+                                                                           K-233, K-283, K-409, K-571,
+                                                                           P-224, P-256, P-384, P-521
+                                                                           (SHA2-224, SHA2-256, SHA2-
+                                                                           384, SHA2-512)
+                                                  -                        B-163, B-233, B-283, B-409,   Digital signature verification
+                                                                           B-571, K-163, K-233, K-283,
+                                                                           K-409, K-571, P-192, P-224,
+                                                                           P-256, P-384, P-521 (SHA-1,
+                                                                           SHA2-224, SHA2-256, SHA2-
+                                                                           384, SHA2-512)
+          A3356         HMAC                      SHA-1, SHA2-224,         112 (minimum)                 Message authentication
+                        FIPS PUB 198-1            SHA2-256, SHA2-384,
+                                                  SHA2-512
+          A3356         KAS-ECC-SSC22             ephemeralUnified         B-233, B-283, B-409, B-571,   Shared secret computation
+                        NIST SP 800-56Arev3                                K-233, K-283, K-409, K-571,
+                                                                           P-224, P-256, P-384, P-521    Key agreement method complies with
+                                                                                                         FIPS 140-3 Implementation Guidance
+                                                                                                         D.F.
+
+          A3356         KTS23                     AES-CCM                  128, 192, 256                 Key wrap/unwrap (authenticated
+                        NIST SP 800-38C                                                                  encryption)24
+
+                                                                                                         SSP establishment methodology
+                                                                                                         provides between 128 and 256 bits of
+                                                                                                         encryption strength
+
+          A3356         KTS                       AES-GCM                  128, 192, 256                 Key wrap/unwrap (authenticated
+                        NIST SP 800-38D                                                                  encryption)25
+
+                                                                                                         SSP establishment methodology
+                                                                                                         provides between 128 and 256 bits of
+                                                                                                         encryption strength
+
+
+
+21 ECDSA – Elliptic Curve Digital Signature Algorithm
+22 KAS-ECC-SSC – Key Agreement Scheme - Elliptic Curve Cryptography - Shared Secret Computation
+23
+     KTS – Key Transport Scheme
+24 Per FIPS 140-3 Implementation Guidance D.G, AES-CCM is an Approved key transport technique.
+25 Per FIPS 140-3 Implementation Guidance D.G, AES-GCM is an Approved key transport technique.
+
+                                                    CorSSL™ FIPS Object Module 2.0.16.001
+                                                         ©2024 Corsec Security, Inc.
+                     This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                                 Page 9 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                           June 11, 2024
+
+
+      CAVP              Algorithm and           Mode / Method              Description / Key Size(s) /   Use / Function
+      Certificate5      Standard                                           Key Strengths
+
+          A3356         KTS                     AES with CMAC              128, 192, 256                 Key wrap/unwrap (encryption
+                        FIPS PUB 197                                                                     with message authentication)26
+                        NIST SP 800-38B
+                                                                                                         SSP establishment methodology
+                                                                                                         provides between 128 and 256 bits of
+                                                                                                         encryption strength
+
+          A3356         KTS                     AES with HMAC              128, 192, 256                 Key wrap/unwrap (encryption
+                        FIPS PUB 197                                                                     with message authentication)27
+                        FIPS PUB 198-1
+                                                                                                         SSP establishment methodology
+                                                                                                         provides between 128 and 256 bits of
+                                                                                                         encryption strength
+
+          A3356         KTS-IFC28               KTS-OAEP-basic             rsakpg1-basic                 Key encapsulation/un-
+                        NIST SP 800-56Brev2                                                              encapsulation
+                                                                           2048, 3072, 4096, 6144,
+                                                                           8192 (SHA2-224, SHA2,256,     SSP establishment methodology
+                                                                           SHA2-384, SHA2-512)           provides between 112 and 201 bits of
+                                                                                                         encryption strength
+
+          A3356         RSA29                   Key generation mode:       2048, 3072, 4096              Key pair generation
+                        FIPS PUB 186-4          B.3.3
+                                                ANSI X9.31                 2048, 3072, 4096 (SHA2-256, Digital signature generation
+                                                                           SHA2-384, SHA2-512)
+                                                                           1024, 2048, 3072, 4096        Digital signature verification
+                                                                           (SHA-1, SHA2-256, SHA2-
+                                                                           384, SHA2-512)
+                                                PKCS#1 v1.5                2048, 3072, 4096 (SHA2-224, Digital signature generation
+                                                                           SHA2-256, SHA2-384, SHA2-
+                                                                           512)
+                                                                           1024, 2048, 3072, 4096        Digital signature verification
+                                                                           (SHA-1, SHA2-224, SHA2-
+                                                                           256, SHA2-384, SHA2-512)
+                                                PSS30                      2048, 3072, 4096 (SHA2-224, Digital signature generation
+                                                                           SHA2-256, SHA2-384, SHA2-
+                                                                           512)
+                                                                           1024, 2048, 3072, 4096        Digital signature verification
+                                                                           (SHA-1, SHA2-224, SHA2-
+                                                                           256, SHA2-384, SHA2-512)
+          A3356         SHS31                   SHA-1, SHA2-224,           -                             Message digest
+                        FIPS PUB 180-4          SHA2-256, SHA2-384,
+                                                SHA2-512
+
+
+
+The vendor affirms the following cryptographic security methods:
+
+26 Per FIPS 140-3 Implementation Guidance D.G, AES with CMAC is an Approved key transport technique.
+27 Per FIPS 140-3 Implementation Guidance D.G, AES with HMAC is an Approved key transport technique.
+28 RSA – Rivest Shamir Adleman
+29
+     RSA – Rivest Shamir Adleman
+30 PSS – Probabilistic Signature Scheme
+31 SHS – Secure Hash Standard
+
+                                                    CorSSL™ FIPS Object Module 2.0.16.001
+                                                         ©2024 Corsec Security, Inc.
+                     This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                                Page 10 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                 June 11, 2024
+
+
+
+     •     Cryptographic key generation – In compliance with section 4 of NIST SP 800-133rev2, the module uses its
+           Approved DRBG to generate random values and seeds used for asymmetric key generation. The generated
+           seed is an unmodified output from the DRBG.
+
+The module implements the non-Approved but allowed algorithms shown in Table 4 below.
+
+                        Table 4 – Non-Approved Algorithms Allowed in the Approved Mode of Operation
+
+         Algorithm                      Caveat                                                  Use / Function
+
+         AES (Cert. A3356)              SSP establishment methodology provides                  Key unwrapping (using any Approved
+                                        between 128 and 256 bits of encryption strength         mode) 32
+
+
+
+The module does not implement any non-Approved algorithms allowed in the Approved mode of operation with
+no security claimed.
+
+
+The module does not implement any non-Approved algorithms not allowed in the Approved mode of operation.
+
+
+2.3            Cryptographic Boundary
+As a software cryptographic module, the module has no physical components. The physical perimeter of the
+cryptographic module is defined by each host platform on which the module is installed. Figure 1 below illustrates
+a block diagram of a typical GPC and the module’s physical perimeter.
+
+
+
+
+32 Per FIPS 140-3 Implementation Guidance D.G, AES in any Approved mode is an Approved key transport technique (for unwrapping only).
+
+                                                CorSSL™ FIPS Object Module 2.0.16.001
+                                                     ©2024 Corsec Security, Inc.
+                 This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                            Page 11 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                              June 11, 2024
+
+
+
+
+                                        Hardware                               Network                           DVD
+                                                               RAM
+                                       Management                              Interface
+
+                                                                                                                 HDD
+                            Clock                                                          SCSI/SATA
+                           Generator                                                       Controller
+                                                                                                              LEDs/LCD
+
+
+
+                               CPU                                                                              Serial
+
+                                                                                I/O Hub
+                                                                                                                Audio
+
+                              Cache                 PCI/PCIe
+                                                     Slots                                                       USB
+                                                                        BIOS
+
+
+
+                              Power              Graphics                                               PCI/PCIe
+                            Interface            Controller                                              Slots
+
+
+
+                            External
+                          Power Supply
+                                                                                            KEY:
+                                                       BIOS – Basic Input/Output System               PCIe – PCI express
+                            Plaintext Data             CPU – Central Processing Unit                  HDD – Hard Disk Drive
+                            Encrypted Data             SATA – Serial Advanced Technology Attachment   DVD – Digital Video Disc
+                            Control Input              SCSI – Small Computer System Interface         USB – Universal Serial Bus
+                            Status Output              PCI – Peripheral Component Interconnect        RAM – Random Access Memory
+                            Physical Perimeter         LED – Light Emitting Diode                     LCD – Liquid Crystal Display
+
+                                                      Figure 1 – GPC Block Diagram
+
+
+
+The module is a software module based on the OpenSSL FIPS Object Module (FOM) 2.0.16. The module is compiled
+into object form and then linked to a “FIPS-capable” instance of the OpenSSL cryptographic library at build-time.
+The larger library can then be linked to a calling application.
+
+The module’s cryptographic boundary consists of all functionalities contained within the module’s compiled
+source code. This comprises a cryptographic primitives library file called fipscanister.o.
+
+The cryptographic boundary is the contiguous perimeter that surrounds all memory-mapped functionality
+provided by the module when loaded and stored in the host platform’s memory. The module image also includes
+an embedded HMAC SHA-1 MAC value for verifying the module’s integrity at runtime. The module is entirely
+contained within the physical perimeter.
+
+Figure 2 below shows the logical block diagram of the module executing in memory and its interactions with
+surrounding software components, as well as the module’s physical perimeter and cryptographic boundary.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 12 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+
+                                                          Calling Application                        fipscanister
+
+
+
+
+                          KEY:
+
+                     Cryptographic Boundary
+
+                     Physical Perimeter                                         Operating System
+
+                     Data Input
+                     Data Output
+                     Control Input
+                     Status Output                         CPU           Memory            Storage           Ports
+                     System Calls
+                                                                                  Host Device
+
+
+
+
+                                 Figure 2 – Module Block Diagram (with Cryptographic Boundary)
+
+
+
+
+2.4           Modes of Operation
+Once all pre-operational self-tests have completed successfully, the module supports only an Approved mode of
+operation. Table 3, Table 4, and above list the algorithms available in the Approved mode; Table 7 provides
+descriptions of the Approved services.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 13 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                     June 11, 2024
+
+
+
+3.            Cryptographic Module Interfaces
+FIPS 140-3 defines the following logical interfaces for cryptographic modules:
+
+    •    Data Input
+    •    Data Output
+    •    Control Input
+    •    Control Output
+    •    Status Output
+
+As a software library, the cryptographic module has no direct access to any of the host platform’s physical ports,
+as it communicates only to the calling application via its well-defined API. A mapping of the FIPS-defined interfaces
+and the module’s logical interfaces can be found in Table 5. Note that the module does not output control
+information, and thus has no specified control output interface.
+
+                                                     Table 5 – Ports and Interfaces
+
+           Physical Port                     Logical Interface                      Data That Passes Over Port/Interface
+
+           Physical data input port(s) of    Data Input                         • Data to be encrypted, decrypted, signed,
+           the host device                   • API input arguments that provide   verified, or hashed
+                                               input data for processing        • Keys to be used in cryptographic services
+                                                                                • Random seed material for the module’s
+                                                                                  DRBG
+                                                                                • Keying material to be used as input to
+                                                                                  SSP establishment services
+           Physical data output port(s) of   Data Output                        • Data that has been encrypted,
+           the host device                   • API output arguments that return   decrypted, or verified
+                                               generated or processed data back • Digital signatures
+                                               to the caller                    • Hashes
+                                                                                • Random values generated by the
+                                                                                  module’s DRBG
+                                                                                • Keys established using module’s SSP
+                                                                                  establishment methods
+           Physical control input port(s) of Control Input                          • API commands invoking cryptographic
+           the host device                   • API input arguments that are           services
+                                               used to initialize and control the   • Modes, key sizes, etc. used with
+                                               operation of the module                cryptographic services
+           Physical status output port(s)    Status Output                          • Status information regarding the module
+           of the host device                • API call return values               • Status information regarding the invoked
+                                                                                      service/operation
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 14 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+4.              Roles, Services, and Authentication
+The sections below describe the module’s authorized roles, services, and operator authentication methods.
+
+
+4.1             Authorized Roles
+The module supports a Crypto Officer (CO) that authorized operators can assume. The CO role performs
+cryptographic initialization or management functions and general security services.
+
+The module also supports the following role(s):
+
+    •    User – The User role performs general security services, including cryptographic operations and other
+         approved security functions.
+
+The module does not support multiple concurrent operators. The calling application that loaded the module is its
+only operator.
+
+Table 6 below lists the supported roles, along with the services (including input and output) available to each role.
+
+                                      Table 6 – Roles, Service Commands, Input and Output
+
+         Role             Service                            Input                                 Output
+
+         CO               Show Status                        API call parameters                   Current operational status
+         CO               Perform self-tests on-demand       Re-instantiate module; API call       Status
+                                                             parameters
+         CO               Zeroize                            Restart calling application; reboot   None
+                                                             or power-cycle host platform
+         CO               Show versioning information        API call parameters                   Module name, version
+         User             Perform symmetric encryption       API call parameters, key, plaintext   Status, ciphertext
+         User             Perform symmetric decryption       API call parameters, key,             Status, plaintext
+                                                             ciphertext
+         User             Generate message digest            API call parameters, message          Status, hash
+         User             Perform authenticated symmetric API call parameters, key, plaintext      Status, ciphertext
+                          encryption
+         User             Perform authenticated symmetric API call parameters, key,                Status, plaintext
+                          decryption                      ciphertext
+         User             Generate random number             API call parameters                   Status, random bits
+         User             Generate keyed hash (HMAC)         API call parameters, key, message     Status, hash
+         User             Generate symmetric digest          API call parameters, key, message     Status, hash
+                          (CMAC)
+         User             Generate asymmetric key pair       API call parameters                   Status, key pair
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 15 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                      June 11, 2024
+
+
+           Role                   Service                                 Input                                    Output
+
+           User                   Calculate key agreement                 API call parameter                       Status, key pairs
+                                  primitive
+           User                   Perform key wrapping                    API call parameter, encryption key, Status, encrypted key
+                                                                          key
+           User                   Perform key unwrapping                  API call parameters, decryption          Status, decrypted key
+                                                                          key, encrypted key
+           User                   Perform key encapsulation               API call parameter, encryption key, Status, encrypted key
+                                                                          key
+           User                   Perform key un-encapsulation            API call parameters, decryption          Status, decrypted key
+                                                                          key, encrypted key
+           User                   Generate signature                      API call parameters, key, message        Status, signature
+           User                   Verify signature                        API call parameters, key, signature, Status
+                                                                          message
+
+
+
+
+4.2                Authentication Methods
+The module does not support authentication methods; operators implicitly assume an authorized role based on
+the service selected.
+
+
+4.3                Services
+Descriptions of the services available are provided in Table 7 below.
+
+The keys and Sensitive Security Parameters (SSPs) listed in the table indicate the type of access required using the
+following notation:
+
+     •     G = Generate: The module generates or derives the SSP.
+     •     R = Read: The SSP is read from the module (e.g., the SSP is output).
+     •     W = Write: The SSP is updated, imported, or written to the module.
+     •     E = Execute: The module uses the SSP in performing a cryptographic operation.
+     •     Z = Zeroize: The module zeroizes the SSP.
+
+                                                                  Table 7 – Approved Services
+ Service            Description             Approved Security           Keys and/or SSPs       Roles        Access Rights to Keys and/or   Indicator
+                                            Function(s)                                                     SSPs
+ Show Status        Return Approved         None                        None                   CO           N/A                            N/A
+                    mode indicator
+ Perform self-      Perform pre-            HMAC (Cert. A3356)          HMAC key               CO           HMAC key – E                   API return value
+ tests on-          operational self-       SHA-1 (Cert. A3356)
+ demand             tests
+ Zeroize            Zeroizes and de-        None                        All keys/SSPs          CO           All keys/SSPs – Z              N/A
+                    allocates memory
+                    containing
+                    sensitive data
+ Show versioning    Return module’s         None                        None                   CO           N/A                            N/A
+ information        name and
+                    versioning
+                    information
+
+                                                  CorSSL™ FIPS Object Module 2.0.16.001
+                                                       ©2024 Corsec Security, Inc.
+                   This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                              Page 16 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                            June 11, 2024
+
+ Service             Description         Approved Security            Keys and/or SSPs    Roles   Access Rights to Keys and/or   Indicator
+                                         Function(s)                                              SSPs
+ Perform             Encrypt plaintext   AES (Cert. A3356)            AES key             User    AES key – WE                   API return value
+ symmetric           using supplied      AES-XTS (Cert. A3356)        AES-XTS key                 AES-XTS key – WE
+ encryption          key and algorithm
+                     specification
+                     (AES)
+ Perform             Decrypt             AES (Cert. A3356)            AES key             User    AES key – WE                   API return value
+ symmetric           ciphertext using
+ decryption          supplied key and
+                     algorithm
+                     specification
+                     (AES)
+ Generate            Compute and         SHS (Cert. A3356)            None                User    None                           API return value
+ message digest      return a message
+                     digest
+ Perform             Encrypt plaintext   AES-CCM (Cert. A3356)        AES-CCM key         User    AES-CCM key – WE               API return value
+ authenticated       using supplied      AES-GCM (Cert. A3356)        AES-GCM key                 AES-GCM key – WE
+ symmetric           AES GCM key and                                  AES-GCM IV                  AES-GCM IV – WE
+ encryption          IV
+ Perform             Decrypt             AES-CCM (Cert. A3356)        AES-CCM key         User    AES-CCM key – WE               API return value
+ authenticated       ciphertext using    AES-GCM (Cert. A3356)        AES-GCM key                 AES-GCM key – WE
+ symmetric           supplied AES                                     AES-GCM IV                  AES-GCM IV – WE
+ decryption          GCM key and IV
+ Generate            Returns the         Counter DRBG (Cert. A3356)   DRBG entropy        User    DRBG entropy – RE              API return value
+ random number       specified number    Hash DRBG (Cert. A3356)      DRBG seed                   DRBG seed – GE
+                     of random bits to   HMAC DRBG (Cert. A3356)      DRBG ‘C’ Value              DRBG ‘C’ Value – GE
+                     the calling                                      DRBG ‘V’ Value              DRBG ‘V’ Value – GE
+                     application                                      DRBG ‘Key’ Value            DRBG ‘Key’ Value – GE
+ Generate keyed      Compute and         HMAC (Cert. A3356)           HMAC key            User    HMAC key – WE                  API return value
+ hash (HMAC)         return a message
+                     authentication
+                     code
+ Generate            Compute and         AES-CMAC (Cert. A3356)       AES-CMAC key        User    AES-CMAC key – WE              API return value
+ symmetric           return a cipher
+ digest (CMAC)       message
+                     authentication
+                     code
+ Generate            Generate and        Counter DRBG (Cert. A3356)   DSA private key     User    DSA private key – GR           API return value
+ asymmetric key      return the          Hash DRBG (Cert. A3356)      DSA public key              DSA public key – GR
+ pair                specified type of   HMAC DRBG (Cert. A3356)      ECDSA private key           ECDSA private key – GR
+                     asymmetric key      RSA (Cert. A3356)            ECDSA public key            ECDSA public key – GR
+                     pair (RSA, DSA,     DSA (Cert. A3356)            RSA private key             RSA private key – GR
+                     ECDSA)              ECDSA (Cert. A3356)          RSA public key              RSA public key – GR
+ Calculate key       Calculate ECDH      ECDH (Cert. A3356)           ECDH public key     User    ECDH public key – WE           API return value
+ agreement           key agreement                                    ECDH private key            ECDH private key – WE
+ primitive           primitive
+ Perform key         Perform key wrap    AES (Cert. A3356)            AES key             User    AES key – WE                   API return value
+ wrapping            with AES
+ Perform key         Perform key         AES (Cert. A3356)            AES key             User    AES key – WE                   API return value
+ unwrapping          unwrap with AES
+ Perform key         Perform key         RSA (Cert. A3356)            RSA public key      User    RSA public key – WE            API return value
+ encapsulation       encapsulation
+                     with RSA
+ Perform key un-     Perform key un-     RSA (Cert. A3356)            RSA private key     User    RSA private key – WE           API return value
+ encapsulation       encapsulation
+                     with RSA
+ Generate            Generate a          RSA (Cert. A3356)            RSA private key     User    RSA private key – WE           API return value
+ signature           signature for the   DSA (Cert. A3356)            DSA private key             DSA private key – WE
+                     supplied message    ECDSA (Cert. A3356)          ECDSA private key           ECDSA private key – WE
+                     using the
+                     specified key and
+                     algorithm (RSA,
+                     DSA, ECDSA)
+ Verify signature    Verify the          RSA (Cert. A3356)            RSA public key      User    RSA public key – WE            API return value
+                     signature on the    DSA (Cert. A3356)            DSA public key              DSA public key – WE
+                     supplied message    ECDSA (Cert. A3356)          ECDSA public key            ECDSA public key – WE
+                     using the
+                     specified key and
+                     algorithm (RSA,
+                     DSA, ECDSA)
+
+
+
+
+                                                   CorSSL™ FIPS Object Module 2.0.16.001
+                                                        ©2024 Corsec Security, Inc.
+                    This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                               Page 17 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+The module does not provide any non-Approved services. Thus, as allowed per section 2.4.C of FIPS 140-3
+Implementation Guidance, the module provides indicators for the use of Approved services through a combination
+of an explicit indication (via a global Approved mode indicator) and an implicit indication (via the API return
+indicating the successful completion of the service).
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 18 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+5.            Software/Firmware Security
+
+The module's integrity is verified via a pre-operational self-test that uses an Approved integrity technique
+implemented within the cryptographic module itself. The entirety of the software cryptographic module is verified
+using a single embedded HMAC SHA-1 digest value. The module computes an HMAC SHA-1 digest at runtime and
+compares it to the embedded digest value; failure of the integrity test will cause the module to enter a critical
+error state.
+
+The module’s integrity test is performed automatically at module instantiation (i.e., when the module is loaded
+into memory for execution) without action from the module operator. This integrity test can also be performed
+on demand by the module operator by issuing the FIPS_selftest() API command.
+
+The CorSSL™ FIPS Object Module is not a standalone application; it is a cryptographic toolkit intended for use in a
+with a vendor’s solution. The module will be linked to a host application, and the host application will be pre-
+installed onto a target platform by the vendor or installed onto target platforms by the end-user. The module itself
+requires no configuration steps to be performed by application developers or end-users, and no action is required
+from developers or end-users to initialize the module for operation. The module is designed with a default entry
+point (DEP) that ensures that the pre-operational tests and conditional CASTS are initiated automatically when
+the module is loaded.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 19 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+6.            Operational Environment
+The CorSSL™ FIPS Object Module comprises a software cryptographic library that executes in a modifiable
+operational environment.
+
+The cryptographic module has control over its own SSPs. The process and memory management functionality of
+the host device’s OS prevents unauthorized access to plaintext private and secret keys, intermediate key
+generation values and other SSPs by external processes during module execution. The module only allows access
+to SSPs through its well-defined API. The operational environment provides the capability to separate individual
+application processes from each other by preventing uncontrolled access to CSPs and uncontrolled modifications
+of SSPs regardless of whether this data is in the process memory or stored on persistent storage within the
+operational environment. Processes that are spawned by the module are owned by the module and are not owned
+by external processes/operators.
+
+Please refer to section 2.1 of this document for a list/description of the applicable operational environments.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 20 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+7.            Physical Security
+The cryptographic module is implemented completely in software, such that the physical security is provided
+solely by the host device. Therefore, per ISO/IEC 19790:2012 7.7.1, this section is not applicable.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 21 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+8.            Non-Invasive Security
+This section is not applicable. There are currently no approved non-invasive mitigation techniques references in
+ISO/IEC 19790:2021 Annex F.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 22 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                      June 11, 2024
+
+
+
+9.                Sensitive Security Parameter
+                  Management
+
+9.1               Keys and Other SSPs
+The module supports the keys and other SSPs listed Table 8 below.
+
+                                                                         Table 8 – SSPs
+Key/SSP           Strength          Security Function   Generation        Import / Export     Establishment   Storage         Zeroization    Use &
+Name/Type                           and Cert. Number                                                                                         Related Keys
+
+Keys
+ AES key          Between 128       AES (CBC, CCM,      -                 IMPORT:             -               Not             Unload         Symmetric
+ (CSP)            and 256 bits      CFB, CTR, ECB,                        Imported via API                    persistently    module; API    encryption/de
+                                    OFB, KW, KWP                          call parameter                      stored by the   call; Remove   cryption; key
+                                    modes)                                                                    module          power          wrap/unwrap
+                                    (Cert. A3356)                         EXPORT: Exported
+                                                                          in plaintext
+                                    KTS
+                                    (Cert. A3356)
+ AES GCM key      Between 128       AES (GCM mode)      -                 IMPORT:             -               Not             Unload         Authenticated
+ (CSP)            and 256 bits      (Cert. A3356)                         Imported via API                    persistently    module; API    symmetric
+                                                                          call parameter                      stored by the   call; Remove   encryption/de
+                                                                                                              module          power          cryption; key
+                                                                          EXPORT: Exported                                                   wrap/unwrap
+                                                                          in plaintext
+ AES XTS key      128 or 256 bits   AES (XTS mode)      -                 IMPORT:             -               Not             Unload         Symmetric
+ (CSP)                              (Cert. A3356)                         Imported via API                    persistently    module; API    encryption/de
+                                                                          call parameter                      stored by the   call; Remove   cryption
+                                                                                                              module          power
+                                                                          EXPORT: Exported
+                                                                          in plaintext
+ AES CMAC key     Between 128       AES (CMAC mode)     -                 IMPORT:             -               Not             Unload         MAC
+ (CSP)            and 256 bits      (Cert. A3356)                         Imported via API                    persistently    module; API    generation/ver
+                                                                          call parameter                      stored by the   call; Remove   ification
+                                                                                                              module          power          encryption/de
+                                                                          EXPORT: Exported                                                   cryption; key
+                                                                          in plaintext                                                       wrap/unwrap
+ HMAC key         112 bits          HMAC                -                 IMPORT:             -               Not             Unload         Message
+ (CSP)            (minimum)         (Cert. A3356)                         Imported in                         persistently    module; API    authentication
+                                                                          plaintext via API                   stored by the   call; Remove   code
+                                                                          parameter                           module          power
+
+                                                                          EXPORT: Exported
+                                                                          in plaintext via
+                                                                          API parameter
+ RSA private      Between 112       RSA                 Generated         IMPORT:             -               Not             Unload         Digital
+ key              and 150 bits      (Cert. A3356)       internally via    Imported in                         persistently    module; API    signature
+ (CSP)                                                  Approved          plaintext via API                   stored by the   call; Remove   generation;
+                                                        DRBG              parameter                           module          power          asymmetric
+                                                                                                                                             decryption
+                                                                          EXPORT: Exported
+                                                                          in plaintext via
+                                                                          API parameter
+ RSA public key   Between 80        RSA                 Generated         IMPORT:             -               Not             Unload         Digital
+ (PSP)            and 150 bits      (Cert. A3356)       internally via    Imported in                         persistently    module; API    signature
+                                                        Approved          plaintext via API                   stored by the   call; Remove   verification;
+                                                        DRBG              parameter                           module          power          asymmetric
+                                                                                                                                             encryption
+                                                                          EXPORT: Exported
+                                                                          in plaintext via
+                                                                          API parameter
+
+
+                                                 CorSSL™ FIPS Object Module 2.0.16.001
+                                                      ©2024 Corsec Security, Inc.
+                  This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                             Page 23 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                                         June 11, 2024
+
+Key/SSP           Strength          Security Function   Generation       Import / Export     Establishment       Storage         Zeroization    Use &
+Name/Type                           and Cert. Number                                                                                            Related Keys
+ DSA private      128 or 256 bits   DSA                 Generated        IMPORT:             -                   Not             Unload         Digital
+ key                                (Cert. A3356)       internally via   Imported in                             persistently    module; API    signature
+ (CSP)                                                  Approved         plaintext via API                       stored by the   call; Remove   generation
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+ DSA public key   80 or 256 bits    DSA                 Generated        IMPORT:             -                   Not             Unload         Digital
+ (PSP)                              (Cert. A3356)       internally via   Imported in                             persistently    module; API    signature
+                                                        Approved         plaintext via API                       stored by the   call; Remove   verification
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+ ECDSA private    Between 80        ECDSA               Generated        IMPORT:             -                   Not             Unload         Digital
+ key              and 256 bits      (Cert. A3356)       internally via   Imported in                             persistently    module; API    signature
+ (CSP)                                                  Approved         plaintext via API                       stored by the   call; Remove   generation
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+ ECDSA public     Between 80        ECDSA               Generated        IMPORT:             -                   Not             Unload         Digital
+ key (PSP)        and 256 bits      (Cert. A3356)       internally via   Imported in                             persistently    module; API    signature
+                                                        Approved         plaintext via API                       stored by the   call; Remove   verification
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+ ECDH private     Between 128       KAS-SSC             Generated        IMPORT:             -                   Not             Unload         Computation
+ key              and 256 bits      (Cert. A3356)       internally via   Imported in                             persistently    module; API    of ECDH
+ (CSP)                                                  Approved         plaintext via API                       stored by the   call; Remove   shared secret
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+ ECDH public      Between 128       KAS-SSC             Generated        IMPORT:             -                   Not             Unload         Computation
+ key              and 256 bits      (Cert. A3356)       internally via   Imported in                             persistently    module; API    of ECDH
+ (PSP)                                                  Approved         plaintext via API                       stored by the   call; Remove   shared secret
+                                                        DRBG             parameter                               module          power
+
+                                                                         EXPORT: Exported
+                                                                         in plaintext via
+                                                                         API parameter
+Other SSPs
+ AES GCM IV       -                 AES (GCM mode)      -                -                   Constructed at      Not             Unload         Initialization
+ (PSP)                              (Cert. A3356)                                            its entirety        persistently    module; API    vector for AES
+                                                                                             internally          stored by the   call; Remove   GCM
+                                                                                             deterministically   module          power
+ DRBG Entropy     -                 DRBG                -                IMPORT:             -                   Plaintext in    Unload         Used in
+ Input                              (Cert. A3356)                        Imported in                             volatile        module; API    random bit
+ (CSP)                                                                   plaintext via API                       memory          call; Remove   generation
+                                                                         parameter                                               power          (Counter,
+                                                                                                                                                Hash, HMAC)
+                                                                         EXPORT: Never
+                                                                         exported
+ DRBG Seed        -                 DRBG                Generated        -                   -                   Not             Unload         Used in
+ (CSP)                              (Cert. A3356)       internally                                               persistently    module; API    random bit
+                                                                                                                 stored by the   call; Remove   generation
+                                                                                                                 module          power
+ DRBG ‘C’ Value   -                 DRBG                Generated        -                   -                   Plaintext in    Unload         Used in
+ (CSP)                              (Cert. A3356)       internally                                               volatile        module; API    random bit
+                                                                                                                 memory          call; Remove   generation
+                                                                                                                                 power          (Hash)
+
+
+
+
+                                                 CorSSL™ FIPS Object Module 2.0.16.001
+                                                      ©2024 Corsec Security, Inc.
+                  This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                             Page 24 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                        June 11, 2024
+
+Key/SSP        Strength       Security Function   Generation   Import / Export   Establishment   Storage        Zeroization    Use &
+Name/Type                     and Cert. Number                                                                                 Related Keys
+ DRBG ‘V’       -              DRBG               Generated    -                 -               Plaintext in   Unload         Used in
+ Value                         (Cert. A3356)      internally                                     volatile       module; API    random bit
+ (CSP)                                                                                           memory         call; Remove   generation
+                                                                                                                power          (Counter,
+                                                                                                                               Hash, HMAC)
+ DRBG ‘Key’     -              DRBG               Generated    -                 -               Plaintext in   Unload         Used in
+ Value                         (Cert. A3356)      internally                                     volatile       module; API    random bit
+ (CSP)                                                                                           memory         call; Remove   generation
+                                                                                                                power          (Counter,
+                                                                                                                               HMAC)
+
+
+
+
+9.2            DRBGs
+The module implements the following Approved DRBG(s):
+
+    •       Counter-based DRBG
+    •       Hash-based DRBG (non-compliant)
+    •       HMAC-based DRBG (non-compliant)
+
+These DRBGs are used to generate random values at the request of the calling application. Outputs from the
+DRBGs are also used in the generation of seeds for asymmetric key pair generation.
+
+The module does not implement any non-Approved DRBGs.
+
+
+9.3            SSP Storage Techniques
+There is no mechanism within the module’s cryptographic boundary for the persistent storage of SSPs. The module
+stores DRBG state values for the lifetime of the DRBG instance. The module uses SSPs passed in on the stack by
+the calling application and does not store these SSPs beyond the lifetime of the API call.
+
+
+9.4            SSP Zeroization Methods
+Maintenance, including protection and zeroization, of any keys and CSPs that exist outside the module’s
+cryptographic boundary are the responsibility of the end-user.
+
+For temporarily stored SSPs, zeroization of sensitive data is performed automatically by API function calls. The
+module will first overwrite existing values with “0”s and then free the memory. Additionally, module operators
+can unload the module from memory or reboot/power-cycle the host device.
+
+
+9.5            RBG Entropy Sources
+The cryptographic module’s entropy scheme follows the scenario given in FIPS 140-3 Implementation Guidance
+9.3.A, section 2(b).
+
+The module invokes a GET command to obtain entropy for random number generation (the module requests 256
+bits of entropy from the calling application per request), and then passively receives entropy from the calling
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 25 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+application while having no knowledge of the entropy source and exercising no control over the amount or the
+quality of the obtained entropy.
+
+The calling application and its entropy sources are located within the physical perimeter of the module’s
+operational environment but outside its cryptographic boundary. Thus, there is no assurance of the minimum
+strength of the generated SSPs.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 26 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+10. Self-Tests
+Both pre-operational and conditional self-tests are performed by the module. Pre-operational tests are performed
+between the time the cryptographic module is instantiated and before the module transitions to the operational
+state. Conditional self-tests are performed by the module during module operation when certain conditions exist.
+The following sections list the self-tests performed by the module, their expected error status, and the error
+resolutions.
+
+
+10.1          Pre-Operational Self-Tests
+The module performs the following pre-operational self-test(s):
+
+    •    Software integrity test (using an HMAC SHA-1 digest verification)
+
+
+10.2          Conditional Self-Tests
+Conditional self-tests are performed by the module during module operation when certain conditions exist.
+
+The module performs the following conditional self-tests:
+
+    •    Conditional cryptographic algorithm self-tests (CASTs)
+            o AES ECB encrypt KAT (128-bit)
+            o AES ECB decrypt KAT (128-bit)
+            o AES CCM encrypt KAT (192-bit)
+            o AES CCM decrypt KAT (192-bit)
+            o AES GCM encrypt KAT (256-bit)
+            o AES GCM decrypt KAT (256-bit)
+            o AES XTS encrypt KAT (128/256-bit)
+            o AES XTS decrypt KAT (128/256-bit)
+            o AES CMAC generate KAT (CBC mode; 128/192/256-bit)
+            o AES CMAC verify KAT (CBC mode; 128/192/256-bit)
+            o CTR_DRBG generate/instantiate/reseed KAT (256-bit AES)
+            o Hash_DRBG generate/instantiate/reseed KAT (SHA2-256)
+            o HMAC_DRBG generate/instantiate/reseed KAT (SHA2-256)
+            o HMAC KATs (SHA-1, SHA2-224, SHA2-256, SHA2-384, SHA2-512)
+            o DSA sign KAT (2048-bit; SHA2-256)
+            o DSA verify KAT (2048-bit; SHA2-256)
+            o ECDSA sign KAT (P-224 and K-233 curves; SHA2-256)
+            o ECDSA verify KAT (P-224 and K-233 curves; SHA2-256)
+            o RSA sign KAT (2048-bit; SHA2-256; PKCS#1 v1.5 scheme)
+            o RSA verify KAT (2048-bit; SHA2-256; PKCS#1 v1.5 scheme)
+            o RSA encrypt KAT
+            o RSA decrypt KAT
+            o ECC CDH shared secret computation KAT (P-224 curve)
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 27 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+         To ensure all CASTs are performed prior to the first operational use of the associated algorithm, all CASTs
+         are performed during the module’s initial power-up sequence. The SHA and HMAC KATs are performed
+         prior to the pre-operational software integrity test; all other CASTs are executed after the successful
+         completion of the software integrity test.
+
+    •    Conditional pair-wise consistency tests (PCTs)
+            o DSA sign/verify PCT
+            o ECDSA sign/verify PCT
+            o RSA sign/verify PCT
+            o RSA encrypt/decrypt PCT
+            o ECDH key generation PCT
+
+    •    Conditional critical function tests
+            o XTS AES duplicate key test
+
+
+10.3          Self-Test Failure Handling
+Upon failure of any of the module’s pre-operational or conditional self-tests, the module will enter a critical error
+state. An internal global error flag FIPS_selftest_fail will be set and subsequently tested to prevent the
+execution of any cryptographic services while the error state persists. For any subsequent request for
+cryptographic services, the module will return an error result consistent with the API’s function declaration for
+every invocation.
+
+To recover, the module must be re-instantiated, or the host device must be rebooted/power-cycled. If these
+recovery methods do not result in the successful completion of all pre-operational self-tests and conditional CASTs,
+then the module will not be able to resume normal operations, and the CO should contact Corsec Security, Inc.
+for assistance.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 28 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+11. Life-Cycle Assurance
+The sections below describe how to ensure the module is operating in its validated configuration, including the
+following:
+
+    •    Procedures for secure installation, initialization, startup, and operation of the module
+    •    Maintenance requirements
+    •    Administrator and non-Administrator guidance
+
+Operating the module without following the guidance herein (including the use of undocumented services) will
+result in non-compliant behavior and is outside the scope of this Security Policy.
+
+
+11.1          Secure Installation
+The module is distributed third-party vendors as a package containing the binary and HMAC digest file that the
+Crypto Officer is to install onto a target platform specified in section 2.1 above or one where portability is
+maintained.
+
+
+11.2          Initialization
+This module is designed to support third-party vendor applications, and these applications are the sole consumers
+of the cryptographic services provided by the module. No end-user action is required to initialize the module for
+operation; the calling application performs any actions required to initialize the module.
+
+The pre-operational integrity test and cryptographic algorithm self-tests are performed automatically via a DEP
+when the module is loaded for execution by the calling application, without any specific action from the calling
+application or the end-user. The DEP invokes self-test code by calling the FIPS_mode_set() API command with
+a non-zero parameter. If successful, this action sets an internal Approved mode flag to ‘TRUE’, placing the module
+in its Approved mode. End-users have no means to short-circuit or bypass these actions.
+
+Failure of any of the initialization actions will result in a failure of the module to load for execution.
+
+
+11.3          Startup
+No startup steps are required to be performed by end-users.
+
+
+11.4          Administrator Guidance
+There are no specific management activities required of the CO role to ensure that the module runs securely. If
+any irregular activity is observed, or if the module is consistently reporting errors, then Corsec Customer Support
+should be contacted.
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 29 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+The following list provides additional guidance for the CO:
+
+    •    The CO can initiate the pre-operational self-tests and conditional CASTs on demand for periodic testing of
+         the module by re-instantiating the module, rebooting/power-cycling the host device, or issuing the
+         FIPS_selftest() API command.
+
+    •    The FIPS_mode() API command can be used to determine the module’s current mode of operation. This
+         command will return a non-zero value when the module has properly initialized in its Approved mode of
+         operation.
+
+    •    The FIPS_module_version_text() API command can be used to obtain the module’s versioning
+         information. This information will include the module name and version, which can be correlated with the
+         module’s validation record.
+
+
+11.5          Non-Administrator Guidance
+The following list provides additional policies for module operators acting in a non-administrative role:
+
+    •    The cryptographic module’s services are designed to be provided to a calling application. Excluding the
+         use of the NIST-defined elliptic curves as trusted third-party domain parameters, all other assurances from
+         FIPS PUB 186-4 (including those required of the intended signatory and the signature verifier) are outside
+         the scope of the module and are the responsibility of the calling application.
+
+    •    The module performs assurances for its key agreement schemes as specified in the following sections of
+         NIST SP 800-56Arev3:
+
+              o    Section 5.5.2 (for assurances of domain parameter validity)
+              o    Section 5.6.2.1 (for assurances required by the key pair owner)
+
+         The module includes the capability to provide the required recipient assurance of ephemeral public key
+         validity specified in section 5.6.2.2.2 of NIST SP 800-56Arev3. However, since public keys from other
+         modules are not received directly by this module (those keys are received by the calling application), the
+         module has no knowledge of when a public key is received. Invocation of the proper module services to
+         validate another module’s public key is the responsibility of the calling application.
+
+    •    The module performs assurances for its RSA-based key transport scheme as specified in the following
+         sections of NIST SP 800-56Brev2:
+
+              o    Section 6.4.1 (for assurances required by the key pair owner)
+
+         The module includes the capability to provide the required recipient assurance of ephemeral public key
+         validity specified in section 6.4.2 of NIST SP 800-56Brev2. However, since public keys from other modules
+         are not received directly by this module (those keys are received by the calling application), the module
+         has no knowledge of when a public key is received. Invocation of the proper module services to validate
+         another module’s public key is the responsibility of the calling application.
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 30 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+    •    To meet the AES GCM (key/IV) pair uniqueness requirements from NIST SP 800-38D, the module complies
+         with FIPS 140-3 IG C.H as follows:
+
+              o    Per scenario 3 of FIPS 140-3 IG C.H, the module employs deterministic IV construction as specified
+                   in section 8.2.1 of NIST SP 800-38D. The IV is constructed at its entirety internally deterministically,
+                   with a length of 96 bits.
+
+         In the event that power to the module is lost and subsequently restored, the calling application must
+         ensure that any AES-GCM keys used for encryption or decryption are re-distributed.
+
+    •    The calling application is responsible for using entropy sources that meet the minimum security strength
+         of 112 bits required for the Approved DRBGs as shown in NIST SP 800-90Arev1, Table 2 and Table 3.
+
+    •    In the event that the module encounters a DRBG self-test failure, the calling application must
+         uninstantiate and reinstantiate the DRBG per the requirements found in NIST SP 800-90Arev1.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 31 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+12. Mitigation of Other Attacks
+This section is not applicable. The module does not claim to mitigate any attacks beyond the FIPS 140-3 Level 1
+requirements for this validation.
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 32 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+
+Appendix A. Acronyms and Abbreviations
+Table 9 provides definitions for the acronyms and abbreviations used in this document.
+
+                                                  Table 9 – Acronyms and Abbreviations
+
+                   Term              Definition
+                   AES               Advanced Encryption Standard
+                   API               Application Programming Interface
+                   CBC               Cipher Block Chaining
+                   CCCS              Canadian Centre for Cyber Security
+                   CMVP              Cryptographic Module Validation Program
+                   CO                Cryptographic Officer
+                   CPU               Central Processing Unit
+                   CSP               Critical Security Parameter
+                   CTR               Counter
+                   CVL               Component Validation List
+                   DEP               Default Entry Point
+                   DES               Data Encryption Standard
+                   DH                Diffie-Hellman
+                   DRBG              Deterministic Random Bit Generator
+                   ECB               Electronic Code Book
+                   ECC CDH           Elliptic Curve Cryptography Cofactor Diffie-Hellman
+                   ECDH              Elliptic Curve Diffie-Hellman
+                   ECDSA             Elliptic Curve Digital Signature Algorithm
+                   EMI/EMC           Electromagnetic Interference /Electromagnetic Compatibility
+                   FIPS              Federal Information Processing Standard
+                   GCM               Galois/Counter Mode
+                   GMAC              Galois Message Authentication Code
+                   GPC               General-Purpose Computer
+                   HMAC              (keyed-) Hash Message Authentication Code
+                   KAS               Key Agreement Scheme
+                   KAT               Known Answer Test
+                   KTS               Key Transport Scheme
+                   KW                Key Wrap
+                   KWP               Key Wrap with Padding
+                   NIST              National Institute of Standards and Technology
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 33 of 35
+FIPS 140-3 Non-Proprietary Security Policy, Version 0.2                                                                    June 11, 2024
+
+
+                   Term              Definition
+                   OS                Operating System
+                   PCT               Pairwise Consistency Test
+                   PKCS              Public Key Cryptography Standard
+                   PSS               Probabilistic Signature Scheme
+                   RNG               Random Number Generator
+                   RSA               Rivest, Shamir, and Adleman
+                   SHA               Secure Hash Algorithm
+                   SHS               Secure Hash Standard
+                   SP                Special Publication
+
+
+
+
+                                               CorSSL™ FIPS Object Module 2.0.16.001
+                                                    ©2024 Corsec Security, Inc.
+                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                                           Page 34 of 35
+         Prepared by:
+      Corsec Security, Inc.
+
+
+
+
+12600 Fair Lakes Circle, Suite 210
+    Fairfax, Virginia 22033
+   United States of America
+
+    Phone: +1 703 267 6050
+    Email: info@corsec.com
+    http://www.corsec.com
+

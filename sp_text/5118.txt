@@ -1,0 +1,1755 @@
+                                      Juniper Networks, Inc.
+
+         FIPS 140-3 Non-Proprietary Security Policy
+
+               Juniper Networks MX304 and EX4100 with MACsec
+                                    Version: Junos OS 22.4R2
+
+
+
+
+      Prepared for:
+
+
+
+
+      Juniper Networks, Inc.
+      1133 Innovation Way
+      Sunnyvale, California 94089
+      USA
+      408.745.2000
+      1.888 JUNIPER
+      www.juniper.net
+
+
+
+      Prepared by:
+
+
+
+
+      www.teronlabs.com
+
+
+
+
+Juniper Networks                    Non-Proprietary FIPS 140-3 Security Policy   Page 1 of 35
+Table of Contents
+1 General ......................................................................................................................................................................... 6
+   1.1 Overview .............................................................................................................................................................. 6
+   1.2 Security Levels..................................................................................................................................................... 6
+2 Cryptographic Module Specification ...................................................................................................................... 6
+   2.1 Description ........................................................................................................................................................... 6
+   2.2 Tested and Vendor Affirmed Module Version and Identification............................................................. 9
+   2.3 Excluded Components ..................................................................................................................................... 10
+   2.4 Modes of Operation ......................................................................................................................................... 10
+   2.5 Algorithms .......................................................................................................................................................... 11
+   2.6 Security Function Implementations .............................................................................................................. 13
+   2.7 Algorithm Specific Information ...................................................................................................................... 15
+   2.8 RBG and Entropy .............................................................................................................................................. 16
+   2.9 Key Generation ................................................................................................................................................. 16
+   2.10 Key Establishment .......................................................................................................................................... 16
+   2.11 Industry Protocols .......................................................................................................................................... 16
+3 Cryptographic Module Interfaces ......................................................................................................................... 17
+   3.1 Ports and Interfaces ......................................................................................................................................... 17
+4 Roles, Services, and Authentication ..................................................................................................................... 18
+   4.1 Authentication Methods ................................................................................................................................. 18
+   4.2 Roles .................................................................................................................................................................... 18
+   4.3 Approved Services ............................................................................................................................................ 18
+   4.4 Non-Approved Services .................................................................................................................................. 22
+   4.5 External Software/Firmware Loaded ........................................................................................................... 22
+5 Software/Firmware Security .................................................................................................................................. 22
+   5.1 Integrity Techniques ........................................................................................................................................ 22
+   5.2 Initiate on Demand ........................................................................................................................................... 22
+6 Operational Environment ....................................................................................................................................... 22
+   6.1 Operational Environment Type and Requirements ................................................................................... 22
+   6.2 Configuration Settings and Restrictions....................................................................................................... 22
+7 Physical Security ....................................................................................................................................................... 23
+8 Non-Invasive Security ............................................................................................................................................. 23
+9 Sensitive Security Parameters Management ...................................................................................................... 23
+   9.1 Storage Areas .................................................................................................................................................... 23
+   9.2 SSP Input-Output Methods ............................................................................................................................ 23
+
+Juniper Networks                                            Non-Proprietary FIPS 140-3 Security Policy                                                            Page 2 of 35
+   9.3 SSP Zeroization Methods ................................................................................................................................ 24
+   9.4 SSPs ..................................................................................................................................................................... 24
+   9.5 Transitions .......................................................................................................................................................... 28
+10 Self-Tests ................................................................................................................................................................. 28
+   10.1 Pre-Operational Self-Tests ........................................................................................................................... 28
+   10.2 Conditional Self-Tests ................................................................................................................................... 28
+   10.3 Periodic Self-Test Information..................................................................................................................... 30
+   10.4 Error States ...................................................................................................................................................... 31
+   10.5 Operator Initiation of Self-Tests ................................................................................................................. 32
+11 Life-Cycle Assurance ............................................................................................................................................. 32
+   11.1 Installation, Initialization, and Startup Procedures .................................................................................. 32
+   11.2 Administrator Guidance ................................................................................................................................ 32
+       11.2.1 Installing the Junos OS firmware image ............................................................................................. 32
+       11.2.2 Configure the device for the Approved mode .................................................................................. 33
+       11.2.3          Zeroizing the System.......................................................................................................................... 33
+   11.3 Non-Administrator Guidance ....................................................................................................................... 34
+   11.4 Design and Rules ............................................................................................................................................ 34
+       11.4.1 Module Design Rules ............................................................................................................................. 34
+       11.4.2          Module Operation Rules ................................................................................................................... 34
+   11.5 Maintenance Requirements ......................................................................................................................... 35
+   11.6 End of Life ........................................................................................................................................................ 35
+12 Mitigation of Other Attacks ................................................................................................................................. 35
+
+
+
+
+Juniper Networks                                           Non-Proprietary FIPS 140-3 Security Policy                                                             Page 3 of 35
+List of Tables
+
+Table 1: Security Levels ................................................................................................................................................ 6
+Table 2: Tested Module Identification – Hardware .............................................................................................. 10
+Table 3: Modes List and Description ....................................................................................................................... 10
+Table 4: Approved Algorithms - OpenSSL 1.0.2.................................................................................................... 11
+Table 5: Approved Algorithms - MACsec ............................................................................................................... 12
+Table 6: Approved Algorithms - MACsec PHY ...................................................................................................... 12
+Table 7: Approved Algorithms - OpenSSL 1.1.1.................................................................................................... 12
+Table 8: Approved Algorithms - Kernel ................................................................................................................... 12
+Table 9: Approved Algorithms - LibMD .................................................................................................................. 12
+Table 10: Vendor-Affirmed Algorithms ................................................................................................................... 13
+Table 11: Security Function Implementations ....................................................................................................... 15
+Table 12: Entropy Certificates .................................................................................................................................. 16
+Table 13: Entropy Sources ......................................................................................................................................... 16
+Table 14: Ports and Interfaces .................................................................................................................................. 18
+Table 15: Authentication Methods .......................................................................................................................... 18
+Table 16: Roles ............................................................................................................................................................. 18
+Table 17: Approved Services ..................................................................................................................................... 21
+Table 18: Mechanisms and Actions Required ........................................................................................................ 23
+Table 19: Storage Areas ............................................................................................................................................. 23
+Table 20: SSP Input-Output Methods ..................................................................................................................... 24
+Table 21: SSP Zeroization Methods ......................................................................................................................... 24
+Table 22: SSP Table 1 ................................................................................................................................................. 26
+Table 23: SSP Table 2 ................................................................................................................................................. 28
+Table 24: Pre-Operational Self-Tests ...................................................................................................................... 28
+Table 25: Conditional Self-Tests ............................................................................................................................... 30
+Table 26: Pre-Operational Periodic Information ................................................................................................... 30
+Table 27: Conditional Periodic Information ........................................................................................................... 31
+Table 28: Error States ................................................................................................................................................. 32
+
+
+List of Figures
+
+Figure 1 – MX304 Universal Routing Platform (front) ........................................................................................... 7
+Figure 2 – MX304 Universal Routing Platform (rear) ............................................................................................. 7
+Figure 3 – EX4100-48MP Switch (front) .................................................................................................................. 8
+Figure 4 – EX4100-48MP Switch (rear) .................................................................................................................... 8
+Figure 5 – EX4100-24MP Switch (front) .................................................................................................................. 8
+Figure 6 – EX4100-24MP Switch (rear) .................................................................................................................... 8
+Figure 7 – EX4100-24P Ethernet Switch (front) ..................................................................................................... 8
+Figure 8 – EX4100-24P Ethernet Switch (rear) ....................................................................................................... 8
+Figure 9 – EX4100-24T Ethernet Switch (front) ..................................................................................................... 8
+Figure 10 – EX4100-24T Ethernet Switch (rear) .................................................................................................... 8
+Figure 11 – EX4100-48P Ethernet Switch (front) .................................................................................................. 9
+Figure 12 – EX4100-48P Ethernet Switch (rear) .................................................................................................... 9
+Figure 13 – EX4100-48T Ethernet Switch (front)................................................................................................... 9
+Figure 14 – EX4100-48T Ethernet Switch (rear) .................................................................................................... 9
+
+
+Juniper Networks                                           Non-Proprietary FIPS 140-3 Security Policy                                                         Page 4 of 35
+Juniper Networks   Non-Proprietary FIPS 140-3 Security Policy   Page 5 of 35
+1 General
+1.1 Overview
+
+This is a non-proprietary Cryptographic Module Security Policy for the Juniper Networks MX304
+Universal Router Platform and EX4100-48MP, EX4100-24MP, EX4100-24P, EX4100-24T, EX4100-
+48P, EX4100-48T Ethernet Switches, hereafter referred to as the cryptographic module.
+
+1.2 Security Levels
+
+The cryptographic module is designed to meet FIPS 140-3 Level 1 overall. The table below shows the
+security levels claimed for each section of the security requirements.
+
+ Section           Title                                               Security Level
+ 1                 General                                             1
+ 2                 Cryptographic module specification                  1
+ 3                 Cryptographic module interfaces                     1
+ 4                 Roles, services, and authentication                 2
+ 5                 Software/Firmware security                          1
+ 6                 Operational environment                             1
+ 7                 Physical security                                   1
+ 8                 Non-invasive security                               N/A
+ 9                 Sensitive security parameter management             1
+ 10                Self-tests                                          1
+ 11                Life-cycle assurance                                1
+ 12                Mitigation of other attacks                         N/A
+                   Overall Level                                       1
+Table 1: Security Levels
+
+
+2 Cryptographic Module Specification
+2.1 Description
+
+Purpose and Use:
+
+Juniper Networks MX304 Universal Routing Platform is a cloud-era platform that cost
+effectively addresses the evolutionary edge and metro Ethernet needs of service providers,
+mobile operators, web-scale operators, and multiple-service operators (MSOs).
+The Juniper Networks EX4100 line of Ethernet Switches offers a secure, cloud-ready
+portfolio of access switches ideal for enterprise branch, campus, and data center networks.
+
+This FIPS 140-3 validation includes the MX series router model MX304, and the following EX series
+switch models: EX4100-48MP, EX4100-24MP, EX4100-24P, EX4100-24T, EX4100-48P and EX4100-
+48T.
+
+The cryptographic module runs Junos OS, Juniper’s reliable, high-performance, modular network
+operating system that is supported across all of Juniper’s physical and virtual routing, switching, and
+security platforms.
+
+
+Juniper Networks                        Non-Proprietary FIPS 140-3 Security Policy               Page 6 of 35
+The cryptographic module provides for an encrypted connection, using SSH, between the management
+station and the module. The cryptographic modules also provide for an encrypted connection, using
+MACsec, between devices. All other data input or output from the modules are considered plaintext for
+this FIPS 140-3 validation.
+
+Module Type:
+The cryptographic module is a Hardware cryptographic module.
+
+Module Embodiment:
+The cryptographic module is defined as a MultiChipStand module that executes Junos OS 22.4R2
+firmware on any of the identified Juniper Networks devices.
+
+Module Characteristics:
+There are no additional characteristics relevant to this module.
+
+Cryptographic Boundary:
+
+The Tested Operational Environment Physical Perimeter (TOEPP) is defined as the outer edge of the
+chassis. The chassis is a rigid sheet-metal structure that houses all components of the device. The
+cryptographic boundary encompasses the entire TOEPP.
+
+The cryptographic module is FIPS-compliant when installed and configured with Junos OS 22.4R2
+validated firmware as specified in section 11.1.
+
+The physical form of the module is depicted in Figures 1 to 14.
+
+
+
+
+                          Figure 1 – MX304 Universal Routing Platform (front)
+
+
+
+
+                           Figure 2 – MX304 Universal Routing Platform (rear)
+
+
+
+
+Juniper Networks                   Non-Proprietary FIPS 140-3 Security Policy               Page 7 of 35
+                      Figure 3 – EX4100-48MP Switch (front)
+
+
+
+
+                       Figure 4 – EX4100-48MP Switch (rear)
+
+
+
+
+                      Figure 5 – EX4100-24MP Switch (front)
+
+
+
+
+                       Figure 6 – EX4100-24MP Switch (rear)
+
+
+
+
+                   Figure 7 – EX4100-24P Ethernet Switch (front)
+
+
+
+
+                   Figure 8 – EX4100-24P Ethernet Switch (rear)
+
+
+
+
+                   Figure 9 – EX4100-24T Ethernet Switch (front)
+
+
+
+
+                   Figure 10 – EX4100-24T Ethernet Switch (rear)
+
+
+
+
+Juniper Networks         Non-Proprietary FIPS 140-3 Security Policy   Page 8 of 35
+                           Figure 11 – EX4100-48P Ethernet Switch (front)
+
+
+
+
+                           Figure 12 – EX4100-48P Ethernet Switch (rear)
+
+
+
+
+                           Figure 13 – EX4100-48T Ethernet Switch (front)
+
+
+
+
+                           Figure 14 – EX4100-48T Ethernet Switch (rear)
+
+
+
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+
+Tested Module Identification – Hardware:
+
+The following models of the module were tested.
+
+ Model       Hardware   Firmware      Processors            Features
+ and/or      Version    Version
+ Part
+ Number
+ MX304       MX304      Junos OS      Intel Xeon D1735-     Dual redundant REs; Up to 3 LMIC (LMIC16-BASE) each
+                        22.4R2.8      TR                    with 4x400 Gbps ports, 16x100 Gbps ports, or
+                                                            combination
+ EX4100-     EX4100-    Junos OS      ARM-cortex A72        16 x 100 MB/1GbE/2.5GbE and 32 x 10 MB/100
+ 48MP        48MP       22.4R2.8      64-bit, single core   MB/1GbE PoE++ access ports
+ EX4100-     EX4100-    Junos OS      ARM-cortex A72        8 x 100 MB/1GbE/2.5GbE/5GbE/10GbE and 16 x 10
+ 24MP        24MP       22.4R2.8      64-bit, single core   MB/100 MB/1GbE PoE++ access ports
+ EX4100-     EX4100-    Junos OS      ARM-cortex A72        24 x 1GbE non-PoE ports
+ 24T         24T        22.4R2.8      64-bit, single core
+ EX4100-     EX4100-    Junos OS      ARM-cortex A72        24 x 1GbE PoE+ access ports
+ 24P         24P        22.4R2.8      64-bit, single core
+ EX4100-     EX4100-    Junos OS      ARM-cortex A72        48 x 1GbE non PoE-access ports
+ 48T         48T        22.4R2        64-bit, single core
+
+
+
+
+Juniper Networks                   Non-Proprietary FIPS 140-3 Security Policy                         Page 9 of 35
+ Model       Hardware     Firmware        Processors             Features
+ and/or      Version      Version
+ Part
+ Number
+ EX4100-     EX4100-      Junos OS        ARM-cortex A72         48 x 1GbE PoE+ access ports
+ 48P         48P          22.4R2.8        64-bit, single core
+Table 2: Tested Module Identification – Hardware
+
+
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets): N/A
+
+The module is not classified as software, firmware, or hybrid; thus, this section is not applicable.
+
+N/A for this module.
+
+Tested Module Identification – Hybrid Disjoint Hardware: N/A
+
+The module is not classified as hybrid disjoint hardware; thus, this section is not applicable.
+
+N/A for this module.
+
+Tested Operational Environments - Software, Firmware, Hybrid: N/A
+
+The module is not classified as software, firmware, or hybrid; thus, this section is not applicable.
+N/A for this module.
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid: N/A
+
+There are no vendor-affirmed operational environments claimed.
+
+N/A for this module.
+
+2.3 Excluded Components
+
+No components are excluded from the requirements of FIPS PUB 140-3.
+
+2.4 Modes of Operation
+
+The module supports an Approved mode only. The module enters Approved mode as a result of
+successful installation, initialization and configuration steps described in section 11. Until these
+procedures have been followed, the module is non-compliant.
+
+ Mode       Description                   Type         Status Indicator
+ Name
+ Approved   Approved mode of operation.   Approved     Suffix string ":fips" in the cli prompt
+Table 3: Modes List and Description
+
+
+
+
+Juniper Networks                      Non-Proprietary FIPS 140-3 Security Policy                  Page 10 of 35
+2.5 Algorithms
+
+Approved Algorithms:
+
+Although the module may have been tested for additional algorithms or modes, only those listed below
+are utilized by the module.
+
+OpenSSL 1.0.2
+ Algorithm                CAVP Cert        Properties                                            Reference
+ AES-CBC                  A4301            Direction - Decrypt, Encrypt                          SP 800-38A
+                                           Key Length - 128, 192, 256
+ AES-CTR                  A4301            Direction - Decrypt, Encrypt                          SP 800-38A
+                                           Key Length - 128, 192, 256
+ ECDSA KeyGen             A4301            Curve - P-256, P-384, P-521                           FIPS 186-4
+ (FIPS186-4)                               Secret Generation Mode - Testing Candidates
+ ECDSA KeyVer (FIPS186-   A4301            Curve - P-256, P-384, P-521                           FIPS 186-4
+ 4)
+ ECDSA SigGen (FIPS186-   A4301            Component - No                                        FIPS 186-4
+ 4)                                        Curve - P-256, P-384, P-521
+                                           Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+ ECDSA SigVer (FIPS186-   A4301            Component - No                                        FIPS 186-4
+ 4)                                        Curve - P-256, P-384, P-521
+                                           Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+ HMAC-SHA-1               A4301            Key Length - Key Length: 160                          FIPS 198-1
+ HMAC-SHA2-256            A4301            Key Length - Key Length: 256                          FIPS 198-1
+ HMAC-SHA2-512            A4301            Key Length - Key Length: 512                          FIPS 198-1
+ KAS-ECC-SSC Sp800-       A4301            Domain Parameter Generation Methods - P-256, P-384,   SP 800-56A Rev.
+ 56Ar3                                     P-521                                                 3
+                                           Scheme -
+                                           ephemeralUnified -
+                                           KAS Role - initiator, responder
+ KDF SSH (CVL)            A4301            Cipher - AES-128, AES-192, AES-256                    SP 800-135 Rev.
+                                           Hash Algorithm - SHA-1, SHA2-256, SHA2-384, SHA2-     1
+                                           512
+ RSA KeyGen (FIPS186-5)   A4301            Key Generation Mode - probable                        FIPS 186-5
+                                           Modulo - 2048, 3072, 4096
+                                           Primality Tests - 2powSecStr
+                                           Private Key Format - standard
+ RSA SigGen (FIPS186-5)   A4301            Modulo - 2048, 3072, 4096                             FIPS 186-5
+                                           Signature Type - pkcs1v1.5
+ RSA SigVer (FIPS186-5)   A4301            Modulo - 2048, 3072, 4096                             FIPS 186-5
+                                           Signature Type - pkcs1v1.5
+ SHA-1                    A4301            Message Length - Message Length: 0-65536 Increment    FIPS 180-4
+                                           8
+ SHA2-256                 A4301            Message Length - Message Length: 0-65536 Increment    FIPS 180-4
+                                           8
+ SHA2-384                 A4301            Message Length - Message Length: 0-65536 Increment    FIPS 180-4
+                                           8
+ SHA2-512                 A4301            Message Length - Message Length: 0-65536 Increment    FIPS 180-4
+                                           8
+Table 4: Approved Algorithms - OpenSSL 1.0.2
+
+
+
+
+Juniper Networks                      Non-Proprietary FIPS 140-3 Security Policy                     Page 11 of 35
+MACsec
+ Algorithm         CAVP Cert         Properties                                        Reference
+ AES-CBC           A4304             Direction - Decrypt, Encrypt                      SP 800-38A
+                                     Key Length - 128, 256
+ AES-CMAC          A4304             Direction - Generation, Verification              SP 800-38B
+                                     Key Length - 128, 256
+ AES-KW            A4304             Direction - Decrypt, Encrypt                      SP 800-38F
+                                     Key Length - 128
+ KDF SP800-108     A4304             KDF Mode - Counter                                SP 800-108 Rev. 1
+                                     Supported Lengths - Supported Lengths: 128, 256
+Table 5: Approved Algorithms - MACsec
+
+MACsec PHY
+ Algorithm   CAVP Cert         Properties                     Reference
+ AES-GCM     A4664             Direction - Decrypt, Encrypt   SP 800-38D
+                               IV Generation - External
+                               IV Generation Mode - 8.2.2
+                               Key Length - 128, 256
+ AES-GCM     AES 4550          Direction - Decrypt, Encrypt   SP 800-38D
+                               Key Length - 128, 256
+ AES-GCM     C1869             Direction - Decrypt, Encrypt   SP 800-38D
+                               IV Generation - External
+                               Key Length - 128, 256
+Table 6: Approved Algorithms - MACsec PHY
+
+OpenSSL 1.1.1
+ Algorithm                   CAVP Cert        Properties                                              Reference
+ ECDSA SigVer (FIPS186-      A4302            Component - No                                          FIPS 186-4
+ 4)                                           Curve - P-256, P-384, P-521
+                                              Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+ SHA2-256                    A4302            Message Length - Message Length: 0-65536 Increment      FIPS 180-4
+                                              8
+Table 7: Approved Algorithms - OpenSSL 1.1.1
+
+Kernel
+ Algorithm           CAVP Cert        Properties                                               Reference
+ HMAC DRBG           A4303            Prediction Resistance - Yes                              SP 800-90A Rev. 1
+                                      Mode - SHA2-256
+ HMAC-SHA2-256       A4303            Key Length - Key Length: 256                             FIPS 198-1
+ SHA2-256            A4303            Message Length - Message Length: 0-51200 Increment 8     FIPS 180-4
+ SHA2-512            A4303            Message Length - Message Length: 0-51200 Increment 8     FIPS 180-4
+Table 8: Approved Algorithms - Kernel
+
+LibMD
+ Algorithm           CAVP Cert        Properties                                               Reference
+ HMAC-SHA-1          A4306            Key Length - Key Length: 112, 160                        FIPS 198-1
+ HMAC-SHA2-256       A4306            Key Length - Key Length: 160, 256                        FIPS 198-1
+ SHA-1               A4306            Message Length - Message Length: 0-51200 Increment 8     FIPS 180-4
+ SHA2-256            A4306            Message Length - Message Length: 0-51200 Increment 8     FIPS 180-4
+ SHA2-512            A4306            Message Length - Message Length: 0-65536 Increment 8     FIPS 180-4
+Table 9: Approved Algorithms - LibMD
+
+
+
+
+Juniper Networks                        Non-Proprietary FIPS 140-3 Security Policy                          Page 12 of 35
+Vendor-Affirmed Algorithms:
+
+ Name     Properties            Implementation      Reference
+ CKG      Key type:Asymmetric   N/A                 SP 800-133 Rev.2 Section 4, example 1 direct output from DRBG.
+Table 10: Vendor-Affirmed Algorithms
+
+
+Non-Approved, Allowed Algorithms:
+
+N/A for this module.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+
+N/A for this module.
+
+2.6 Security Function Implementations
+
+The module implements the security functions listed in the following table.
+
+ Name                   Type                     Description              Properties            Algorithms
+ Enc/Dec (SSH)          BC-UnAuth                Unauthenticated                                AES-CBC: (A4301)
+                                                 encryption for SSH                             AES-CTR: (A4301)
+ KAS-SSC (SSH)          KAS-SSC                  Key Agreement                                  KAS-ECC-SSC Sp800-
+                                                 Scheme Shared Secret                           56Ar3: (A4301)
+                                                 Computation for SSH
+ KeyGen (SSH)           AsymKeyPair-KeyGen       Key Generation used                            ECDSA KeyGen
+                        CKG                      for SSH                                        (FIPS186-4): (A4301)
+                                                 authentication keys                            ECDSA KeyVer
+                                                                                                (FIPS186-4): (A4301)
+                                                                                                RSA KeyGen
+                                                                                                (FIPS186-5): (A4301)
+                                                                                                HMAC DRBG:
+                                                                                                (A4303)
+                                                                                                CKG: ()
+ SigGen (SSH)           DigSig-SigGen            Signature Generation                           HMAC DRBG:
+                                                 for peer                                       (A4303)
+                                                 authentication in SSH                          ECDSA SigGen
+                                                                                                (FIPS186-4): (A4301)
+                                                                                                RSA SigGen (FIPS186-
+                                                                                                5): (A4301)
+                                                                                                SHA2-256: (A4301)
+                                                                                                SHA2-384: (A4301)
+                                                                                                SHA2-512: (A4301)
+ SigVer (SSH)           DigSig-SigVer            Signature Verification                         ECDSA SigVer
+                                                 for peer                                       (FIPS186-4): (A4301)
+                                                 authentication in SSH                          RSA SigVer (FIPS186-
+                                                                                                5): (A4301)
+                                                                                                SHA2-256: (A4301)
+
+
+
+Juniper Networks                        Non-Proprietary FIPS 140-3 Security Policy                        Page 13 of 35
+ Name               Type                  Description             Properties             Algorithms
+                                                                                         SHA2-384: (A4301)
+                                                                                         SHA2-512: (A4301)
+ MAC (SSH)          MAC                   Message                                        HMAC-SHA-1:
+                                          authentication for                             (A4301)
+                                          SSH                                            HMAC-SHA2-256:
+                                                                                         (A4301)
+                                                                                         HMAC-SHA2-512:
+                                                                                         (A4301)
+ KAS KeyGen (SSH)   KAS-KeyGen            Key Generation for                             ECDSA KeyGen
+                    CKG                   Key Agreement in                               (FIPS186-4): (A4301)
+                                          SSH                                            ECDSA KeyVer
+                                                                                         (FIPS186-4): (A4301)
+                                                                                         CKG: ()
+                                                                                         HMAC DRBG:
+                                                                                         (A4303)
+ KDF (SSH)          KAS-135KDF            Key derivation                                 KDF SSH: (A4301)
+                                          function for SSH                               SHA-1: (A4301)
+                                                                                         SHA2-256: (A4301)
+                                                                                         SHA2-384: (A4301)
+                                                                                         SHA2-512: (A4301)
+ Full KAS (SSH)     KAS-Full              Full Key Agreement      IG:IG D.F Scenario 2   ECDSA KeyGen
+                    CKG                   for SSH                 path (2), split.       (FIPS186-4): (A4301)
+                                                                  Key confirmation:No    ECDSA KeyVer
+                                                                  Key derivation:KDF     (FIPS186-4): (A4301)
+                                                                  SSH (separately        KAS-ECC-SSC Sp800-
+                                                                  tested).               56Ar3: (A4301)
+                                                                                         SHA-1: (A4301)
+                                                                                         SHA2-256: (A4301)
+                                                                                         SHA2-384: (A4301)
+                                                                                         SHA2-512: (A4301)
+                                                                                         KDF SSH: (A4301)
+ KTS (SSH)          KTS-Wrap              Key transport using     Standard:SP 800-38F    AES-CBC: (A4301)
+                    KTS-Unwrap            SSH as per IG D.G       IG D.G:Approved key    AES-CTR: (A4301)
+                                          provisions              wrapping key using     HMAC-SHA-1:
+                                                                  combination            (A4301)
+                                                                  (encryption +          HMAC-SHA2-256:
+                                                                  authentication)        (A4301)
+                                                                  method.                HMAC-SHA2-512:
+                                                                  Caveat:Key             (A4301)
+                                                                  establishment
+                                                                  methodology provides
+                                                                  between 112 and 256
+                                                                  bits of security
+                                                                  strength
+ SHA (LibMD)        SHA                   Message Digest                                 SHA-1: (A4306)
+                                          Generation                                     SHA2-256: (A4306)
+                                                                                         SHA2-512: (A4306)
+ MAC (LibMD)        MAC                   Message                                        HMAC-SHA-1:
+                                          Authentication                                 (A4306)
+                                                                                         HMAC-SHA2-256:
+                                                                                         (A4306)
+ DRBG (Kernel)      DRBG                  Random Bit                                     HMAC DRBG:
+                                          Generation                                     (A4303)
+                                                                                         HMAC-SHA2-256:
+                                                                                         (A4303)
+                                                                                         SHA2-256: (A4303)
+
+
+
+Juniper Networks                 Non-Proprietary FIPS 140-3 Security Policy                       Page 14 of 35
+ Name                  Type                     Description             Properties             Algorithms
+ SHA (Kernel)          SHA                      Entropy source                                 SHA2-512: (A4303)
+                                                conditioning
+                                                component
+ Verify image          DigSig-SigVer            Verification of                                ECDSA SigVer
+                                                firmware image                                 (FIPS186-4): (A4302)
+                                                                                               Curve: P-256
+                                                                                               SHA2-256: (A4302)
+ Key derivation        KAS-56CKDF               Derivation of MACsec                           KDF SP800-108:
+ (MACsec)                                       MKA keys                                       (A4304)
+                                                                                               AES-CMAC: (A4304)
+                                                                                               AES-CBC: (A4304)
+ Key wrap (MACsec)     KTS-Wrap                 Distribution of         Standard:SP 800-38F    AES-KW: (A4304)
+                       KTS-Unwrap               MACsec SAKs             IG D.G:Approved key
+                                                                        wrapping key using
+                                                                        KW mode.
+                                                                        Caveat:Key
+                                                                        establishment
+                                                                        methodology provides
+                                                                        between 112 and 256
+                                                                        bits of security
+                                                                        strength
+ Enc/Dec (MACsec)      BC-Auth                  Encryption and                                 AES-GCM: (AES 4550,
+                                                decryption of MACsec                           C1869, A4664)
+                                                data
+ Integrity (MACsec)    MAC                      MACsec protocol data                           AES-CMAC: (A4304)
+                                                integrity protection
+ Entropy Source        ENT-ESV                  Entropy source                                 SHA2-512: (A4303)
+Table 11: Security Function Implementations
+
+
+
+2.7 Algorithm Specific Information
+
+In reference to the MACsec protocol, the modules can take on the role of Peer or Authenticator.
+
+The AES GCM IV construction is performed in compliance with IG C.H scenario 1c (MACsec per IEEE
+802.1AE and its amendments).
+
+
+The module includes ECDSA algorithms that have been validated using FIPS 186-4 CAVP tests, which
+are mathematically identical to FIPS 186-5 CAVP tests. Per IG C.K, all RSA and ECDSA algorithms
+implemented by the module are claimed compliant with FIPS 186-5.
+The module complies with IG C.F. RSA Key Generation, Signature Generation and Signature Verification
+have been tested and validated using CAVP testing for all implemented modulus lengths (2048, 3072
+and 4096 bits). The number of Miller-Rabin tests used for primality testing as part of RSA Key
+Generation is consistent with Table C.3.
+
+The module implements the following Approved key agreement methods which have been CAVP tested
+and validated:
+    ⦁ KAS-ECC per SP 800-56A Rev. 3 (FIPS 140-3 IG D.F Scenario 2, path 2).
+
+
+
+
+Juniper Networks                       Non-Proprietary FIPS 140-3 Security Policy                       Page 15 of 35
+The module obtains the FIPS 140-3 IG D.F required key agreement assurances in accordance with
+Section 5.6.2 of SP800-56A Rev. 3. All the key agreement protocols implemented by the module are
+Diffie-Hellman based.
+
+2.8 RBG and Entropy
+
+The tables below indicate the entropy source used by the module and their associated certificates.
+
+ Cert       Vendor Name
+ Number
+ E103       Juniper Networks
+ E104       Juniper Networks
+Table 12: Entropy Certificates
+
+
+ Name                             Type         Operational Environment        Sample     Entropy    Conditioning
+                                                                              Size       per        Component
+                                                                                         Sample
+ EX4100 - Junos OS 22.4 Entropy   Non-         ARM-cortex A72 64-bit,         512 bits   448 bits   A4303 (SHA2-
+ Source (E103)                    Physical     single core                                          512)
+ MX304 - Junos OS 22.4 Entropy    Non-         Intel Xeon D-1735TR            512 bits   448 bits   A4303 (SHA2-
+ Source (E104)                    Physical                                                          512)
+Table 13: Entropy Sources
+
+
+The entropy source is used to seed the module’s HMAC DRBG with the minimum required 256-bits of
+entropy. Each 512-bit block of conditioned output from the entropy source contains 448 bits of
+entropy. The HMAC DRBG is used for all random data required by the module, including key generation.
+
+There are no initialization procedures required by the users of the module to operate the entropy source
+in a compliant manner. The module complies with the ESV Public Use document of the validated
+entropy source (Certs. E103 and E104).
+
+2.9 Key Generation
+
+The cryptographic module implements the key generation methods listed above in the Security
+Functions implementation table.
+
+2.10 Key Establishment
+
+The cryptographic module implements the key establishment methods listed above in the Security
+Functions implementation table.
+
+2.11 Industry Protocols
+
+The cryptographic module supports the protocols listed below. No part of these protocols, other than
+the approved cryptographic algorithms and the KDFs, have been tested by the CAVP and CMVP. The
+SSH algorithms allow independent selection of key exchange, authentication, cipher, and integrity. In
+
+
+Juniper Networks                     Non-Proprietary FIPS 140-3 Security Policy                         Page 16 of 35
+reference to the supported protocols table below, each column of options for a given protocol is
+independent and may be used in any viable combination.
+
+
+ Protocol       Key Exchange                                  Auth               Cipher                   Integrity
+                                                              ECDSA P-256
+                                                              ECDSA P-384        AES CBC
+                EC Diffie-Hellman P-256                                                                   HMAC-SHA-1
+                                                              ECDSA P-521        128/192/256
+ SSHv2          EC Diffie-Hellman P-384                                                                   HMAC-SHA2-256
+                                                              RSA 2048           AES CTR
+                EC Diffie-Hellman P-521                                                                   HMAC-SHA2-512
+                                                              RSA 3072           128/192/256
+                                                              RSA 4096
+                MACsec Key Agreement (SP800-108 KDF,                             AES-GCM-128
+ MACsec                                                       Shared secret
+                AES-CMAC-128/256, AES-KW 128/256)                                AES-GCM-256
+
+
+
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+
+The following table maps each physical interface to one or more logical interface types defined in
+the FIPS 140-3 standard. The module does not have a Control Output Interface.
+
+ Physical Port                                                   Logical          Data That Passes
+                                                                 Interface(s)
+ Ethernet (data)                                                 Data Input       LAN communications
+                                                                 Data Output
+                                                                 Control Input
+                                                                 Status
+                                                                 Output
+ Ethernet (mgmt.)                                                Data Input       Remote management
+                                                                 Data Output
+                                                                 Control Input
+                                                                 Status
+                                                                 Output
+ Serial                                                          Data Input       Console serial port management
+                                                                 Data Output
+                                                                 Control Input
+                                                                 Status
+                                                                 Output
+ Power                                                           Power            Power
+ Reset button                                                    Control Input    Reset
+ USB                                                             Data Input       Firmware load port
+                                                                 Control Input
+ LED                                                             Status           Status indicator lighting
+                                                                 Output
+ SFP28 (EX4100 only)                                             Data Input       Virtual chassis ports
+                                                                 Data Output
+                                                                 Control Input
+                                                                 Status
+                                                                 Output
+ Timing interface ports: 10MG, PPS, ToD, BITS, GM/PTP            Control Input    Clock and timing signals from external
+ (MX304 only)                                                                     devices
+
+
+
+Juniper Networks                          Non-Proprietary FIPS 140-3 Security Policy                              Page 17 of 35
+Table 14: Ports and Interfaces
+
+
+
+
+4 Roles, Services, and Authentication
+
+4.1 Authentication Methods
+
+The module implements two forms of role-based authentication methods, as described in the following
+table.
+
+ Method            Description                Security        Strength Each              Strength per Minute
+ Name                                         Mechanism       Attempt
+ Password          User and CO                SHA             Probability of guessing:   Timed access mechanism allows
+ authentication    authentication via SSH     (LibMD)         1/(96^10) <                max of 10 attempts / min.
+                   or consol. Minimum of                      1/1,000,000.               Probability of guessing: 10/(96^10)
+                   10 ASCII character                                                    < 1/100,000.
+                   passwords.
+ Signature         User/CO                    SigVer (SSH)    Strength of signature      A rate of 1 CPU cycle per failed
+ authentication    authentication via SSH                     algorithm, minimum 112-    authentication for the Intel Xeon
+                                                              bits. Probability of       D1735-TR processor (8 cores, 2.2
+                                                              success for random         GHz) allows for the probability of
+                                                              attempt: 1/(2^112) <       success by brute-force attack: 60 x
+                                                              1/1,000,000.               8 x 2.2 x 10^9 x 1/(2^112) <
+                                                                                         1/100,000.
+Table 15: Authentication Methods
+
+
+
+4.2 Roles
+
+ Name                         Type                  Operator Type        Authentication Methods
+ Crypto Officer               Role                  CO                   Password authentication
+                                                                         Signature authentication
+ User                         Role                  Monitor              Password authentication
+                                                                         Signature authentication
+Table 16: Roles
+
+
+The module supports two roles: Cryptographic Officer (CO) and User. The module supports concurrent
+operators but does not support a maintenance role and/or bypass capability. The module enforces the
+separation of roles using either of the role-based operator authentication methods in Section 4.1.
+
+The Cryptographic Officer role configures and monitors the module via a console or SSH connection. As
+root or super-user, the Cryptographic Officer has permission to view and edit secrets within the module.
+
+The User role monitors the module via the console or SSH. The user role cannot change the
+configuration.
+
+4.3 Approved Services
+
+
+Juniper Networks                            Non-Proprietary FIPS 140-3 Security Policy                           Page 18 of 35
+ Name        Description            Indicator        Inputs           Outputs                 Security    SSP Access
+                                                                                              Functions
+ Configure   Security relevant      ':fips' suffix   CLI Command      Status                  SHA         Crypto Officer
+ Security    configuration          in CLI                                                    (Kernel)    - HMAC DRBG V
+                                    prompt                                                    Entropy     value: E
+                                                                                              Source      - HMAC DRBG
+                                                                                              KeyGen      Key value: E
+                                                                                              (SSH)       - HMAC DRBG
+                                                                                              SHA         Entropy Input: E
+                                                                                              (LibMD)     - HMAC DRBG
+                                                                                              MAC         Seed: E
+                                                                                              (LibMD)     - User-PW: W
+                                                                                              DRBG        - CO-PW: W
+                                                                                              (Kernel)    - Root-PW: W
+                                                                                                          - SSH PUB:
+                                                                                                          G,R,W
+                                                                                                          - SSH PHK:
+                                                                                                          G,R,W
+                                                                                                          - MACsec CAK:
+                                                                                                          W
+                                                                                                          - MACsec CKN:
+                                                                                                          R,W
+ Configure   Non-security           None             CLI Command      Status                  None        Crypto Officer
+             relevant
+             configuration
+ Secure      MACsec encrypted       ':fips' suffix   MACsec traffic   MACsec traffic          Key wrap    Crypto Officer
+ Traffic     transfer of data,      in CLI           frames           frames                  (MACsec)    - MACsec KEK:
+             distribution of keys   prompt                                                    Enc/Dec     G,E
+                                                                                              (MACsec)    - MACsec SAK:
+                                                                                              Integrity   G,E
+                                                                                              (MACsec)    - MACsec ICK:
+                                                                                                          G,E
+ Show        Show status            None             None             ':fips' suffix in CLI   None        Crypto Officer
+ status                                                               prompt                              User
+ Zeroize     Zeroize all CSPs       None             CLI command      None (completion        None        Crypto Officer
+                                                                      indicator is                        - HMAC DRBG V
+                                                                      implicitly                          value: Z
+                                                                      provided by the                     - HMAC DRBG
+                                                                      module                              Key value: Z
+                                                                      rebooting)                          - HMAC DRBG
+                                                                                                          Entropy Input: Z
+                                                                                                          - HMAC DRBG
+                                                                                                          Seed: Z
+                                                                                                          - SSH DH Shared
+                                                                                                          Secret: Z
+                                                                                                          - SSH PHK: Z
+                                                                                                          - SSH PUB: Z
+                                                                                                          - SSH DH PRV: Z
+                                                                                                          - SSH DH PUB: Z
+                                                                                                          - SSH DH Pub
+                                                                                                          (peer): Z
+                                                                                                          - SSH-SEKs: Z
+                                                                                                          - CO-PW: Z
+                                                                                                          - Root-PW: Z
+                                                                                                          - User-PW: Z
+                                                                                                          - Auth-CO Pub: Z
+                                                                                                          - Auth-User Pub:
+                                                                                                          Z
+
+
+Juniper Networks                         Non-Proprietary FIPS 140-3 Security Policy                            Page 19 of 35
+ Name        Description          Indicator        Inputs           Outputs          Security     SSP Access
+                                                                                     Functions
+                                                                                                  - Root-CA: Z
+                                                                                                  - Package-CA: Z
+                                                                                                  - MACsec CAK: Z
+                                                                                                  - MACsec CKN: Z
+                                                                                                  - MACsec SAK: Z
+                                                                                                  - MACsec KEK: Z
+                                                                                                  - MACsec ICK: Z
+ SSH         Initiate SSH         ':fips' suffix   SSH packets      SSH packets,     Enc/Dec      Crypto Officer
+ connect     connection for SSH   in CLI                            Status           (SSH)        - HMAC DRBG V
+             monitoring and       prompt                                             KAS-SSC      value: E
+             control (CLI)                                                           (SSH)        - HMAC DRBG
+                                                                                     SigGen       Key value: E
+                                                                                     (SSH)        - HMAC DRBG
+                                                                                     SigVer       Entropy Input: E
+                                                                                     (SSH)        - HMAC DRBG
+                                                                                     MAC (SSH)    Seed: E
+                                                                                     KAS          - SSH DH Shared
+                                                                                     KeyGen       Secret: G,E
+                                                                                     (SSH)        - SSH DH PRV:
+                                                                                     KDF (SSH)    G,E
+                                                                                     Full KAS     - SSH DH PUB: G
+                                                                                     (SSH)        - SSH-SEKs: G,E
+                                                                                     KTS (SSH)    - SSH DH Pub
+                                                                                     SHA          (peer): E
+                                                                                     (Kernel)     - CO-PW: E
+                                                                                     Entropy      User
+                                                                                     Source       - HMAC DRBG V
+                                                                                                  value: E
+                                                                                                  - HMAC DRBG
+                                                                                                  Key value: E
+                                                                                                  - HMAC DRBG
+                                                                                                  Entropy Input: E
+                                                                                                  - HMAC DRBG
+                                                                                                  Seed: E
+                                                                                                  - SSH DH Shared
+                                                                                                  Secret: G,E
+                                                                                                  - SSH DH PRV:
+                                                                                                  G,E
+                                                                                                  - SSH DH PUB: G
+                                                                                                  - SSH-SEKs: G,E
+                                                                                                  - SSH DH Pub
+                                                                                                  (peer): E
+                                                                                                  - User-PW: E
+ MACsec      Initiate MACsec      ':fips' suffix   MACsec link      MACsec frames,   Key          Crypto Officer
+ connect     connection           in CLI           configuration,   Status           derivation   - MACsec ICK: E
+                                  prompt           CKN, CAK                          (MACsec)     - MACsec SAK:
+                                                                                     Key wrap     E,W,R
+                                                                                     (MACsec)     - MACsec KEK: E
+                                                                                     Enc/Dec
+                                                                                     (MACsec)
+                                                                                     Integrity
+                                                                                     (MACsec)
+ Console     Console monitoring   None             CLI Command      Status           None         Crypto Officer
+ access      and control (CLI)                                                                    - CO-PW: E
+                                                                                                  - Root-PW: E
+
+
+
+Juniper Networks                       Non-Proprietary FIPS 140-3 Security Policy                      Page 20 of 35
+ Name          Description             Indicator        Inputs            Outputs        Security    SSP Access
+                                                                                         Functions
+                                                                                                     User
+                                                                                                     - User-PW: E
+ Remote        Software initiated      None             CLI command       Status         None        Crypto Officer
+ reset         reset, performs self-                                                                 - HMAC DRBG V
+               tests on demand.                                                                      value: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Key value: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Entropy Input: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Seed: Z
+                                                                                                     - SSH DH Shared
+                                                                                                     Secret: Z
+                                                                                                     - SSH DH PRV: Z
+                                                                                                     - SSH DH PUB: Z
+                                                                                                     - SSH-SEKs: Z
+                                                                                                     - SSH DH Pub
+                                                                                                     (peer): Z
+                                                                                                     - MACsec SAK: Z
+                                                                                                     - MACsec KEK: Z
+                                                                                                     - MACsec ICK: Z
+ Local reset   Hardware reset or       None             Main power        Status         None        Unauthenticated
+               power cycle                              cycle                                        - HMAC DRBG V
+                                                                                                     value: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Key value: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Entropy Input: Z
+                                                                                                     - HMAC DRBG
+                                                                                                     Seed: Z
+                                                                                                     - SSH DH Shared
+                                                                                                     Secret: Z
+                                                                                                     - SSH DH PRV: Z
+                                                                                                     - SSH DH PUB: Z
+                                                                                                     - SSH-SEKs: Z
+                                                                                                     - SSH DH Pub
+                                                                                                     (peer): Z
+                                                                                                     - MACsec SAK: Z
+                                                                                                     - MACsec KEK: Z
+                                                                                                     - MACsec ICK: Z
+ Traffic       Traffic requiring no    None             Traffic in        Traffic out    None        Unauthenticated
+               cryptographic
+               services
+ Load          Loading of firmware     ':fips' suffix   CLI Command       Status         Verify      Crypto Officer
+ Image         image                   in CLI                                            image       - Root-CA: E
+                                       prompt                                                        - Package-CA: Z
+ Perform       On demand               None             Local or remote   Status         None        Crypto Officer
+ self-test     execution of all pre-                    reset                                        User
+               operational and                                                                       Unauthenticated
+               conditional
+               algorithm self-tests
+ Show          Show system             None             CLI command       Status         None        Crypto Officer
+ module        information                                                                           User
+ version       identifying module
+Table 17: Approved Services
+
+
+Juniper Networks                            Non-Proprietary FIPS 140-3 Security Policy                    Page 21 of 35
+4.4 Non-Approved Services
+
+The module does not offer any non-approved services.
+
+N/A for this module.
+
+
+4.5 External Software/Firmware Loaded
+
+The module includes a firmware load service that is used to install the Junos OS firmware image as part
+of installation of the module, as described in Section 11.1. The loaded firmware is a complete image
+replacement and constitutes an entirely new module and version of Junos OS which would require a
+separate FIPS 140-3 validation.
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+
+The cryptographic module implements a firmware integrity self-test that uses ECDSA P-256 with SHA2-
+256 to ensure the integrity of all Junos OS firmware components. The self-test is automatically run on
+power-up.
+
+5.2 Initiate on Demand
+
+The firmware integrity test can be run on demand by the module’s operator by power cycling the
+module.
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+
+Type of Operational Environment: Non-Modifiable
+
+The module consists of hardware containing a non-modifiable operational environment as per the FIPS
+140-3 definitions. It includes a firmware load service to support necessary updates. The loaded firmware
+is a complete image replacement and constitutes an entirely new module and version of Junos OS which
+would require a separate FIPS 140-3 validation.
+
+6.2 Configuration Settings and Restrictions
+
+There are no security rules, settings, or restrictions to the configuration of the operational environment
+beyond the initialization instructions to set the module in Approved mode.
+
+
+
+
+Juniper Networks                    Non-Proprietary FIPS 140-3 Security Policy                 Page 22 of 35
+7 Physical Security
+The module’s physical embodiment meets Level 1 Physical Security requirements. The module is
+completely enclosed in a rectangular nickel or clear zinc coated, cold rolled steel, plated steel and
+brushed aluminum enclosure. There are no ventilation holes, gaps, slits, cracks, slots, or crevices that
+would allow for any sort of observation of any component contained within the cryptographic boundary.
+
+ Mechanism                Inspection     Inspection
+                          Frequency      Guidance
+ Opaque metal enclosure   n/a            n/a
+Table 18: Mechanisms and Actions Required
+
+
+
+
+8 Non-Invasive Security
+This section is not applicable, as there are currently no approved non-invasive mitigation techniques
+specified in ISO/IEC 19790:2012.
+
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+
+The table below lists the areas within the module’s cryptographic boundary where SSPs can be stored.
+ Storage   Description                            Persistence
+ Area                                             Type
+ Name
+ RAM       Random Access Memory                   Dynamic
+ Flash     Internal flash memory storage drive    Static
+Table 19: Storage Areas
+
+
+
+9.2 SSP Input-Output Methods
+
+The table below lists the method used by the module for the input and output of SSPs.
+
+ Name                           From             To             Format      Distribution   Entry        SFI or
+                                                                Type        Type           Type         Algorithm
+ Entry via SSH                  Remote CO        RAM            Encrypted   Automated      Electronic   KTS (SSH)
+ Entry via console              Local CO         RAM            Plaintext   Manual         Electronic
+ Output via SSH                 RAM              Remote CO      Encrypted   Automated      Electronic   KTS (SSH)
+ Output via console             RAM              Local CO       Plaintext   Manual         Electronic
+ Entry as part of KAS           Remote peer      RAM            Plaintext   Automated      Electronic   Full KAS (SSH)
+ Output as part of KAS          RAM              Remote peer    Plaintext   Automated      Electronic   Full KAS (SSH)
+ Pre-loaded                     Manufacturer     Flash          Plaintext   Manual         Direct
+ MACsec Key Agreement           Remote           RAM            Encrypted   Automated      Electronic   Key wrap
+ Input                          device                                                                  (MACsec)
+ MACsec Key Agreement           RAM              Remote         Encrypted   Automated      Electronic   Key wrap
+ Output                                          device                                                 (MACsec)
+
+
+Juniper Networks                         Non-Proprietary FIPS 140-3 Security Policy                          Page 23 of 35
+Table 20: SSP Input-Output Methods
+
+
+
+9.3 SSP Zeroization Methods
+
+The table below describes the SSP zeroization methods employed by the module.
+ Zeroization        Description                                Rationale                               Operator Initiation
+ Method
+ Zeroize CLI        This command erases all data, including    This command erases all keys and        Yes, CO via invocation
+ command            all configuration information, returning   CSPS from storage. The forced           of zeroize CLI command.
+                    the module to its factory default state    power cycle also zeroizes SSPs in
+                    The system is then rebooted.               volatile memory.
+ Reset              Zeroization of SSPs in RAM via             RAM is volatile and all data is lost    Yes, both User and CO,
+                    invocation of local or remote reset        when power is taken off.                via invocation of Local
+                    service.                                   Zeroization is practically              Reset or Remote Reset
+                                                               instantaneous.                          services.
+ Explicit zeroize   Zeroization of SSPs in memory when no      Use of explicit zeroization function    No. The operator cannot
+ function           longer needed.                             destroys SSP information                directly initiate this
+                                                               immediately by overwriting              method.
+                                                               memory area with zeroes.
+Table 21: SSP Zeroization Methods
+
+
+The Zeroize CLI command method is detailed in section 11.2.3.
+
+The completion of zeroization is indicated implicitly. If the zeroization is initiated using a zeroization
+command or explicit delete command, completion of the command indicates that zeroization has
+successfully completed. If the zeroization is initiated by power cycling the module, then successful
+reboot of the module indicates that zeroization has completed successfully. In the case of zeroization
+initiated by session termination, SSPs are zeroized when the session terminates, and session termination
+is indicated in the log.
+
+9.4 SSPs
+
+All SSPs used by the module are described in this section.
+
+ Name          Description                   Size - Strength    Type -              Generated         Established    Used By
+                                                                Category            By                By
+ HMAC          A critical value of the       256 - 256          DRBG internal       DRBG                             DRBG
+ DRBG V        internal state of DRBG                           state - CSP         (Kernel)                         (Kernel)
+ value
+ HMAC          A critical value of the       256 - 256          DRB internal        DRBG                             DRBG
+ DRBG Key      internal state of DRBG                           state - CSP         (Kernel)                         (Kernel)
+ value
+ HMAC          A critical value of the       256 - 256          Entropy source      Entropy                          DRBG
+ DRBG          internal state of DRBG                           output - CSP        Source                           (Kernel)
+ Entropy       provided by entropy
+ Input         source
+ HMAC          Seed material used to         256 - 256          DRBG internal       DRBG                             DRBG
+ DRBG          seed or reseed the HMAC                          state - CSP         (Kernel)                         (Kernel)
+ Seed          DRBG
+
+
+
+
+Juniper Networks                           Non-Proprietary FIPS 140-3 Security Policy                               Page 24 of 35
+ Name         Description                   Size - Strength    Type -             Generated    Established    Used By
+                                                               Category           By           By
+ SSH DH       Shared DH value               256, 384, 521 -    DH shared                       KAS-SSC        KDF (SSH)
+ Shared       computed from the             128, 192, 256      value - CSP                     (SSH)
+ Secret       ephemeral DH key-pairs
+              as part of SSH and used
+              to derive session keys.
+ SSH PHK      SSH Private host key. 1st     2048, 256, 4096,   Asymmetric         KeyGen                      SigGen
+              time SSH is configured,       384, 521 - 112,    private key -      (SSH)                       (SSH)
+              the keys are generated.       128, 152, 192,     CSP
+                                            256
+ SSH PUB      SSH Public Host Key           2048, 256, 4096,   Asymmetric         KeyGen                      SigVer
+                                            384, 521 - 112,    public key - PSP   (SSH)                       (SSH)
+                                            128, 152, 192,
+                                            256
+ SSH DH       SSH KAS private key           256, 384, 521 -    Asymmetric         KAS KeyGen                  KAS-SSC
+ PRV                                        128, 192, 256      private key -      (SSH)                       (SSH)
+                                                               CSP                                            Full KAS
+                                                                                                              (SSH)
+ SSH DH       SSH KAS public key            256, 384, 521 -    Asymmetric         KAS KeyGen
+ PUB                                        128, 192, 256      public key - PSP   (SSH)
+ SSH DH       SSH KAS public key from       256, 384, 521 -    Asymmetric                                     KAS-SSC
+ Pub (peer)   peer                          128, 192, 256      public key - PSP                               (SSH)
+                                                                                                              Full KAS
+                                                                                                              (SSH)
+ SSH-SEKs     SSH Session Encryption        128, 192, 256 -    Symmetric key -                 KDF (SSH)      Enc/Dec
+              Keys                          128, 192, 256      CSP                             Full KAS       (SSH)
+                                                                                               (SSH)          MAC
+                                                                                                              (SSH)
+ CO-PW        Password used to              Min 10             Authentication                  KTS (SSH)      SHA
+              authenticate the CO.          characters - n/a   password - CSP                                 (LibMD)
+ Root-PW      Password used by CO to        Min 10             Authentication                  KTS (SSH)      SHA
+              authenticate as 'root'.       characters - n/a   password - CSP                                 (LibMD)
+ User-PW      Password used to              Min 10             Authentication                  KTS (SSH)      SHA
+              authenticate User             characters - n/a   password - CSP                                 (LibMD)
+ Auth-CO      SSH CO Authentication         2048, 4096, 256,   Asymmetric                      KTS (SSH)      SigVer
+ Pub          Public Key                    384, 521 - 112,    public key - PSP                               (SSH)
+                                            128, 152, 192,
+                                            256
+ Auth-User    SSH User Authentication       2048, 4096, 256,   Asymmetric                      KTS (SSH)      SigVer
+ Pub          Public Key                    384, 521 - 112,    public key - PSP                               (SSH)
+                                            128, 152, 192,
+                                            256
+ Root-CA      X.509 Certificate used to     256, 384 - 128,    Asymmetric                                     Verify
+              verify the validity of the    196                public key - PSP                               image
+              Juniper Package CA
+ Package-     X.509 Certificate used to     256 - 128          Asymmetric                                     Verify
+ CA           verify the validity the                          public key - PSP                               image
+              Juniper Image at software
+              load and also at runtime
+              for integrity.
+ MACsec       Externally generated pre-     32 (hex)           Symmetric key -
+ CAK          shared key entered when       characters for     CSP
+              MACsec static                 128-bit AES
+              connectivity association      keys, 64 (hex)
+                                            characters for
+
+
+Juniper Networks                           Non-Proprietary FIPS 140-3 Security Policy                        Page 25 of 35
+ Name        Description                    Size - Strength    Type -             Generated         Established    Used By
+                                                               Category           By                By
+             key (CAK) security mode        256-bit AES keys
+             is enabled.                    - 128, 256
+ MACsec      Externally generated pre-      64 characters -    Identifier - PSP
+ CKN         shared key used to             n/a
+             identify the CAK (64
+             characters)
+ MACsec      Security Association Key       128, 256 - 128,    Symmetric key -    Key               Key wrap       Enc/Dec
+ SAK         used to encrypt/decrypt        256                CSP                derivation        (MACsec)       (MACsec)
+             traffic for a given session                                          (MACsec)
+ MACsec      Key Encryption Key used        128, 256 - 128,    Symmetric key -    Key                              Key wrap
+ KEK         to transmit SAK to other       256                CSP                derivation                       (MACsec)
+             members of a MACsec                                                  (MACsec)
+             connectivity association
+ MACsec      Integrity Check Key used       128, 256 - 128,    Symmetric key -    Key                              Integrity
+ ICK         to verify the integrity and    256                CSP                derivation                       (MACsec)
+             authenticity of MPDUs.                                               (MACsec)
+Table 22: SSP Table 1
+
+
+ Name          Input -           Storage              Storage Duration                         Zeroization     Related
+               Output                                                                                          SSPs
+ HMAC                            RAM:Plaintext        Until updated by                         Zeroize CLI
+ DRBG V                                               HMAC_DRBG_Update()                       command
+ value                                                                                         Reset
+ HMAC                            RAM:Plaintext        Until updated by                         Zeroize CLI
+ DRBG Key                                             HMAC_DRBG_Update()                       command
+ value                                                                                         Reset
+ HMAC                            RAM:Plaintext        Until HMAC_Instantiate_Update()          Zeroize CLI
+ DRBG                                                 or HMAC_DRBG_Reseed() complete           command
+ Entropy                                                                                       Reset
+ Input
+ HMAC                            RAM:Plaintext        Until HMAC_Instantiate_Update() or       Zeroize CLI
+ DRBG Seed                                            HMAC_DRBG_Reseed() complete              command
+                                                                                               Reset
+ SSH DH                          RAM:Plaintext        Until SSH session termination            Zeroize CLI
+ Shared                                                                                        command
+ Secret                                                                                        Reset
+                                                                                               Explicit
+                                                                                               zeroize
+                                                                                               function
+ SSH PHK       Entry via SSH     RAM:Plaintext        Until SSH session termination            Zeroize CLI     SSH
+               Entry via         Flash:Plaintext      (RAM)                                    command         PUB:Paired
+               console                                                                                         With
+               Output via
+               SSH
+               Output via
+               console
+ SSH PUB       Entry via SSH     RAM:Plaintext                                                 Zeroize CLI     SSH
+               Entry via         Flash:Plaintext                                               command         PHK:Paired
+               console                                                                                         With
+               Output via
+               SSH
+               Output via
+               console
+
+
+Juniper Networks                           Non-Proprietary FIPS 140-3 Security Policy                             Page 26 of 35
+ Name          Input -          Storage            Storage Duration                  Zeroization   Related
+               Output                                                                              SSPs
+ SSH DH                         RAM:Plaintext      Until SSH session termination     Reset         SSH DH
+ PRV                                                                                 Explicit      PUB:Paired
+                                                                                     zeroize       With
+                                                                                     function
+ SSH DH        Output as part   RAM:Plaintext      Until SSH session termination     Reset         SSH DH
+ PUB           of KAS                                                                Explicit      PRV:Paired
+                                                                                     zeroize       With
+                                                                                     function
+ SSH DH        Entry as part    RAM:Plaintext      Until SSH session termination     Reset
+ Pub (peer)    of KAS                                                                Explicit
+                                                                                     zeroize
+                                                                                     function
+ SSH-SEKs                       RAM:Plaintext      Until SSH session termination     Reset
+                                                                                     Explicit
+                                                                                     zeroize
+                                                                                     function
+ CO-PW         Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+               Entry via        Flash:Plaintext                                      command
+               console
+ Root-PW       Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+               Entry via        Flash:Plaintext                                      command
+               console
+ User-PW       Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+               Entry via        Flash:Plaintext                                      command
+               console
+ Auth-CO       Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+ Pub           Entry via        Flash:Plaintext                                      command
+               console
+               Output via
+               SSH
+               Output via
+               console
+ Auth-User     Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+ Pub           Entry via        Flash:Plaintext                                      command
+               console
+               Output via
+               SSH
+               Output via
+               console
+ Root-CA       Pre-loaded       RAM:Plaintext                                        Zeroize CLI
+                                Flash:Plaintext                                      command
+ Package-CA    Pre-loaded       RAM:Plaintext                                        Zeroize CLI
+                                Flash:Plaintext                                      command
+ MACsec        Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+ CAK           Entry via        Flash:Obfuscated                                     command
+               console
+ MACsec        Entry via SSH    RAM:Plaintext                                        Zeroize CLI
+ CKN           Entry via        Flash:Obfuscated                                     command
+               console
+ MACsec        MACsec Key       RAM:Plaintext                                        Zeroize CLI
+ SAK           Agreement                                                             command
+               Input                                                                 Reset
+               MACsec Key
+
+
+
+
+Juniper Networks                        Non-Proprietary FIPS 140-3 Security Policy                  Page 27 of 35
+ Name           Input -        Storage                Storage Duration                    Zeroization       Related
+                Output                                                                                      SSPs
+                Agreement
+                Output
+ MACsec                        RAM:Plaintext                                              Zeroize CLI
+ KEK                                                                                      command
+                                                                                          Reset
+ MACsec ICK                    RAM:Plaintext                                              Zeroize CLI
+                                                                                          command
+                                                                                          Reset
+Table 23: SSP Table 2
+
+
+
+
+9.5 Transitions
+
+The following transitions apply to algorithms used by this module:
+
+SHA-1: The SHA-1 hash algorithm will be non-Approved for cryptographic protection purposes after
+December 31, 2030.
+
+10 Self-Tests
+On power up or reset, the module performs the pre-operational self-tests and the indicated conditional
+cryptographic algorithm self-tests described below. All KATs must be completed successfully prior to
+any other use of cryptography by the module. The CASTs for algorithms utilized in the pre-operational
+Firmware integrity check are performed prior to the Firmware integrity check.
+
+10.1 Pre-Operational Self-Tests
+
+ Algorithm      Test          Test        Test          Indicator    Details
+ or Test        Properties    Method      Type
+ Firmware       ECDSA P-      KAT         SW/FW         PASS/FAIL    ECDSA verify
+ integrity      256 with                  Integrity     console
+ check          SHA2-256                                output
+ Critical       SHA2-256      KAT         Critical      PASS/FAIL    Checks that any file that is executed is registered in
+ functions                                Function      console      a manifest of executable files that comes with the
+ test                                                   output       firmware. Test verifies the integrity of the
+                                                                     operational environment is being enforced by
+                                                                     having the kernel attempt to run a specific
+                                                                     executable file that does not contain a hash in the
+                                                                     manifest file, verifying it cannot be executed.
+Table 24: Pre-Operational Self-Tests
+
+
+
+10.2 Conditional Self-Tests
+
+ Algorithm or Test           Test              Test        Test      Indicator           Details             Conditions
+                             Properties        Method      Type
+ Entropy Source (start-up)   n/a               APT,        CAST      PASS/FAIL           Start-up            On-power up
+                                               RCT                   console output
+
+
+Juniper Networks                       Non-Proprietary FIPS 140-3 Security Policy                             Page 28 of 35
+ Algorithm or Test          Test             Test       Test       Indicator          Details           Conditions
+                            Properties       Method     Type
+ Entropy Source             n/a              APT,       CAST       Console output     Continuous        Data output
+ (continuous)                                RCT                   / output of                          from noise
+                                                                   entropy source                       source
+ AES-CBC (A4301) Encrypt    Key size: 128,   KAT        CAST       PASS/FAIL          Encrypt           On power-up
+                            192, 256                               console output
+ AES-CBC (A4301) Decrypt    Key size: 128,   KAT        CAST       PASS/FAIL          Decrypt           On power-up
+                            192, 256                               console output
+ HMAC-SHA-1 (A4301)         Key size: 160    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+ HMAC-SHA2-256 (A4301)      Key size: 256    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+ HMAC-SHA2-384 (A4301)      Key size: 384    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+ HMAC-SHA2-512 (A4301)      Key size: 512    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+ RSA SigGen (FIPS186-5)     RSA 2048 w/      KAT        CAST       PASS/FAIL          Sign              On power-up
+ (A4301)                    SHA2-256,                              console output
+                            RSA 4096 w/
+                            SHA2-256
+ RSA SigVer (FIPS186-5)     RSA 2048 w/      KAT        CAST       PASS/FAIL          Verify            On power-up
+ (A4301)                    SHA2-256,                              console output
+                            RSA 4096 w/
+                            SHA2-256
+ ECDSA SigGen (FIPS186-4)   P-256, P-384,    KAT        CAST       PASS/FAIL          Sign              On power-up
+ (A4301)                    P-521                                  console output
+ ECDSA SigVer (FIPS186-4)   P-256, P-384,    KAT        CAST       PASS/FAIL          Verify            On power-up
+ (A4301)                    P-521                                  console output
+ KAS-ECC-SSC Sp800-         P-256, P-384,    KAT        CAST       PASS/FAIL          ECDH              On power-up
+ 56Ar3 (A4301)              P-521                                  console output     Computation
+ KDF SSH (A4301)            SHA-1, SHA2-     KAT        CAST       PASS/FAIL          Key derivation    On power-up
+                            256, SHA2-                             console output     Computation
+                            384
+ RSA KeyGen (FIPS186-5)     n/a              PCT        PCT        Returned           Generation and    On key
+ (A4301)                                                           key/transition     Verification of   generation
+                                                                   soft error state   signature
+ ECDSA KeyGen (FIPS186-     n/a              PCT        PCT        Returned           Generation and    On key
+ 4) (A4301)                                                        key/transition     Verification of   generation
+                                                                   soft error state   signature
+ ECDSA SigVer (FIPS186-4)   P-256            KAT        CAST       PASS/FAIL          Verify            On power-up
+ (A4302)                                                           console output
+ FW Load                    ECDSA P-256      KAT        SW/FW      PASS/FAIL          Verification of   On FW load
+                            with SHA2-                  Load       console output     ECDSA
+                            256                                                       signature on
+                                                                                      FW
+ HMAC DRBG (A4303)          256, SHA2-       KAT        CAST       PASS/FAIL          Health-tests      On power-up
+                            256                                    console output     initialise, re-
+                                                                                      seed, and
+                                                                                      generate
+ HMAC-SHA-1 (A4303)         Key size: 160    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+ HMAC-SHA2-256 (A4303)      Key size: 256    KAT        CAST       PASS/FAIL          MAC               On power-up
+                                                                   console output
+
+
+
+
+Juniper Networks                      Non-Proprietary FIPS 140-3 Security Policy                         Page 29 of 35
+ Algorithm or Test                 Test             Test         Test     Indicator          Details          Conditions
+                                   Properties       Method       Type
+ SHA2-384 (A4303)                  n/a              KAT          CAST     PASS/FAIL          Hash             On power-up
+                                                                          console output
+ SHA2-512 (A4303)                  n/a              KAT          CAST     PASS/FAIL          Hash             On power-up
+                                                                          console output
+ HMAC-SHA2-256 (A4306)             Key size: 256    KAT          CAST     PASS/FAIL          MAC              On power-up
+                                                                          console output
+ HMAC-SHA-1 (A4306)                Key size: 256    KAT          CAST     PASS/FAIL          MAC              On power-up
+                                                                          console output
+ SHA2-512 (A4306)                  n/a              KAT          CAST     PASS/FAIL          Hash             On power-up
+                                                                          console output
+ KDF SP800-108 (A4304)             Key size: 128    KAT          CAST     PASS/FAIL          Derive           On power-up
+                                                                          console output
+ AES-KW (A4304) Wrap               Key size: 128,   KAT          CAST     PASS/FAIL          Wrap             On power-up
+                                   192, 256                               console output
+ AES-KW (A4304) Unwrap             Key size: 128,   KAT          CAST     PASS/FAIL          Unwrap           On power-up
+                                   192, 256                               console output
+ AES-CMAC (A4304)                  Key size: 128,   KAT          CAST     PASS/FAIL          MAC              On power-up
+                                   256                                    console output
+ AES-GCM                           128,256          KAT          CAST     Internal status:   Encrypt          On power-up
+ (AES4550/C1869/A4664)                                                    power-up
+ Encrypt                                                                  continues or
+                                                                          errors
+ AES-GCM                           128,256          KAT          CAST     Internal status:   Decrypt          On power-up
+ (AES4550/C1869/A4664)                                                    power-up
+ Decrypt                                                                  continues or
+                                                                          errors
+Table 25: Conditional Self-Tests
+
+
+
+
+10.3 Periodic Self-Test Information
+
+The module does not implement periodic self-testing.
+
+ Algorithm or Test           Test Method              Test Type               Period                   Periodic Method
+ Firmware integrity          KAT                      SW/FW Integrity         On demand                Manually
+ check
+ Critical functions test     KAT                      Critical Function       On demand                Manually
+Table 26: Pre-Operational Periodic Information
+
+
+ Algorithm or Test             Test Method                Test Type             Period                 Periodic Method
+ Entropy Source (start-up)     APT, RCT                   CAST                  On demand              Manually
+ Entropy Source                APT, RCT                   CAST                  Continuous             Automatically
+ (continuous)
+ AES-CBC (A4301)               KAT                        CAST                  On Demand              Manually
+ Encrypt
+ AES-CBC (A4301)               KAT                        CAST                  On Demand              Manually
+ Decrypt
+ HMAC-SHA-1 (A4301)            KAT                        CAST                  On Demand              Manually
+
+
+
+Juniper Networks                             Non-Proprietary FIPS 140-3 Security Policy                           Page 30 of 35
+ Algorithm or Test         Test Method           Test Type               Period                 Periodic Method
+ HMAC-SHA2-256             KAT                   CAST                    On Demand              Manually
+ (A4301)
+ HMAC-SHA2-384             KAT                   CAST                    On Demand              Manually
+ (A4301)
+ HMAC-SHA2-512             KAT                   CAST                    On Demand              Manually
+ (A4301)
+ RSA SigGen (FIPS186-5)    KAT                   CAST                    On Demand              Manually
+ (A4301)
+ RSA SigVer (FIPS186-5)    KAT                   CAST                    On Demand              Manually
+ (A4301)
+ ECDSA SigGen (FIPS186-    KAT                   CAST                    On Demand              Manually
+ 4) (A4301)
+ ECDSA SigVer (FIPS186-    KAT                   CAST                    On Demand              Manually
+ 4) (A4301)
+ KAS-ECC-SSC Sp800-        KAT                   CAST                    On Demand              Manually
+ 56Ar3 (A4301)
+ KDF SSH (A4301)           KAT                   CAST                    On Demand              Manually
+ RSA KeyGen (FIPS186-5)    PCT                   PCT                     On trigger condition   Automatic
+ (A4301)
+ ECDSA KeyGen              PCT                   PCT                     On trigger condition   Automatic
+ (FIPS186-4) (A4301)
+ ECDSA SigVer (FIPS186-    KAT                   CAST                    On Demand              Manually
+ 4) (A4302)
+ FW Load                   KAT                   SW/FW Load              On FW load request     Automatic
+ HMAC DRBG (A4303)         KAT                   CAST                    On Demand              Manually
+ HMAC-SHA-1 (A4303)        KAT                   CAST                    On Demand              Manually
+ HMAC-SHA2-256             KAT                   CAST                    On Demand              Manually
+ (A4303)
+ SHA2-384 (A4303)          KAT                   CAST                    On Demand              Manually
+ SHA2-512 (A4303)          KAT                   CAST                    On Demand              Manually
+ HMAC-SHA2-256             KAT                   CAST                    On Demand              Manually
+ (A4306)
+ HMAC-SHA-1 (A4306)        KAT                   CAST                    On Demand              Manually
+ SHA2-512 (A4306)          KAT                   CAST                    On Demand              Manually
+ KDF SP800-108 (A4304)     KAT                   CAST                    On Demand              Manually
+ AES-KW (A4304) Wrap       KAT                   CAST                    On Demand              Manually
+ AES-KW (A4304) Unwrap     KAT                   CAST                    On Demand              Manually
+ AES-CMAC (A4304)          KAT                   CAST                    On Demand              Manually
+ AES-GCM                   KAT                   CAST                    On Demand              Manually
+ (AES4550/C1869/A4664)
+ Encrypt
+ AES-GCM                   KAT                   CAST                    On Demand              Manually
+ (AES4550/C1869/A4664)
+ Decrypt
+Table 27: Conditional Periodic Information
+
+
+
+
+10.4 Error States
+
+
+
+Juniper Networks                      Non-Proprietary FIPS 140-3 Security Policy                           Page 31 of 35
+ Name          Description                                          Conditions              Recovery Method        Indicator
+ Critical      The cryptographic module ceases to perform           On any power-up         Power cycle            Console
+ Failure       cryptographic operations, inhibits all data          self-test or PCT                               status
+ State         output, and provides status of the error via         failure                                        indicator
+               syslog messages and console status output
+ Soft          A non-critical self-test failure occurs, causing a   Firmware load test or   The module             Console
+ Error         failure of the triggering operation                  continuous entropy      processes the error,   displays
+ State                                                              health test failure     and resumes normal     error
+                                                                                            operation
+Table 28: Error States
+
+
+The module enters critical error state upon failure of a self-test, causing the kernel to ‘panic‘ and all
+execution to halt. The only way to exit from this state is to reboot the module, which causes the self-
+tests to be repeated and pass successfully before the corresponding algorithms are usable.
+
+10.5 Operator Initiation of Self-Tests
+
+Self–tests that are performed at power-up are available on demand by power cycling the module.
+
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+
+The module must be correctly installed and configured to enter a FIPS compliant state and operate in
+the Approved mode. The required procedures are as follows:
+
+    1. Install the Junos OS firmware image - the procedure is detailed in section 11.2.1
+    2. Configure device for the Approved mode - the procedure is section 11.2.2.
+
+To continue using the module in a FIPS compliant way, the Module Operation Rules in section 11.4.2
+must be followed.
+
+11.2 Administrator Guidance
+
+11.2.1 Installing the Junos OS firmware image
+
+    1. Download the validated firmware image from
+       https://www.juniper.net/support/downloads/junos.html. Log in to the Juniper Networks
+       authentication system using the username (generally your e-mail address) and password supplied
+       by Juniper Networks representatives. Select the validated firmware image. Download the
+       firmware image to a local host or to an internal software distribution site.
+
+            The cryptographic module devices use the following firmware images
+             MX304        junos-vmhost-install-mx-x86-64-22.4R2.8.tgz
+             EX4100       junos-install-ex-arm-64-22.4R2.8.tgz
+
+
+
+Juniper Networks                             Non-Proprietary FIPS 140-3 Security Policy                            Page 32 of 35
+    2. Connect to the console port on the device from your management device, and log in to the
+       Junos OS CLI.
+    3. Install the new package on the device (package may be a local file copied to the device, or a file
+       on a remote server):
+        MX304          user@host> request vmhost software add <package>
+        EX4100         user@host> request system software add <package>
+    4. Reboot the device to load the installation:
+        MX304        user@host> request vmhost reboot
+        EX4100       user@host> request system reboot
+    5. After the reboot has completed, log in and use the show version command to verify that the new
+       version of the software is successfully installed.
+                       user@host> request vmhost reboot
+
+11.2.2 Configure the device for the Approved mode
+
+To configure the device for the Approved mode:
+
+    1. Zeroize the device to delete all CSPs before entering the Approved mode.
+        MX304         root@host# request vmhost zeroize no-forwarding
+        EX4100        root@host# request system zeroize
+    2. After the device comes up, login using username “root” and password blank.
+    3. Configure root authentication with password at least 10 characters or more.
+        MX304          root@host# set vmhost root-authentication plain-text-password
+        EX4100         root@host# set system root-authentication plain-text-password
+    4. Load configuration onto device and commit new configuration.
+       NOTE: SSH key-exchange configuration must not include ‘dh-group14-sha1’. It is not approved for
+       this module.
+    5. Configure crypto-officer and login with crypto-officer credentials.
+    6. For MX304 only, the “fips-mode” and “jpfe-fips” are optional packages needed for enabling FIPS.
+       These packages are part of Junos OS software. To enable these packages, use below commands:
+        MX304         crypto-officer@host> request system software add optional://fips-mode
+                      crypto-officer@host> request system software add optional://jpfe-fips
+    7. Set the fips level to 1.
+        MX304           crypto-officer@host# set system fips chassis level 1
+        EX4100          crypto-officer@host# set system fips level 1
+    8. Commit and reboot the device.
+                     crypto-officer@host# commit
+                     crypto-officer@host# run request system reboot
+
+11.2.3 Zeroizing the System
+
+
+
+
+Juniper Networks                     Non-Proprietary FIPS 140-3 Security Policy                Page 33 of 35
+CAUTION: Perform system zeroization with care. After the zeroization process is complete, no data is
+left on the device. The device is returned to the factory default state, equivalent to a fresh installation of
+the firmware, without any configured users or configuration files.
+
+After zeroizing the system, the module is no longer in a FIPS compliant state. (Installation and
+configuration as per section 11.1 is required to enter the FIPS compliant state and enable the Approved
+mode of operation).
+
+NOTE: The Crypto-Officer must retain control of the module while zeroization is in progress.
+
+To zeroize the device:
+
+    1. Login to the device as Crypto Officer and from CLI, enter
+        MX304         crypto-officer@host# request vmhost zeroize no-forwarding
+        EX4100        crypto-officer@host# request system zeroize
+                      warning: System will be rebooted and may not boot without configuration
+                      Erase all data, including configuration and log files? [yes, no] (no)
+
+    2. To initiate the zeroization process, type yes at the prompt:
+                        Erase all data, including configuration and log files? [yes, no] (no)
+                        yes
+
+11.3 Non-Administrator Guidance
+
+No specific non-administrator guidance is required to operate the module.
+
+11.4 Design and Rules
+11.4.1 Module Design Rules
+
+The module design implements the following security rules:
+   1. The module clears previous authentications on power cycle.
+   2. Power up self-tests do not require any operator action.
+   3. Data output is inhibited during key generation, self-tests, zeroization, and error states.
+   4. Status information does not contain CSPs or sensitive data that if misused could lead to a
+      compromise of the module.
+   5. There are no restrictions on which SSPs are zeroized by the zeroization service.
+   6. The module does not support a maintenance interface or role.
+   7. The module does not output intermediate key values.
+   8. The module requires two independent internal actions to be performed prior to outputting
+      plaintext CSPs.
+   9. If the module loses power and then it is restored, then a new key shall be established for use
+      with the AES GCM encryption/decryption processes.
+
+11.4.2 Module Operation Rules
+
+The following are requirements for compliant usage of the module:
+   1. The cryptographic officer must retain control of the module while zeroization is in process.
+
+
+Juniper Networks                       Non-Proprietary FIPS 140-3 Security Policy                 Page 34 of 35
+    2. The cryptographic officer shall verify that the firmware image to be loaded on the module is a
+        FIPS validated image.
+    3. Before pushing the factory reset button on the device, the cryptographic officer shall perform
+        the zeroize command as described in section 11.2.3.
+    4. The password minimum-length must be configured to be at least 10.
+    5. Virtual Chassis features must not be configured.
+    6. Dynamic CAK mode shall not be configured for MACsec.
+    7. Only the AES-GCM cipher suites shall be configured for MACsec.
+    8. The module shall only be used with CMVP-validated modules when supporting the MACsec
+        protocol for providing Peer, Authenticator functionality.
+    9. The link between the Peer and Authenticator, used in the MACsec communication, shall be
+        secure to prevent the possibility for an attacker to introduce foreign equipment into the local
+        area network.
+    10. The module shall not be configured to use a radius server and the radius server capability shall
+        be disabled.
+    11. SSH key-exchange must not be configured to include ‘dh-group14-sha1’.
+
+
+11.5 Maintenance Requirements
+
+No special maintenance requirements are required.
+
+11.6 End of Life
+
+When disposing of the cryptographic module, the cryptographic officer shall perform the zeroize
+command as described in Section 11.2.3.
+
+
+12 Mitigation of Other Attacks
+The module does not implement mechanisms to mitigate other attacks beyond what is described in this
+security policy.
+
+
+
+
+Juniper Networks                    Non-Proprietary FIPS 140-3 Security Policy                 Page 35 of 35
+

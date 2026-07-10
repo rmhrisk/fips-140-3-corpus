@@ -1,0 +1,2521 @@
+                       Red Hat, Inc
+
+Red Hat Enterprise Linux 9 NSS Cryptographic Module
+
+     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                          Prepared by:
+
+              atsec information security corporation
+
+               4516 Seton Center Pkwy, Suite 250
+
+                        Austin, TX 78759
+
+                            Page 1 of 62
+www.atsec.com
+
+
+
+
+  Page 2 of 62
+Table of Contents
+1 – General ............................................................................................................................................................ 7
+    1.1 Overview ............................................................................................................................................................7
+    1.2 Security Levels....................................................................................................................................................7
+2 – Cryptographic Module Specification ............................................................................................................... 8
+    2.1 Description .........................................................................................................................................................8
+    2.2 Tested and Vendor Affirmed Module Version and Identification ..................................................................9
+    2.3 Excluded Components ..................................................................................................................................... 11
+    2.4 Modes of Operation.......................................................................................................................................... 11
+    2.5 Algorithms ........................................................................................................................................................ 11
+    2.6 Security Function Implementations ................................................................................................................ 17
+    2.7         Algorithm Specific Information ............................................................................................................... 20
+        2.7.1           AES GCM IV..................................................................................................................................... 20
+
+        2.7.2           Key Derivation using SP 800-132 PBKDF2 ..................................................................................... 21
+
+        2.7.3           SP 800-56Ar3 Assurances ................................................................................................................ 22
+
+        2.7.4           RSA Approved Modulus Size ........................................................................................................... 22
+
+        2.7.5           Legacy Use ........................................................................................................................................ 22
+
+    2.8 RBG and Entropy ............................................................................................................................................. 22
+    2.9 Key Generation ................................................................................................................................................ 23
+    2.10 Key Establishment .......................................................................................................................................... 24
+    2.11 Industry Protocols .......................................................................................................................................... 24
+3 Cryptographic Module Interfaces ..................................................................................................................... 26
+    3.1 Ports and Interfaces.......................................................................................................................................... 26
+4 Roles, Services, and Authentication ................................................................................................................. 27
+    4.1 Authentication Methods .................................................................................................................................. 27
+    4.2 Roles.................................................................................................................................................................. 27
+    4.3 Approved Services ............................................................................................................................................ 27
+    4.4 Non-Approved Services ................................................................................................................................... 33
+    4.5 External Software/Firmware Loaded ............................................................................................................... 35
+5 Software/Firmware Security ............................................................................................................................. 36
+    5.1 Integrity Techniques ........................................................................................................................................ 36
+    5.2 Initiate on Demand .......................................................................................................................................... 36
+6 Operational Environment ................................................................................................................................ 37
+
+                                                                                 Page 3 of 62
+   6.1 Operational Environment Type and Requirements ....................................................................................... 37
+   6.2 Configuration Settings and Restrictions .......................................................................................................... 37
+   6.3 Additional Information .................................................................................................................................... 37
+7 Physical Security .............................................................................................................................................. 38
+8 Non-Invasive Security ...................................................................................................................................... 39
+9 Sensitive Security Parameters Management ..................................................................................................... 40
+   9.1 Storage Areas .................................................................................................................................................... 40
+   9.2 SSP Input-Output Methods ............................................................................................................................. 40
+   9.3 SSP Zeroization Methods ................................................................................................................................. 41
+   9.4 SSPs ................................................................................................................................................................... 41
+   9.5 Transitions ........................................................................................................................................................ 47
+10 Self-Tests ........................................................................................................................................................ 48
+   10.1 Pre-Operational Self-Tests ............................................................................................................................. 48
+   10.2 Conditional Self-Tests .................................................................................................................................... 48
+   10.3 Periodic Self-Test Information ...................................................................................................................... 55
+   10.4 Error States ..................................................................................................................................................... 58
+   10.5 Operator Initiation of Self-Tests .................................................................................................................... 58
+11 Life-Cycle Assurance ...................................................................................................................................... 59
+   11.1 Installation, Initialization, and Startup Procedures ...................................................................................... 59
+   11.2 Administrator Guidance ................................................................................................................................ 59
+   11.3 Non-Administrator Guidance ........................................................................................................................ 59
+   11.4 Design and Rules ............................................................................................................................................ 60
+   11.5 Maintenance Requirements ........................................................................................................................... 60
+   11.6 End of Life ...................................................................................................................................................... 60
+12 Mitigation of Other Attacks ........................................................................................................................... 61
+   12.1 Attack List....................................................................................................................................................... 61
+
+
+
+
+                                                                                Page 4 of 62
+List of Tables
+Table 1: Security Levels ................................................................................................ Error! Bookmark not defined.
+Table 2: Tested Module Identification – Hardware .................................................... Error! Bookmark not defined.
+Table 3: Tested Module Identification – Software/Firmware/Hybrid (Executable Code Sets) Error! Bookmark not
+defined.
+Table 4: Tested Module Identification – Hybrid Disjoint Hardware ......................... Error! Bookmark not defined.
+Table 5: Tested Operational Environments - Software, Firmware, Hybrid .............. Error! Bookmark not defined.
+Table 6: Vendor Affirmed Operational Environments - Software, Firmware, Hybrid ............ Error! Bookmark not
+defined.
+Table 7: Modes List and Description ........................................................................... Error! Bookmark not defined.
+Table 8: Approved Algorithms ..................................................................................... Error! Bookmark not defined.
+Table 9: Vendor Affirmed Algorithms ........................................................................ Error! Bookmark not defined.
+Table 10: Non-Approved, Allowed Algorithms .......................................................... Error! Bookmark not defined.
+Table 11: Non-Approved, Allowed Algorithms with No Security Claimed .............. Error! Bookmark not defined.
+Table 12: Non-Approved, Not Allowed Algorithms ................................................... Error! Bookmark not defined.
+Table 13: Security Function Implementations ............................................................ Error! Bookmark not defined.
+Table 14: Entropy Certificates ..................................................................................... Error! Bookmark not defined.
+Table 15: Entropy Sources ............................................................................................ Error! Bookmark not defined.
+Table 16: Key Generation ............................................................................................. Error! Bookmark not defined.
+Table 17: Key Agreement ............................................................................................. Error! Bookmark not defined.
+Table 18: Key Transport ............................................................................................... Error! Bookmark not defined.
+Table 19: Ports and Interfaces ...................................................................................... Error! Bookmark not defined.
+Table 20: Authentication Methods .............................................................................. Error! Bookmark not defined.
+Table 21: Roles .............................................................................................................. Error! Bookmark not defined.
+Table 22: Approved Services ........................................................................................ Error! Bookmark not defined.
+Table 23: Non-Approved Services ............................................................................... Error! Bookmark not defined.
+Table 24: Mechanisms and Actions Required ............................................................. Error! Bookmark not defined.
+Table 25: EFP/EFT Information ................................................................................... Error! Bookmark not defined.
+Table 26: Hardness Testing Temperatures .................................................................. Error! Bookmark not defined.
+Table 27: Storage Areas ................................................................................................ Error! Bookmark not defined.
+Table 28: SSP Input-Output ......................................................................................... Error! Bookmark not defined.
+Table 29: SSP Zeroization Methods ............................................................................. Error! Bookmark not defined.
+Table 30: SSP Information First ................................................................................... Error! Bookmark not defined.
+Table 31: SSP Information Second ............................................................................... Error! Bookmark not defined.
+Table 32: Pre-Operational Self-Tests ........................................................................... Error! Bookmark not defined.
+Table 33: Conditional Self-Tests .................................................................................. Error! Bookmark not defined.
+Table 34: Pre-Operational Periodic Information ........................................................ Error! Bookmark not defined.
+Table 35: Conditional Periodic Information ............................................................... Error! Bookmark not defined.
+Table 36: Error States ................................................................................................... Error! Bookmark not defined.
+
+
+                                                                      Page 5 of 62
+Page 6 of 62
+List of Figures
+Figure 1: Block Diagram ...............................................................................................................................................9
+
+
+
+
+                                                                            Page 7 of 62
+1 – General
+
+1.1 Overview
+
+This document is the non-proprietary FIPS 140-3 Security Policy for version 3.90.0-4408e3bb8a34af3a of the
+Red Hat Enterprise Linux 9 NSS Cryptographic Module. It contains the security rules under which the module
+must operate and describes how this module meets the requirements as specified in FIPS PUB 140-3 (Federal
+Information Processing Standards Publication 140-3) for an overall Security Level 1 module.
+This Non-Proprietary Security Policy may be reproduced and distributed, but only whole and intact and
+including this notice. Other documentation is proprietary to their authors.
+
+
+1.2 Security Levels
+
+ Section               Title                                            Security Level
+
+ 1                     General                                          1
+
+ 2                     Cryptographic module specification               1
+
+ 3                     Cryptographic module interfaces                  1
+
+ 4                     Roles, services, and authentication              1
+
+ 5                     Software/Firmware security                       1
+
+ 6                     Operational environment                          1
+
+ 7                     Physical security                                N/A
+
+ 8                     Non-invasive security                            N/A
+
+ 9                     Sensitive security parameter management          1
+
+ 10                    Self-tests                                       1
+
+ 11                    Life-cycle assurance                             1
+
+ 12                    Mitigation of other attacks                      1
+
+                       Overall Level                                    1
+
+Table 1: Security Levels
+
+
+
+
+                                                         Page 8 of 62
+2 – Cryptographic Module Specification
+
+2.1 Description
+
+Purpose and Use:
+The Red Hat Enterprise Linux 9 NSS Cryptographic Module (hereafter referred to as “the module”) is defined as
+a software module in a multi-chip standalone embodiment. It provides a C language application program
+interface (API) designed to support cross-platform development of security-enabled client and server
+applications. Applications built with NSS can support SSLv3, TLS, IKEv2, PKCS#5, PKCS#7, PKCS#11,
+PKCS#12, S/MIME, X.509 v3 certificates, and other security standards supporting FIPS 140-3 validated
+cryptographic algorithms. It combines a vertical stack of Linux components intended to limit the external
+interface each separate component may provide.
+
+
+Module Type: Software
+
+
+Module Embodiment: MultiChipStand
+
+
+Cryptographic Boundary:
+The cryptographic boundary consists only of the Softoken and Freebl libraries along with their associated
+integrity check values as listed in Section 2.2. If any other NSS API outside of these two libraries is invoked, the
+user is not interacting with the module specified in this Security Policy.
+
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The TOEPP of the module is defined as the general-purpose computer on which the module is installed.
+
+
+
+
+                                                     Page 9 of 62
+Figure 1: Block Diagram
+
+
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+
+Tested Module Identification – Hardware:
+N/A for this module.
+
+
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+
+ Package or File Name        Software/ Firmware           Features                  Integrity Test
+                             Version
+
+ libsoftokn3.so,             3.90.0-4408e3bb8a34af3a      N/A                       HMAC-SHA-256
+ libfreeblpriv3.so on Dell
+ PowerEdge
+
+ libsoftokn3.so,             3.90.0-4408e3bb8a34af3a      N/A                       HMAC-SHA-256
+ libfreeblpriv3.so on IBM
+ 9080-HEX
+
+
+
+
+                                                  Page 10 of 62
+ Package or File Name              Software/ Firmware                Features                      Integrity Test
+                                   Version
+
+ libsoftokn3.so,                   3.90.0-4408e3bb8a34af3a           N/A                           HMAC-SHA-256
+ libfreeblpriv3.so on IBM
+ z16 3931-A01
+
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+
+Tested Module Identification – Hybrid Disjoint Hardware:
+N/A for this module.
+
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+
+ Operating            Hardware             Processors               PAA/PAI       Hypervisor or Host    Version(s)
+ System               Platform                                                    OS
+
+ Red Hat              Dell                 Intel Cascade            Yes           N/A                   3.90.0-
+ Enterprise           PowerEdge            Lake Xeon Silver                                             4408e3bb8a34af3a
+ Linux 9              R440                 4216
+
+ Red Hat              Dell                 Intel Cascade            No            N/A                   3.90.0-
+ Enterprise           PowerEdge            Lake Xeon Silver                                             4408e3bb8a34af3a
+ Linux 9              R440                 4216
+
+ Red Hat              IBM 9080-            IBM POWER10              Yes           PowerVM               3.90.0-
+ Enterprise           HEX                                                         FW1040.00 with        4408e3bb8a34af3a
+ Linux 9                                                                          VIOS 3.1.3.00
+
+ Red Hat              IBM 9080-            IBM POWER10              No            PowerVM               3.90.0-
+ Enterprise           HEX                                                         FW1040.00 with        4408e3bb8a34af3a
+ Linux 9                                                                          VIOS 3.1.3.00
+
+ Red Hat              IBM z16              IBM z16                  Yes           N/A                   3.90.0-
+ Enterprise           3931-A01                                                                          4408e3bb8a34af3a
+ Linux 9
+
+ Red Hat              IBM z16              IBM z16                  No            N/A                   3.90.0-
+ Enterprise           3931-A01                                                                          4408e3bb8a34af3a
+ Linux 9
+
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+
+
+
+
+                                                             Page 11 of 62
+ Operating System                     Hardware Platform
+
+ Red Hat Enterprise Linux 9           Intel(R) Xeon(R) E5
+
+Table 4: Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid
+
+CMVP makes no statement as to the correct operation of the module or the security strengths of the generated
+keys when so ported if the specific operational environment is not listed on the validation certificate.
+
+
+2.3 Excluded Components
+
+There are no components within the cryptographic boundary excluded from the FIPS 140-3 requirements.
+
+
+2.4 Modes of Operation
+
+Modes List and Description:
+
+ Mode Name          Description                                           Type       Status Indicator
+
+ Approved           Automatically entered whenever an                     Approved   Equivalent to the indicator of
+                    approved service is requested.                                   the requested service.
+
+ Non-               Automatically entered whenever a non-                 Non-       Equivalent to the indicator of
+ Approved           approved service is requested.                        Approved   the requested service.
+
+Table 5: Modes List and Description
+
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed on start-up, the
+module automatically transitions to the approved mode. No operator intervention is required to reach this
+point.
+
+
+Mode Change Instructions and Status:
+The module automatically switches between the approved and non-approved modes depending on the services
+requested by the operator. The status indicator of the mode of operation is equivalent to the indicator of the
+service that was requested.
+
+
+Degraded Mode Description:
+The module does not implement a degraded mode of operation.
+
+
+2.5 Algorithms
+
+Approved Algorithms:
+
+
+
+
+                                                          Page 12 of 62
+Algorithm     CAVP    Properties                             Reference
+              Cert
+
+AES-CBC       A4987   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-CBC       A4994   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-CBC-CS1   A4992   Direction - decrypt, encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-CMAC      A4989   Direction - Generation, Verification   SP 800-38B
+                      Key Length - 128, 192, 256
+
+AES-CTR       A4987   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-CTR       A4994   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-ECB       A4987   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-ECB       A4994   Direction - Decrypt, Encrypt           SP 800-38A
+                      Key Length - 128, 192, 256
+
+AES-GCM       A4987   Direction - Decrypt, Encrypt           SP 800-38D
+                      IV Generation - External, Internal
+                      IV Generation Mode - 8.2.1, 8.2.2
+                      Key Length - 128, 192, 256
+
+AES-GCM       A4994   Direction - Decrypt, Encrypt           SP 800-38D
+                      IV Generation - External, Internal
+                      IV Generation Mode - 8.2.1, 8.2.2
+                      Key Length - 128, 192, 256
+
+AES-GCM       A5559   Direction - Decrypt, Encrypt           SP 800-38D
+                      IV Generation - External, Internal
+                      Key Length - 128, 192, 256
+                      IV Generation Mode - 8.2.1
+
+AES-KW        A4988   Direction - Decrypt, Encrypt           SP 800-38F
+                      Key Length - 128, 192, 256
+
+AES-KW        A4993   Direction - Decrypt, Encrypt           SP 800-38F
+                      Key Length - 128, 192, 256
+
+
+
+                                       Page 13 of 62
+Algorithm      CAVP    Properties                                                  Reference
+               Cert
+
+AES-KWP        A4988   Direction - Decrypt, Encrypt                                SP 800-38F
+                       Key Length - 128, 192, 256
+
+AES-KWP        A4993   Direction - Decrypt, Encrypt                                SP 800-38F
+                       Key Length - 128, 192, 256
+
+ECDSA KeyGen   A4987   Curve - P-256, P-384, P-521                                 FIPS 186-5
+(FIPS186-5)            Secret Generation Mode - testing candidates
+
+ECDSA SigGen   A4987   Curve - P-256, P-384, P-521                                 FIPS 186-5
+(FIPS186-5)            Component - No
+                       Hash Algorithm - SHA2-224, SHA2-256, SHA2-384, SHA2-
+                       512
+
+ECDSA SigVer   A4987   Curve - P-256, P-384, P-521                                 FIPS 186-5
+(FIPS186-5)            Hash Algorithm - SHA2-224, SHA2-256, SHA2-384, SHA2-
+                       512
+
+Hash DRBG      A4987   Prediction Resistance - No, Yes                             SP 800-90A
+                       Mode - SHA2-256                                             Rev. 1
+
+HMAC-SHA-1     A4987   Key Length - Key Length: 112-524288 Increment 8             FIPS 198-1
+
+HMAC-SHA2-     A4987   Key Length - Key Length: 112-524288 Increment 8             FIPS 198-1
+224
+
+HMAC-SHA2-     A4987   Key Length - Key Length: 112-524288 Increment 8             FIPS 198-1
+256
+
+HMAC-SHA2-     A4987   Key Length - Key Length: 112-524288 Increment 8             FIPS 198-1
+384
+
+HMAC-SHA2-     A4987   Key Length - Key Length: 112-524288 Increment 8             FIPS 198-1
+512
+
+KAS-ECC-SSC    A4987   Domain Parameter Generation Methods - P-256, P-384, P-521   SP 800-56A
+Sp800-56Ar3            Scheme -                                                    Rev. 3
+                       ephemeralUnified -
+                       KAS Role - initiator, responder
+
+KAS-FFC-SSC    A4987   Domain Parameter Generation Methods - ffdhe2048,            SP 800-56A
+Sp800-56Ar3            ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192, MODP-2048,      Rev. 3
+                       MODP-3072, MODP-4096, MODP-6144, MODP-8192
+                       Scheme -
+
+
+
+                                        Page 14 of 62
+Algorithm         CAVP    Properties                                                      Reference
+                  Cert
+                          dhEphem -
+                          KAS Role - initiator, responder
+
+KDA HKDF          A4986   Derived Key Length - 2048                                       SP 800-56C
+Sp800-56Cr1               Shared Secret Length - Shared Secret Length: 224-65336          Rev. 2
+                          Increment 8
+                          HMAC Algorithm - SHA2-224, SHA2-256, SHA2-384, SHA2-
+                          512
+
+KDF IKEv2         A4991   Diffie-Hellman Shared Secret Length - Diffie-Hellman Shared     SP 800-135
+(CVL)                     Secret Length: 224, 2048, 8192                                  Rev. 1
+                          Derived Keying Material Length - Derived Keying Material
+                          Length: 1056, 3072
+                          Hash Algorithm - SHA-1, SHA2-256, SHA2-384, SHA2-512
+
+KDF SP800-108     A4990   KDF Mode - Counter, Double Pipeline Iteration, Feedback         SP 800-108
+                          Supported Lengths - Supported Lengths: 8, 72, 128, 776, 3456,   Rev. 1
+                          4096
+
+PBKDF             A4987   Iteration Count - Iteration Count: 1000-10000 Increment 1       SP 800-132
+                          Password Length - Password Length: 8-128 Increment 1
+
+RSA KeyGen        A4987   Key Generation Mode - probable                                  FIPS 186-5
+(FIPS186-5)               Modulo - 2048, 3072, 4096, 8192
+                          Primality Tests - 2pow100
+                          Private Key Format - standard
+
+RSA SigGen        A4987   Modulo - 2048, 3072, 4096                                       FIPS 186-5
+(FIPS186-5)               Signature Type - pkcs1v1.5, pss
+
+RSA SigVer        A4987   Signature Type - PKCS 1.5, PKCSPSS                              FIPS 186-4
+(FIPS186-2)               Modulo - 1536
+
+RSA SigVer        A4987   Signature Type - PKCS 1.5, PKCSPSS                              FIPS 186-4
+(FIPS186-4)               Modulo - 1024, 2048, 3072, 4096
+
+RSA SigVer        A4987   Modulo - 2048, 3072, 4096                                       FIPS 186-5
+(FIPS186-5)               Signature Type - pkcs1v1.5, pss
+
+Safe Primes Key   A4987   Safe Prime Groups - ffdhe2048, ffdhe3072, ffdhe4096,            SP 800-56A
+Generation                ffdhe6144, ffdhe8192, MODP-2048, MODP-3072, MODP-               Rev. 3
+                          4096, MODP-6144, MODP-8192
+
+SHA2-224          A4987   Large Message Sizes - 1, 2, 4, 8                                FIPS 180-4
+                          Message Length - Message Length: 0-65536 Increment 8
+
+
+                                           Page 15 of 62
+ Algorithm              CAVP          Properties                                                      Reference
+                        Cert
+
+ SHA2-256               A4987         Large Message Sizes - 1, 2, 4, 8                                FIPS 180-4
+                                      Message Length - Message Length: 0-65536 Increment 8
+
+ SHA2-384               A4987         Large Message Sizes - 1, 2, 4, 8                                FIPS 180-4
+                                      Message Length - Message Length: 0-65536 Increment 8
+
+ SHA2-512               A4987         Large Message Sizes - 1, 2, 4, 8                                FIPS 180-4
+                                      Message Length - Message Length: 0-65536 Increment 8
+
+ TLS v1.2 KDF           A4987         Hash Algorithm - SHA2-256, SHA2-384, SHA2-512                   SP 800-135
+ RFC7627 (CVL)                                                                                        Rev. 1
+
+Table 6: Approved Algorithms
+
+The table above lists all approved cryptographic algorithms of the module, including specific key lengths
+employed for approved services in Section 4.3, and implemented modes or methods of operation of the
+algorithms.
+
+
+Vendor-Affirmed Algorithms:
+
+ Name                                     Properties              Implementation   Reference
+
+ Symmetric Cryptographic Key              Key                     N/A              SP 800-133r2, section 4,
+ Generation (CKG)                         type:Symmetric                           example 1, and section 6.1
+
+ Asymmetric Cryptographic Key             Key                     N/A              SP 800-133r2, section 4,
+ Generation (CKG)                         type:Asymmetric                          example 1
+
+Table 7: Vendor-Affirmed Algorithms
+
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+The module does not implement non-approved algorithms that are allowed in the approved mode of operation.
+
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+The module does not implement non-approved algorithms that are allowed in the approved mode of operation
+with no security claimed.
+
+
+Non-Approved, Not Allowed Algorithms:
+
+
+
+
+                                                       Page 16 of 62
+Name                                                                           Use and Function
+
+MD2, MD5, SHA-1                                                                Message digest
+
+RC2, RC4, DES, Triple-DES, CDMF, Camellia, SEED, ChaCha20(-                    Encryption, Decryption
+Poly1305)
+
+AES GCM (external IV)                                                          Encryption
+
+CBC-MAC, AES XCBC-MAC, AES XCBC-MAC-96                                         Message authentication
+
+HMAC (MD2, MD5, SHA-1; < 112-bit keys)                                         Message authentication
+
+HMAC/SSLv3 MAC (constant-time implementation)                                  Message authentication
+
+MD2, MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, DES, Triple-              Key derivation
+DES, AES, Camellia, SEED, ANS X9.63 KDF, SSL 3 PRF, IKEv1 PRF, TLS
+1.0/1.1 KDF, TLS KDF without extended master secret
+
+KBKDF, HKDF, TLS 1.2 KDF, IKEv2 PRF (< 112-bit keys)                           Key derivation
+
+KBKDF (MD2, MD5)                                                               Key derivation
+
+IKEv2 PRF (MD2, MD5)                                                           Key derivation
+
+PKCS#5 PBE, PKCS#12 PBE                                                        Password-based key derivation
+
+PBKDF2 (short password; short salt; insufficient iterations; < 112-bit keys)   Password-based key derivation
+
+J-PAKE                                                                         Shared secret computation
+
+KAS-FFC-SSC (FIPS 186-type groups)                                             Shared secret computation
+
+X25519                                                                         Shared secret computation
+
+DSA                                                                            Signature generation,
+                                                                               Signature verification
+
+RSA (primitive; PKCS#1 v1.5 or PSS with MD2, MD5, SHA-1)                       Signature generation,
+                                                                               Signature verification
+
+RSA (< 2048-bit keys)                                                          Signature generation
+
+RSA (< 1024-bit keys)                                                          Signature verification
+
+ECDSA (component)                                                              Signature generation,
+                                                                               Signature verification
+
+
+
+                                                  Page 17 of 62
+ Name                                                                            Use and Function
+
+ RSA                                                                             Asymmetric encryption,
+                                                                                 Asymmetric decryption
+
+ DSA                                                                             Parameter generation,
+                                                                                 Parameter verification, Key
+                                                                                 pair generation
+
+ DH (FIPS 186-type groups)                                                       Key pair generation
+
+ RSA (< 2048 bits; > 4096 bits)                                                  Key pair generation
+
+ Ed25519, X25519                                                                 Key pair generation
+
+ Symmetric key generation (< 112 bits)                                           Secret key generation
+
+Table 8: Non-Approved, Not Allowed Algorithms
+
+The table above lists all the non-approved cryptographic algorithms of the module employed by the non-
+approved services in Section 4.4.
+
+
+2.6 Security Function Implementations
+
+ Name                     Type                  Description         Properties             Algorithms
+
+ Encryption with          BC-UnAuth             Encryption using    Keys:128, 192, 256     AES-CBC
+ AES                                            AES                 bits with 128-256      AES-CTR
+                                                                    bits of key strength   AES-ECB
+                                                                                           AES-CBC-CS1
+                                                                                           AES-CBC
+                                                                                           AES-CTR
+                                                                                           AES-ECB
+
+ Decryption with          BC-UnAuth             Decryption using    Keys:128, 192, 256     AES-CBC
+ AES                                            AES                 bits with 128-256      AES-CTR
+                                                                    bits of key strength   AES-ECB
+                                                                                           AES-CBC-CS1
+                                                                                           AES-CTR
+                                                                                           AES-CTR
+                                                                                           AES-ECB
+
+ Authenticated            BC-Auth               Authenticated       Keys:128, 192, 256     AES-GCM
+ Encryption with                                encryption using    bits with 128-256      AES-GCM
+ AES                                            AES                 bits of key strength   AES-GCM
+
+
+
+
+                                                    Page 18 of 62
+Name               Type         Description         Properties             Algorithms
+
+Authenticated      BC-Auth      Authenticated       Keys:128, 192, 256     AES-GCM
+Decryption with                 decryption using    bits with 128-256      AES-GCM
+AES                             AES                 bits of key strength   AES-GCM
+
+Key Derivation     PBKDF        Key derivation      Derived keys:112-      PBKDF
+with PBKDF                      using PBKDF         256 bits
+
+Key Derivation     KBKDF        Key derivation      Derived keys:112-      KDF SP800-108
+with KBKDF                      using KBKDF         256 bits
+
+Key Derivation     KAS-56CKDF   Key derivation      Derived keys:112-      KDA HKDF Sp800-
+with HKDF                       using HKDF          256 bits               56Cr1
+
+Key Derivation     KAS-135KDF   Key derivation      Derived keys:112-      TLS v1.2 KDF
+with TLS 1.2 KDF                using TLS 1.2 KDF   256 bits               RFC7627
+
+Key Derivation     KAS-135KDF   Key derivation      Derived keys:112-      KDF IKEv2
+with IKEv2 KDF                  using IKEv2 KDF     256 bits
+
+Key Wrapping       KTS-Wrap     Key wrapping        Keys:128, 192, 256     AES-KW
+with AES                        using AES           bits with 128-256      AES-KWP
+                                                    bits of key            AES-KW
+                                                    strength;              AES-KWP
+                                                    Compliant with IG      AES-GCM
+                                                    D.G                    AES-GCM
+                                                                           AES-GCM
+
+Key Unwrapping     KTS-Wrap     Key unwrapping      Keys:128, 192, 256     AES-KW
+with AES                        using AES           bits with 128-256      AES-KWP
+                                                    bits of key            AES-KW
+                                                    strength;              AES-KWP
+                                                    Compliant with IG      AES-GCM
+                                                    D.G                    AES-GCM
+                                                                           AES-GCM
+
+Message            MAC          Message             Keys:112-256 bits      HMAC-SHA-1
+Authentication                  authentication      with 112-256 bits      HMAC-SHA2-224
+with HMAC                       using HMAC          of key strength        HMAC-SHA2-256
+                                                                           HMAC-SHA2-384
+                                                                           HMAC-SHA2-512
+
+Message            MAC          Message             Keys:128, 192, 256     AES-CMAC
+Authentication                  authentication      bits with 128-256
+with CMAC                       using CMAC          bits of key strength
+
+
+
+
+                                    Page 19 of 62
+Name                Type            Description          Properties            Algorithms
+
+Random Number       DRBG            Random number        Hash:SHA2-256         Hash DRBG
+Generation with                     generation using
+Hash_DRBG                           Hash_DRBG
+
+Shared Secret       KAS-SSC         Shared secret        Curves:P-256, P-      KAS-ECC-SSC
+Computation with                    computation using    384, P-521 with       Sp800-56Ar3
+KAS-ECC-SSC                         KAS-ECC-SSC          128, 192 and 256
+                                                         bits of strength;
+                                                         Compliant with IG
+                                                         D.F scenario 2(1)
+
+Shared Secret       KAS-SSC         Shared secret        Keys:MODP-2048,       KAS-FFC-SSC
+Computation with                    computation using    MODP-3072,            Sp800-56Ar3
+KAS-FFC-SSC                         KAS-FFC-SSC          MODP-4096,
+                                                         MODP-6144,
+                                                         MODP-8192,
+                                                         ffdhe2048,
+                                                         ffdhe3072,
+                                                         ffdhe4096,
+                                                         ffdhe6144,
+                                                         ffdhe8192 with
+                                                         112-200 bits of key
+                                                         strength;
+                                                         Compliant with IG
+                                                         D.F scenario 2(1)
+
+Signature           DigSig-SigGen   Signature            Keys:2048, 3072,      RSA SigGen
+Generation with                     generation using     4096 bits with 112-   (FIPS186-5)
+RSA                                 RSA                  150 bits of key
+                                                         strength
+
+Signature           DigSig-SigGen   Signature            Curves:P-256, P-      ECDSA SigGen
+Generation with                     generation using     384, P-521 with       (FIPS186-5)
+ECDSA                               ECDSA                128, 192 and 256
+                                                         bits of strength
+
+Signature           DigSig-SigVer   Signature            Keys:1024, 1280,      RSA SigVer
+Verification with                   verification using   1536, 1792, 2048,     (FIPS186-2)
+RSA                                 RSA                  3072, 4096 bits       RSA SigVer
+                                                         with 80-150 bits of   (FIPS186-4)
+                                                         key strength          RSA SigVer
+                                                                               (FIPS186-5)
+
+Signature           DigSig-SigVer   Signature            Curves:P-256, P-      ECDSA SigVer
+Verification with                   verification using   384, P-521 with       (FIPS186-5)
+ECDSA                               ECDSA
+
+                                        Page 20 of 62
+ Name                       Type             Description           Properties            Algorithms
+                                                                   128, 192, 256 bits
+                                                                   of strength
+
+ Symmetric Key              CKG              Direct symmetric      Keys:112-256 bits     Hash DRBG
+ Generation with                             key generation        with 112-256 bits
+ Hash_DRBG                                   using Hash_DRBG       of key strength;
+                                                                   Compliant with
+                                                                   SP800-133r2
+                                                                   section 6.1
+
+ Key Pair                   AsymKeyPair-     Key pair generation   Keys:2048, 3072,      RSA KeyGen
+ Generation with            KeyGen           using RSA             4096 bits with 112-   (FIPS186-5)
+ RSA                                                               150 bits of key
+                                                                   strength
+
+ Key Pair                   AsymKeyPair-     Key pair generation   Curves:P-256, P-      ECDSA KeyGen
+ Generation with            KeyGen           using ECDSA           384, P-521 with       (FIPS186-5)
+ ECDSA                                                             128, 192 and 256
+                                                                   bits of strength
+
+ Key Pair                   AsymKeyPair-     Key pair generation   Keys:MODP-2048,       Safe Primes Key
+ Generation with            KeyGen           using Safe Primes     MODP-3072,            Generation
+ Safe Primes                                                       MODP-4096,
+                                                                   MODP-6144,
+                                                                   MODP-8192,
+                                                                   ffdhe2048,
+                                                                   ffdhe3072,
+                                                                   ffdhe4096,
+                                                                   ffdhe6144,
+                                                                   ffdhe8192 with
+                                                                   112-200 bits of key
+                                                                   strength
+
+ Message Digest             SHA              Message digest                              SHA2-256
+ with SHA                                    using SHA                                   SHA2-384
+                                                                                         SHA2-512
+                                                                                         SHA2-224
+
+Table 9: Security Function Implementations
+
+
+
+2.7 Algorithm Specific Information
+
+2.7.1     AES GCM IV
+
+The Crypto Officer shall consider the following requirements and restrictions when using the module.
+
+
+                                                 Page 21 of 62
+For TLS 1.2, the module offers the AES GCM implementation and uses the context of Scenario 1 of FIPS 140-3
+IG C.H. NSS is compliant with SP 800-52r2 Section 3.3.1 and the mechanism for IV generation is compliant
+with RFC 5288 and 8446.
+The module does not implement the TLS protocol. The module’s implementation of AES GCM is used together
+with an application that runs outside the module’s cryptographic boundary. The design of the TLS protocol
+implicitly ensures that the counter (the nonce_explicit part of the IV) does not exhaust the maximum number
+of possible values for a given session key.
+In the event the module’s power is lost and restored, the consuming application must ensure that a new key for
+use with the AES GCM key encryption or decryption under this scenario shall be established.
+Alternatively, the Crypto Officer can use the module’s API to perform AES GCM encryption using internal IV
+generation that complies with Scenario 2 of the IG C.H. These IVs are always at least 96 bits and generated
+using the approved DRBG internal to the module’s boundary.
+Additionally, the module offers an internal deterministic IV generation mode compliant with Scenario 3 of
+FIPS 140-3 IG C.H. The generated GCM IV is at least 96 bits in length where the size of the fixed (name) field is
+at least 32 bits. The module then internally generates a 32 bit or longer deterministic non-repetitive counter.
+The module increments the counter monotonically at each invocation of the AES-GCM for the same
+encryption key. The module explicitly checks for the wrap around and returns an error if wrap around
+condition is reached.
+In case the module’s power is lost and then restored, a new key for use with the AES-GCM
+encryption/decryption shall be established.
+Finally, for TLS 1.3, the AES GCM implementation uses the context of Scenario 5 of FIPS 140-3 IG C.H. The
+protocol that provides this compliance is TLS 1.3, defined in RFC8446 of August 2018, using the cipher-suites
+that explicitly select AES GCM as the encryption/decryption cipher (Appendix B.4 of RFC8446). The module
+supports acceptable AES GCM cipher suites from Section 3.3.1 of SP800-52r2. TLS 1.3 employs separate 64-bit
+sequence numbers, one for protocol records that are received, and one for protocol records that are sent to a
+peer. These sequence numbers are set at zero at the beginning of a TLS 1.3 connection and each time when the
+AES-GCM key is changed. After reading or writing a record, the respective sequence number is incremented by
+one. The protocol specification determines that the sequence number should not wrap, and if this condition is
+observed, then the protocol implementation must either trigger a re-key of the session (i.e., a new key for AES-
+GCM), or terminate the connection.
+
+
+2.7.2   Key Derivation using SP 800-132 PBKDF2
+
+The module provides password-based key derivation (PBKDF2), compliant with SP 800-132. The module
+supports option 1a from Section 5.4 of SP 800-132, in which the Master Key (MK) or a segment of it is used
+directly as the Data Protection Key (DPK). In accordance to SP 800-132 and FIPS 140-3 IG D.N, the following
+requirements shall be met:
+    •   Derived keys shall only be used in storage applications. The MK shall not be used for other purposes.
+        The length of the MK or DPK shall be of 112 bits or more.
+    •   Passwords or passphrases, used as an input for the PBKDF2, shall not be used as cryptographic keys.
+    •   The length of the required password or passphrase is at least 8 characters. The probability of guessing
+        the value is estimated to be at most 1/628 = 4 x 10-15, when the password is a combination of lowercase,
+        uppercase, and numeric characters. If the password solely consists of digits, the probability of guessing
+
+
+                                                   Page 22 of 62
+          the value is estimated to be 10-8. Combined with the minimum iteration count as described below, this
+          provides an acceptable trade-off between user experience and security against brute-force attacks.
+     •    A portion of the salt, with a length of at least 128 bits, shall be generated randomly using the SP 800-
+          90Ar1 DRBG provided by the module.
+     •    The iteration count shall be selected as large as possible, as long as the time required to generate the
+          key using the entered password is acceptable for the users. The minimum value is 1000.
+
+
+2.7.3     SP 800-56Ar3 Assurances
+
+To comply with the assurances found in Section 5.6.2 of SP 800-56Ar3, the operator must use the module
+together with an application that implements the TLS protocol. Additionally, the module’s approved Key Pair
+Generation service (see Section 4.3) must be used to generate ephemeral Diffie- Hellman or EC Diffie-Hellman
+key pairs, or the key pairs must be obtained from another FIPS- validated module. As part of this service, the
+module will internally perform the full public key validation of the generated public key.
+The module’s shared secret computation service will internally perform the full public key validation of the
+peer public key, complying with Sections 5.6.2.2.1 and 5.6.2.2.2 of SP 800-56Ar3.
+
+
+2.7.4     RSA Approved Modulus Size
+
+RSA Signature Verification is approved for 1024, 1280, 1536 and 1792-bit keys in compliance with IG C.F. The
+1280 and 1792-bit keys cannot be ACVP tested. However, all modulus sizes in which testing is available have
+been tested by the CAVP.
+
+
+2.7.5     Legacy Use
+
+Digital signature verification using RSA with 1024, 1280, 1536, 1792-bit moduli is allowed for legacy use only.
+These legacy algorithms can only be used on data that was generated prior to the Legacy Date specified in FIPS
+140-3 IG C.M
+
+
+2.8 RBG and Entropy
+
+ Cert          Vendor
+ Number        Name
+
+ E47           Red Hat, Inc
+
+Table 10: Entropy Certificates
+
+
+
+
+                                                      Page 23 of 62
+ Name                  Type       Operational Environment                   Sample    Entropy    Conditioning
+                                                                            Size      per        Component
+                                                                                      Sample
+
+ Userspace CPU         Non-       Red Hat Enterprise Linux 9 on Dell        256       225 bits   HMAC-
+ Time Jitter           Physical   PowerEdge R440 on Intel(R) Xeon(R)        bits                 SHA2-512
+ RNG Entropy                      Silver 4216; Red Hat Enterprise Linux 9
+ Source Version                   on IBM z16 3931-A01 on IBM z16; Red
+ 2.2.0                            Hat Enterprise Linux 9 on PowerVM
+                                  FW1040.00 with VIOS 3.1.3.00 on IBM
+                                  9080 HEX on IBM POWER10
+
+Table 11: Entropy Sources
+
+The module employs a Deterministic Random Bit Generator (DRBG) implementation based on SP 800-90Ar1.
+This DRBG is used internally by the module (e.g. to generate symmetric keys, seeds for asymmetric key pairs,
+and random numbers for security functions). It can also be accessed using the specified API functions.
+The DRBG implemented is a SHA-256 Hash_DRBG, seeded by the entropy source described in the table above.
+It does not employ prediction resistance.
+The module generates SSPs (e.g., keys) whose strengths are modified by available entropy.
+The module complies with the Public Use Document for ESV certificate E47 by reading entropy data from the
+get_random() function with the GRND_RANDOM flag set, which corresponds to the GetEntropy() conceptual
+interface. The operational environment on the ESV certificate is identical to the operating system described in
+this document. There are no maintenance requirements for the entropy source.
+The entropy source is located within the module’s physical perimeter, but outside of the module’s
+cryptographic boundary.
+
+
+2.9 Key Generation
+
+The module implements Cryptographic Key Generation (CKG, vendor affirmed), compliant with SP 800-133r2.
+When random values are required, they are obtained from the SP 800-90Ar1 approved DRBG, compliant with
+Section 4 of SP 800-133r2. The following methods are implemented:
+     •    Direct generation of symmetric keys: compliant with SP 800-133r2, Section 6.1.
+     •    Safe primes key pair generation: compliant with SP 800-133r2, Section 5.2, which maps to SP 800-
+          56Ar3. The method described in Section 5.6.1.1.4 of SP 800-56Ar3 (“Testing Candidates”) is used.
+     •    RSA key pair generation: compliant with SP 800-133r2, Section 5.1, which maps to FIPS 186-5. The
+          method described in Appendix A.1.3 of FIPS 186-5 (“Probable Primes”) is used.
+     •    ECC (ECDH and ECDSA) key pair generation: compliant with SP 800-133r2, Section 5.1, which maps
+          to FIPS 186-5. The method described in Appendix A.2.2 of FIPS 186-5 (“Rejection Sampling”) is used.
+          Note that this generation method is also used to generate ECDH key pairs.
+Additionally, the module implements the following key derivation methods:
+     •    KBKDF: compliant with SP 800-108r1. This implementation can be used to generate secret keys from a
+          pre-existing key-derivation-key.
+
+                                                    Page 24 of 62
+    •   HKDF: compliant with SP 800-56Cr2. This implementation shall only be used to generate secret keys
+        in the context of an SP 800-56Ar3 key agreement scheme.
+    •   TLS 1.2 KDF, IKEv2 PRF: compliant with SP 800-135r1. These implementations shall only be used to
+        generate secret keys in the context of the TLS 1.2, and IKEv2 protocols, respectively.
+    •   PBKDF2: compliant with option 1a of SP 800-132. This implementation shall only be used to derive
+        keys for use in storage applications.
+Intermediate key generation values are not output from the module and are explicitly zeroized after processing
+the service.
+
+
+2.10 Key Establishment
+
+The module provides Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) shared secret
+computation compliant with SP800-56Ar3, in accordance with scenario 2 (1) of FIPS 140-3 IG D.F.
+For Diffie-Hellman, the module supports the use of the safe primes defined in RFC 3526 (IKE) and RFC 7919
+(TLS). Note that the module only implements domain parameter generation, key pair generation and
+verification, and shared secret computation. No other part of the IKE or TLS protocols is implemented (with the
+exception of the TLS 1.2 KDF and IKEv2 PRF):
+IKE (RFC 3526):
+    •   MODP-2048 (ID = 14)
+    •   MODP-3072 (ID = 15)
+    •   MODP-4096 (ID = 16)
+    •   MODP-6144 (ID = 17)
+    •   MODP-8192 (ID = 18)
+TLS (RFC 7919):
+    •   ffdhe2048 (ID = 256)
+    •   ffdhe3072 (ID = 257)
+    •   ffdhe4096 (ID = 258)
+    •   ffdhe6144 (ID = 259)
+    •   ffdhe8192 (ID = 260)
+According to FIPS 140-3 IG D.B, the key sizes of DH and ECDH shared secret computation provide 112-200
+resp. 128-256 bits of security strength in an approved mode of operation.
+The module also provides the following key transport mechanisms:
+    •   Key wrapping using AES KW and AES KWP, with a security strength of 128, 192, or 256 bits,
+        depending on the wrapping key size.
+    •   Key wrapping using AES GCM with a security strength of 128, 192, or 256 bits.
+
+
+2.11 Industry Protocols
+
+For DH, the module supports the use of the safe primes defined in RFC 3526 (IKE) and RFC 7919 (TLS) as listed
+in Section 2.10. Note that the module only implements domain parameter generation, key pair generation and
+verification, and shared secret computation. No other part of the IKE or TLS protocols is implemented (with the
+exception of the TLS 1.2 KDF (RFC 7627) and IKEv2 KDF). No parts of the TLS and IKE protocols, other than
+the KDFs, have been tested by the CAVP or CMVP.
+                                                  Page 25 of 62
+TLS 1.2 KDF (RFC 7627) and IKEv2 implementations shall only be used to generate secret keys in the context
+of the TLS 1.2 and IKE protocols respectively.
+
+
+
+
+                                                 Page 26 of 62
+3 Cryptographic Module Interfaces
+
+3.1 Ports and Interfaces
+
+ Physical Port                                                       Logical        Data That Passes
+                                                                     Interface(s)
+
+ As a software-only module, the module does not have physical        Data Input     API input parameters
+ ports. Physical Ports are interpreted to be the physical ports of
+ the hardware platform on which it runs.
+
+ As a software-only module, the module does not have physical        Data           API output parameters
+ ports. Physical Ports are interpreted to be the physical ports of   Output
+ the hardware platform on which it runs.
+
+ As a software-only module, the module does not have physical        Control        API function calls, API
+ ports. Physical Ports are interpreted to be the physical ports of   Input          input parameters for
+ the hardware platform on which it runs.                                            control input
+
+ As a software-only module, the module does not have physical        Status         API return codes
+ ports. Physical Ports are interpreted to be the physical ports of   Output
+ the hardware platform on which it runs.
+
+Table 12: Ports and Interfaces
+
+The logical interfaces are the APIs through which the applications request services. The module does not
+implement a control output interface.
+
+
+
+
+                                                    Page 27 of 62
+4 Roles, Services, and Authentication
+
+4.1 Authentication Methods
+
+N/A for this module.
+The module does not support authentication for roles.
+
+
+4.2 Roles
+
+ Name                         Type            Operator Type         Authentication Methods
+
+ Crypto Officer               Role            CO                    None
+
+Table 13: Roles
+
+The module supports the Crypto Officer role only. This sole role is implicitly and always assumed by the
+operator of the module. No support is provided for multiple concurrent operators or a maintenance role.
+
+
+4.3 Approved Services
+
+ Name             Descriptio     Indicator              Inputs       Outputs       Security        SSP Access
+                  n                                                                Functions
+
+ Encryption       Encrypt a      CKS_NSS_FIPS_O         AES key,     Ciphertext    Encryption      Crypto
+                  plaintext      K (1)                  IV,                        with AES        Officer
+                                                        plaintext                                  - AES Key:
+                                                                                                   W,E
+
+ Decryption       Decrypt a      CKS_NSS_FIPS_O         AES key,     Plaintext     Decryption      Crypto
+                  ciphertext     K (1)                  IV,                        with AES        Officer
+                                                        ciphertex                                  - AES Key:
+                                                        t                                          W,E
+
+ Authenticated    Encrypt a      CKS_NSS_               AES key,     Ciphertext,   Authenticated   Crypto
+ Encryption       plaintext      FIPS_OK                IV,          MAC tag       Encryption      Officer
+                                                        plaintext                  with AES        - AES Key:
+                                                                                                   W,E
+
+ Authenticated    Decrypt a      CKS_NSS_               AES key,     Plaintext     Authenticated   Crypto
+ Decryption       ciphertext     FIPS_OK                IV, MAC      or fail       Decryption      Officer
+                                                        tag,                       with AES        - AES Key:
+                                                        ciphertex                                  W,E
+                                                        t
+
+
+
+                                                   Page 28 of 62
+Name            Descriptio   Indicator        Inputs      Outputs   Security        SSP Access
+                n                                                   Functions
+
+Key             Derive a     CKS_NSS_FIPS_O   Key-        Derived   Key             Crypto
+Derivation      key from a   K (1)            derivatio   key       Derivation      Officer
+from a KDK      key-                          n key                 with KBKDF      - Key-
+                derivation                                                          Derivation
+                key                                                                 Key: W,E
+                                                                                    - Derived
+                                                                                    Key : G
+
+Key             Derive a     CKS_NSS_FIPS_O   Shared      Derived   Key             Crypto
+Derivation      key from a   K (1)            secret      key       Derivation      Officer
+                shared                                              with HKDF       - Shared
+                secret                                              Key             Secret: W,E
+                                                                    Derivation      - Derived
+                                                                    with TLS 1.2    Key : G
+                                                                    KDF
+                                                                    Key
+                                                                    Derivation
+                                                                    with IKEv2
+                                                                    KDF
+
+Password-       Derive a     CKS_NSS_FIPS_O   Password    Derived   Key             Crypto
+Based Key       key from a   K (1)            , salt,     key       Derivation      Officer
+Derivation      password                      iteration             with PBKDF      - Password:
+                                              count                                 W,E
+                                                                                    - Derived
+                                                                                    Key : G
+
+Key             Wrap a       CKS_NSS_FIPS_O   AES key,    Wrapped   Key             Crypto
+Wrapping        CSP          K (1)            any CSP     CSP       Wrapping        Officer
+                                                                    with AES        - AES Key:
+                                                                                    W,E
+
+Key             Unwrap a     CKS_NSS_FIPS_O   AES key,    Any CSP   Key             Crypto
+Unwrapping      CSP          K (1)            Wrapped               Unwrapping      Officer
+                                              CSP                   with AES        - AES Key:
+                                                                                    W,E
+
+Message         Compute a    CKS_NSS_FIPS_O   HMAC        MAC tag   Message         Crypto
+Authenticatio   MAC tag      K (1)            key                   Authenticatio   Officer
+n                                                                   n with HMAC     - HMAC
+                                                                                    Key : W,E
+
+Message         Compute a    CKS_NSS_FIPS_O   AES key     MAC tag   Message         Crypto
+Authenticatio   MAC tag      K (1)                                  Authenticatio   Officer
+n with AES                                                          n with CMAC
+
+                                          Page 29 of 62
+Name            Descriptio   Indicator        Inputs      Outputs     Security        SSP Access
+                n                                                     Functions
+                                                                                      - AES Key:
+                                                                                      W,E
+
+Message         Compute a    CKS_NSS_FIPS_O   Message     Digest      Message         Crypto
+Digest          message      K (1)                        value       Digest with     Officer
+                digest                                                SHA
+
+Random          Generate     CKR_OK           Output      Random      Random          Crypto
+Number          random                        length      bytes       Number          Officer
+Generation      bytes                                                 Generation      - Entropy
+                                                                      with            Input : W,E
+                                                                      Hash_DRBG       - DRBG
+                                                                                      Seed : G,E
+                                                                                      - Internal
+                                                                                      State (V, C)
+                                                                                      : G,W,E
+
+Shared Secret   Compute a    CKS_NSS_FIPS_O   DH          Shared      Shared Secret   Crypto
+Computation     shared       K                private     secret      Computation     Officer
+with DH         secret                        key                     with KAS-       - DH
+                                              (owner),                FFC-SSC         Private Key
+                                              DH                                      : W,E
+                                              public                                  - DH Public
+                                              key                                     Key : W,E
+                                              (peer)                                  - Shared
+                                                                                      Secret: G
+
+Shared Secret   Compute a    CKS_NSS_FIPS_O   EC          Shared      Shared Secret   Crypto
+Computation     shared       K                private     secret      Computation     Officer
+with ECC        secret                        key                     with KAS-       - EC Private
+                                              (owner),                ECC-SSC         Key : W,E
+                                              EC public                               - EC Public
+                                              key                                     Key: W,E
+                                              (peer)                                  - Shared
+                                                                                      Secret: G
+
+Signature       Generate a   CKS_NSS_FIPS_O   RSA         Signature   Signature       Crypto
+Generation      signature    K                private                 Generation      Officer
+with RSA                                      key,                    with RSA        - RSA
+                                              message                                 Private Key
+                                                                                      : W,E
+
+Signature       Generate a   CKS_NSS_FIPS_O   EC          Signature   Signature       Crypto
+Generation      signature    K                private                 Generation      Officer
+with ECDSA                                                            with ECDSA
+
+
+                                          Page 30 of 62
+Name           Descriptio   Indicator        Inputs      Outputs       Security       SSP Access
+               n                                                       Functions
+                                             key,                                     - EC Private
+                                             message                                  Key : W,E
+
+Signature      Verify a     CKS_NSS_FIPS_O   RSA         Pass/fail     Signature      Crypto
+Verification   signature    K                public                    Verification   Officer
+with RSA                                     key,                      with RSA       - RSA
+                                             message,                                 Public Key:
+                                             signature                                W,E
+
+Signature      Verify a     CKS_NSS_FIPS_O   EC public   Pass/fail     Signature      Crypto
+Verification   signature    K                key,                      Verification   Officer
+with ECDSA                                   message,                  with ECDSA     - EC Public
+                                             signature                                Key: W,E
+
+Key Pair       Generate a   CKS_NSS_FIPS_O   Group       DH public     Key Pair       Crypto
+Generation     key pair     K                            key, DH       Generation     Officer
+with Safe                                                private key   with Safe      - DH
+Primes                                                                 Primes         Private Key
+                                                                                      :G
+                                                                                      - DH Public
+                                                                                      Key : G
+                                                                                      -
+                                                                                      Intermediat
+                                                                                      e key
+                                                                                      generation
+                                                                                      value :
+                                                                                      G,E,Z
+
+Key Pair       Generate a   CKS_NSS_FIPS_O   Modulus     RSA public    Key Pair       Crypto
+Generation     key pair     K                bits        key, RSA      Generation     Officer
+with RSA                                                 private key   with RSA       - RSA
+                                                                                      Private Key
+                                                                                      :G
+                                                                                      - RSA
+                                                                                      Public Key:
+                                                                                      G
+                                                                                      -
+                                                                                      Intermediat
+                                                                                      e key
+                                                                                      generation
+                                                                                      value :
+                                                                                      G,E,Z
+
+
+
+
+                                         Page 31 of 62
+Name           Descriptio    Indicator        Inputs      Outputs       Security     SSP Access
+               n                                                        Functions
+
+Key Pair       Generate a    CKS_NSS_FIPS_O   Curve       EC public     Key Pair     Crypto
+Generation     key pair      K                            key, EC       Generation   Officer
+with ECDSA                                                private key   with ECDSA   - EC Private
+                                                                                     Key : G
+                                                                                     - EC Public
+                                                                                     Key: G
+                                                                                     -
+                                                                                     Intermediat
+                                                                                     e key
+                                                                                     generation
+                                                                                     value :
+                                                                                     G,E,Z
+
+Symmetric      Generate a    CKS_NSS_FIPS_O   Key size    AES key,      Symmetric    Crypto
+Key            secret key    K                            HMAC key      Key          Officer
+Generation                                                or key-       Generation   - AES Key:
+                                                          derivation    with         G
+                                                          key           Hash_DRBG    - HMAC
+                                                                                     Key : G
+                                                                                     - Key-
+                                                                                     Derivation
+                                                                                     Key: G
+
+Show Version   Return the    None             N/A         Module        None         Crypto
+               module                                     name and                   Officer
+               name and                                   version
+               version                                    informatio
+               informatio                                 n
+               n
+
+Show Status    Return the    None             N/A         Module        None         Crypto
+               module                                     status                     Officer
+               status
+
+Self-Test      Perform       None             N/A         Pass/fail     None         Crypto
+               the CASTs                                                             Officer
+               and
+               integrity
+               tests
+
+Zeroization    Zeroize all   N/A              Any SSP     None          None         Crypto
+               SSPs                                                                  Officer
+                                                                                     - AES Key:
+                                                                                     Z
+                                                                                     - HMAC
+
+                                          Page 32 of 62
+ Name                 Descriptio   Indicator            Inputs      Outputs        Security         SSP Access
+                      n                                                            Functions
+                                                                                                    Key : Z
+                                                                                                    - Key-
+                                                                                                    Derivation
+                                                                                                    Key: Z
+                                                                                                    - Shared
+                                                                                                    Secret: Z
+                                                                                                    - Password:
+                                                                                                    Z
+                                                                                                    - Derived
+                                                                                                    Key : Z
+                                                                                                    - Entropy
+                                                                                                    Input : Z
+                                                                                                    - DRBG
+                                                                                                    Seed : Z
+                                                                                                    - Internal
+                                                                                                    State (V, C)
+                                                                                                    :Z
+                                                                                                    - DH
+                                                                                                    Private Key
+                                                                                                    :Z
+                                                                                                    - DH Public
+                                                                                                    Key : Z
+                                                                                                    - EC Private
+                                                                                                    Key : Z
+                                                                                                    - EC Public
+                                                                                                    Key: Z
+                                                                                                    - RSA
+                                                                                                    Private Key
+                                                                                                    :Z
+                                                                                                    - RSA
+                                                                                                    Public Key:
+                                                                                                    Z
+                                                                                                    -
+                                                                                                    Intermediat
+                                                                                                    e key
+                                                                                                    generation
+                                                                                                    value : Z
+
+Table 14: Approved Services
+
+The table above lists the approved services in this module, the algorithms involved, the Sensitive Security
+Parameters (SSPs) involved and how they are accessed, the roles that can request the service, and the respective
+service indicator. In this table, CO specifies the Crypto Officer role.
+The module provides services to operators that assume the available role. All services are described in detail in
+the API documentation (manual pages). The service tables define the services that utilize approved and non-
+
+                                                    Page 33 of 62
+approved security functions in this module. For the respective tables, the convention below applies when
+specifying the access permissions (types) that the service has for each SSP.
+    •    Generate (G): The module generates or derives the SSP.
+    •    Read (R): The SSP is read from the module (e.g. the SSP is output).
+    •    Write (W): The SSP is updated, imported, or written to the module.
+    •    Execute (E): The module uses the SSP in performing a cryptographic operation.
+    •    Zeroize (Z): The module zeroizes the SSP.
+    •    N/A: The module does not access any SSP or key during its operation.
+To interact with the module, a calling application must use the FIPS token APIs provided by Softoken. The
+FIPS token API layer can be used to retrieve the approved service indicator for the module. This indicator
+consists of four independent service indicators:
+    1.   The session indicator, which must be used for all cryptographic services except the key (pair)
+         generation and key derivation services. It can be accessed by invoking the NSC_NSSGetFIPSStatus
+         function with the CKT_NSS_SESSION_LAST_CHECK parameter. If the output parameter is set to
+         CKS_NSS_FIPS_OK (1), the service was approved.
+    2.   The object indicator, which must be used for the key (pair) generation and key derivation services. It
+         can be accessed by invoking the NSC_NSSGetFIPSStatus function with the
+         CKT_NSS_OBJECT_CHECK parameter and the output derived key. If the output parameter is set to
+         CKS_NSS_FIPS_OK (1), the service was approved.
+    3.   The DRBG service indicator, which must be used for the DRBG service. It can be accessed by invoking
+         the C_SeedRandom or C_GenerateRandom functions. If any of these functions returns CKR_OK, the
+         service was approved.
+
+
+4.4 Non-Approved Services
+
+ Name                  Description             Algorithms                                                  Role
+
+ Message Digest        Compute a message       MD2, MD5, SHA-1                                             CO
+                       digest
+
+ Encryption            Encrypt a plaintext     RC2, RC4, DES, Triple-DES, CDMF, Camellia, SEED,            CO
+                                               ChaCha20(-Poly1305)
+                                               AES GCM (external IV)
+
+ Decryption            Decrypt a ciphertext    RC2, RC4, DES, Triple-DES, CDMF, Camellia, SEED,            CO
+                                               ChaCha20(-Poly1305)
+
+ Message               Compute a MAC tag       CBC-MAC, AES XCBC-MAC, AES XCBC-MAC-96                      CO
+ Authentication                                HMAC (MD2, MD5, SHA-1; < 112-bit keys)
+                                               HMAC/SSLv3 MAC (constant-time implementation)
+
+ Key Derivation        Derive a key from a     MD2, MD5, SHA-1, SHA-224, SHA-256, SHA-384,                 CO
+                       key-derivation key      SHA-512, DES, Triple-DES, AES, Camellia, SEED, ANS
+                       or a shared secret      X9.63 KDF, SSL 3 PRF, IKEv1 PRF, TLS 1.0/1.1 KDF,
+                                               TLS KDF without extended master secret
+                                               KBKDF, HKDF, TLS 1.2 KDF, IKEv2 PRF (< 112-bit
+
+                                                  Page 34 of 62
+ Name                     Description             Algorithms                                                      Role
+                                                  keys)
+                                                  KBKDF (MD2, MD5)
+                                                  IKEv2 PRF (MD2, MD5)
+
+ Password-Based           Derive a key from a     PKCS#5 PBE, PKCS#12 PBE                                         CO
+ Key Derivation           password                PBKDF2 (short password; short salt; insufficient
+                                                  iterations; < 112-bit keys)
+
+ Shared Secret            Compute a shared        J-PAKE                                                          CO
+ Computation              secret                  KAS-FFC-SSC (FIPS 186-type groups)
+                                                  X25519
+
+ Signature                Generate a signature    DSA                                                             CO
+ Generation                                       RSA (primitive; PKCS#1 v1.5 or PSS with MD2, MD5,
+                                                  SHA-1)
+                                                  RSA (< 2048-bit keys)
+                                                  ECDSA (component)
+
+ Signature                Verify a signature      DSA                                                             CO
+ Verification                                     RSA (< 1024-bit keys)
+                                                  ECDSA (component)
+
+ Asymmetric               Encrypt a plaintext     RSA                                                             CO
+ Encryption
+
+ Asymmetric               Decrypt a plaintext     RSA                                                             CO
+ Decryption
+
+ Parameter                Generate domain         DSA                                                             CO
+ Generation               parameters
+
+ Parameter                Verify domain           DSA                                                             CO
+ Verification             parameters
+
+ Key Pair                 Generate a key pair     DSA                                                             CO
+ Generation                                       DH (FIPS 186-type groups)
+                                                  RSA (< 2048 bits; > 4096 bits)
+                                                  Ed25519, X25519
+
+ Secret Key               Generate a secret key   Symmetric key generation (< 112 bits)                           CO
+ Generation
+
+Table 15: Non-Approved Services
+
+The table above lists the non-approved services in this module, the algorithms involved, the roles that can
+request the service, and the respective service indicator. In this table, CO specifies the Crypto Officer role.
+
+
+
+                                                     Page 35 of 62
+4.5 External Software/Firmware Loaded
+
+The module does not load external software or firmware.
+
+
+
+
+                                                 Page 36 of 62
+5 Software/Firmware Security
+
+5.1 Integrity Techniques
+
+Each software component of the module has an associated HMAC-SHA2-256 integrity check value. The
+integrity of the module is verified by comparing the HMAC-SHA2-256 values calculated at run time with the
+integrity values embedded in the check files that were computed at build time. If the integrity test fails, the
+module enters the Power-On Error state.
+
+
+5.2 Initiate on Demand
+
+Integrity tests are performed as part of the pre-operational self-tests, which are executed when the module is
+initialized. The integrity tests may be invoked on-demand by unloading and subsequently re-initializing the
+module, which will perform (among others) the software integrity tests.
+
+
+
+
+                                                   Page 37 of 62
+6 Operational Environment
+
+6.1 Operational Environment Type and Requirements
+
+Type of Operational Environment: Modifiable
+
+
+How Requirements are Satisfied:
+The operating system provides process isolation and memory protection mechanisms that ensure appropriate
+separation for memory access among the processes on the system. Each process has control over its own data
+and uncontrolled access to the data of other processes is prevented.
+
+
+6.2 Configuration Settings and Restrictions
+
+The module shall be installed as stated in Section 11.1. If properly installed, the operating system provides
+process isolation and memory protection mechanisms that ensure appropriate separation for memory access
+among the processes on the system. Each process has control over its own data and uncontrolled access to the
+data of other processes is prevented.
+Instrumentation tools like the ptrace system call, gdb and strace, userspace live patching, as well as other
+tracing mechanisms offered by the Linux environment such as ftrace or systemtap, shall not be used in the
+operational environment. The use of any of these tools implies that the cryptographic module is running in a
+non-validated operational environment.
+
+
+6.3 Additional Information
+
+The Red Hat Enterprise Linux operating system is used as the basis of other products which include but are not
+limited to:
+    •   Red Hat Enterprise Linux CoreOS
+    •   Red Hat Ansible Automation Platform
+    •   Red Hat OpenStack Platform
+    •   Red Hat OpenShift
+    •   Red Hat Gluster Storage
+    •   Red Hat Satellite
+Compliance is maintained for these products whenever the binary is found unchanged.
+
+
+
+
+                                                  Page 38 of 62
+7 Physical Security
+The module is comprised of software only and therefore this section is not applicable.
+
+
+
+
+                                                   Page 39 of 62
+8 Non-Invasive Security
+This module does not implement any non-invasive security mechanism and therefore this section is not
+applicable.
+
+
+
+
+                                                Page 40 of 62
+9 Sensitive Security Parameters Management
+
+9.1 Storage Areas
+
+ Storage     Description                                                                           Persistence
+ Area                                                                                              Type
+ Name
+
+ RAM         Temporary storage for SSPs used by the module as part of service execution. The       Dynamic
+             module does not perform persistent storage of SSPs
+
+Table 16: Storage Areas
+
+SSPs imported, generated, derived, or otherwise established by the module are stored in RAM while the module
+is operational. The operator application can use these SSPs to perform cryptographic operations, or export them
+as described in Section 9.2.
+The module maintains internal separation of the SSPs (including CSPs) in approved and non-approved modes of
+operation using an internal isFIPS flag for each SSP. This flag indicates whether the SSP can be used in
+approved or non-approved services.
+The module does not perform persistent storage of SSPs.
+
+
+9.2 SSP Input-Output Methods
+
+ Name                 From            To                 Format      Distribution   Entry        SFI or
+                                                         Type        Type           Type         Algorithm
+
+ API input            Calling         Cryptographic      Plaintext   Manual         Electronic
+ parameters           application     module
+ (plaintext)          within TOEPP
+
+ API input            Calling         Cryptographic      Encrypted   Manual         Electronic   Key
+ parameters           application     module                                                     Unwrapping
+ (encrypted)          within TOEPP                                                               with AES
+
+ API output           Cryptographic   Calling            Plaintext   Manual         Electronic
+ parameters           module          application
+ (plaintext)                          within TOEPP
+
+ API output           Cryptographic   Calling            Encrypted   Manual         Electronic   Key
+ parameters           module          application                                                Wrapping
+ (encrypted)                          within TOEPP                                               with AES
+
+Table 17: SSP Input-Output Methods
+
+
+
+
+                                                   Page 41 of 62
+CSPs (with the exception of passwords) can only be imported to and exported from the module when they are
+wrapped using an approved security function (e.g. AES KW or KWP). PSPs can be imported and exported in
+plaintext. Import and export is performed using API input and output parameters.
+
+
+9.3 SSP Zeroization Methods
+
+ Zeroization          Description                Rationale                                    Operator Initiation
+ Method
+
+ Destroy Object       Destroys the SSP           Memory occupied by SSPs is overwritten       By calling the
+                      represented by the         with zeroes, which renders the SSP values    C_DestroyObject
+                      object                     irretrievable. The completion of the         function.
+                                                 zeroization routine indicates that the
+                                                 zeroization procedure succeeded.
+
+ Automatic            Automatically              Memory occupied by SSPs is overwritten       N/A
+                      zeroized by the            with zeroes, which renders the SSP values
+                      module when no             irretrievable.
+                      longer needed
+
+ Remove power         De-allocates the           Volatile memory used by the module is        By removing power
+ from the             volatile memory used       overwritten within nanoseconds when
+ module               to store SSPs              power is removed. Module power off
+                                                 indicates that the zeroization procedure
+                                                 succeeded.
+
+Table 18: SSP Zeroization Methods
+
+All data output is inhibited during zeroization. Memory is deallocated after zeroization.
+
+
+9.4 SSPs
+
+ Name               Description     Size -          Type -             Generated    Established     Used By
+                                    Strength        Category           By           By
+
+ AES Key            AES key         128, 192,       Symmetric          Symmetric                    Encryption
+                    used for        256 bits -      key - CSP          Key                          with AES
+                    encryption,     128, 192,                          Generation                   Decryption
+                    decryption,     256 bits                           with                         with AES
+                    and                                                Hash_DRBG                    Authenticated
+                    computing                                                                       Encryption
+                    MAC tags                                                                        with AES
+                                                                                                    Authenticated
+                                                                                                    Decryption
+                                                                                                    with AES
+                                                                                                    Key Wrapping
+
+                                                       Page 42 of 62
+Name          Description     Size -        Type -             Generated    Established     Used By
+                              Strength      Category           By           By
+                                                                                            with AES
+                                                                                            Key
+                                                                                            Unwrapping
+                                                                                            with AES
+                                                                                            Message
+                                                                                            Authentication
+                                                                                            with CMAC
+
+HMAC Key      HMAC key        112-256       Symmetric          Symmetric                    Message
+              used for        bits - 112-   key - CSP          Key                          Authentication
+              computing       256 bits                         Generation                   with HMAC
+              MAC tags                                         with
+                                                               Hash_DRBG
+
+Key-          Symmetric       112-4096      Symmetric          Symmetric                    Key Derivation
+Derivation    key used to     bits - 112-   key - CSP          Key                          with KBKDF
+Key           derive          256 bits                         Generation
+              symmetric                                        with
+              keys                                             Hash_DRBG
+
+Shared        Shared secret   256-8192      Shared                          Shared Secret   Key Derivation
+Secret        generated by    bits - 112-   secret - CSP                    Computation     with HKDF
+              (EC) Diffie-    256 bits                                      with KAS-       Key Derivation
+              Hellman                                                       ECC-SSC         with TLS 1.2
+                                                                            Shared Secret   KDF
+                                                                            Computation     Key Derivation
+                                                                            with KAS-       with IKEv2
+                                                                            ECC-SSC         KDF
+
+Password      Password        8-128         Password -                                      Key Derivation
+              used to         characters    CSP                                             with PBKDF
+              derive          - N/A
+              symmetric
+              keys
+
+Derived Key   Symmetric       112-4096      Symmetric          Key
+              key derived     bits - 112-   key - CSP          Derivation
+              from a key-     256 bits                         with PBKDF
+              derivation                                       Key
+              key, shared                                      Derivation
+              secret, or                                       with KBKDF
+              password                                         Key
+                                                               Derivation
+                                                               with HKDF
+                                                               Key
+                                                               Derivation
+                                               Page 43 of 62
+Name           Description      Size -        Type -             Generated      Established   Used By
+                                Strength      Category           By             By
+                                                                 with TLS 1.2
+                                                                 KDF
+                                                                 Key
+                                                                 Derivation
+                                                                 with IKEv2
+                                                                 KDF
+
+Entropy        Entropy          128-384       Entropy                                         Random
+Input          input used to    bits - 128-   input - CSP                                     Number
+               seed the         256 bits                                                      Generation
+               DRBG                                                                           with
+                                                                                              Hash_DRBG
+
+DRBG Seed      DRBG seed        440 bits -    Seed - CSP         Random                       Random
+               derived from     256 bits                         Number                       Number
+               entropy                                           Generation                   Generation
+               input                                             with                         with
+                                                                 Hash_DRBG                    Hash_DRBG
+
+Internal       Internal state   880 bits -    Internal           Random                       Random
+State (V, C)   of the           256 bits      state - CSP        Number                       Number
+               Hash_DRBG                                         Generation                   Generation
+                                                                 with                         with
+                                                                 Hash_DRBG                    Hash_DRBG
+
+DH Private     Private key      2048-8192     Private key        Key Pair                     Shared Secret
+Key            used for         bits - 112-   - CSP              Generation                   Computation
+               Diffie-          200 bits                         with Safe                    with KAS-
+               Hellman                                           Primes                       FFC-SSC
+
+DH Public      Public key       2048-8192     Public key -       Key Pair                     Shared Secret
+Key            used for         bits - 112-   PSP                Generation                   Computation
+               Diffie-          200 bits                         with Safe                    with KAS-
+               Hellman                                           Primes                       FFC-SSC
+
+EC Private     Private key      P-256, P-     Private key -      Key Pair                     Shared Secret
+Key            used for EC      384, P-521    CSP                Generation                   Computation
+               Diffie-          - 128, 192,                      with ECDSA                   with KAS-
+               Hellman          256 bits                                                      ECC-SSC
+                                                                                              Signature
+                                                                                              Generation
+                                                                                              with ECDSA
+
+
+
+
+                                                 Page 44 of 62
+ Name                   Description    Size -        Type -             Generated    Established   Used By
+                                       Strength      Category           By           By
+
+ EC Public              Public key     P-256, P-     Public key -       Key Pair                   Shared Secret
+ Key                    used for EC    384, P-521    PSP                Generation                 Computation
+                        Diffie-        - 128, 192,                      with ECDSA                 with KAS-
+                        Hellman        256 bits                                                    ECC-SSC
+                                                                                                   Signature
+                                                                                                   Verification
+                                                                                                   with ECDSA
+
+ RSA Private            Private key    2048, 3072,   Private key -      Key Pair                   Signature
+ Key                    used for RSA   4096 bits -   CSP                Generation                 Generation
+                        signature      112-150                          with RSA                   with RSA
+                        generation     bits
+
+ RSA Public             Public key     KeyGen:       Public key -       Key Pair                   Signature
+ Key                    used for RSA   2048, 3072,   PSP                Generation                 Verification
+                        signature      4096 bits;                       with RSA                   with RSA
+                        verification   SigVer:
+                                       1024, 1280,
+                                       1536, 1792,
+                                       2048, 3072,
+                                       4096 bits -
+                                       KeyGen:
+                                       112-150
+                                       bits;
+                                       SigVer: 80-
+                                       150 bits
+
+ Intermediate           Temporary      256-8192      Intermediate       Key Pair                   Key Pair
+ key                    value          bits - 112-   value - CSP        Generation                 Generation
+ generation             generated      256 bits                         with RSA                   with RSA
+ value                  during key                                      Key Pair                   Key Pair
+                        generation                                      Generation                 Generation
+                        services                                        with ECDSA                 with ECDSA
+                                                                        Key Pair                   Key Pair
+                                                                        Generation                 Generation
+                                                                        with Safe                  with Safe
+                                                                        Primes                     Primes
+
+Table 19: SSP Table 1
+
+
+
+
+                                                        Page 45 of 62
+Name             Input -       Storage         Storage            Zeroization   Related SSPs
+                 Output                        Duration
+
+AES Key          API input     RAM:Plaintext   Until explicitly   Destroy
+                 parameters                    zeroized by        Object
+                 (encrypted)                   operator           Remove
+                 API output                                       power from
+                 parameters                                       the module
+                 (encrypted)
+
+HMAC Key         API input     RAM:Plaintext   Until explicitly   Destroy
+                 parameters                    zeroized by        Object
+                 (encrypted)                   operator           Remove
+                 API output                                       power from
+                 parameters                                       the module
+                 (encrypted)
+
+Key-             API input     RAM:Plaintext   Until explicitly   Destroy       Derived Key
+Derivation Key   parameters                    zeroized by        Object        :Derivation Of
+                 (encrypted)                   operator           Remove
+                 API output                                       power from
+                 parameters                                       the module
+                 (encrypted)
+
+Shared Secret    API input     RAM:Plaintext   Until explicitly   Destroy       DH Private Key
+                 parameters                    zeroized by        Object        :Derived From
+                 (encrypted)                   operator           Remove        DH Public Key
+                 API output                                       power from    :Derived From
+                 parameters                                       the module    EC Private Key
+                 (encrypted)                                                    :Derived From
+                                                                                EC Public
+                                                                                Key:Derived From
+                                                                                Derived Key
+                                                                                :Derivation Of
+
+Password         API input     RAM:Plaintext   For the            Destroy       Derived Key
+                 parameters                    duration of the    Object        :Derivation Of
+                 (plaintext)                   service            Remove
+                                                                  power from
+                                                                  the module
+
+Derived Key      API output    RAM:Plaintext   Until explicitly   Destroy       Key-Derivation
+                 parameters                    zeroized by        Object        Key:Derived From
+                 (encrypted)                   operator           Remove        Password:Derived
+                                                                  power from    From
+                                                                  the module    Shared
+                                                                                Secret:Derived From
+
+                                           Page 46 of 62
+Name             Input -       Storage         Storage            Zeroization   Related SSPs
+                 Output                        Duration
+
+Entropy Input                  RAM:Plaintext   From               Automatic     DRBG Seed
+                                               generation         Remove        :Derivation Of
+                                               until DRBG         power from
+                                               Seed is created    the module
+
+DRBG Seed                      RAM:Plaintext   While the          Automatic     Entropy Input
+                                               DRBG is            Remove        :Derived From
+                                               instantiated       power from    Internal State (V, C)
+                                                                  the module    :Generation Of
+
+Internal State                 RAM:Plaintext   While the          Remove        DRBG Seed
+(V, C)                                         module is          power from    :Generated From
+                                               operational        the module
+
+DH Private       API input     RAM:Plaintext   Until explicitly   Destroy       DH Public Key
+Key              parameters                    zeroized by        Object        :Paired With
+                 (encrypted)                   operator           Remove        Intermediate key
+                 API output                                       power from    generation value
+                 parameters                                       the module    :Generated From
+                 (encrypted)
+
+DH Public Key    API input     RAM:Plaintext   Until explicitly   Destroy       DH Private Key
+                 parameters                    zeroized by        Object        :Paired With
+                 (plaintext)                   operator           Remove        Intermediate key
+                 API output                                       power from    generation value
+                 parameters                                       the module    :Generated From
+                 (plaintext)
+
+EC Private Key   API input     RAM:Plaintext   Until explicitly   Destroy       EC Public Key:Paired
+                 parameters                    zeroized by        Object        With
+                 (encrypted)                   operator           Remove        Intermediate key
+                 API output                                       power from    generation value
+                 parameters                                       the module    :Generated From
+                 (encrypted)
+
+EC Public Key    API input     RAM:Plaintext   Until explicitly   Destroy       EC Private Key
+                 parameters                    zeroized by        Object        :Paired With
+                 (plaintext)                   operator           Remove        Intermediate key
+                 API output                                       power from    generation value
+                 parameters                                       the module    :Generated From
+                 (plaintext)
+
+RSA Private      API input     RAM:Plaintext   Until explicitly   Destroy       RSA Public
+Key              parameters                    zeroized by        Object        Key:Paired With
+                 (encrypted)                   operator           Remove        Intermediate key
+
+                                           Page 47 of 62
+ Name                   Input -       Storage         Storage            Zeroization   Related SSPs
+                        Output                        Duration
+                        API output                                       power from    generation value
+                        parameters                                       the module    :Generated From
+                        (encrypted)
+
+ RSA Public             API input     RAM:Plaintext   Until explicitly   Destroy       RSA Private Key
+ Key                    parameters                    zeroized by        Object        :Paired With
+                        (plaintext)                   operator           Remove        Intermediate key
+                        API output                                       power from    generation value
+                        parameters                                       the module    :Generated From
+                        (plaintext)
+
+ Intermediate                         RAM:Plaintext   For the            Automatic     DH Private Key
+ key generation                                       duration of the                  :Generation Of
+ value                                                service                          DH Public Key
+                                                                                       :Generation Of
+                                                                                       EC Private Key
+                                                                                       :Generation Of
+                                                                                       EC Public
+                                                                                       Key:Generation Of
+                                                                                       RSA Private Key
+                                                                                       :Generation Of
+                                                                                       RSA Public
+                                                                                       Key:Generation Of
+
+Table 20: SSP Table 2
+
+
+
+9.5 Transitions
+
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes, starting January 1,
+2031.
+
+
+
+
+                                                  Page 48 of 62
+10 Self-Tests
+
+10.1 Pre-Operational Self-Tests
+
+ Algorithm or         Test             Test Method        Test Type        Indicator                Details
+ Test                 Properties
+
+ HMAC-                256-bit          Message            SW/FW            Module becomes           Integrity test for
+ SHA2-256             key              authentication     Integrity        operational and          libsoftokn3.so and
+ (A4987)                                                                   services are available   libfreeblpriv3.so
+                                                                           for use
+
+Table 21: Pre-Operational Self-Tests
+
+Each software component of the module has an associated HMAC-SHA2-256 integrity check value. The
+software integrity tests ensure that the module is not corrupted. The HMAC-SHA2-256 algorithm goes through
+a CAST before the software integrity tests are performed.
+Upon initialization, the module immediately performs all Freebl cryptographic algorithm self-tests (CASTs) as
+specified in the Conditional Self-Tests table. When all those self-tests pass successfully, the module
+automatically performs the pre-operational integrity test on the libfreeblpriv3.so file using its associated check
+value.
+Then, the module performs the RSA CAST in the Softoken library, followed by the pre-operational integrity
+test on the libsoftokn3.so file using its associated check value. The CAST for the algorithm used in the pre-
+operational self-test (i.e., HMAC-SHA2-256) is performed by the Freebl library, before the Softoken library
+integrity test. Finally, all remaining CASTs for the algorithms implemented in Softoken are executed (see the
+Conditional Self-Tests table).
+Only if all CASTs and pre-operational integrity tests passed successfully, the module transitions to the
+operational state. No operator intervention is required to reach this point.
+While the module is executing the self-tests, services are not available, and data output (via the data output
+interface) is inhibited until the tests are successfully completed. If any of the self-tests fails, an error message is
+returned, and the module transitions to an error state.
+
+
+10.2 Conditional Self-Tests
+
+ Algorithm or        Test Properties       Test         Test    Indicator              Details                Conditions
+ Test                                      Method       Type
+
+ SHA-1               512-bit               KAT          CAST    Module                 Message Digest         Module
+ (A4987)             message                                    becomes                                       initialization
+                                                                operational and
+                                                                services are
+                                                                available for
+                                                                use
+
+
+                                                           Page 49 of 62
+Algorithm or   Test Properties   Test     Test    Indicator         Details          Conditions
+Test                             Method   Type
+
+SHA2-224       512-bit           KAT      CAST    Module            Message Digest   Module
+(A4987)        message                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+SHA2-256       512-bit           KAT      CAST    Module            Message Digest   Module
+(A4987)        message                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+SHA2-384       512-bit           KAT      CAST    Module            Message Digest   Module
+(A4987)        message                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+SHA2-512       512-bit           KAT      CAST    Module            Message Digest   Module
+(A4987)        message                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+HMAC-          288-bit key       KAT      CAST    Module            Message          Module
+SHA-1                                             becomes           Authentication   initialization
+(A4987)                                           operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+HMAC-          288-bit key       KAT      CAST    Module            Message          Module
+SHA2-224                                          becomes           Authentication   initialization
+(A4987)                                           operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+HMAC-          288-bit key       KAT      CAST    Module            Message          Module
+SHA2-256                                          becomes           Authentication   initialization
+(A4987)                                           operational and
+
+                                             Page 50 of 62
+Algorithm or   Test Properties   Test     Test    Indicator         Details          Conditions
+Test                             Method   Type
+                                                  services are
+                                                  available for
+                                                  use
+
+HMAC-          288-bit key       KAT      CAST    Module            Message          Module
+SHA2-384                                          becomes           Authentication   initialization
+(A4987)                                           operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+HMAC-          288-bit key       KAT      CAST    Module            Message          Module
+SHA2-512                                          becomes           Authentication   initialization
+(A4987)                                           operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-ECB        128, 192, 256-    KAT      CAST    Module            Encryption       Module
+(A4987)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-ECB        128, 192, 256-    KAT      CAST    Module            Decryption       Module
+(A4987)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-ECB        128, 192, 256-    KAT      CAST    Module            Encryption       Module
+(A4994)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-ECB        128, 192, 256-    KAT      CAST    Module            Decryption       Module
+(A4994)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+
+                                             Page 51 of 62
+Algorithm or   Test Properties   Test     Test    Indicator         Details      Conditions
+Test                             Method   Type
+
+AES-CBC        128, 192, 256-    KAT      CAST    Module            Encryption   Module
+(A4987)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-CBC        128, 192, 256-    KAT      CAST    Module            Decryption   Module
+(A4987)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-CBC        128, 192, 256-    KAT      CAST    Module            Encryption   Module
+(A4994)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-CBC        128, 192, 256-    KAT      CAST    Module            Decryption   Module
+(A4994)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Encryption   Module
+(A4987)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Decryption   Module
+(A4987)        bit key                            becomes                        initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Encryption   Module
+(A4994)        bit key                            becomes                        initialization
+                                                  operational and
+
+                                             Page 52 of 62
+Algorithm or   Test Properties   Test     Test    Indicator         Details          Conditions
+Test                             Method   Type
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Decryption       Module
+(A4994)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Encryption       Module
+(A5559)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-GCM        128, 192, 256-    KAT      CAST    Module            Decryption       Module
+(A5559)        bit key                            becomes                            initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+AES-CMAC       128, 192, 256-    KAT      CAST    Module            Message          Module
+(A4989)        bit key                            becomes           Authentication   initialization
+                                                  operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+KDF SP800-     HMAC-SHA2-        KAT      CAST    Module            Key Derivation   Module
+108 (A4990)    256 in counter                     becomes                            initialization
+               mode                               operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+KDA HKDF       SHA2-256          KAT      CAST    Module            Key Derivation   Module
+Sp800-56Cr1                                       becomes                            initialization
+(A4986)                                           operational and
+                                                  services are
+                                                  available for
+                                                  use
+
+
+                                             Page 53 of 62
+Algorithm or   Test Properties    Test     Test    Indicator         Details                 Conditions
+Test                              Method   Type
+
+TLS v1.2       SHA2-256           KAT      CAST    Module            Key Derivation          Module
+KDF                                                becomes                                   initialization
+RFC7627                                            operational and
+(A4987)                                            services are
+                                                   available for
+                                                   use
+
+KDF IKEv2      SHA-1, SHA-        KAT      CAST    Module            Key Derivation          Module
+(A4991)        256, SHA-384,                       becomes                                   initialization
+               SHA-512                             operational and
+                                                   services are
+                                                   available for
+                                                   use
+
+PBKDF          SHA2-256 with      KAT      CAST    Module            Key Derivation          Module
+(A4987)        5 iterations,                       becomes                                   initialization
+               128-bit salt and                    operational and
+               14 characters                       services are
+               password                            available for
+                                                   use
+
+Hash DRBG      SHA-256            KAT      CAST    Module            Instantiate Generate;   Module
+(A4987)        without                             becomes           Reseed Generate         initialization
+               prediction                          operational and   (compliant to SP
+               resistance                          services are      800- 90Ar1 Section
+                                                   available for     11.3)
+                                                   use
+
+KAS-FFC-       ffdhe2048          KAT      CAST    Module            Shared Secret           Module
+SSC Sp800-                                         becomes           Computation             initialization
+56Ar3                                              operational and
+(A4987)                                            services are
+                                                   available for
+                                                   use
+
+KAS-ECC-       P-256              KAT      CAST    Module            Shared Secret           Module
+SSC Sp800-                                         becomes           Computation             initialization
+56Ar3                                              operational and
+(A4987)                                            services are
+                                                   available for
+                                                   use
+
+RSA SigGen     PKCS#1 v1.5        KAT      CAST    Module            Signature               Module
+(FIPS186-5)    with SHA2-                          becomes           Generation              initialization
+(A4987)        256, SHA2-384,                      operational and
+
+                                              Page 54 of 62
+ Algorithm or         Test Properties   Test     Test    Indicator         Details                Conditions
+ Test                                   Method   Type
+                      SHA2-512, and                      services are
+                      2048-bit key                       available for
+                                                         use
+
+ RSA SigVer           PKCS#1 v1.5       KAT      CAST    Module            Signature              Module
+ (FIPS186-5)          with SHA2-                         becomes           Verification           initialization
+ (A4987)              256, SHA2-384,                     operational and
+                      SHA2-512, and                      services are
+                      2048-bit key                       available for
+                                                         use
+
+ ECDSA                SHA2-256 and      KAT      CAST    Module            Signature              Module
+ SigGen               P-256                              becomes           Generation             initialization
+ (FIPS186-5)                                             operational and
+ (A4987)                                                 services are
+                                                         available for
+                                                         use
+
+ ECDSA                SHA2-256 and      KAT      CAST    Module            Signature              Module
+ SigVer               P-256                              becomes           Verification           initialization
+ (FIPS186-5)                                             operational and
+ (A4987)                                                 services are
+                                                         available for
+                                                         use
+
+ Safe Primes          N/A               PCT      PCT     Successful key    PCT according to       Key Pair
+ Key                                                     pair generation   section 5.6.2.1.4 of   Generation
+ Generation                                                                [SP800-56Ar3]
+ (A4987)
+
+ ECDSA                N/A               PCT      PCT     Successful key    PCT according to       Key Pair
+ KeyGen                                                  pair generation   section 5.6.2.1.4 of   Generation
+ (FIPS186-5)                                                               [SP800-56Ar3]
+ (A4987)
+
+ ECDSA                SHA-256           PCT      PCT     Successful key    Signature              Key Pair
+ KeyGen                                                  pair generation   Generation and         Generation
+ (FIPS186-5)                                                               Signature
+ (A4987)                                                                   Verification
+
+ RSA KeyGen           PKCS#1 v1.5       PCT      PCT     Successful key    Signature              Key Pair
+ (FIPS186-5)          with SHA-256                       pair generation   Generation and         Generation
+ (A4987)                                                                   Signature
+                                                                           Verification
+
+Table 22: Conditional Self-Tests
+
+                                                    Page 55 of 62
+The module performs self-tests on all FIPS approved cryptographic algorithms as part of the approved services
+supported in the approved mode of operation, using the tests shown in the Conditional Self-Tests table above.
+Upon generation of a key pair, the module will perform a pair-wise consistency test (PCT) as shown in the table
+above, which provides some assurance that the generated key pair is well formed. For DH and EC key pairs,
+these tests consist of the PCT described in Section 5.6.2.1.4 of SP 800-56Ar3. For RSA and EC key pairs, this test
+consists of a signature generation and a signature verification operation. Note that two PCTs are performed for
+EC key pairs.
+
+
+10.3 Periodic Self-Test Information
+
+ Algorithm or Test          Test Method          Test Type           Period                 Periodic Method
+
+ HMAC-SHA2-256              Message              SW/FW Integrity     On demand              Manually
+ (A4987)                    authentication
+
+Table 23: Pre-Operational Periodic Information
+
+
+
+
+ Algorithm or Test          Test Method          Test Type           Period                 Periodic Method
+
+ SHA-1 (A4987)              KAT                  CAST                On demand              Manually
+
+ SHA2-224 (A4987)           KAT                  CAST                On demand              Manually
+
+ SHA2-256 (A4987)           KAT                  CAST                On demand              Manually
+
+ SHA2-384 (A4987)           KAT                  CAST                On demand              Manually
+
+ SHA2-512 (A4987)           KAT                  CAST                On demand              Manually
+
+ HMAC-SHA-1                 KAT                  CAST                On demand              Manually
+ (A4987)
+
+ HMAC-SHA2-224              KAT                  CAST                On demand              Manually
+ (A4987)
+
+ HMAC-SHA2-256              KAT                  CAST                On demand              Manually
+ (A4987)
+
+ HMAC-SHA2-384              KAT                  CAST                On demand              Manually
+ (A4987)
+
+ HMAC-SHA2-512              KAT                  CAST                On demand              Manually
+ (A4987)
+
+ AES-ECB (A4987)            KAT                  CAST                On demand              Manually
+
+
+                                                     Page 56 of 62
+Algorithm or Test   Test Method   Test Type           Period      Periodic Method
+
+AES-ECB (A4987)     KAT           CAST                On demand   Manually
+
+AES-ECB (A4994)     KAT           CAST                On demand   Manually
+
+AES-ECB (A4994)     KAT           CAST                On demand   Manually
+
+AES-CBC (A4987)     KAT           CAST                On demand   Manually
+
+AES-CBC (A4987)     KAT           CAST                On demand   Manually
+
+AES-CBC (A4994)     KAT           CAST                On demand   Manually
+
+AES-CBC (A4994)     KAT           CAST                On demand   Manually
+
+AES-GCM (A4987)     KAT           CAST                On demand   Manually
+
+AES-GCM (A4987)     KAT           CAST                On demand   Manually
+
+AES-GCM (A4994)     KAT           CAST                On demand   Manually
+
+AES-GCM (A4994)     KAT           CAST                On demand   Manually
+
+AES-GCM (A5559)     KAT           CAST                On demand   Manually
+
+AES-GCM (A5559)     KAT           CAST                On demand   Manually
+
+AES-CMAC            KAT           CAST                On demand   Manually
+(A4989)
+
+KDF SP800-108       KAT           CAST                On demand   Manually
+(A4990)
+
+KDA HKDF Sp800-     KAT           CAST                On demand   Manually
+56Cr1 (A4986)
+
+TLS v1.2 KDF        KAT           CAST                On demand   Manually
+RFC7627 (A4987)
+
+KDF IKEv2           KAT           CAST                On demand   Manually
+(A4991)
+
+PBKDF (A4987)       KAT           CAST                On demand   Manually
+
+Hash DRBG           KAT           CAST                On demand   Manually
+(A4987)
+
+
+
+                                      Page 57 of 62
+ Algorithm or Test          Test Method      Test Type             Period      Periodic Method
+
+ KAS-FFC-SSC                KAT              CAST                  On demand   Manually
+ Sp800-56Ar3
+ (A4987)
+
+ KAS-ECC-SSC                KAT              CAST                  On demand   Manually
+ Sp800-56Ar3
+ (A4987)
+
+ RSA SigGen                 KAT              CAST                  On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ RSA SigVer                 KAT              CAST                  On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ ECDSA SigGen               KAT              CAST                  On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ ECDSA SigVer               KAT              CAST                  On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ Safe Primes Key            PCT              PCT                   On demand   Manually
+ Generation
+ (A4987)
+
+ ECDSA KeyGen               PCT              PCT                   On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ ECDSA KeyGen               PCT              PCT                   On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+ RSA KeyGen                 PCT              PCT                   On demand   Manually
+ (FIPS186-5)
+ (A4987)
+
+Table 24: Conditional Periodic Information
+
+
+
+
+                                                   Page 58 of 62
+10.4 Error States
+
+ Name             Description                  Conditions           Recovery         Indicator
+                                                                    Method
+
+ Power-           An error occurred during     Software             Restart of the   Module will not load
+ On Error         the self-tests executed on   integrity test       module
+                  power-on                     failure
+                                               or CAST failure
+
+ PCT Error        An error occurred during a   PCT failure          Restart of the   Module stops functioning
+                  PCT                                               module           (sftk_fatalError is set to
+                                                                                     TRUE)
+
+Table 25: Error States
+
+In any error state, the output interface is inhibited, and the module accepts no more inputs or requests.
+
+
+10.5 Operator Initiation of Self-Tests
+
+The software integrity tests and CASTs can be invoked on demand by unloading and subsequently re-
+initializing the module. The PCTs can be invoked on demand by requesting the Key Pair Generation service.
+
+
+
+
+                                                    Page 59 of 62
+11 Life-Cycle Assurance
+
+11.1 Installation, Initialization, and Startup Procedures
+
+The module is distributed within the following RPM packages for each of the tested operational environments:
+
+    •   Dell PowerEdge R440: nss-softokn-3.90.0-6.el9_2.x86_64.rpm and nss-softokn-freebl-3.90.0-
+        6.el9_2.x86_64.rpm
+    •   IBM z16 3931-A01: nss-softokn-3.90.0-6.el9_2.s390x.rpm and nss-softokn-freebl-3.90.0-
+        6.el9_2.s390x.rpm
+    •   IBM 9080-HEX: nss-softokn-3.90.0-6.el9_2.ppc64le.rpm and nss-softokn-freebl-3.90.0-
+        6.el9_2.ppc64le.rpm
+Before the nss-softokn-3.90.0-6.el9_2 and nss-softokn-freebl-3.90.0-6.el9_2 RPM packages are installed, the
+RHEL 9 system must operate in the approved mode. This can be achieved by:
+    •   Adding the fips=1 option to the kernel command line during the system installation. During the
+        software selection stage, do not install any third-party software. More information can be found at the
+        vendor documentation.
+    •   Switching the system into the approved mode after the installation. Execute the fips-mode-setup --
+        enable command. Restart the system. More information can be found at the vendor documentation.
+In both cases, the Crypto Officer must verify the RHEL 9 system operates in the approved mode by executing
+the fips-mode-setup --check command, which should output “FIPS mode is enabled.”
+After installation of the nss-softokn-3.90.0-6.el9_2 and nss-softokn-freebl-3.90.0-6.el9_2 RPM packages, the
+Crypto Officer must execute the “Show module name and version” service by accessing the
+CKA_NSS_VALIDATION_MODULE_ID attribute of the CKO_NSS_VALIDATION object in the default slot.
+The object attribute must contain the value:
+Red Hat Enterprise Linux 9 nss 3.90.0-4408e3bb8a34af3a
+Alternatively, the /usr/lib64/nss/unsupported-tools/validation tool is provided as a convenience by the nss-
+tools-3.90.0-6.el9_2 RPM package. This tool performs the same steps, and also outputs the FIPS module
+identifier as above.
+
+
+11.2 Administrator Guidance
+
+The version of the RPMs containing the FIPS validated Module is stated in section 11.1. The RPM packages
+forming the Module can be installed by standard tools recommended for the installation of RPM packages on a
+Red Hat Enterprise Linux system (for example, dnf, rpm, and the RHN remote management tool). All RPM
+packages are signed with the Red Hat build key, which is an RSA 4096-bit key using SHA-256 signatures. The
+signature is automatically verified upon installation of the RPM package. If the signature cannot be validated,
+the RPM tool rejects the installation of the package. In such a case, the Crypto Officer is requested to obtain a
+new copy of the module's RPMs from Red Hat.
+
+
+11.3 Non-Administrator Guidance
+
+There is no non-administrator guidance.
+
+                                                   Page 60 of 62
+11.4 Design and Rules
+
+Not applicable.
+
+
+11.5 Maintenance Requirements
+
+There are no maintenance requirements.
+
+
+11.6 End of Life
+
+As the module does not persistently store SSPs, secure sanitization of the module consists of unloading the
+module. This will zeroize all SSPs in volatile memory. Then, if desired, the nss-softokn-3.90.0-6.el9_2 and nss-
+softokn-freebl-3.90.0-6.el9_2 RPM packages can be uninstalled from the RHEL 9 systems.
+
+
+
+
+                                                   Page 61 of 62
+12 Mitigation of Other Attacks
+
+12.1 Attack List
+
+Timing attacks on RSA
+    •   RSA blinding: timing attack on RSA was first demonstrated by Paul Kocher in 1996, who contributed
+        the mitigation code to our module. Most recently Boneh and Brumley showed that RSA blinding is an
+        effective defense against timing attacks on RSA.
+        o Specific Limit: None
+Cache-timing attacks on the modular exponentiation operation used in RSA
+    •   Cache invariant module exponentiation: this is a variant of a modular exponentiation implementation
+        that Colin Percival showed to defend against cache-timing attacks
+        o Specific Limit: this mechanism requires intimate knowledge of the cache line sizes of the
+             processor. The mechanism may be ineffective when the module is running on a processor whose
+             cache line sizes are unknown.
+Arithmetic errors in RSA signatures
+    •   Double-checking RSA signatures: arithmetic errors in RSA signatures might leak the private key.
+        Ferguson and Schneier recommend that every RSA signature generation should verify the signature
+        just generated.
+        o Specific Limit: None
+
+
+
+
+                                                 Page 62 of 62
+

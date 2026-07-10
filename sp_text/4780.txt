@@ -1,0 +1,2491 @@
+                            Red Hat Enterprise Linux 9 gnutls
+
+                              version 3.7.6-66803fa128d6a6e5
+
+     FIPS 140-3 Non-Proprietary Security Policy
+
+                                                                      document version 1.1
+
+                                                                 Last update: 2024-08-09
+
+
+
+                                          Prepared by:
+
+                       atsec information security corporation
+
+                      4516 Seton Center Parkway, Suite 250
+
+                                      Austin, TX 78759
+
+                                       www.atsec.com
+
+
+
+
+                           © 2024 Red Hat, Inc./ atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Red Hat Enterprise Linux 9 gnutls                                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Table of Contents
+1   General ............................................................................................................... 4
+  1.1    Overview ............................................................................................................................ 4
+  1.2    Security Levels ................................................................................................................... 4
+2   Cryptographic Module Specification ..................................................................... 5
+  2.1    Description ......................................................................................................................... 5
+  2.2    Version Information............................................................................................................ 5
+  2.3    Operational Environments ................................................................................................. 5
+  2.4    Modes of Operations .......................................................................................................... 6
+  2.5    Approved Algorithms ......................................................................................................... 6
+  2.6    Non-Approved Algorithms .................................................................................................. 9
+  2.7    Module Design and Components ..................................................................................... 10
+3   Cryptographic Module Ports and Interfaces ........................................................ 12
+4   Roles, services, and authentication .................................................................... 13
+  4.1    Roles ................................................................................................................................ 13
+  4.2    Authentication ................................................................................................................. 14
+  4.3    Services ........................................................................................................................... 14
+5   Software/Firmware security ............................................................................... 20
+  5.1    Integrity Techniques ........................................................................................................ 20
+  5.2    On-Demand Integrity Test................................................................................................ 20
+  5.3    Executable Code .............................................................................................................. 20
+6   Operational Environment ................................................................................... 21
+  6.1    Applicability ..................................................................................................................... 21
+  6.2    Tested operational Environments .................................................................................... 21
+  6.3    Policy and Requirements ................................................................................................. 21
+7   Physical Security ............................................................................................... 22
+8   Non-invasive Security ........................................................................................ 23
+9   Sensitive Security Parameters Management ....................................................... 24
+  9.1    Random bit Generator ..................................................................................................... 30
+  9.2    SSP generation................................................................................................................. 30
+  9.3    SSP entry and output ....................................................................................................... 31
+  9.4    SSP establishment ........................................................................................................... 31
+  9.5    SSP storage ...................................................................................................................... 32
+  9.6    SSP Zeroization ................................................................................................................ 32
+10 Self-tests .......................................................................................................... 33
+  10.1 Pre-operational Software Integrity Test ........................................................................... 33
+  10.2 Conditional Self-Tests ...................................................................................................... 33
+    10.2.1    Conditional Cryptographic algorithm tests ............................................................... 33
+    10.2.2    Conditional Pairwise Consistency Test ..................................................................... 34
+    10.2.3    Periodic/On-Demand Self-Test .................................................................................. 34
+  10.3 Error States ...................................................................................................................... 34
+11 Life-cycle assurance .......................................................................................... 36
+  11.1 Delivery and Operation .................................................................................................... 36
+    11.1.1    End of Life Procedure ............................................................................................... 36
+
+                                           © 2024 Red Hat, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                         2 of 45
+Red Hat Enterprise Linux 9 gnutls                                                            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+  11.2 Crypto Officer Guidance ................................................................................................... 36
+    11.2.1  TLS ........................................................................................................................... 36
+    11.2.2  AES XTS .................................................................................................................... 37
+    11.2.3  AES GCM IV .............................................................................................................. 37
+    11.2.4  Key Derivation using SP 800-132 PBKDF .................................................................. 37
+    11.2.5  Compliance to SP 800-56ARev3 assurances ............................................................ 38
+12 Mitigation of other attacks ................................................................................ 39
+
+
+
+
+                                          © 2024 Red Hat, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                      3 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+1 General
+
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for version 3.7.6-66803fa128d6a6e5
+of the Red Hat Enterprise Linux 9 gnutls cryptographic module. It has a one-to-one mapping to the
+[SP 800-140B] starting with section B.2.1 named “General” that maps to section 1 in this document
+and ending with section B.2.12 named “Mitigation of other attacks” that maps to section 12 in this
+document. It contains the security rules under which the module must operate and describes how
+this module meets the requirements as specified in FIPS PUB 140-3 (Federal Information Processing
+Standards Publication 140-3) for an Overall Security Level 1 module.
+
+1.2 Security Levels
+        ISO/IEC 24759
+      Section 6. [Number                          FIPS 140-3 Section Title                      Security Level
+            Below]
+
+      1                              General                                                    1
+
+      2                              Cryptographic Module Specification                         1
+
+      3                              Cryptographic Module Interfaces                            1
+
+      4                              Roles, Services, and Authentication                        1
+
+      5                              Software/Firmware Security                                 1
+
+      6                              Operational Environment                                    1
+
+      7                              Physical Security                                          Not Applicable
+
+      8                              Non-invasive Security                                      Not Applicable
+
+      9                              Sensitive Security Parameter Management                    1
+
+      10                             Self-tests                                                 1
+
+      11                             Life-cycle Assurance                                       1
+
+      12                             Mitigation of Other Attacks                                1
+
+                                               Overall                                          1
+
+ Table 1 - Security Levels
+
+
+
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     4 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2 Cryptographic Module Specification
+
+2.1 Description
+The Red Hat Enterprise Linux 9 gnutls cryptographic module (hereafter referred to as “the module”)
+is a software library. The module is an open-source, general-purpose set of libraries designed to
+support cross-platform development of security-enabled client and server applications. The module
+is a multiple-chip standalone cryptographic module.
+
+2.2 Version Information
+The module version is 3.7.6-66803fa128d6a6e5 of the Red Hat Enterprise Linux 9 gnutls
+cryptographic module.
+
+2.3 Operational Environments
+The module has been tested on the following platforms with the corresponding module variants and
+configuration options with and without PAA:
+
+     #      Operating                   Hardware Platform                         Processor                 PAA/
+             System                                                                                      Acceleration
+ 1       Red Hat Enterprise      Dell PowerEdge R440                        Intel® Xeon® Silver         AES-NI, SHA
+         Linux 9                                                            4216                        Extensions
+ 2       Red Hat Enterprise      IBM z16 3931-A01                           IBM z16                     CPACF
+         Linux 9
+ 3       Red Hat Enterprise      IBM 9080-HEX                               IBM POWER10                 ISA
+         Linux 9 with
+         PowerVM
+         FW1040.00 with
+         VIOS 3.1.3.00
+
+ Table 2 - Tested Operational Environments
+In addition to the configurations tested by the atsec CST laboratory, vendor-affirmed testing was
+performed on the following platforms for the module by F5, Inc.
+
+     #                  Operating System                                         Hardware Platform
+ 1       Red Hat Enterprise Linux 9                               Intel® Xeon® E5
+
+ Table 3 - Vendor Affirmed Operation Environments
+Note: The CMVP makes no statement as to the correct operation of the module or the security
+strengths of the generated keys when so ported if the specific operational environment is not listed
+on the validation certificate.
+
+                 Component                                                      Description
+ /usr/lib64/libgnutls.so.30                         Provides the API for the calling applications to request cryptographic
+ Note: libgmp is statically linked to libgnutls     services, and implements the TLS protocol, DRBG, RSA Key
+                                                    Generation, Diffie-Hellman and EC Diffie-Hellman.
+ /usr/lib64/libnettle.so.8                          Provides the cryptographic algorithm implementations, including AES,
+                                                    SHA, HMAC, RSA Digital Signature, DSA and ECDSA.
+ /usr/lib64/libhogweed.so.6                         Provides primitives used by libgnutls and libnettle to support the
+                                                    asymmetric cryptographic operations.
+ /usr/lib64/.libgnutls.so.30.hmac                   The .hmac file contain the HMAC-SHA2-256 values of the libraries for
+                                                    integrity check during the power-up.
+
+
+                                      © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                         5 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Table 4 – Cryptographic Module Components
+
+2.4 Modes of Operations
+When the module starts up successfully, after passing all the pre-operational and conditional
+cryptographic algorithms self-tests (CASTs), the module is operating in the approved mode of
+operation by default and can only be transitioned into the non-Approved mode by calling one of the
+non-Approved services listed in Table 10. Please see section 4 for the details on service indicator
+provided by the module that identifies when an approved service is called.
+
+2.5 Approved Algorithms
+The table below lists all security functions of the module, including specific key size(s) employed for
+approved or vendor-affirmed security functions, and implemented modes of operation.
+
+  CAVP Cert          Algorithm              Mode/Method             Description/Key               Use/Function
+                        and                                           Size(s)/Key
+                     Standard                                         Strength(s)
+
+Certs. #A3472, AES                    CBC                         128, 192, 256-bit keys     Symmetric encryption;
+#A3473,        FIPS197, SP800-                                    with 128-256 bits key      Symmetric decryption
+#A3478,        38A                                                strength
+#A3550, #A3551
+
+Cert. #A3478       AES                ECB                         128, 192, 256-bit keys     Symmetric encryption;
+                   FIPS197, SP800-                                with 128-256 bits key      Symmetric decryption
+                   38A                                            strength
+
+
+Certs. #A3472,     AES                CCM                         128, 256-bit keys with     Symmetric encryption;
+#A3550             SP800-38C                                      128 or 256 bits key        Symmetric decryption;
+                                                                  strength                   Authenticated encryption;
+                                                                                             Authenticated decryption
+
+Certs. #A3475, AES                    CFB8                        128, 192, 256-bit keys     Symmetric encryption;
+#A3476, #A3481 FIPS197, SP800-                                    with 128 or 256 bits key   Symmetric decryption
+               38A                                                strength
+
+Certs. #A3472, AES                    CMAC                        128, 256-bit keys with     Message authentication
+#A3473,        SP800-38B                                          128 or 256 bits key        code (MAC)
+#A3478, #A3550                                                    strength                   Message authentication
+                                                                                             code verification
+
+Certs. #A3472, AES                    GCM                         128, 256-bit keys with     Symmetric encryption and
+#A3473,        SP800-38D                                          128 or 256 bits key        decryption in the context of
+#A3478,                                                           strength                   the Transport Layer Security
+#A3550, #A3551                                                                               (TLS) network protocol
+
+Cert. #A3478       AES                GMAC                        128, 256-bit keys with     Message authentication
+                   SP800-38D                                      128 or 256 bits key        code (MAC)
+                                                                  strength                   Message authentication
+                                                                                             code verification
+
+Cert. #A3479       AES                XTS                         256, 512-bit keys with     Symmetric encryption (for
+                   SP800-38E                                      128 or 256 bits key        data storage);
+                                                                  strength                   Symmetric decryption (for
+                                                                                             data storage)
+
+
+
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    6 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+  CAVP Cert          Algorithm           Mode/Method               Description/Key                  Use/Function
+                        and                                          Size(s)/Key
+                     Standard                                        Strength(s)
+
+Vendor Affirmed    CKG               Key pair generation (FIPS-   RSA: 2048, 3072, 4096-       Key pair generation
+                   SP800-133rev2     186-4, SP800-56Arev3,        bit keys with 112-149
+                                     SP800-90Arev1)               bits key strength
+                                                                  ECDSA/ECDH: P-256, P-
+                                                                  384,
+                                                                  P-521 elliptic curves with
+                                                                  128-256 bits key
+                                                                  strength
+                                                                  Safe Primes: 2048, 3072,
+                                                                  4096, 6144, 8192-bit
+                                                                  keys with 112-200 bits of
+                                                                  key strength
+
+Cert. #A3478       DRBG              CTR_DRBG:                    256-bit keys with 256        Random number generation
+                   SP800-90Arev1     AES-256 without DF,          bits key strength
+                                     without PR
+
+Cert. #A3478       ECDSA             ECDSA KeyGen (B.4.2          P-256, P-384,                Key pair generation
+                   FIPS186-4         Testing Candidates)          P-521 elliptic curves with
+                                                                  128-256 bits key
+                                                                  strength
+
+                                     ECDSA KeyVer                 P-256, P-384,                Public key verification
+                                                                  P-521 elliptic curves with
+                                                                  128-256 bits key
+                                                                  strength
+
+                                     SHA-224, SHA-256, SHA-       P-256, P-384, P-521          Digital signature generation
+                                     384, SHA-512                 elliptic curves with 128-
+                                                                  256 bits key strength
+
+                                     SHA-1, SHA-224,              P-256, P-384, P-521          Digital signature verification
+                                     SHA-256, SHA-384, SHA-       elliptic curves with 128-
+                                     512                          256 bits key strength
+
+Certs. #A3473, HMAC                  SHA-1, SHA-224,              112-524288 bit keys with     Message authentication
+#A3478, #A3552 FIPS198-1             SHA-256, SHA-384, SHA-       112-256 key strength         code (MAC)
+                                     512                                                       Message authentication
+                                                                                               code verification
+
+Cert. #A3478       KAS-ECC-SSC       ECC                          P-256, P-384, P-521          EC Diffie-Hellman shared
+                   SP800-56Arev3     Ephemeral Unified            elliptic curves keys with    secret computation;
+                                     Scheme                       128-256 bits key             Transport Layer Security
+                                                                  strength                     (TLS) network protocol
+
+Cert. #A3478       KAS-FFC-SSC       Safe Prime Groups:           2048, 3072, 4096, 6144,      Diffie-Hellman shared secret
+                   SP800-56Arev3     ffdhe2048, ffdhe3072,        8192-bit keys with 112-      computation;
+                                     ffdhe4096, ffdhe6144,        200 bits key strength        Transport Layer Security
+                                     ffdhe8192,                                                (TLS) network protocol
+                                     MODP-2048,
+                                     MODP-3072,
+                                     MODP-4096,
+                                     MODP-6144,
+                                     MODP-8192
+
+Cert. #A3477       KDA HKDF          SHA-224, SHA-256, SHA-       Derived key with 112 to      HKDF key derivation;
+                   SP800-56Crev1     384, SHA-512                 256 bits of key strength     Transport Layer Security
+                                                                                               (TLS) network protocol
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                         7 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+  CAVP Cert          Algorithm            Mode/Method               Description/Key               Use/Function
+                        and                                           Size(s)/Key
+                     Standard                                         Strength(s)
+
+Cert. #A3478       TLS v1.2 KDF       TLS v1.2 with SHA-256,      Derived key with 112 to    TLS key derivation
+                   RFC7627            SHA-384                     256 bits of key strength
+                   SP800-135rev1
+                   (CVL)
+
+Certs. #A3472,     AES CCM SP800-     KTS per IG D.G              128, 256-bit keys with     Key wrapping;
+#A3550             38C                                            128 or 256 bits of key     Key unwrapping
+                                                                  strength
+                                                                                             (as part of the cipher suites
+                                                                                             in the TLS protocol)
+Certs. #A3472, AES GCM SP800-         KTS per IG D.G              128, 256-bit keys with
+#A3473,        38D                                                128 or 256 bits of key
+#A3478,                                                           strength
+#A3550, #A3551
+
+AES                AES CBC and        KTS per IG D.G              128, 256-bit keys with
+Certs. #A3472,     HMAC                                           128 or 256 bits of key
+#A3473,            SP800-38A,                                     strength
+#A3478,            FIPS198-1
+#A3550, #A3551
+
+HMAC
+Certs. #A3473,
+#A3478, #A3552
+
+Cert. #A3478       PBKDF              HMAC-SHA-1, HMAC-SHA-       112-256 bits               Password-based key
+                   SP800-132          224, HMAC-SHA-256,          14-128 characters with     derivation
+                                      HMAC-SHA-384, HMAC-         password strength
+                                      SHA-512                     between 1014 and 10128
+
+Cert. #A3478       RSA               RSA KeyGen (B.3.2            2048, 3072, 4096-bit       Key pair generation
+                   FIPS186-4         Random Provable Primes)      keys with 112-149 bits
+                   FIPS 140-3 IG C.F                              key strength
+
+                                      RSA SigGen PKCS#1v1.5:      2048, 3072, 4096-bit       Digital signature generation
+                                      SHA-224, SHA-256, SHA-      keys with 112-149 bits
+                                      384, SHA-512                key strength
+
+                                      RSA SigGen                  2048, 3072, 4096-bit
+                                      PSS: SHA-256, SHA-384,      keys with 112-149 bits
+                                      SHA-512                     key strength
+
+                                      RSA SigVer PKCS#1v1.5:   2048, 3072, 4096-bit          Digital signature verification
+                                      SHA-1, SHA-224, SHA-256, keys with 112-149 bits
+                                      SHA-384, SHA-512         key strength
+
+                                      RSA SigVer                  2048, 3072, 4096-bit
+                                      PSS: SHA-256, SHA-384,      keys with 112-149 bits
+                                      SHA-512                     key strength
+
+Cert. #A3478       Safe Primes Key    Safe Prime Groups:          2048, 3072, 4096, 6144,    Key pair generation
+                   Generation         ffdhe2048, ffdhe3072,       8192-bit keys with 112-
+                   SP800-56Arev3      ffdhe4096, ffdhe6144,       200 bits key strength
+                                      ffdhe8192, MODP-2048,
+                                      MODP-3072, MODP-4096,
+                                      MODP-6144, MODP-8192
+
+
+
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     8 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+  CAVP Cert           Algorithm            Mode/Method               Description/Key                 Use/Function
+                         and                                           Size(s)/Key
+                      Standard                                         Strength(s)
+
+Certs. #A3474,      SHA-3             SHA3-224, SHA3-256,          N/A                         Message digest
+#A3480              FIPS202           SHA3-384, SHA3-512
+                    FIPS 140-3 IG C.C
+
+
+Certs. #A3473, SHA                     SHA-1, SHA-224,             N/A                         Message digest
+#A3478, #A3552 FIPS180-4               SHA-256, SHA-384, SHA-
+                                       512
+
+ Table 5 - Approved Algorithms
+
+2.6 Non-Approved Algorithms
+Non-Approved Algorithms Allowed in the Approved Mode of Operation:
+The module does not implement any Non-Approved Algorithms Allowed in the Approved Mode of
+Operation.
+Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed:
+The module does not implement any non-Approved but Allowed algorithm in Approved mode of
+operation with no security claimed.
+Non-Approved Algorithms Not Allowed in the Approved Mode of Operation:
+The table below lists Non-Approved security functions that are not Allowed in the Approved Mode of
+Operation.
+
+              Algorithm/Functions                                               Use/Function
+
+AES GCM not in the context of the TLS protocol         Symmetric encryption; Symmetric decryption
+
+Blowfish                                               Symmetric encryption; Symmetric decryption
+
+Camellia                                               Symmetric encryption; Symmetric decryption
+
+CAST                                                   Symmetric encryption; Symmetric decryption
+
+ChaCha20                                               Symmetric encryption; Symmetric decryption
+
+Chacha20 and Poly1305                                  Authenticated encryption; Authenticated decryption
+
+DES                                                    Symmetric encryption; Symmetric decryption
+
+Diffie-Hellman with keys generated with domain         Key agreement; Diffie-Hellman shared secret computation
+parameters other than safe primes
+
+DSA                                                    Key pair generation; Domain parameter generation; Digital
+                                                       signature generation; Digital signature verification
+
+ECDSA with curves not listed in Table 5                Key pair generation; Public key verification; Digital signature
+                                                       generation; Digital signature verification
+
+EC Diffie-Hellman with curves not listed in Table 5    Key agreement; EC Diffie-Hellman shared secret computation
+
+GOST                                                   Symmetric encryption; Symmetric decryption; Message digest
+
+HMAC with keys smaller than 112-bit                    Message authentication code (MAC)
+
+HMAC with GOST                                         Message authentication code (MAC)
+
+MD2, MD4, MD5                                          Message digest; Message authentication code (MAC)
+
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                         9 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+              Algorithm/Functions                                               Use/Function
+
+PBKDF with non-approved message digest algorithms Password-based key derivation
+
+RC2, RC4                                               Symmetric encryption; Symmetric decryption
+
+RMD160                                                 Message digest; Message authentication code (MAC)
+
+RSA with keys smaller than 2048 bits or greater than Key pair generation; Digital signature generation
+4096 bits.
+
+RSA with keys smaller than 1024 bits or greater than Digital signature verification
+4096 bits.
+
+RSA encryption and decryption with any key sizes.      Key encapsulation; Key un-encapsulation
+
+Salsa20                                                Symmetric encryption; Symmetric decryption
+
+SM3                                                    Message digest
+
+Serpent                                                Symmetric encryption; Symmetric decryption
+
+SHA-1                                                  Digital signature generation
+
+STREEBOG                                               Message digest; Message authentication code (MAC)
+
+Triple-DES                                             Symmetric encryption; Symmetric decryption
+
+Twofish                                                Symmetric encryption; Symmetric decryption
+
+UMAC                                                   Message authentication code (MAC)
+
+Yarrow                                                 Random number generation
+
+ Table 6 - Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+2.7 Module Design and Components
+The software block diagram below shows the module, its interfaces with the operational
+environment and the delimitation of its cryptographic boundary.
+
+
+
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     10 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Figure 1 – Cryptographic Boundary
+The module is implemented as a shared library. The cryptographic module boundary consists of 5
+components:
+    •   libgnutls
+    •   libnettle
+    •   libhogweed
+    •   libgmp – statically linked
+    •   gnutls hmac file
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   11 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+3 Cryptographic Module Ports and Interfaces
+The logical interfaces are the API through which the applications request services. The following
+table summarizes the logical interfaces:
+
+            Physical Port                  Logical Interface1 Data that passes over port/interface
+As a software-only module, the module      Data Input               API input parameters
+does not have physical ports. Physical
+                                           Data Output              API output parameters
+Ports are interpreted to be the physical
+ports of the hardware platform on which it Control Input            API function calls for control
+runs.
+                                           Status Output            API return codes, status parameters
+
+ Table 7 - Ports and Interfaces
+The module does not output any control data to another cryptographic module.
+
+
+
+
+1 The module does not implement Control Output interface.
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   12 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+4 Roles, services, and authentication
+The module supports the Crypto Officer role only. This sole role is implicitly assumed
+by the operator of the module when performing a service. The module does not support
+authentication.
+
+4.1 Roles
+Table below describes the authorized role(s) in which the service can be performed with specification
+of the service input parameters and associated service output parameters.
+
+   Role                      Service                                      Input                           Output
+
+Crypto      Authenticated encryption                      Key, Plaintext, IV                  Ciphertext, MAC tag
+Officer
+(CO)        Authenticated decryption                      Key, Ciphertext, IV, MAC tag        Plaintext
+
+            Diffie-Hellman shared secret computation      Private key, public key from peer   Shared secret
+
+            Digital signature generation                  Message, hash algorithm, private    Digital signature
+                                                          key
+
+            Digital signature verification                Message, signature, hash            Verification result
+                                                          algorithm, public key
+
+            Domain parameter generation                   Domain parameters input             Generated domain
+                                                                                              parameters
+
+            EC Diffie-Hellman shared secret               Private key, public key from peer   Shared secret
+            computation
+
+            HKDF key derivation                           Shared secret                       HKDF derived key
+
+            Key pair generation                           RSA key size, Diffie-Hellman Safe   Key pair
+                                                          Prime or Elliptic Curve, enabled-
+                                                          curve2
+
+            Key agreement                                 Private key, public key from peer   Derived key
+
+            Key encapsulation                             Key to be encapsulated, Key         Encapsulated key
+                                                          encapsulating key
+
+            Key un-encapsulation                          Encapsulated key, Key               Unencapsulated key
+                                                          encapsulating key
+
+            Key wrapping                                  Key to be wrapped, Key wrapping     Wrapped key
+                                                          key
+
+            Key unwrapping                                Wrapped key, Key unwrapping key     Unwrapped key
+
+            Message authentication code (MAC)             HMAC key or AES key, message        MAC tag
+
+            Message authentication code verification      HMAC key or AES key, message,       Pass/fail
+                                                          MAC tag
+
+            Message digest                                Message                             Digest of the message
+
+            Password-based key derivation                 Password or passphrase, salt,       PBKDF Derived key
+                                                          iteration count
+
+            Public key verification                       Key pair                            Return codes/log messages
+
+            Random number generation                      Number of bits                      Random number
+
+
+
+2 The enabled-curve input parameter can be adjusted relying on the crypto-policies package provided as part of the RHEL
+OS. The usage of crypto-policies is discouraged by the vendor. Further info can be found at the vendor's documentation.
+
+                                      © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    13 of 45
+Red Hat Enterprise Linux 9 gnutls                                                    FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+   Role                       Service                                       Input                            Output
+
+            Self-tests                                     N/A                                   Result of self-test (pass/fail)
+
+            Symmetric decryption                           Key, Ciphertext                       Plaintext
+
+            Symmetric encryption                           Key, Plaintext                        Ciphertext
+
+            Show module name and version                   N/A                                   Name and version
+                                                                                                 information
+
+            Show status                                    N/A                                   Return codes and/or log
+                                                                                                 messages
+
+            TLS key derivation                             TLS Pre-master secret                 Derived key
+
+            Transport Layer Security (TLS) network         Cipher-suites, Digital Certificate,  Return codes and/or log
+            protocol                                       Public and Private Keys, Application messages, Application data
+                                                           Data
+
+            Zeroization                                    Context containing SSPs               N/A
+
+
+ Table 8 - Roles, Service Commands, Input and Output
+
+4.2 Authentication
+FIPS 140-3 does not require an authentication mechanism for level 1 modules. Therefore, the module
+does not implement an authentication mechanism for Crypto Officer. The Crypto Officer role is
+authorized to access all services provided by the module (see Table - Approved Services and Table
+- Non-Approved Services below).
+
+4.3 Services
+The table below lists all approved services that can be used in the approved mode of operation.
+The following convention is used to specify access rights to an SSP:
+    •   G = Generate: The module generates or derives the SSP.
+    •   R = Read: The SSP is read from the module (e.g., the SSP is output).
+    •   W = Write: The SSP is updated, imported, or written to the module.
+    •   E = Execute: The module uses the SSP in performing a cryptographic operation.
+    •   Z = Zeroize: The module zeroizes the SSP.
+    •   N/A: the calling application does not access any SSP or key during its operation.
+The service indicator is invoked by calling the function "gnutls_fips140_get_operation_state()" and
+it returns "GNUTLS_FIPS140_OP_APPROVED" depending on whether the API invoked corresponds to
+an approved algorithm.
+
+     Service             Description         Approved            Keys and/or        Roles Access rights          Indicator
+                                              Security              SSPs                     to Keys
+                                             Functions                                     and/or SSPs
+
+                                                 Cryptographic Services
+
+
+
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                        14 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Service         Description           Approved         Keys and/or        Roles Access rights         Indicator
+                                            Security           SSPs                     to Keys
+                                           Functions                                  and/or SSPs
+Symmetric          Perform AES          AES-CBC            AES key             CO        W, E           GNUTLS_FIPS140
+encryption         encryption           AES-ECB                                                         _OP_APPROVED
+                                        AES-CCM
+                                        AES-CFB8
+                                        AES-CMAC
+                                        AES-GMAC
+                                        AES-XTS
+Symmetric          Perform AES          AES-CBC            AES key                       W, E           GNUTLS_FIPS140
+decryption         decryption           AES-ECB                                                         _OP_APPROVED
+                                        AES-CCM
+                                        AES-GCM
+                                        AES-CFB8
+                                        AES-CMAC
+                                        AES-GMAC
+                                        AES-XTS
+Authenticated      Encrypt a plaintext AES-CCM             AES key                       W, E           GNUTLS_FIPS140
+encryption                                                                                              _OP_APPROVED
+Authenticated      Decrypt a            AES-CCM            AES key                       W, E           GNUTLS_FIPS140
+decryption         ciphertext                                                                           _OP_APPROVED
+Key wrapping       Key wrapping (as     AES-CCM            AES key                       W, E           GNUTLS_FIPS140
+                   part of the cipher   AES-GCM                                                         _OP_APPROVED
+                   suites in the TLS
+                   protocol)            AES-CBC,           AES key, HMAC                 W, E
+                                        HMAC               key
+Key unwrapping     Key unwrapping       AES-CCM            AES key                       W, E           GNUTLS_FIPS140
+                   (as part of the      AES-GCM                                                         _OP_APPROVED
+                   cipher suites in the
+                   TLS protocol)        AES-CBC,           AES key, HMAC                 W, E
+                                        HMAC               key
+Key pair           Generate RSA,        CKG                Module-generated              G, E, R        GNUTLS_FIPS140
+generation         ECDSA/ECDH and       DRBG               RSA public key,                              _OP_APPROVED
+                   DH key pairs                            Module generated
+                                        ECDSA
+                                                           RSA private key
+                                        RSA
+                                        Safe Primes Key    Module-generated              G, E, R
+                                        generation         ECDSA public key,
+                                                           Module generated
+                                                           ECDSA private
+                                                           key
+                                                           Module-generated              G, E, R
+                                                           Diffie-Hellman
+                                                           public key,
+                                                           Module-generated
+                                                           Diffie-Hellman
+                                                           private keys
+                                                           Module-generated              G, E, R
+                                                           EC Diffie-Hellman
+                                                           public key,
+                                                           Module-generated
+                                                           EC Diffie-Hellman
+                                                           private keys
+                                                           DRBG internal                 W, E
+                                                           state (V value,
+                                                           key)
+                                                           “enabled-curve”               W, E
+                                                           parameter
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   15 of 45
+Red Hat Enterprise Linux 9 gnutls                                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Service          Description           Approved          Keys and/or          Roles Access rights         Indicator
+                                             Security            SSPs                       to Keys
+                                            Functions                                     and/or SSPs
+Digital signature   Generate RSA and DRBG                    DRBG internal                 W, E             GNUTLS_FIPS140
+generation          ECDSA signature  ECDSA                   state (V value,                                _OP_APPROVED
+                    See Table 5 for                          key)
+                                     SHA
+                    SHA sizes                                RSA private key
+                                     RSA
+                                                             ECDSA private
+                                                             key
+Digital signature   Verify RSA, and     RSA                  RSA public key                W, E             GNUTLS_FIPS140
+verification        ECDSA signature     ECDSA                                                               _OP_APPROVED
+                                                             ECDSA public key
+                    See Table 5 for     SHA
+                    SHA sizes
+Public key          Verify ECDSA        ECDSA                ECDSA public key              W, E             GNUTLS_FIPS140
+verification        public key                                                                              _OP_APPROVED
+Random number       Generate random     DRBG                 Entropy input                 W, E             GNUTLS_FIPS140
+generation          bitstrings                                                                              _OP_APPROVED
+                                                             DRBG internal                 E, G             GNUTLS_FIPS140
+                                                             state (V value,                                _OP_APPROVED
+                                                             key)
+                                                             DRBG seed                     E, G             GNUTLS_FIPS140
+                                                                                                            _OP_APPROVED
+Message digest      Compute SHA         SHA                  None                          N/A              GNUTLS_FIPS140
+                    hashes                                                                                  _OP_APPROVED
+
+
+
+
+Message             Compute HMAC        Compute HMAC         HMAC key                      W, E             GNUTLS_FIPS140
+authentication                                                                                              _OP_APPROVED
+code (MAC)          Compute AES-        CMAC with AES        AES key
+                    based CMAC
+                    Compute AES-        GMAC with AES        AES key
+                    based GMAC
+Message             Verify MAC tag      HMAC or              AES key or HMAC               W, E             GNUTLS_FIPS140
+authentication                          GMAC with AES or     key                                            _OP_APPROVED
+code verification                       CMAC with AES
+Diffie-Hellman      Compute a shared KAS-FFC-SSC             Diffie-Hellman                W, E             GNUTLS_FIPS140
+shared secret       secret                                   public key, Diffie-                            _OP_APPROVED
+computation                                                  Hellman private
+                                                             key
+                                                             Diffie-Hellman                G, R
+                                                             Shared secret
+EC Diffie-Hellman   Compute a shared KAS-ECC-SSC             EC Diffie-Hellman             W, E             GNUTLS_FIPS140
+shared secret       secret                                   public key, EC                                 _OP_APPROVED
+computation                                                  Diffie-Hellman
+                                                             private key
+                                                             EC Diffie-Hellman             G, R
+                                                             Shared secret
+TLS key derivation Perform TLS key      TLS v1.2 KDF         TLS pre-master                W, E             GNUTLS_FIPS140
+                   derivation           RFC7627              secret                                         _OP_APPROVED
+                                                             TLS master                    E, G
+                                                             secret
+                                                             TLS derived key               G, R
+HKDF key            Perform key         KDA HKDF             Diffie-Hellman                W, E             GNUTLS_FIPS140
+derivation          derivation using                         shared secret or                               _OP_APPROVED
+                    HKDF (in the                             EC Diffie-Hellman
+                    context of TLS 1.3)                      shared secret
+
+                                      © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     16 of 45
+Red Hat Enterprise Linux 9 gnutls                                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Service             Description             Approved       Keys and/or       Roles Access rights          Indicator
+                                                  Security         SSPs                    to Keys
+                                                 Functions                               and/or SSPs
+                                                              HKDF derived key              G, R
+Password-based        Perform password- PBKDF                 Password/passphr              W, E            GNUTLS_FIPS140
+key derivation        based key                               ase                                           _OP_APPROVED
+                      derivation
+                                                              PBKDF derived                 G, R
+                                                              key
+
+                                                  Network Protocol Service
+Transport Layer       Establish TLS        Supported cipher     RSA public key,   CO        W, E            GNUTLS_FIPS140
+Security (TLS)        session              suites in FIPS-      RSA private key,                            _OP_APPROVED
+network protocol                           validated            ECDSA public key,
+                                           configuration (see ECDSA private
+                                           Appendix A for the key
+                                           complete list of
+                                                                TLS pre-master              W, E, G
+                                           valid cipher suites)
+                                                                secret, TLS
+                                                                master secret,
+                                                                Diffie Hellman
+                                                                private key,
+                                                                Diffie-Hellman
+                                                                public key, EC
+                                                                Diffie Hellman
+                                                                public key, EC
+                                                                Diffie-Hellman
+                                                                private key, TLS
+                                                                derived key,
+                                                                HKDF derived key
+
+                                                 Other FIPS-Related Services
+Show status           Show module          N/A                None               CO         N/A             N/A
+                      status
+Self-tests            Perform self-tests   AES, Diffie-        None                         N/A             N/A
+                                           Hellman, EC Diffie-
+                                           Hellman, ECDSA,
+                                           DRBG, HMAC, RSA,
+                                           SHS, HKDF, PBKDF,
+                                           TLS v1.2 KDF
+                                           RFC7627
+Show module      Show module               N/A                None                          N/A             N/A
+name and version name and version
+Zeroization           Zeroize SSPs         N/A                Any SSPs                      All SSPs: Z     N/A
+
+ Table 9 - Approved Services
+The table below lists all non-Approved services that can only be used in the non-Approved mode of
+operation.
+
+     Service                  Description                          Algorithms Accessed                              Role
+
+                                                  Cryptographic Services
+
+Symmetric                Compute the cipher for      AES GCM not in the context of the TLS protocol            CO
+encryption               encryption                  Blowfish
+                                                     Camellia
+                                                     CAST
+                                                     ChaCha20
+                                                     DES
+                                                     GOST
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       17 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Service               Description                          Algorithms Accessed                             Role
+
+                                               Cryptographic Services
+                                                 RC2, RC4
+                                                 Salsa20
+                                                 Serpent
+                                                 Triple-DES
+                                                 Twofish
+
+Symmetric             Compute the cipher for     AES GCM not in the context of the TLS protocol
+decryption            decryption                 Blowfish
+                                                 Camellia
+                                                 CAST
+                                                 ChaCha20
+                                                 DES
+                                                 GOST
+                                                 RC2, RC4
+                                                 Salsa20
+                                                 Serpent
+                                                 Triple-DES
+                                                 Twofish
+
+Key pair generation   Generate RSA, DSA, and     DSA
+                      ECDSA key pairs            ECDSA with curves not listed in Table 5
+                                                 RSA with keys smaller than 2048 bits or greater than 4096
+                                                 bits
+
+Digital signature     Sign RSA, DSA, and         DSA
+generation            ECDSA signatures           ECDSA with curves not listed in Table 5
+                                                 RSA with keys smaller than 2048 bits or greater than 4096
+                                                 bits
+
+Digital signature     Verify RSA, DSA, and       DSA
+verification          ECDSA signatures           ECDSA with curves not listed in Table 5
+                                                 RSA with keys smaller than 1024 bits or greater than 4096
+                                                 bits
+
+Domain parameter      Generate domain            DSA
+generation            parameter
+
+Message digest        Compute message digest     GOST
+                                                 MD2, MD4, MD5
+                                                 RMD160
+                                                 SM3
+                                                 STREEBOG
+
+Message             Compute HMAC                 HMAC with keys smaller than 112-bit
+authentication code                              HMAC with GOST
+(MAC)
+                                                 MD2, MD4, MD5
+                                                 RMD160
+                                                 STREEBOG
+                                                 UMAC
+
+Key agreement         Perform key agreement      Diffie-Hellman with keys generated with domain
+                                                 parameters other than safe primes
+                                                 EC Diffie-Hellman with curves not listed in Table 5
+
+Key encapsulation     Perform RSA key            RSA encryption and decryption with any key sizes
+                      encapsulation
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   18 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Service               Description                          Algorithms Accessed                             Role
+
+                                             Cryptographic Services
+
+Key un-               Perform RSA key un-        RSA encryption and decryption with any key sizes
+encapsulation         encapsulation
+
+Diffie-Hellman        Perform DH shared secret Diffie-Hellman with keys generated with domain
+shared secret         computation              parameters other than safe primes
+computation
+
+EC Diffie-Hellman     Perform ECDH shared        EC Diffie-Hellman with curves not listed in Table 5
+shared secret         secret computation
+computation
+
+Password-based key Perform password-based        PBKDF using non-approved message digest algorithms
+derivation         key derivation
+
+Public key            Verify ECDSA public key    ECDSA with curves not listed in Table 5
+verification
+
+Transport Layer       Establish non-supported    Non-supported cipher suite (see Appendix A for the
+Security (TLS)        TLS channel                complete list of valid cipher)
+network protocol
+
+ Table 10 - Non-Approved Services
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    19 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+5 Software/Firmware security
+
+5.1 Integrity Techniques
+The integrity of the module is verified by comparing an HMAC-SHA2-256 value calculated at run
+time with the HMAC value stored in the .hmac file that was computed at build time for each
+software component of the module listed in section 2. The .hmac file has HMAC value for libgnutls,
+libnettle and libhogweed listed in section 2. If the HMAC values do not match, the test
+fails, and the module enters the error state.
+Integrity tests are performed as part of the Pre-Operational Self-Tests.
+
+5.2 On-Demand Integrity Test
+The module provides the Self-Test service to perform self-tests on demand which includes the pre-
+operational test (i.e., integrity test) and the cryptographic algorithm self-tests (CASTs). The Self-
+Tests service can be called on demand by invoking the gnutls_fips140_run_self_tests() function
+which will perform integrity tests and the cryptographic algorithms self-tests. Additionally, the Self-
+Test service can be invoked by powering-off and reloading the module. During the execution of the
+on-demand self-tests, services are not available, and no data output is possible.
+
+5.3 Executable Code
+The module consists of executable code in the form of libgnutls, libnettle, libgmp and libhogweed
+shared libraries as stated in section 2.
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   20 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+6 Operational Environment
+
+6.1 Applicability
+The module operates in a modifiable operational environment per FIPS 140-3 level 1 specification:
+the module executes on a general-purpose operating system (Red Hat Enterprise Linux 9), which
+allows modification, loading, and execution of software that is not part of the validated module.
+
+6.2 Tested operational Environments
+See Section 2.3.
+The Red Hat Enterprise Linux operating system is used as the basis of other products which include
+but are not limited to:
+    •   Red Hat Enterprise Linux CoreOS
+    •   Red Hat Ansible Automation Platform
+    •   Red Hat OpenStack Platform
+    •   Red Hat OpenShift
+    •   Red Hat Gluster Storage
+    •   Red Hat Satellite
+Compliance is maintained for these products whenever the binaries are found unchanged.
+
+6.3 Policy and Requirements
+The module shall be installed as stated in Section 11. If properly installed, the operating system
+provides process isolation and memory protection mechanisms that ensure appropriate separation
+for memory access among the processes on the system. Each process has control over its own data
+and uncontrolled access to the data of other processes is prevented.
+There are no concurrent operators.
+The module does not have the capability of loading software or firmware from an external source.
+Instrumentation tools like the ptrace system call, gdb and strace, userspace live patching, as well
+as other tracing mechanisms offered by the Linux environment such as ftrace or systemtap, shall
+not be used in the operational environment. The use of any of these tools implies that the
+cryptographic module is running in a non-validated operational environment.
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   21 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+7 Physical Security
+The module is comprised of software only and therefore this section is Not Applicable (N/A).
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   22 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+8 Non-invasive Security
+This module does not implement any non-invasive security mechanism and therefore this section is
+Not Applicable (N/A).
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   23 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ 9 Sensitive Security Parameters Management
+ Table 11 summarizes the SSPs that are used by the cryptographic services implemented in the
+ module.
+
+ Key / SSP     Strength      Security       Generation     Import/Export Establis Storag Zeroization          Use & related
+  Name /                   Function and                                   hment      e                            keys
+   Type                    Cert. Number
+
+AES key       AES-XTS:    AES-CBC, AES- N/A                MD/EE             N/A     RAM      gnutls_cipher_ Use: Symmetric
+              128, 256    CCM, AES-                                                           deinit()       encryption;
+              bits;       CFB8, AES-                                                          gnutls_aead_ci Symmetric
+                                                           Import: CM
+              Other       CMAC,                                                               pher_deinit() decryption;
+                                                           from TOEPP
+              modes:      AES-ECB AES-                                                                       Message
+                                                           Path.
+              128, 192,   GCM, AES-                                                                          authentication
+                                                           Passed to the                                     code (MAC);
+              256 bits    GMAC, AES-                       module via API
+                          XTS,                                                                               Message
+                                                           parameters in                                     authentication
+                          Certs. #A3472,                   plaintext (P)                                     code verification;
+                          #A3473,                          format.
+                          #A3475,                                                                            Authenticated
+                                                           Export: None                                      encryption;
+                          #A3476,
+                                                                                                             Authenticated
+                          #A3478,
+                                                                                                             decryption; Key
+                          #A3479,
+                                                                                                             wrapping; Key
+                          #A3481,
+                          #A3550,                                                                            unwrapping
+                          #A3551                                                                             Related SSPs:
+                                                                                                             N/A
+HMAC key      112–256     HMAC           N/A               MD/EE             N/A      RAM     gnutls_hmac_ Use: Message
+              bits        Certs. #A3473,                                                      deinit()     Authentication
+                          #A3478,                          Import: CM                                      Code (MAC);
+                          #A3552                           from TOEPP                                      Message
+                                                                                                           authentication
+                                                           Path.
+                                                                                                           code verification;
+                                                           Passed to the                                   Key wrapping;
+                                                           module via API                                  Key unwrapping
+                                                           parameters in
+                                                                                                           Related SSPs:
+                                                           plaintext (P)
+                                                                                                           N/A
+                                                           format.
+                                                           Export: None
+Module-       112 to 256 DRBG, RSA:       Generated        MD/EE             N/A     RAM      gnutls_privkey Use: Key pair
+generated     bits       Cert. #A3478     using the FIPS                                      _deinit()       generation
+RSA public                                186-4 key                                           gnutls_x509_p Related SSPs:
+                                                           Import: None
+key                                       generation                                          rivkey_deinit() DRBG internal
+                                          method; the      Export: CM to
+                                                           TOEPP Path.                        gnutls_rsa_par state (V value,
+                                          random value
+                                                           Passed from the                    ams_deinit() key); Module-
+                                          used in key                                                         generated RSA
+                                          generation is    module via API                                     private key
+                                          obtained from    parameters in
+                                          the SP800-       plaintext (P)
+                                          90Arev1          format.
+                                          DRBG.
+Module-     112 to 256 DRBG, RSA:         Generated        MD/EE             N/A     RAM      gnutls_privkey Use: Key pair
+generated bits         Cert. #A3478       using the FIPS                                      _deinit()       generation
+RSA private                               186-4 key                                           gnutls_x509_p Related SSPs:
+                                                           Import: None
+key                                       generation                                          rivkey_deinit() DRBG internal
+                                          method; the      Export: CM to
+                                                           TOEPP Path.                        gnutls_rsa_par state (V value,
+                                          random value
+                                                                                              ams_deinit() key); Module-
+                                          used in key      Passed from the                                    generated RSA
+                                          generation is    module via API                                     public key
+                                          obtained from    parameters in
+                                          the SP800-       plaintext (P)
+                                          90Arev1          format.
+                                          DRBG.
+RSA public    112 to 256 RSA              N/A              MD/EE             N/A     RAM      gnutls_privkey Use: Digital
+key           bits       Cert. #A3478                                                         _deinit()      signature
+                                                                                                             verification;
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       24 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Key / SSP     Strength      Security       Generation     Import/Export Establis Storag Zeroization          Use & related
+  Name /                   Function and                                   hment      e                            keys
+   Type                    Cert. Number
+                                                          Import: CM                          gnutls_x509_p Transport Layer
+                                                          from TOEPP                          rivkey_deinit() Security (TLS)
+                                                          Path.                               gnutls_rsa_par network protocol
+                                                          Passed to the                       ams_deinit() Related SSPs:
+                                                          module via API                                      RSA private key
+                                                          parameters in
+                                                          plaintext (P)
+                                                          format.
+                                                          Export: None
+RSA private 112 to 256 RSA                N/A             MD/EE             N/A      RAM      gnutls_privkey Use: Digital
+key         bits       Cert. #A3478                                                           _deinit()       signature
+                                                          Import: CM                          gnutls_x509_p generation;
+                                                          from TOEPP                          rivkey_deinit() Transport Layer
+                                                                                                              Security (TLS)
+                                                          Path.                               gnutls_rsa_par
+                                                                                                              network protocol
+                                                          Passed to the                       ams_deinit()
+                                                                                                              Related SSPs:
+                                                          module via API
+                                                                                                              RSA public key
+                                                          parameters in
+                                                          plaintext (P)
+                                                          format.
+                                                          Export: None
+Module-       112, 192,   DRBG, ECDSA: Generated          MD/EE             N/A      RAM      gnutls_privkey Use: Key pair
+generated     256 bits    Cert. #A3478 using the FIPS                                         _deinit()       generation
+ECDSA                                  186-4 key          Import: None                        gnutls_x509_p Related SSPs:
+public key                             generation                                             rivkey_deinit() DRBG internal
+                                       method; the        Export: CM to
+                                                          TOEPP Path.                         gnutls_rsa_par state (V value,
+                                       random value
+                                                          Passed from the                     ams_deinit() key); Module-
+                                       used in key                                                            generated ECDSA
+                                       generation is      module via API                                      private key
+                                       obtained from      parameters in
+                                       the SP800-         plaintext (P)
+                                       90Arev1            format.
+                                       DRBG.
+Module-     112, 192,     DRBG, ECDSA: Generated          MD/EE             N/A      RAM      gnutls_privkey Use: Key pair
+generated 256 bits        Cert. #A3478 using the FIPS                                         _deinit()       generation
+ECDSA                                  186-4 key                                              gnutls_x509_p Related SSPs:
+                                                          Import: None
+private key                            generation                                             rivkey_deinit() DRBG internal
+                                       method; the        Export: CM to
+                                                          TOEPP Path.                         gnutls_rsa_par state (V value,
+                                       random value
+                                                                                              ams_deinit() key); Module-
+                                       used in key        Passed from the                                     generated ECDSA
+                                       generation is      module via API                                      public key
+                                       obtained from      parameters in
+                                       the SP800-         plaintext (P)
+                                       90Arev1            format.
+                                       DRBG.
+ECDSA         128, 192,   ECDSA           N/A             MD/EE             N/A      RAM      gnutls_privkey Use: Digital
+public key    256 bits    Cert. #A3478                                                        _deinit()       signature
+                                                          Import: CM                          gnutls_x509_p verification;
+                                                          from TOEPP                          rivkey_deinit() Public key
+                                                                                                              verification;
+                                                          Path.                               gnutls_rsa_par
+                                                                                                              Transport Layer
+                                                          Passed to the                       ams_deinit()
+                                                                                                              Security (TLS)
+                                                          module via API                                      network protocol
+                                                          parameters in
+                                                                                                              Related SSPs:
+                                                          plaintext (P)
+                                                                                                              DRBG internal
+                                                          format.
+                                                                                                              state (V value,
+                                                          Export: None                                        key); ECDSA
+                                                                                                              private key
+ECDSA       128, 192,     ECDSA           N/A             MD/EE             N/A      RAM      gnutls_privkey Use: Digital
+private key 256 bits      Cert. #A3478                                                        _deinit()       signature
+                                                                                              gnutls_x509_p generation;
+                                                                                              rivkey_deinit() Public key
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       25 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Key / SSP     Strength      Security       Generation     Import/Export Establis Storag Zeroization          Use & related
+  Name /                   Function and                                   hment      e                            keys
+   Type                    Cert. Number
+                                                          Import: CM                          gnutls_rsa_par verification;
+                                                          from TOEPP                          ams_deinit() Transport Layer
+                                                          Path.                                              Security (TLS)
+                                                          Passed to the                                      network protocol
+                                                          module via API                                     Related SSPs:
+                                                          parameters in                                      DRBG internal
+                                                          plaintext (P)                                      state (V value,
+                                                          format.                                            key); ECDSA
+                                                          Export: None                                       public key
+
+Module-       112-200     KAS-FFC-SSC     Generated      MD/EE           N/A         RAM      gnutls_dh_par Use: Key pair
+generated     bits        DRBG            using the SP                                        ams_deinit() generation;
+Diffie-                                   800-56Arev3 Export: CM to                           gnutls_pk_par Transport Layer
+                          Cert. #A3478
+Hellman                                   Safe Primes                                         ams_clear()   Security (TLS)
+                                                         TOEPP Path.
+public key                                key generation                                                    network protocol
+                                                         Passed from the
+                                          method;                                                           Related SSPs:
+                                                         module via API
+                                          random values                                                     Module-
+                                                         parameters in
+                                          are obtained plaintext (P)                                        generated Diffie-
+                                          from the                                                          Hellman private
+                                                         format.
+                                          SP800-                                                            key; DRBG
+                                          90Arev1        Import: None
+                                                                                                            internal state (V
+                                          DRBG.                                                             value, key); TLS
+                                                                                                            pre-master
+                                                                                                            secret
+Module-     112-200       KAS-FFC-SSC     Generated      MD/EE           N/A         RAM      gnutls_dh_par Use: Key pair
+generated bits            DRBG            using the SP                                        ams_deinit() generation;
+Diffie-                                   800-56Arev3                                         gnutls_pk_par Transport Layer
+                          Cert. #A3478                   Export: CM to
+Hellman                                   Safe Primes    TOEPP Path.                          ams_clear()   Security (TLS)
+private key                               key generation Passed from the                                    network protocol
+                                          method;                                                           Related SSPs:
+                                                         module via API
+                                          random values                                                     Module-
+                                                         parameters in
+                                          are obtained                                                      generated Diffie-
+                                                         plaintext (P)
+                                          from the                                                          Hellman public
+                                                         format.
+                                          SP800-                                                            key; DRBG
+                                          90Arev1        Import: None
+                                                                                                            internal state (V
+                                          DRBG.                                                             value, key); TLS
+                                                                                                            pre-master
+                                                                                                            secret
+Diffie-       112-200     KAS-FFC- SSC    N/A             MD/EE              N/A     RAM      gnutls_dh_par Use: Diffie-
+Hellman       bits        Cert. #A3478                                                        ams_deinit() Hellman shared
+public key                                                                                    gnutls_pk_par secret
+                                                          Import: CM
+                                                                                              ams_clear()   computation;
+                                                          from TOEPP
+                                                                                                            Transport Layer
+                                                          Path. Passed to
+                                                          the module via                                    Security (TLS)
+                                                          API parameters                                    network protocol
+                                                          in plaintext (P)                                  Related keys:
+                                                          format.                                           Diffie-Hellman
+                                                                                                            private key;
+                                                          Export: None
+                                                                                                            Diffie-Hellman
+                                                                                                            shared secret
+Diffie-     112-200       KAS-FFC- SSC    N/A             MD/EE              N/A     RAM      gnutls_dh_par Use: Diffie-
+Hellman     bits          Cert. #A3478                                                        ams_deinit() Hellman shared
+private key                                                                                   gnutls_pk_par secret
+                                                          Import: CM
+                                                          from TOEPP                          ams_clear()   computation;
+                                                          Path. Passed to                                   Transport Layer
+                                                                                                            Security (TLS)
+                                                          the module via
+                                                                                                            network protocol
+                                                          API parameters
+                                                          in plaintext (P)                                  Related keys:
+                                                          format.                                           Diffie-Hellman
+                                                                                                            public key; Diffie-
+                                                          Export: None
+                                                                                                            Hellman shared
+                                                                                                            secret
+
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       26 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Key / SSP     Strength      Security       Generation     Import/Export Establis Storag Zeroization           Use & related
+  Name /                   Function and                                   hment      e                             keys
+   Type                    Cert. Number
+
+Module-       128, 192,   KAS-ECC-SSC     Generated      MD/EE           N/A         RAM      gnutls_pk_par Use: Key pair
+generated     256 bits    DRBG            internally by                                       ams_clear()   generation;
+EC Diffie-                                the module                                                        Transport Layer
+                          Cert. #A3478                   Export: CM to
+Hellman                                   using the                                                         Security (TLS)
+                                                         TOEPP Path.
+public key                                ECDSA key                                                         network protocol
+                                                         Passed from the
+                                          generation                                                        Related keys:
+                                          method         module via API
+                                                                                                            Module-
+                                          compliant with parameters in                                      generated EC
+                                          [FIPS186-4]    plaintext (P)
+                                                         format.                                            Diffie-Hellman
+                                          and [SP800-                                                       private key;
+                                          56Arev3]; the Import: None                                        DRBG internal
+                                          random value                                                      state (V value,
+                                          used in key                                                       key); TLS pre-
+                                          generation is                                                     master secret
+                                          obtained from
+                                          the SP800-
+                                          90Arev1 DRBG
+Module-     128, 192,     KAS-ECC-SSC     Generated      MD/EE           N/A         RAM      gnutls_pk_par Use: Key pair
+generated 256 bits        DRBG            internally by                                       ams_clear()   generation;
+EC Diffie-                                the module     Export: CM to                                      Transport Layer
+                          Cert. #A3478
+Hellman                                   using the      TOEPP Path.                                        Security (TLS)
+private key                               ECDSA key                                                         network protocol
+                                                         Passed from the
+                                          generation                                                        Related keys:
+                                          method         module via API
+                                                                                                            Module-
+                                          compliant with parameters in                                      generated EC
+                                          [FIPS186-4]    plaintext (P)
+                                                                                                            Diffie-Hellman
+                                          and [SP800-    format.
+                                                                                                            public key; DRBG
+                                          56Arev3]; the Import: None                                        internal state (V
+                                          random value                                                      value, key); TLS
+                                          used in key                                                       pre-master
+                                          generation is                                                     secret
+                                          obtained from
+                                          the SP800-
+                                          90Arev1 DRBG
+EC Diffie-    128, 192,   KAS-ECC-SSC     N/A             MD/EE            N/A       RAM      gnutls_pk_par Use: EC Diffie-
+Hellman       256 bits    Cert. #A3478                                                        ams_clear()   Hellman shared
+public key                                                                                                  secret
+                                                          Import: CM
+                                                                                                            computation;
+                                                          from TOEPP
+                                                                                                            Transport Layer
+                                                          Path.
+                                                                                                            Security (TLS)
+                                                          Passed to the                                     network protocol
+                                                          module via API
+                                                                                                            Related keys:
+                                                          parameters in
+                                                                                                            EC Diffie-Hellman
+                                                          plaintext (P)
+                                                                                                            private key; EC
+                                                          format.
+                                                                                                            Diffie-Hellman
+                                                          Export: None                                      shared secret
+EC Diffie-  128, 192,     KAS-ECC-SSC     N/A             MD/EE            N/A       RAM      gnutls_pk_par Use: EC Diffie-
+Hellman     256 bits      Cert. #A3478                                                        ams_clear()   Hellman shared
+private key                                                                                                 secret
+                                                          Import: CM
+                                                          from TOEPP                                        computation;
+                                                                                                            Transport Layer
+                                                          Path.
+                                                                                                            Security (TLS)
+                                                          Passed to the                                     network protocol
+                                                          module via API
+                                                                                                            Related keys:
+                                                          parameters in
+                                                                                                            EC Diffie-Hellman
+                                                          plaintext (P)
+                                                                                                            public key; EC
+                                                          format.
+                                                                                                            Diffie-Hellman
+                                                          Export: None                                      shared secret
+Diffie-       112 to 200 KAS-FFC-SSC      N/A             MD/EE            Generate RAM       zeroize_key()   Use: Diffie-
+Hellman       bits       Cert. #A3478                                      d during                           Hellman shared
+shared                                                                     the                                secret
+secret                                                                     Diffie-                            computation;
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       27 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Key / SSP     Strength      Security       Generation     Import/Export Establis Storag Zeroization           Use & related
+  Name /                   Function and                                   hment      e                             keys
+   Type                    Cert. Number
+                                                           Import: CM      Hellman                            HKDF key
+                                                           from TOEPP      key                                derivation
+                                                           Path.           agreeme                            Related keys:
+                                                           Passed to the   nt and                             Diffie-Hellman
+                                                           module via API shared                              public key; Diffie-
+                                                           parameters in   secret                             Hellman private
+                                                           plaintext (P)   computat                           key
+                                                           format.         ion per
+                                                                           SP800-
+                                                           Export: CM to
+                                                           TOEPP Path.     56Arev3.
+                                                           Passed from the
+                                                           module via API
+                                                           parameters in
+                                                           plaintext (P)
+                                                           format.
+EC Diffie-    112 to 256 KAS-ECC-SSC      N/A              MD/EE           Generate RAM       zeroize_key()   Use: EC Diffie-
+Hellman       bits       Cert. #A3478                                      d during                           Hellman shared
+shared                                                     Import: CM      the EC                             secret
+secret                                                     from TOEPP      Diffie-                            computation;
+                                                                           Hellman                            HKDF key
+                                                           Path.
+                                                                           key                                derivation
+                                                           Passed to the   agreeme                            Related keys:
+                                                           module via API nt and
+                                                                                                              EC Diffie-Hellman
+                                                           parameters in   shared                             public key; EC
+                                                           plaintext (P)   secret                             Diffie-Hellman
+                                                           format.         computat                           private key
+                                                           Export: CM to   ion per
+                                                           TOEPP Path.     SP800-
+                                                           Passed from the 56Arev3.
+                                                           module via API
+                                                           parameters in
+                                                           plaintext (P)
+                                                           format.
+PBKDF       Password      PBKDF           N/A              MD/EE             N/A      RAM     Internal       Use: Password-
+password or strength      Cert. #A3478    (key material                                       PBKDF state is based key
+passphrase 1014 -                         is entered via                                      zeroized       derivation
+                                                           Import: CM to
+                                          API                                                 automatically Related keys:
+            10128                                          TOEPP Path.
+                                          parameters)                                         when function PBKDF derived
+                                                           Passed to the                      returns.
+                                                           module via API                                    key
+                                                           parameters in
+                                                           plaintext (P)
+                                                           format.
+                                                           Export: None
+PBKDF       112-256       PBKDF           Derived during MD/EE               N/A      RAM     zeroize_key()   Use: Password-
+derived key bits          Cert. #A3478    the PBKDF                                                           based key
+                                                                                                              derivation
+                                                           Import: None
+                                                                                                              Related keys:
+                                                           Export: CM
+                                                                                                              PBKDF password
+                                                           from TOEPP
+                                                                                                              or passphrase
+                                                           Path.
+                                                           Passed from the
+                                                           module via API
+                                                           parameters in
+                                                           plaintext (P)
+                                                           format.
+HKDF        112 to 256 KDA HKDF           Derived (as      MD/EE             N/A      RAM     gnutls_deinit() Use: HKDF key
+derived key bits       Cert. #A3477       part of                                                             derivation;
+                                          TLSv1.3) with                                                       Transport Layer
+                                                           Import: None
+                                          KDA HKDF                                                            Security (TLS)
+                                                           Export: CM                                         network protocol
+                                                           from TOEPP
+                                                           Path.
+
+                                       © 2024 Red Hat, Inc. / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       28 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Key / SSP      Strength      Security       Generation     Import/Export Establis Storag Zeroization          Use & related
+  Name /                    Function and                                   hment      e                            keys
+   Type                     Cert. Number
+                                                           Passed from the                                    Related keys:
+                                                           module via API                                     Diffie-Hellman
+                                                           parameters in                                      shared secret, EC
+                                                           plaintext (P)                                      Diffie-Hellman
+                                                           format.                                            shared secret
+Entropy        112 to 337 DRBG             Obtained from Import: None      N/A        RAM      gnutls_global_ Use: Random
+input          bits       Cert. #A3478     the SP 800-   Export: None                          deinit()       number
+                                           90B compliant it remains within                                    generation
+IG D.L                                     Non-Physical the                                                   Related keys:
+                           ESV             Entropy
+compliant                                                cryptographic                                        DRBG seed
+                           Cert. #E47      Source
+                                                         boundary.
+DRBG           128 to 256 DRBG             Generated     Import: None        N/A      RAM      gnutls_global_ Use: Random
+internal       bits       Cert. #A3478     from the DRBG Export: None                          deinit()       number
+state (V                                   seed as                                                            generation
+value, key)                                defined in                                                         Related keys:
+                                           SP800-                                                             DRBG seed,
+IG D.L                                     90Arev1                                                            Module-
+compliant                                                                                                     generated ECDSA
+                                                                                                              public key,
+                                                                                                              Module-
+                                                                                                              generated ECDSA
+                                                                                                              private key,
+                                                                                                              Module-
+                                                                                                              generated RSA
+                                                                                                              public key,
+                                                                                                              Module-
+                                                                                                              generated RSA
+                                                                                                              private key,
+                                                                                                              Module-
+                                                                                                              generated Diffie-
+                                                                                                              Hellman public
+                                                                                                              key, Module-
+                                                                                                              generated Diffie-
+                                                                                                              Hellman private
+                                                                                                              key, Module-
+                                                                                                              generated EC
+                                                                                                              Diffie-Hellman
+                                                                                                              public key,
+                                                                                                              Module-
+                                                                                                              generated EC
+                                                                                                              Diffie-Hellman
+                                                                                                              private key
+DRBG seed 128 to 256 DRBG                  Derived from    Import: None      N/A      RAM      gnutls_global_ Use: Random
+          bits       Cert. #A3478          entropy input   Export: None                        deinit()       number
+                                           as defined in                                                      generation
+IG D.L                                                     it remains within
+                                           SP800-          the                                                Related keys:
+compliant                  ESV             90Arev1         cryptographic                                      Entropy input;
+                           Cert. #E47                                                                         DRBG internal
+                                                           boundary.
+                                                                                                              state (V value,
+                                                                                                              key)
+TLS pre-       DH 112 to TLS v1.2 KDF N/A                  MD/EE             Key      RAM      gnutls_deinit() Use: TLS key
+master         256 bits    RFC7627                                           agreeme                           derivation,
+secret         ECDH 112 Certs. #A3478                                        nt for                            Transport Layer
+                                                           Import: CM to
+               to 256 bits                                                   Diffie-                           Security (TLS)
+                                                           TOEPP Path.
+                                                                             Hellman                           network protocol
+                                                           Passed to the     or EC                             Related keys:
+                                                           module via API    Diffie-                           TLS master
+                                                           parameters in     Hellman
+                                                           plaintext (P)                                       secret
+                                                                             and
+                                                           format.           shared
+                                                           Export: None      secret
+                                                                             computat
+
+                                        © 2024 Red Hat, Inc. / atsec information security.
+              This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                        29 of 45
+ Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Key / SSP    Strength     Security       Generation     Import/Export Establis Storag Zeroization            Use & related
+ Name /                 Function and                                   hment      e                              keys
+  Type                  Cert. Number
+                                                                         ion per
+                                                                         SP800-
+                                                                         56Arev3
+
+
+
+TLS master 112 to 256 TLS v1.2 KDF  Derived from MD/EE                   N/A        RAM      gnutls_deinit() Use: TLS key
+secret     bits       RFC7627       TLS pre-                                                                 derivation,
+                      Certs. #A3478 master secret Import: None                                               Transport Layer
+                                    using TLS v1.2                                                           Security (TLS)
+                                    KDF            Export: None                                              network protocol
+                                    RFC7627per                                                               Related keys:
+                                    SP800-                                                                   TLS pre-master
+                                    135rev1.                                                                 secret, TLS
+                                                                                                             derived key
+TLS derived 112 to 256 TLS v1.2 KDF  Derived from      MD/EE             N/A        RAM      gnutls_deinit() Use: TLS key
+key         bits       RFC7627       TLS master                                                              derivation,
+                       Certs. #A3478 secret using      Import: None
+                                                                                                             Transport Layer
+                                     TLS v1.2 KDF                                                            Security (TLS)
+                                     RFC7627 per       Export: CM                                            network protocol
+                                     SP800-            from TOEPP
+                                                       Path.                                                 Related keys:
+                                     135rev1.                                                                TLS pre-master
+                                                       Passed from the                                       secret, TLS
+                                                       module via API                                        master secret
+                                                       parameters in
+                                                       plaintext (P)
+                                                       format.
+
+  Table 11 - SSPs
+
+ 9.1 Random bit Generator
+ The module employs a Deterministic Random Bit Generator (DRBG) based on [SP800-90ARev1] for
+ the generation of random value used in asymmetric keys, and for providing a RNG service to calling
+ applications. The approved DRBG provided by the module is the CTR_DRBG with AES-256. The DRBG
+ does not employ prediction resistance or a derivation function. The module uses an SP800-90B-
+ compliant Entropy Source specified in the table below to seed the DRBG.
+
+    Entropy Source             Minimum number                                         Details
+                               of bits of entropy
+  SP 800-90B                   225 bits of entropy        Userspace CPU Jitter 2.2.0 entropy source with
+  compliant Non-               in the 256-bit             LFSR as the non-vetted conditioning component is
+  Physical Entropy             output                     located within the physical perimeter of the
+  Source                                                  module but outside the cryptographic boundary of
+  (ESV cert. E47)                                         the module.
+  Table 12 - Non-Deterministic Random Number Generation Specification
+  The module generates SSPs (e.g., keys) whose strengths are modified by available entropy.
+
+ 9.2 SSP generation
+ In accordance with FIPS 140-3 IG D.H, the cryptographic module performs Cryptographic Key
+ Generation (CKG) for asymmetric keys according to section 5.1 and 5.2 of [SP800-133rev2]
+ according to section 6.1 of [SP800-133rev2] (vendor affirmed) by obtaining a random bit string
+ directly from an approved [SP800-90Arev1] DRBG and that can support the required security
+ strength requested by the caller (without any V, as described in Additional Comments 2 of IG D.H).
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    30 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    •   For generating RSA and ECDSA keys, the module implements asymmetric cryptographic
+        key generation (CKG) services compliant with [FIPS186-4].
+    •   The public and private keys used in the EC Diffie-Hellman key agreement schemes are
+        generated internally by the module using the ECDSA key generation method compliant with
+        [FIPS186-4] and [SP800-56Arev3].
+    •   The public and private keys used in the Diffie-Hellman key agreement scheme are also
+        compliant with [SP800-56Arev3]. The module generates keys using safe primes defined in
+        RFC7919 and RFC3526, as described in the next section.
+The module provides the following SSP generation methods with associated SSP sizes and
+strengths:
+    •   RSA [FIPS186-4] B.3.2 Random Provable Primes - 2048, 3072, 4096-bit keys with 112-149
+        bits of key strength
+    •   ECDH/ECDSA [FIPS186-4] B.4.2 Testing Candidates - P-256, P-384, P-521 elliptic curves with
+        128-256 bits of key strength
+    •   Safe Primes Key Generation [SP800-56Arev3] - 2048, 3072, 4096, 6144, 8192-bit keys with
+        112-200 bits of key strength
+The module supports the following key derivation methods according to [SP800-135rev1]:
+    •   KDF for the TLS protocol, used as pseudo-random functions (PRF) for TLSv1.2 (RFC7627)
+The module supports the following key derivation methods according to [SP800-56Cr1]:
+    •   HKDF for the TLS protocol TLSv1.3.
+The module also supports password-based key derivation (PBKDF). The implementation is
+compliant with option 1a of [SP800-132]. Keys derived from passwords or passphrases using this
+method can only be used in storage applications
+Intermediate key generation values are not output from the module and are explicitly zeroized
+after processing the service.
+
+9.3 SSP entry and output
+SSPs are provided to the module via API input parameters in plaintext form and output via API
+output parameters in plaintext form within the physical perimeter of the operational environment.
+This is allowed by [FIPS140-3_IG] IG 9.5.A, according to the “CM Software to/from App via TOEPP
+Path” entry on the Key Establishment Table. The module does not support entry or output of
+cryptographically protected SSPs.
+
+9.4 SSP establishment
+The module provides Diffie-Hellman and EC Diffie-Hellman shared secret computation compliant
+with SP800- 56Arev3, in accordance with scenario 2 (1) of IG D.F and used as part of the TLS
+protocol key exchange in accordance with scenario 2 (2) of IG D.F; that is, the shared secret
+computation (KAS-FFC-SSC and KAS-ECC-SSC) followed by the derivation of the keying material
+using SP800-135rev1 KDF and SP800-56Crev1 KDF.
+For Diffie-Hellman, the module supports the use of safe primes from RFC7919 for domain
+parameters and key generation, which are used in the TLS key agreement implemented by the
+module.
+    •   TLS (RFC7919)
+        ◦    ffdhe2048 (ID = 256)
+        ◦    ffdhe3072 (ID = 257)
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   31 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+        ◦    ffdhe4096 (ID = 258)
+        ◦    ffdhe6144 (ID = 259)
+        ◦    ffdhe8192 (ID = 260)
+The module also supports the use of safe primes from RFC3526, which are part of the Modular
+Exponential (MODP) Diffie-Hellman groups that can be used for Internet Key
+Exchange (IKE). Note that the module only implements key generation and verification, and
+shared secret computation using safe primes, but no part of the IKE protocol.
+    •   IKEv2 (RFC3526)
+        ◦    MODP-2048 (ID=14)
+        ◦    MODP-3072 (ID=15)
+        ◦    MODP-4096 (ID=16)
+        ◦    MODP-6144 (ID=17)
+        ◦    MODP-8192 (ID=18)
+The module also provides the following key transport mechanisms:
+    •   Key wrapping using AES-CCM, AES-GCM, and AES-CBC with HMAC, used in the context of
+        the TLS protocol cipher suites (in compliance with IG D.G).
+According to Table 2: Comparable strengths in [SP 800-57rev5], the key sizes of AES, Diffie-
+Hellman and EC Diffie-Hellman provides the following security strength in Approved mode of
+operation:
+    •   AES key wrapping using AES-CCM, AES-GCM, and AES in CBC mode and HMAC, provides
+        between 128 or 256 bits of encryption strength.
+    •   Diffie-Hellman shared secret computation provides between 112 and 200 bits of security
+        strength.
+    •   EC Diffie-Hellman shared secret computation provides between 128 and 256 bits of security
+        strength.
+
+9.5 SSP storage
+Symmetric keys, public and private keys are provided to the module by the calling application via
+API input parameters and are destroyed by the module when invoking the appropriate API function
+calls.
+The module does not perform persistent storage of SSPs. The SSPs are temporarily stored in the
+RAM in plaintext form. SSPs are provided to the module by the calling process and are destroyed
+when released by the appropriate zeroization function calls.
+
+9.6 SSP Zeroization
+The memory occupied by SSPs is allocated by regular memory allocation operating system calls.
+The application that is acting as the CO is responsible for calling the appropriate zeroization
+functions provided in the module's API and listed in Table 11. Calling the gnutls_deinit() will zeroize
+the SSPs stored in the TLS protocol internal state and also invoke the corresponding API functions
+listed in Table 11 to zeroize SSPs. The zeroization functions overwrite the memory occupied by
+SSPs with “zeros” and deallocate the memory with the regular memory deallocation operating
+system call. The completion of a zeroization routine(s) will indicate that a zeroization procedure
+succeeded. All data output is inhibited during zeroization.
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   32 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+10 Self-tests
+The module performs the pre-operational self-test and CASTs automatically when the module is
+loaded into memory. Pre-operational self-test ensure that the module is not corrupted, and the
+CASTs ensure that the cryptographic algorithms work as expected. While the module is executing
+the self-tests, the module services are not available, and input and output are inhibited. The module
+is not available for use by the calling application until the pre-operational self-test and the CASTs
+are completed successfully. After the pre-operational test and the CASTs succeed, the module
+becomes operational. If any of the pre-operational test or any of the CASTs fail an error message is
+returned, and the module transitions to the error state.
+
+10.1 Pre-operational Software Integrity Test
+The module performs the following pre-operational tests: the integrity test of the shared libraries
+that comprise the module using HMAC-SHA2-256. The details of integrity test are provided in section
+5.1. Prior the first use, a CAST is executed for the algorithms used in the Pre-operational Self-Tests.
+
+10.2 Conditional Self-Tests
+The following sub-sections describe the conditional self-tests supported by the module. If one of the
+conditional self-tests fail, the module transitions to the ‘Error’ state and a corresponding error
+indication is given.
+The entropy source performs its required self-tests; those are not listed here, as the entropy source
+is not part of the cryptographic boundary of the module.
+
+10.2.1           Conditional Cryptographic algorithm tests
+The module performs cryptographic algorithm self-tests (CASTs) on all approved cryptographic
+algorithms. The CASTs consist of Known Answer Tests for all the approved cryptographic algorithms.
+
+        Algorithm                                                        Test
+
+AES                            KAT AES CBC mode with 128-bit and 256-bit keys, encryption and decryption (separately
+                               tested)
+                               KAT AES CFB8 mode with 256-bit key, encryption and decryption (separately tested)
+                               KAT AES GCM mode with 256-bit key, encryption and decryption (separately tested)
+                               KAT AES XTS mode with 256-bit keys, encryption and decryption (separately tested)
+                               KAT AES-CMAC with 256-bit key size MAC generation
+
+Diffie-Hellman                 Primitive “Z” Computation KAT with ffdhe3072
+
+DRBG                           KAT CTR_DRBG with AES with 256-bit keys without DF, without PR
+
+DRBG                           Health tests according to section 11.3 of [SP800-90Arev1]
+
+EC Diffie-Hellman              Primitive “Z” Computation KAT with P-256 curve
+
+ECDSA                          KAT ECDSA with P-256 using SHA-256, P-384 using SHA-384, and P-521 using SHA-512,
+                               signature generation and verification (separately tested)
+
+HKDF KDA                       KAT with SHA-256
+
+HMAC                           KAT HMAC-SHA-1, HMAC-SHA-224, HMAC-SHA-256, HMAC-SHA-384, HMAC-SHA-512
+
+PBKDF KDF                      KAT with SHA-256 with 4096 iterations and 288-bit salt
+
+RSA                            KAT RSA PKCS#1 v1.5 with 2048-bit key using SHA-256, signature generation and
+                               verification (separately tested)
+
+SHA-3                          KAT SHA3-224, SHA3-256, SHA3-384, SHA3-512
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   33 of 45
+Red Hat Enterprise Linux 9 gnutls                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+        Algorithm                                                          Test
+
+TLS v1.2 KDF RFC7627            KAT with SHA-256
+
+ Table 13 - Conditional Cryptographic Algorithm Self-Tests
+
+10.2.2            Conditional Pairwise Consistency Test
+The module performs the Pair-wise Consistency Tests (PCT) shown in the following table. If any of
+the tests fails, the module returns an error code and enters the Error state. When the module is in
+the Error state, no data is output, and cryptographic operations are not allowed.
+
+              Algorithm                                                        Test
+
+ECDSA key generation                      PCT using SHA-256, signature generation and verification.
+
+RSA key generation                        PCT using PKCS#1 v1.5 with SHA-256, signature generation and verification
+
+Diffie-Hellman key generation             PCT according to section 5.6.2.1.4 of [SP800-56Arev3]
+
+EC Diffie-Hellman key generation          Covered by ECDSA PCT as allowed by IG 10.3.A additional comment 1
+
+ Table 14 - Pairwise Consistency Test
+
+10.2.3            Periodic/On-Demand Self-Test
+The module provides the Self-Test service to perform self-tests on demand which includes the pre-
+operational test (i.e., integrity test) and the cryptographic algorithm self-tests (CASTs). The Self-
+Tests service can be called on demand by invoking the gnutls_fips140_run_self_tests() function
+which will perform integrity tests and the cryptographic algorithms self-tests. Additionally, the Self-
+Test service can be invoked by powering-off and reloading the module. During the execution of the
+on-demand self-tests, services are not available, and no data output is possible.
+
+10.3 Error States
+When the module fails any pre-operational self-test or conditional test, the module will return an
+error code to indicate the error and enters error state. Any further cryptographic operations and the
+data output via the data output interface are inhibited. The calling application can obtain the module
+state by calling the gnutls_fips140_get_operation_state() API function. The function returns
+GNUTLS_FIPS140_OP_ERROR if the module is in the Error state.
+The following table shows the error codes and the corresponding condition:
+
+  Error                        Cause of Error                                        Status Indicator
+  State
+Error State   When the integrity tests or KAT fail at power-up.       GNUTLS_E_SELF_TEST_ERROR (-400)
+              When the KAT of DRBG fails during pre-operational       GNUTLS_E_RANDOM_FAILED (-206)
+              tests
+              When the new generated key pair fails the PCT           GNUTLS_E_PK_GENERATION_ERROR (-403)
+              When the module is in error state and caller requests   GNUTLS_E_LIB_IN_ERROR_STATE (-402)
+              cryptographic operations
+
+ Table 15 - Error States
+Self-test errors transition the module into an error state that keeps the module operational but
+prevents any cryptographic related operations. The module must be restarted and perform the per-
+                                     © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   34 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+operational self-test and the CASTs to recover from these errors. If failures persist, the module must
+be re-installed.
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   35 of 45
+Red Hat Enterprise Linux 9 gnutls                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+11 Life-cycle assurance
+
+11.1 Delivery and Operation
+The module is distributed as a part of the Red Hat Enterprise Linux 9 (RHEL 9) package in the form
+of the gnutls-3.7.6-19.el9_0.x86_64 RPM package for x86 systems or gnutls-3.7.6-19.el9_0.s390x
+RPM package for s390 systems or gnutls-3.7.6-19.el9_0.ppc64le RPM package for ppc64le systems.
+
+11.1.1           End of Life Procedure
+For secure sanitization of the cryptographic module, the module needs first to be powered off, which
+will zeroize all keys and CSPs in volatile memory. Then, for actual deprecation, the module shall be
+upgraded to a newer version that is FIPS 140-3 validated.
+The module does not possess persistent storage of SSPs, so further sanitization steps are not
+needed.
+
+11.2 Crypto Officer Guidance
+The binaries of the 'Red Hat Enterprise Linux 9 gnutls version 3.7.6-66803fa128d6a6e5’ are
+contained in the RPM packages for delivery listed below.
+Before the 'Red Hat Enterprise Linux 9 gnutls’ RPM packages are installed, the RHEL 9 system must
+operate in Approved mode. This can be achieved by:
+•    Starting the installation in Approved mode. Add the fips=1 option to the kernel command line
+     during the system installation. During the software selection stage, do not install any third-
+     party software. More information can be found at the vendor documentation.
+•    Switching the system into Approved mode after the installation. Execute the fips-mode-setup
+     --enable command. Restart the system. More information can be found at the vendor
+     documentation.
+In both cases, the Crypto Officer must verify the RHEL 9 system operates in Approved mode by
+executing the fips-mode-setup --check command, which should output “FIPS mode is enabled.”
+The following RPM packages contain the FIPS validated module:
+
+ Processor Architecture                                          RPM Packages
+
+ Intel 64-bit                       gnutls- 3.7.6-19.el9_0.x86_64.rpm
+                                    nettle- 3.8-3.el9_0.x86_64.rpm
+
+ z16 64-bit                         gnutls - 3.7.6-19.el9_0.s390x.rpm
+                                    nettle - 3.8-3.el9_0.s390x.rpm
+
+ POWER10 64-bit                     gnutls - 3.7.6-19.el9_0.ppc64le.rpm
+                                    nettle - 3.8-3.el9_0.ppc64le.rpm
+
+ Table 16 - RPM packages
+
+11.2.1           TLS
+The TLS protocol implementation provides both server and client sides. In order to operate in the
+approved mode, digital certificates used for server and client authentication shall comply with the
+restrictions of key size and message digest algorithms imposed by [SP800-131Arev2]. In addition,
+as required also by [SP800-131Arev2], Diffie-Hellman with keys smaller than 2048 bits must not be
+used.
+
+                                     © 2024 Red Hat, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    36 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+The TLS protocol lacks the support to negotiate the used Diffie-Hellman key sizes. To ensure full
+support for all TLS protocol versions, the TLS client implementation of the module accepts Diffie-
+Hellman key sizes smaller than 2048 bits offered by the TLS server.
+For complying with the requirement to not allow Diffie-Hellman key sizes smaller than 2048 bits, the
+Crypto Officer must ensure that:
+    •   in case the module is used as a TLS server, the Diffie-Hellman parameters must be 2048
+        bits or larger;
+    •   in case the module is used as a TLS client, the TLS server must be configured to only offer
+        Diffie-Hellman keys of 2048 bits or larger.
+
+11.2.2           AES XTS
+The AES algorithm in XTS mode can be only used for the cryptographic protection of data on storage
+devices, as specified in [SP800-38E]. The length of a single data unit encrypted with the XTS-AES
+shall not exceed 2²⁰ AES blocks, that is 16MB of data.
+The module implements a check that ensures, before performing any cryptographic operation, that
+the two AES keys used in AES XTS mode are not identical (in compliance with IG C.I) .
+Note: AES-XTS shall be used with 128 and 256-bit keys only. AES-XTS with 192-bit keys is not an
+Approved service.
+
+11.2.3           AES GCM IV
+The module implements AES GCM for being used in the TLS v1.2 and v1.3 protocols. AES GCM IV
+generation is in compliance with [FIPS140-3_IG] IG C.H for both protocols as follows:
+    •   For TLS v1.2, IV generation is in compliance with scenario 1.a of IG C.H and [RFC5288]. The
+        module supports acceptable AES-GCM ciphersuites from section 3.3.1 of [SP800-52rev2].
+    •   For TLS v1.3, IV generation is in compliance with scenario 5 of IG C.H and [RFC8446]. The
+        module supports acceptable AES-GCM ciphersuites from section 3.3.1 of [SP800-52rev2].
+The IV generated in both scenarios is only used within the context of the TLS protocol
+implementation. The nonce_explicit part of the IV does not exhaust the maximum number of
+possible values for a given session key. The design of the TLS protocol in this module implicitly
+ensures that the nonce_explicit, or counter portion of the IV will not exhaust all of its possible values.
+In case the module's power is lost and then restored, the key used for the AES GCM encryption or
+decryption shall be redistributed.
+The Crypto Officer can use the module’s API to perform AES GCM encryption using internal IV
+generation. These IVs are always 96 bits and generated using the approved DRBG internal to the
+module’s boundary. This is in compliance with Scenario 2 of FIPS 140-3 IG C.H.
+
+
+
+11.2.4           Key Derivation using SP 800-132 PBKDF
+The module provides password-based key derivation (PBKDF), compliant with SP800-132 and IG
+D.N. The module supports option 1a from section 5.4 of [SP800-132], in which the Master Key (MK)
+or a segment of it is used directly as the Data Protection Key (DPK).
+In accordance with [SP800-132], the following requirements shall be met.
+    •   Derived keys shall only be used in storage applications. The Master Key (MK) shall not be
+        used for other purposes. The length of the MK or DPK shall be of 112 bits or more (this is
+        verified by the module to determine the service is approved).
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   37 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    •   A portion of the salt, with a length of at least 128 bits (this is verified by the module to
+        determine the service is approved), shall be generated randomly using the SP800-90Arev1
+        DRBG,
+    •   The iteration count shall be selected as large as possible, as long as the time required to
+        generate the key using the entered password is acceptable for the users. The minimum
+        value shall be 1000 (this is verified by the module to determine the service is approved).
+    •   Passwords or passphrases, used as an input for the PBKDF, shall not be used as
+        cryptographic keys.
+    •   The length of the password or passphrase shall be of at least 14 characters (this is verified
+        by the module to determine the service is approved), and shall consist of lower-case, upper-
+        case and numeric characters. The probability of guessing the value is estimated to be 10-14
+        (assuming all digits)
+The calling application shall also observe the rest of the requirements and recommendations
+specified in [SP800-132].
+
+11.2.5           Compliance to SP 800-56ARev3 assurances
+To comply with the assurances listed in section 5.6.2 of SP 800-56ARev3, the module shall be used
+together with an application that implements the "TLS protocol" and the following steps shall be
+performed.
+    1. The entity using the module, must use the module's "Key pair generation" service for
+       generating DH/ECDH ephemeral keys. This meets the assurances required by key pair
+       owner defined in the section 5.6.2.1 of SP 800-56ARev3.
+    2. As part of the module's shared secret computation (SSC) service, the module internally
+       performs the public key validation on the peer's public key passed in as input to the SSC
+       function. This meets the public key validity assurance required by the sections
+       5.6.2.2.1/5.6.2.2.2 of SP 800-56ARev3.
+
+The module does not support static keys therefore the "assurance of peer's possession of private
+key" is not applicable.
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   38 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+12 Mitigation of other attacks
+RSA is vulnerable to timing attacks. In a setup where attackers can measure the time of RSA
+decryption or signature operations, blinding is always used to protect the RSA operation from that
+attack.
+The internal API function of rsa_blind() and rsa_unblind() are called by the module for RSA
+signature generation and RSA decryption operations. The module generates a random blinding
+factor and include this random value in the RSA operations to prevent RSA timing attacks.
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   39 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix A. TLS Cipher Suites
+The module supports the following cipher suites for the TLS protocol version 1.0, 1.1, 1.2 and 1.3,
+compliant with section 3.3.1 of [SP800-52rev2]. Each cipher suite defines the key exchange
+algorithm, the bulk encryption algorithm (including the symmetric key size) and the MAC algorithm.
+
+                              Cipher Suite                                               ID             Reference
+
+ TLS_DH_RSA_WITH_AES_128_CBC_SHA                                              { 0x00, 0x31 }          RFC3268
+
+ TLS_DHE_RSA_WITH_AES_128_CBC_SHA                                             { 0x00, 0x33 }          RFC3268
+
+ TLS_DH_RSA_WITH_AES_256_CBC_SHA                                              { 0x00, 0x37 }          RFC3268
+
+ TLS_DHE_RSA_WITH_AES_256_CBC_SHA                                             { 0x00, 0x39 }          RFC3268
+
+ TLS_DH_RSA_WITH_AES_128_CBC_SHA256                                           { 0x00,0x3F }           RFC5246
+
+ TLS_DHE_RSA_WITH_AES_128_CBC_SHA256                                          { 0x00,0x67 }           RFC5246
+
+ TLS_DH_RSA_WITH_AES_256_CBC_SHA256                                           { 0x00,0x69 }           RFC5246
+
+ TLS_DHE_RSA_WITH_AES_256_CBC_SHA256                                          { 0x00,0x6B }           RFC5246
+
+ TLS_PSK_WITH_AES_128_CBC_SHA                                                 { 0x00, 0x8C }          RFC4279
+
+ TLS_PSK_WITH_AES_256_CBC_SHA                                                 { 0x00, 0x8D }          RFC4279
+
+ TLS_DHE_RSA_WITH_AES_128_GCM_SHA256                                          { 0x00, 0x9E }          RFC5288
+
+ TLS_DHE_RSA_WITH_AES_256_GCM_SHA384                                          { 0x00, 0x9F }          RFC5288
+
+ TLS_DH_RSA_WITH_AES_128_GCM_SHA256                                           { 0x00, 0xA0 }          RFC5288
+
+ TLS_DH_RSA_WITH_AES_256_GCM_SHA384                                           { 0x00, 0xA1 }          RFC5288
+
+ TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA                                          { 0xC0, 0x04 }          RFC4492
+
+ TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA                                          { 0xC0, 0x05 }          RFC4492
+
+ TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA                                         { 0xC0, 0x09 }          RFC4492
+
+ TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA                                         { 0xC0, 0x0A }          RFC4492
+
+ TLS_ECDH_RSA_WITH_AES_128_CBC_SHA                                            { 0xC0, 0x0E }          RFC4492
+
+ TLS_ECDH_RSA_WITH_AES_256_CBC_SHA                                            { 0xC0, 0x0F }          RFC4492
+
+ TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA                                           { 0xC0, 0x13 }          RFC4492
+
+ TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA                                           { 0xC0, 0x14 }          RFC4492
+
+ TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256                                      { 0xC0, 0x23 }          RFC5289
+
+ TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384                                      { 0xC0, 0x24 }          RFC5289
+
+ TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256                                       { 0xC0, 0x25 }          RFC5289
+
+ TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384                                       { 0xC0, 0x26 }          RFC5289
+
+ TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256                                        { 0xC0, 0x27 }          RFC5289
+
+ TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384                                        { 0xC0, 0x28 }          RFC5289
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   40 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                              Cipher Suite                                               ID             Reference
+
+ TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256                                         { 0xC0, 0x29 }          RFC5289
+
+ TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384                                         { 0xC0, 0x2A }          RFC5289
+
+ TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256                                      { 0xC0, 0x2B }          RFC5289
+
+ TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384                                      { 0xC0, 0x2C }          RFC5289
+
+ TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256                                       { 0xC0, 0x2D }          RFC5289
+
+ TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384                                       { 0xC0, 0x2E }          RFC5289
+
+ TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256                                        { 0xC0, 0x2F }          RFC5289
+
+ TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384                                        { 0xC0, 0x30 }          RFC5289
+
+ TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256                                         { 0xC0, 0x31 }          RFC5289
+
+ TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384                                         { 0xC0, 0x32 }          RFC5289
+
+ TLS_DHE_RSA_WITH_AES_128_CCM                                                 { 0xC0, 0x9E }          RFC6655
+
+ TLS_DHE_RSA_WITH_AES_256_CCM                                                 { 0xC0, 0x9F }          RFC6655
+
+ TLS_DHE_RSA_WITH_AES_128_CCM_8                                               { 0xC0, 0xA2 }          RFC6655
+
+ TLS_DHE_RSA_WITH_AES_256_CCM_8                                               { 0xC0, 0xA3 }          RFC6655
+
+ TLS_AES_128_GCM_SHA256                                                       { 0x13, 0x01 }          RFC8446
+
+ TLS_AES_256_GCM_SHA384                                                       { 0x13, 0x02 }          RFC8446
+
+ TLS_AES_128_CCM_SHA256                                                       { 0x13, 0x04 }          RFC8446
+
+ TLS_AES_128_CCM_8_SHA256                                                     { 0x13, 0x05 }          RFC8446
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   41 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix B. Glossary and Abbreviations
+         AES            Advanced Encryption Standard
+         AES-NI         Advanced Encryption Standard New Instructions
+         CAVP           Cryptographic Algorithm Validation Program
+         CBC            Cipher Block Chaining
+         CCM            Counter with Cipher Block Chaining-Message Authentication Code
+         CFB            Cipher Feedback
+         CKG            Cryptographic Key Generation
+         CMAC           Cipher-based Message Authentication Code
+         CMVP           Cryptographic Module Validation Program
+
+         CPACF          CP Assist for Cryptographic Functions
+         CSP            Critical Security Parameter
+         CTR            Counter Mode
+         DES            Data Encryption Standard
+         DF             Derivation Function
+         DSA            Digital Signature Algorithm
+         DRBG           Deterministic Random Bit Generator
+         ECB            Electronic Code Book
+         ECC            Elliptic Curve Cryptography
+         FFC            Finite Field Cryptography
+         FIPS           Federal Information Processing Standards Publication
+         GCM            Galois Counter Mode
+         GMAC           Galois Counter Mode Message Authentication Code
+         HMAC           Hash Message Authentication Code
+         KAS            Key Agreement Scheme
+         KAT            Known Answer Test
+         KW             AES Key Wrap
+         MAC            Message Authentication Code
+         NIST           National Institute of Science and Technology
+         PAA            Processor Algorithm Acceleration
+         PAI            Processor Algorithm Implementation
+         PBKDF2         Password-based Key Derivation Function v2
+         PKCS           Public-Key Cryptography Standards
+         PCT            Pairwise Consistency Test
+         PR             Prediction Resistance
+         RNG            Random Number Generator
+         RSA            Rivest, Shamir, Addleman
+         SHA            Secure Hash Algorithm
+         SHS            Secure Hash Standard
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   42 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix C. References
+FIPS140-3            FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+                     March 2019
+                     https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-3.pdf
+FIPS140-3_IG         Implementation Guidance for FIPS PUB 140-3 and the Cryptographic
+                     Module Validation Program
+                     March 2024
+                     https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-
+                     program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf
+FIPS180-4            Secure Hash Standard (SHS)
+                     August 2015
+                     http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+FIPS186-4            Digital Signature Standard (DSS)
+                     July 2013
+                     http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+FIPS197              Advanced Encryption Standard
+                     November 2001
+                     http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+FIPS198-1            The Keyed Hash Message Authentication Code (HMAC)
+                     July 2008
+                     http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+FIPS202              SHA-3 Standard: Permutation-Based Hash and Extendable-Output
+                     Functions
+                     August 2015
+                     http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+PKCS#1               Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                     Specifications Version 2.1
+                     February 2003
+                     http://www.ietf.org/rfc/rfc3447.txt
+SP800-38A            NIST Special Publication 800-38A - Recommendation for Block Cipher
+                     Modes of Operation Methods and Techniques
+                     December 2001
+                     https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
+SP800-38B            NIST Special Publication 800-38B - Recommendation for Block Cipher
+                     Modes of Operation: The CMAC Mode for Authentication
+                     May 2005
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38b.pdf
+SP800-38C            NIST Special Publication 800-38C - Recommendation for Block Cipher
+                     Modes of Operation: the CCM Mode for Authentication and
+                     Confidentiality
+                     July 2007
+                     http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+SP800-38D            NIST Special Publication 800-38D - Recommendation for Block Cipher
+                     Modes of Operation: Galois/Counter Mode (GCM) and GMAC
+                     November 2007
+                     https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   43 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+SP800-38E            NIST Special Publication 800-38E - Recommendation for Block Cipher
+                     Modes of Operation: The XTS AES Mode for Confidentiality on Storage
+                     Devices
+                     January 2010
+                     https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38e.pdf
+SP800-52rev2         NIST Special Publication 800-52 Revision 2 - Guidelines for the
+                     Selection, Configuration, and Use of Transport Layer Security (TLS)
+                     Implementations
+                     August 2019
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+SP800-               NIST Special Publication 800-56A Revision 3 - Recommendation for Pair
+56ARev3              Wise Key Establishment Schemes Using Discrete Logarithm
+                     Cryptography
+                     April 2018
+                     https://doi.org/10.6028/NIST.SP.800-56Ar3
+SP800-               Recommendation for Key Derivation through Extraction-then-Expansion
+56CRev2              August 2020
+                     https://doi.org/10.6028/NIST.SP.800-56Cr2
+SP800-57rev5         NIST Special Publication 800-57 Part 1 Revision 5 - Recommendation for
+                     Key Management Part 1: General
+                     May 2020
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf
+SP800-               NIST Special Publication 800-90A - Revision 1 - Recommendation for
+90ARev1              Random Number Generation Using Deterministic Random Bit
+                     Generators
+                     June 2015
+                     http://dx.doi.org/10.6028/NIST.SP.800-90Ar1
+SP800-90B            NIST Special Publication 800-90B - Recommendation for the Entropy
+                     Sources Used for Random Bit Generation
+                     January 2018
+                     https://doi.org/10.6028/NIST.SP.800-90B
+SP800-               NIST Special Publication 800-131 Revision 2 - Transitions:
+131Arev2             Recommendation for Transitioning the Use of Cryptographic Algorithms
+                     and Key Lengths
+                     March 2019
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar2.pdf
+SP800-132            NIST Special Publication 800-132 - Recommendation for Password-
+                     Based Key Derivation - Part 1: Storage Applications
+                     December 2010
+                     https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf
+SP800-               NIST Special Publication 800-133 - Recommendation for Cryptographic
+133Rev2              Key Generation
+                     June 2020
+                     https://doi.org/10.6028/NIST.SP.800-133r2
+SP800-135rev1 NIST Special Publication 800-135 Revision 1 - Recommendation for
+              Existing Application-Specific Key Derivation Functions
+              December 2011
+              http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-135r1.pdf
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   44 of 45
+Red Hat Enterprise Linux 9 gnutls                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+SP800-140B           NIST Special Publication 800-140B - CMVP Security Policy Requirements
+                     March 2020
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140B.pdf
+RFC8446              The Transport Layer Security (TLS) Protocol Version 1.3
+                     August 2018
+                     https://www.ietf.org/rfc/rfc8446.txt
+RFC7919              Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for
+                     Transport Layer Security (TLS)
+                     August 2016
+                     https://www.ietf.org/rfc/rfc7919.txt
+RFC3526              More Modular Exponential (MODP) Diffie-Hellman groups for Internet
+                     Key Exchange (IKE)
+                     May 2003
+                     https://www.ietf.org/rfc/rfc3526.txt
+RFC7627              Transport Layer Security (TLS) Session Hash and Extended Master
+                     Secret Extension
+                     September 2015
+                     https://www.ietf.org/rfc/rfc7627.txt
+
+
+
+
+                                    © 2024 Red Hat, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   45 of 45
+

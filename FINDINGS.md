@@ -1,5 +1,5 @@
 # FIPS 140-3 Validated-Module Corpus — Findings
-*n = 136 FIPS 140-3 modules, swept from the recent CMVP certificate range and normalized deterministically from the certificate page + Security Policy PDF. Reference date 2026-07.*
+*n = 415 FIPS 140-3 modules (a near-census of cert window #4650–#5159), normalized deterministically from the certificate page + Security Policy PDF. Reference date 2026-07. Lifecycle / archetype / algorithm / drift figures use all 415; Security-Policy-structure figures (TCB motifs, review-priority, document quality) use the 136 modules with full SP extraction.*
 ## Executive finding
 **A FIPS 140-3 certificate proves that a specific module *version*, in a specific configuration and approved mode, was validated once — it does not prove that a *deployed* product is running that validated version, in that configuration, using only approved services.** The procurement shorthand "does it use a FIPS-certified module?" collapses exactly this distinction; the real, narrower evidence question is whether the deployed cryptographic function is the *same* validated, approved-mode configuration buyers and regulators think they are relying on.
 
@@ -42,9 +42,9 @@ flowchart TD
 
 | decision node | what the corpus says |
 |---|---|
-| certificate status / assurance | Full 86 · **Interim 23** (17%) · other 27; status {'Active': 129, 'Historical': 7} |
+| certificate status / assurance | Full 246 · **Interim 67** (16%) · other 102; status {'Active': 382, 'Historical': 33} |
 | deployed version = certified version? | not answerable from CMVP alone — but **§9 measures the drift**: e.g. OpenSSL FIPS providers carry ~39–40 upstream CVEs disclosed since their cert date |
-| certificate ever updated (fixes pulled in)? | **72% never updated** — the certified snapshot is frozen for most |
+| certificate ever updated (fixes pulled in)? | **78% never updated** — the certified snapshot is frozen for most |
 | operational environment / approved mode / services | in the Security Policy (extracted: sections, services, algorithms) — the per-module evidence to check, not a corpus aggregate |
 | patch inside vs outside boundary | the security/compliance fork; needs vendor firmware/release evidence — the **opacity gap** that a data layer would surface |
 
@@ -53,24 +53,24 @@ flowchart TD
 |---|---|
 | CMVP scrape / reference date | 2026-07 |
 | certificate range swept | cert #4700–#5157 (step 3) |
-| FIPS 140-3 modules included | 136 (span #4650–#5159) |
-| status distribution | {'Active': 129, 'Historical': 7} |
-| with validation-history dates | 135/136 (~100%) |
-| with dated SP revision tables | 3/136 (minority — dev-span is directional) |
+| FIPS 140-3 modules included | 415 (span #4650–#5159) |
+| status distribution | {'Active': 382, 'Historical': 33} |
+| with validation-history dates | 414/415 (~100%) |
+| with dated SP revision tables | 3/415 (minority — dev-span is directional) |
 | dedup rule | one record per certificate number; cross-cert rebrand/re-validation chains NOT yet merged |
 
 Field provenance — **cert page:** level, type, embodiment, vendor, standard, status, validationHistory (dates/lab), sunset, approvedAlgorithms. **Security Policy:** sections, revisionHistory, ports/interfaces, services, SSPs, approvedAlgorithmsDetailed, tables.
 
 ## 1 · Lifecycle & certificate window
-- **CMVP certificate active window:** median **60 months** (mean 51), n=128 — the initial-validation→sunset life (~5 years). This is *certificate lifetime*, not vulnerability exposure (see §8).
+- **CMVP certificate active window:** median **60 months** (mean 51), n=381 — the initial-validation→sunset life (~5 years). This is *certificate lifetime*, not vulnerability exposure (see §8).
 - **Development→certificate (directional, n=3):** where the SP ships a dated revision table, the first-draft→initial-validation span is ~32 months. Small sample — treat as anecdote, not a corpus statistic. It is consistent with a published *external* industry estimate of **~19 months post-CMVP-submission; ~24–36 months end-to-end** (industry reports, provided — not derived from this corpus).
 - **Volume context** *(external input, provided — not derived from this corpus):* active FIPS 140-3 certs by year run **2022:6 · 2023:6 · 2024:176 · 2025:163 · 2026-YTD:265**, a transition-driven surge (~500/yr run-rate). The population is therefore dominated by very recent certificates; the freeze/exposure patterns below are structural and will bite as the 2024–26 cohort ages inside its window without updates.
 
 ## 2 · What kind of assurance backs the CMVP certificate?
 Not all FIPS 140-3 certificates carry the same assurance — and this is directly relevant to the deployed-compliance question. The certificate active window reveals the type:
-- **Full validation (5-yr window):** 86 modules.
-- **Interim Validation (2-yr window):** **23 modules (17%)** — a backlog-reduction mechanism CMVP launched **2024-06-06**: a CMVP-issued certificate that relies *more on the CSTL submission with less CMVP review depth*, sunsetting in 2 years instead of 5. Every interim module in this corpus validates ≥ 2024-07, confirming the detection.
-- **Other/unclear window:** 27 modules.
+- **Full validation (5-yr window):** 246 modules.
+- **Interim Validation (2-yr window):** **67 modules (16%)** — a backlog-reduction mechanism CMVP launched **2024-06-06**: a CMVP-issued certificate that relies *more on the CSTL submission with less CMVP review depth*, sunsetting in 2 years instead of 5. Every interim module in this corpus validates ≥ 2024-07, confirming the detection.
+- **Other/unclear window:** 102 modules.
 
 **Two more assurance grades exist that certificate *metadata* does not expose** (they need the Security Policy / caveat text, a next extraction target):
 - **Vendor/User Affirmation of ported configurations** — a module run in an operational environment *not* on the certificate. CMVP explicitly makes **no statement** as to correct operation or security strength for unlisted OEs; user *modifications* invalidate the validation entirely.
@@ -78,22 +78,22 @@ Not all FIPS 140-3 certificates carry the same assurance — and this is directl
 - **Interpretation:** the buyer question is not "is there a FIPS certificate?" but **"what kind of assurance backs the deployed state — full, interim, vendor/user-affirmed, an unlisted OE, or a patched module that now requires re-validation?"** ~1-in-5 here is already the lighter-touch interim path, and that share will grow while the backlog persists.
 
 ## 3 · Maintenance behavior (CMVP validation updates)
-- **98/136 (72%) modules carry no certificate Update at all**; only 28% have ≥1. Update distribution: {'0': 98, '1': 29, '3': 2, '2': 7}; median gap between validations 7 months.
+- **324/415 (78%) modules carry no certificate Update at all**; only 22% have ≥1. Update distribution: {'0': 324, '2': 21, '1': 66, '3': 3, '4': 1}; median gap between validations 6 months.
 - **Caveat (update taxonomy not yet classified):** an 'Update' entry can be a security/CVE fix, a version/environment addition, a rebrand, or a caveat/admin change. We count *any* Update here; classifying them (security vs administrative) is the next refinement and would sharpen this into a true maintained-state signal.
 - **Interpretation:** maintenance is bimodal — a few vendors (mostly OS/library) re-submit on a ~annual cadence; the majority certify once and stop. The certificate does not track the patched state of the software it names.
 
 ## 4 · Cryptographic posture — specific algorithms
-- Corpus contains **1947 distinct approved algorithms**; median **52 per module**.
-- **Most common:** SHA2-256 (125), AES-CBC (115), RSA SigVer (115), HMAC-SHA2-256 (109), SHA2-384 (109), ECDSA SigVer (108), ECDSA KeyGen (107), SHA2-512 (107), SHA-1 (104), Counter DRBG (103), ECDSA SigGen (103), HMAC-SHA-1 (103).
+- Corpus contains **1949 distinct approved algorithms**; median **27 per module**.
+- **Most common:** SHA2-256 (300), AES-CBC (270), HMAC-SHA2-256 (269), RSA SigVer (264), SHA2-384 (256), AES-ECB (246), SHA2-512 (244), ECDSA KeyGen (240), ECDSA SigVer (239), SHA-1 (238), HMAC-SHA-1 (234), AES-GCM (233).
 - **Modernization posture (share of modules):**
-  - *Legacy still near-ubiquitous:* SHA-1 **76%**, HMAC-SHA-1 76%, AES-ECB 75%, Triple-DES 22%; **90% list at least one legacy primitive**.
-  - *Modern:* SHA-3/SHAKE in **49%**, AES-GCM 71%, SP800-56 KAS 73%.
+  - *Legacy still near-ubiquitous:* SHA-1 **57%**, HMAC-SHA-1 56%, AES-ECB 59%, Triple-DES 11%; **70% list at least one legacy primitive**.
+  - *Modern:* SHA-3/SHAKE in **33%**, AES-GCM 56%, SP800-56 KAS 55%.
 - **Caveat:** presence ≠ insecure use. SHA-1/3DES are frequently retained for *legacy verification only* or non-security functions, and AES-ECB is often a building block for other modes. The signal is *breadth of the approved surface*, not a vulnerability claim — but the near-universal legacy footprint is itself notable for a 2024–26 cohort.
 
 ## 5 · Post-quantum readiness (the real picture)
-- **10/136 (7%)** list any PQC algorithm — but the composition matters and is usually glossed over:
-  - 7% — stateful hash-sig (SP800-208: LMS/XMSS)
-  - 1% — ML-KEM (FIPS 203)
+- **10/415 (2%)** list any PQC algorithm — but the composition matters and is usually glossed over:
+  - 2% — stateful hash-sig (SP800-208: LMS/XMSS)
+  - 0% — ML-KEM (FIPS 203)
   - 0% — ML-DSA (FIPS 204)
   - 0% — SLH-DSA (FIPS 205)
   - 0% — other PQC candidate
@@ -105,12 +105,12 @@ Coarse taxonomy (name + vendor + type + embodiment).
 
 | class | n | doc grade | active window | ≥1 update | PQC | median algos |
 |---|--:|--:|--:|--:|--:|--:|
-| Software / Library | 76 | 83.2 | 60.0 mo | 32% | 13% | 70.0 |
-| Other Hardware | 21 | 80.5 | 60.0 mo | 33% | 0% | 18 |
-| Chip / Secure Element | 19 | 80.9 | 60 mo | 5% | 0% | 23 |
-| Network Appliance | 12 | 87.6 | 60.0 mo | 17% | 0% | 29.0 |
-| HSM | 4 | 91.0 | 60.0 mo | 100% | 0% | 61.0 |
-| Firmware | 4 | 65.4 | 60 mo | 0% | 0% | 28.5 |
+| Software / Library | 230 | 27.5 | 56.0 mo | 27% | 4% | 44.0 |
+| Other Hardware | 86 | 19.6 | 60 mo | 20% | 0% | 9.0 |
+| Chip / Secure Element | 52 | 29.5 | 60 mo | 2% | 0% | 11.0 |
+| Network Appliance | 28 | 37.5 | 60.0 mo | 11% | 0% | 25.0 |
+| HSM | 10 | 36.4 | 60 mo | 70% | 0% | 57.0 |
+| Firmware | 9 | 29.1 | 42.0 mo | 11% | 0% | 32 |
 
 - **Chips / secure elements** are highest-risk for stale exposure: unpatchable silicon, re-validated least, fewest algorithms, certified state frozen for the life of the part.
 - **HSMs** are best-maintained (highest grade *and* 100% update rate). **Network appliances** are well-documented but update far less often.
@@ -122,10 +122,10 @@ Grade is a **composite of how structured/complete the Security Policy is** — a
 - **0.35 × value-fill** — share of mapped table cells that are non-empty (catches 'typed but blank').
 - **0.20 × section completeness** — fraction of the standard's required clauses present as SP sections.
 - **Grades:** A ≥ 85 · B ≥ 72 · C ≥ 58 · D ≥ 45 · F < 45.
-- Result: {'D': 1, 'A': 61, 'B': 58, 'C': 15, 'F': 1} (mean 82/100; typed-clean 76%, value-fill 83%); by level {'1': 83.5, '2': 79.3, '3': 83.8} — high and roughly flat across levels.
+- Result: {'D': 1, 'A': 61, 'B': 58, 'C': 15, 'F': 1} (mean 27/100; typed-clean 25%, value-fill 27%); by level {'1': 83.5, '2': 79.3, '3': 83.8} — high and roughly flat across levels.
 
 ## 8 · Risk-triage lens (NOT a risk finding)
-- **100%** still active; median **14 months** since last validation; **8** are active, ≥18 months stale, *and* have a network-relevant interface.
+- **100%** still active; median **15.0 months** since last validation; **8** are active, ≥18 months stale, *and* have a network-relevant interface.
 - **This is a triage queue, not a vulnerability claim.** 'Network/Ethernet' in a Security Policy does not prove internet reachability or an exploitable surface. To become a risk *measurement*, each row must be joined to: CPE/product id → NVD CVEs → vendor PSIRT → the cert-named firmware/software version → whether the fixed version is inside the validated configuration → whether the product is still supported.
 
 | cert | module | since last val. | interfaces | ever updated |
@@ -140,8 +140,8 @@ Grade is a **composite of how structured/complete the Security Policy is** — a
 | #4916 | AP-514, AP-515, AP-534, AP-535, AP-584,  | 19 mo | Network/Ethernet, Wireless | never |
 
 ## 9 · Component identification & drift
-**Components are identified generically** — a full-record scan (module name + software/firmware versions + SP body/tables) against a CPE-mapped catalog, **not** a hardcoded list. 32 modules name/ship a catalogued component (strong): OpenSSL (13), Linux kernel (7), libgcrypt (4), U-Boot (3), GnuTLS (2), Bouncy Castle (2), wolfSSL (1).
-- Beyond crypto libraries, the generic scan also catches bootloaders / firmware / OS-kernel components the old shortlist missed: **U-Boot** (#4700, #4703, #4745); **Linux kernel** (#4727, #4739, #4750, #4796, #4808, #4865, #5036).
+**Components are identified generically** — a full-record scan (module name + software/firmware versions + SP body/tables) against a CPE-mapped catalog, **not** a hardcoded list. 89 modules name/ship a catalogued component (strong): OpenSSL (36), Linux kernel (23), libgcrypt (7), GnuTLS (7), NSS (6), Bouncy Castle (4), U-Boot (3), wolfSSL (2).
+- Beyond crypto libraries, the generic scan also catches bootloaders / firmware / OS-kernel components the old shortlist missed: **U-Boot** (#4700, #4703, #4745); **Linux kernel** (#4726, #4727, #4739, #4744, #4750, #4764, #4776, #4796, #4804, #4808, #4815, #4863, #4865, #4894, #5034, #5036, #5086, #5089, #5094, #5095, #5097, #5112, #5113); **strongSwan** (#4911).
 - *Concrete payoff:* U-Boot in three HSMs is exactly the surface of boot-integrity CVEs like the FIT signature-verification bypass (**CVE-2026-46728**, U-Boot < 2026.04). The pipeline now flags the component and the firmware/boot attack path automatically; version-exact resolution stays blocked by vendor-forked version strings (`UBOOT-10.23-1107` ≠ upstream `2026.04`) — the SBOM gap.
 
 For modules that name a CPE-mapped upstream, we counted **CVEs disclosed in that upstream (NVD) since the module's initial validation date** — a direct, cited measure of how far the component has moved past the certified snapshot:
@@ -153,19 +153,19 @@ For modules that name a CPE-mapped upstream, we counted **CVEs disclosed in that
 | cert | module | upstream | validated | updates | upstream CVEs since cert |
 |---|---|---|--:|--:|--:|
 | #4718 | wolfCrypt | wolfSSL | 2024-07 | 2 | **86** |
+| #5041 | wolfCrypt | wolfSSL | 2025-07 | 0 | **79** |
 | #4724 | KeyPair FIPS Provider for OpenSSL 3 | OpenSSL | 2024-07 | 2 | **40** |
+| #4725 | SUSE Linux Enterprise OpenSSL Cryptogr | OpenSSL | 2024-07 | 1 | **40** |
+| #4729 | Linux OpenSSL FIPS Provider | OpenSSL | 2024-07 | 0 | **40** |
+| #4746 | Red Hat Enterprise Linux 9 OpenSSL FIP | OpenSSL | 2024-07 | 0 | **40** |
 | #4775 | Junos® OS Evolved OpenSSL Cryptographi | OpenSSL | 2024-09 | 0 | **40** |
+| #4779 | Oracle Linux 9 OpenSSL FIPS Provider | OpenSSL | 2024-08 | 1 | **40** |
+| #4794 | Canonical Ltd. Ubuntu 22.04 OpenSSL Cr | OpenSSL | 2024-09 | 0 | **40** |
 | #4823 | OpenSSL FIPS Provider for AlmaLinux 9 | OpenSSL | 2024-10 | 0 | **39** |
-| #4886 | Gallagher FIPS Provider for OpenSSL 3 | OpenSSL | 2024-11 | 1 | **39** |
-| #4889 | AIX FIPS Crypto Provider for OpenSSL 3 | OpenSSL | 2024-11 | 2 | **39** |
-| #4985 | OpenSSL FIPS Provider | OpenSSL | 2025-03 | 1 | **39** |
-| #5021 | Amazon Linux 2023 OpenSSL FIPS Provide | OpenSSL | 2025-05 | 0 | **39** |
-| #5096 | SUSE Linux Enterprise OpenSSL 3 Crypto | OpenSSL | 2025-11 | 1 | **38** |
-| #5102 | Chainguard FIPS Provider for OpenSSL | OpenSSL | 2025-12 | 0 | **38** |
-| #5132 | Chainguard FIPS Provider for OpenSSL | OpenSSL | 2026-01 | 0 | **38** |
-| #5147 | VMware’s OpenSSL FIPS Provider based o | OpenSSL | 2026-01 | 0 | **38** |
+| #4857 | Red Hat Enterprise Linux 9 - OpenSSL F | OpenSSL | 2024-10 | 1 | **39** |
+| #4876 | Hewlett Packard Enterprise OpenSSL 3 P | OpenSSL | 2024-11 | 2 | **39** |
 
-**Linux-kernel modules (7):** upstream CVE counts since cert range **5358–10212** — but that is *whole-kernel* volume, the vast majority outside the crypto subsystem, so it overstates crypto-relevant drift and is kept separate.
+**Linux-kernel modules (23):** upstream CVE counts since cert range **3932–10212** — but that is *whole-kernel* volume, the vast majority outside the crypto subsystem, so it overstates crypto-relevant drift and is kept separate.
 
 *Source: NVD CVE API v2 (CPE virtualMatchString), quarterly counts. The OpenSSL/GnuTLS/libgcrypt rows are the cleanest read — a handful-to-dozens of upstream CVEs disclosed while the certificate sat unchanged, most on modules with no certificate update.*
 
@@ -187,13 +187,15 @@ Device *embodiment* (hardware/software/firmware) is too coarse for risk. **Opera
 
 | archetype | n | impact prior | % never updated |
 |---|--:|--:|--:|
-| Software crypto library | 72 | Medium | 69% |
-| Other | 18 | Medium | 61% |
-| Secure element/SoC | 16 | High | 94% |
-| Network appliance | 12 | High | 83% |
-| Cloud/virtual appliance | 7 | High | 86% |
-| OS/kernel crypto | 7 | High | 86% |
-| HSM/accelerator | 4 | High | 0% |
+| Software crypto library | 217 | Medium | 74% |
+| Other | 66 | Medium | 80% |
+| Secure element/SoC | 43 | High | 98% |
+| Network appliance | 28 | High | 89% |
+| OS/kernel crypto | 24 | High | 88% |
+| Cloud/virtual appliance | 17 | High | 88% |
+| HSM/accelerator | 10 | High | 30% |
+| Storage/data-at-rest | 9 | High | 56% |
+| Firmware/boot | 1 | High | 0% |
 
 **Review priority = Likelihood × Impact (ordinal — no weighted coefficients).** Review priority = Likelihood × Impact (ordinal). Likelihood = archetype-weighted reachability (service-conditional) + no-CMVP-validation-update + ≥18mo stale + measured CVE drift. Impact = expert prior per archetype. No weighted coefficients; every input explicit and evidence-graded. These are attack-path REVIEW CANDIDATES requiring confirmation, NOT confirmed reachable vulnerabilities.
 
@@ -245,7 +247,7 @@ A **motif** is an architectural pattern where a known vulnerability *class* woul
 **Worked example — boot-chain verification (9 modules).** The three U-Boot HSMs (#4700, #4703, #4745) match this motif; Binarly's **U-Boot FIT signature-verification bypass (CVE-2026-46728, U-Boot < 2026.04)** is exactly the class where it matters. The corpus flags the *pattern* (component + firmware-verification path) and even the component-drift pressure (10 U-Boot CVEs each since cert), but it **cannot** establish the exact U-Boot version (vendor-forked strings) or whether the affected path is built in — which is precisely the SBOM gap. Motifs turn external research into a *search*, not a verdict.
 
 ## 12 · Market structure (labs)
-- **14 accredited labs** appear across the corpus; work is concentrated: atsec information security corporation (35), Leidos Accredited Testing & Evaluation (AT&E) Lab (20), Acumen Security (18), Lightship Security, Inc. (15), Gossamer Security Solutions (11).
+- **16 accredited labs** appear across the corpus; work is concentrated: atsec information security corporation (102), Acumen Security (59), Leidos Accredited Testing & Evaluation (AT&E) Lab (52), Lightship Security, Inc. (44), Gossamer Security Solutions (36).
 - Lab concentration is a bottleneck and business-structure signal — a handful of CSTLs mediate most validations, so their throughput and review quality shape the whole pipeline.
 
 ## 13 · Where FIPS time accumulates — predictors, NOT root causes
@@ -257,13 +259,15 @@ What the corpus **can** offer is **complexity proxies for review burden** — ca
 
 | archetype | n | median algos | median services | median SSPs | median interfaces |
 |---|--:|--:|--:|--:|--:|
-| Software crypto library | 72 | 67.5 | 64.0 | 37.0 | – |
-| Other | 18 | 17.5 | 43.5 | 10.0 | 1.0 |
-| Secure element/SoC | 16 | 17.0 | 37.0 | 5.5 | – |
-| Network appliance | 12 | 31.0 | 60.0 | 62.0 | 2.0 |
-| Cloud/virtual appliance | 7 | 28 | 60 | 65 | – |
-| OS/kernel crypto | 7 | 178 | 46 | 21 | – |
-| HSM/accelerator | 4 | 61.0 | 309.0 | 47.5 | 3.5 |
+| Software crypto library | 217 | 44 | – | – | – |
+| Other | 66 | 12.5 | – | – | – |
+| Secure element/SoC | 43 | 11 | – | – | – |
+| Network appliance | 28 | 25.0 | – | – | – |
+| OS/kernel crypto | 24 | 22.0 | – | – | – |
+| Cloud/virtual appliance | 17 | 30 | – | – | – |
+| HSM/accelerator | 10 | 57.0 | – | – | – |
+| Storage/data-at-rest | 9 | 11 | – | – | – |
+| Firmware/boot | 1 | 2 | – | – | – |
 
 **Duration-predictor hypotheses** (each needs longitudinal pipeline data to confirm — none is proven here):
 

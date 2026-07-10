@@ -1,0 +1,2532 @@
+                                          Ctrl IQ, Inc.
+
+    Rocky Linux 8 Kernel Cryptographic API
+      FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Prepared by:
+
+atsec information security corporation
+4516 Seton Center Pkwy, Suite 250
+Austin, TX 78759                                                        Document version: 1.2
+www.atsec.com                                                          Last update: 2025-11-12
+
+
+
+
+                             © 2025 Ctrl IQ, Inc., atsec information security.
+   This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                   Page 1 of 51
+Rocky Linux 8 Kernel Cryptographic API                                                    FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Table of Contents
+1     General ............................................................................................................................... 5
+    1.1     Overview ..................................................................................................................... 5
+      1.1.1        How this Security Policy was prepared ................................................................ 5
+    1.2     Security Levels ............................................................................................................ 5
+2     Cryptographic Module Specification .................................................................................. 6
+    2.1     Description .................................................................................................................. 6
+    2.2     Tested and Vendor Affirmed Module Version and Identification ................................ 7
+    2.3     Excluded Components ................................................................................................ 8
+    2.4     Modes of Operation ..................................................................................................... 8
+    2.5     Algorithms ................................................................................................................... 9
+    2.6     Security Function Implementations .......................................................................... 12
+    2.7     Algorithm Specific Information.................................................................................. 15
+      2.7.1        AES-GCM IV ........................................................................................................ 15
+      2.7.2        AES-XTS .............................................................................................................. 15
+      2.7.3        RSA ..................................................................................................................... 16
+      2.7.4        Authenticated Encryption/Decryption ................................................................ 16
+      2.7.5        SHA-1 ................................................................................................................. 16
+    2.8     RBG and Entropy ....................................................................................................... 16
+    2.9     Key Generation ......................................................................................................... 17
+    2.10        Key Establishment ................................................................................................. 17
+    2.11        Industry Protocols .................................................................................................. 17
+3     Cryptographic Module Interfaces ..................................................................................... 18
+    3.1     Ports and Interfaces .................................................................................................. 18
+4     Roles, Services, and Authentication................................................................................. 19
+    4.1     Authentication Methods ............................................................................................ 19
+    4.2     Roles .......................................................................................................................... 19
+    4.3     Approved Services .................................................................................................... 19
+    4.4     Non-Approved Services ............................................................................................. 23
+    4.5     External Software/Firmware Loaded ......................................................................... 23
+5     Software/Firmware Security ............................................................................................. 24
+    5.1     Integrity Techniques ................................................................................................. 24
+    5.2     Initiate on Demand ................................................................................................... 24
+6     Operational Environment ................................................................................................. 25
+    6.1     Operational Environment Type and Requirements................................................... 25
+    6.2     Configuration Settings and Restrictions ................................................................... 25
+7     Physical Security .............................................................................................................. 26
+
+                                © 2025 Ctrl IQ, Inc., atsec information security.
+      This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                                               Page 2 of 51
+Rocky Linux 8 Kernel Cryptographic API                                                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+8     Non-Invasive Security ...................................................................................................... 27
+9     Sensitive Security Parameters Management ................................................................... 28
+    9.1      Storage Areas ............................................................................................................ 28
+    9.2      SSP Input-Output Methods ........................................................................................ 28
+    9.3      SSP Zeroization Methods .......................................................................................... 28
+    9.4      SSPs ........................................................................................................................... 29
+    9.5      Transitions ................................................................................................................. 32
+10        Self-Tests ...................................................................................................................... 33
+    10.1        Pre-Operational Self-Tests ..................................................................................... 33
+    10.2        Conditional Self-Tests ............................................................................................ 33
+    10.3        Periodic Self-Test Information ............................................................................... 40
+    10.4        Error States ............................................................................................................ 44
+    10.5        Operator Initiation of Self-Tests............................................................................. 45
+11        Life-Cycle Assurance..................................................................................................... 46
+    11.1        Installation, Initialization, and Startup Procedures................................................ 46
+    11.2        Administrator Guidance ......................................................................................... 46
+    11.3        Non-Administrator Guidance ................................................................................. 46
+    11.4        Design and Rules ................................................................................................... 46
+    11.5        Maintenance Requirements ................................................................................... 46
+    11.6        End of Life .............................................................................................................. 46
+12        Mitigation of Other Attacks ........................................................................................... 48
+A     Glossary and Abbreviations ............................................................................................. 49
+B     References ....................................................................................................................... 50
+
+
+
+
+                                © 2025 Ctrl IQ, Inc., atsec information security.
+      This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                                                Page 3 of 51
+Rocky Linux 8 Kernel Cryptographic API                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+List of Tables
+Table 1: Security Levels ............................................................................................................ 5
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) . 7
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid ............................... 8
+Table 4: Modes List and Description ......................................................................................... 8
+Table 5: Approved Algorithms ................................................................................................. 11
+Table 6: Non-Approved, Not Allowed Algorithms .................................................................... 12
+Table 7: Security Function Implementations .......................................................................... 15
+Table 8: Entropy Certificates ................................................................................................... 16
+Table 9: Entropy Sources ........................................................................................................ 16
+Table 10: Ports and Interfaces ................................................................................................ 18
+Table 11: Roles ........................................................................................................................ 19
+Table 12: Approved Services .................................................................................................. 23
+Table 13: Non-Approved Services ........................................................................................... 23
+Table 14: Storage Areas .......................................................................................................... 28
+Table 15: SSP Input-Output Methods ...................................................................................... 28
+Table 16: SSP Zeroization Methods......................................................................................... 29
+Table 17: SSP Table 1.............................................................................................................. 30
+Table 18: SSP Table 2.............................................................................................................. 31
+Table 19: Pre-Operational Self-Tests....................................................................................... 33
+Table 20: Conditional Self-Tests.............................................................................................. 40
+Table 21: Pre-Operational Periodic Information ...................................................................... 40
+Table 22: Conditional Periodic Information ............................................................................. 44
+Table 23: Error States ............................................................................................................. 45
+
+
+List of Figures
+Figure 1: Block Diagram ............................................................................................................ 7
+
+
+
+
+                                 © 2025 Ctrl IQ, Inc., atsec information security.
+       This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                                            Page 4 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for version kernel
+rocky8.20240923; libkcapi 1.2.0-2.el8 of the Rocky Linux 8 Kernel Cryptographic API module.
+It contains the security rules under which the module must operate and describes how this
+module meets the requirements as specified in FIPS PUB 140-3 (Federal Information
+Processing Standards Publication 140-3) for an overall Security Level 1 module.
+
+This Non-Proprietary Security Policy may be reproduced and distributed, but only whole and
+intact and including this notice. Other documentation is proprietary to their authors.
+
+1.1.1 How this Security Policy was prepared
+In preparing the Security Policy document, the laboratory formatted the vendor-supplied
+documentation for consolidation without altering the technical statements therein contained.
+The further refining of the Security Policy document was conducted iteratively throughout the
+conformance testing, wherein the Security Policy was submitted to the vendor, who would
+then edit, modify, and add technical contents. The vendor would also supply additional
+documentation, which the laboratory formatted into the existing Security Policy, and
+resubmitted to the vendor for their final editing.
+
+1.2 Security Levels
+ Section               Title                                                             Security Level
+ 1                     General                                                           1
+ 2                     Cryptographic module specification                                1
+ 3                     Cryptographic module interfaces                                   1
+ 4                     Roles, services, and authentication                               1
+ 5                     Software/Firmware security                                        1
+ 6                     Operational environment                                           1
+ 7                     Physical security                                                 N/A
+ 8                     Non-invasive security                                             N/A
+ 9                     Sensitive security parameter management                           1
+ 10                    Self-tests                                                        1
+ 11                    Life-cycle assurance                                              1
+ 12                    Mitigation of other attacks                                       N/A
+                       Overall Level                                                     1
+                                       Table 1: Security Levels
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 5 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+
+The Rocky Linux 8 Kernel Cryptographic API (hereafter referred to as “the module”) provides
+a C language application program interface (API) for use by other (kernel space and user
+space) processes that require cryptographic functionality. The module operates on a general-
+purpose computer as part of the Linux kernel. Its cryptographic functionality can be accessed
+using the Linux Kernel Crypto API.
+
+Module Type: Software
+
+Module Embodiment: MultiChipStand
+
+Cryptographic Boundary:
+
+The cryptographic boundary of the module is defined as the kernel binary and the kernel
+crypto object files, the libkcapi shared library, and the sha512hmac binary, which is used to
+verify the integrity of the software components. In addition, the cryptographic boundary
+contains the .hmac files which store the expected integrity values for each of the software
+components.
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+
+The TOEPP of the module is defined as the general-purpose computer on which the module is
+installed.
+
+The PAA provided by the processor is located within the module’s physical perimeter and
+outside of the module’s cryptographic boundary.
+
+The cryptographic boundary and TOEPP are schematically represented in Figure 1.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 6 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                         Figure 1: Block Diagram
+
+2.2 Tested and                    Vendor           Affirmed            Module             Version          and
+    Identification
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+
+ Package or File Name                                          Software/            Featur       Integrity
+                                                               Firmware             es           Test
+                                                               Version
+ /boot/vmlinuz-4.18.0-                                         kernel          HMAC-N/A
+ 553.16.1.el8_6.ciqfips.0.5.x86_64; *.ko.xz files in           rocky8.202409   SHA2-256
+ /usr/lib/modules/4.18.0-                                      23;     libkcapi(libkcapi.so
+ 553.16.1.el8_6.ciqfips.0.5.x86_64/kernel/crypto               1.2.0-2.el8     );     HMAC-
+ and                      /usr/lib/modules/4.18.0-                             SHA2-512
+ 553.16.1.el8_6.ciqfips.0.5.x86_64/kernel/arch/x8                              (vmlinuz,
+ 6/crypto;                   /usr/bin/sha512hmac;                              sha512hma
+ /lib64/libkcapi.so.1.2.0                                                      c);      RSA
+                                                                               signature
+                                                                               verification
+                                                                               (*.ko.xz
+                                                                               files)
+ Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 7 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Operating      Hardware        Processors PAA/PAI Hypervisor Version(s)
+ System         Platform                                  or Host OS
+ Rocky          SuperMicro      Intel    Xeon Yes                      kernel
+ Linux 8        SuperServer     E3-1270 v6                             rocky8.20240923;
+                5039MS                                                 libkcapi 1.2.0-2.el8
+ Rocky          SuperMicro      Intel    Xeon No                       kernel
+ Linux 8        SuperServer     E3-1270 v6                             rocky8.20240923;
+                5039MS                                                 libkcapi 1.2.0-2.el8
+             Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+
+The module implements Processor Algorithm Acceleration (PAA) for the tested platforms listed
+above. There is no Processor Algorithm Implementation (PAI).
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+
+N/A for this module.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary excluded from the FIPS 140-3
+requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+
+ Mode           Description              Type          Status Indicator
+ Name
+ Approved       Automatically            Approved      Mapped to approved service indicator in
+ mode           entered                                Section 4.3 for all approved algorithms except
+                whenever      an                       GCM: respective approved service function
+                approved service                       returns      indicator     0.     For    GCM:
+                is requested                           crypto_aead_get_flags(tfm)         has     the
+                                                       CRYPTO_TFM_FIPS_COMPLIANCE flag set
+ Non-           Automatically     Non-                 No service indicator required for non-approved
+ approved       entered           Approved             services per IG 2.4.C
+ mode           whenever a non-
+                approved service
+                is requested
+                              Table 4: Modes List and Description
+
+
+After passing all pre-operational self-tests and conditional self-tests executed on startup, the
+module automatically transitions to the approved mode. No operator intervention is required
+to reach this point.
+
+Mode Change Instructions and Status:
+
+The module automatically switches between the approved and non-approved modes
+depending on the services requested by the operator. The status indicator of the mode of
+operation is equivalent to the indicator of the service that was requested.
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 8 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2.5 Algorithms
+Approved Algorithms:
+
+ Algorithm            CAVP Cert                                  Properties                     Reference
+ AES-CBC              A5807, A5810, A5813, A5816,                Direction - Decrypt,           SP 800-38A
+                      A5819                                      Encrypt
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-CBC-CS3          A5807, A5810, A5816, A5819                 Direction - decrypt,           SP 800-38A
+                                                                 encrypt
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-CCM              A5807, A5810, A5816, A5819                 Key Length - 128, 192,         SP 800-38C
+                                                                 256
+ AES-CFB128           A5807, A5810, A5816, A5819                 Direction - Decrypt,           SP 800-38A
+                                                                 Encrypt
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-CMAC             A5807, A5810, A5816, A5819                 Direction - Generation,        SP 800-38B
+                                                                 Verification
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-CTR              A5807, A5810, A5813, A5816,                Direction - Decrypt,           SP 800-38A
+                      A5819                                      Encrypt
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-ECB              A5807, A5808, A5809,            A5810,     Direction - Decrypt,           SP 800-38A
+                      A5811, A5812, A5813,            A5814,     Encrypt
+                      A5815, A5816, A5817,            A5818,     Key Length - 128, 192,
+                      A5819, A5820, A5821                        256
+ AES-GCM              A5807, A5809, A5810,            A5812,     Direction - Decrypt,           SP 800-38D
+                      A5813, A5815, A5816,            A5818,     Encrypt
+                      A5819, A5821                               IV     Generation     -
+                                                                 External
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-GCM              A5808, A5811, A5814, A5817,                Direction - Decrypt,           SP 800-38D
+                      A5820                                      Encrypt
+                                                                 IV     Generation     -
+                                                                 Internal
+                                                                 IV Generation Mode -
+                                                                 8.2.1
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-GMAC             A5807, A5810, A5816, A5819                 Direction - Decrypt,           SP 800-38D
+                                                                 Encrypt
+                                                                 IV     Generation     -
+                                                                 External
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-KW               A5807, A5810, A5816, A5819                 Direction - Decrypt,           SP 800-38F
+                                                                 Encrypt
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 9 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm            CAVP Cert                                  Properties                     Reference
+                                                                 Key Length - 128, 192,
+                                                                 256
+ AES-XTS              A5807, A5810, A5813, A5816,                Direction - Decrypt,           SP 800-38E
+ Testing              A5819                                      Encrypt
+ Revision 2.0                                                    Key Length - 128, 256
+ Counter DRBG         A5807, A5808, A5809, A5810,                Prediction Resistance -        SP 800-90A
+                      A5811, A5812, A5813, A5814,                No,                Yes         Rev. 1
+                      A5815, A5816, A5817, A5818,                Mode - AES-128, AES-
+                      A5819, A5820, A5821                        192,          AES-256
+                                                                 Derivation    Function
+                                                                 Enabled - Yes
+ Hash DRBG            A5807, A5822, A5823, A5824                 Prediction Resistance -        SP 800-90A
+                                                                 No,                Yes         Rev. 1
+                                                                 Mode - SHA-1, SHA2-
+                                                                 256, SHA2-512
+ HMAC DRBG            A5807, A5822, A5823, A5824                 Prediction Resistance -        SP 800-90A
+                                                                 No,                Yes         Rev. 1
+                                                                 Mode - SHA-1, SHA2-
+                                                                 256, SHA2-512
+ HMAC-SHA-1           A5807, A5822, A5823, A5824                 Key Length - Key               FIPS 198-1
+                                                                 Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA2-           A5807, A5822, A5823, A5824                 Key Length - Key               FIPS 198-1
+ 224                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA2-           A5807, A5822, A5823, A5824                 Key Length - Key               FIPS 198-1
+ 256                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA2-           A5807, A5822, A5823, A5824                 Key Length - Key               FIPS 198-1
+ 384                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA2-           A5807, A5822, A5823, A5824                 Key Length - Key               FIPS 198-1
+ 512                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA3-           A5807                                      Key Length - Key               FIPS 198-1
+ 224                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA3-           A5807                                      Key Length - Key               FIPS 198-1
+ 256                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA3-           A5807                                      Key Length - Key               FIPS 198-1
+ 384                                                             Length:    112-524288
+                                                                 Increment 8
+ HMAC-SHA3-           A5807                                      Key Length - Key               FIPS 198-1
+ 512                                                             Length:    112-524288
+                                                                 Increment 8
+ RSA     SigVer       A5807                                      Modulo - 2048, 3072,           FIPS 186-5
+ (FIPS186-5)                                                     4096
+                                                                 Signature    Type     -
+                                                                 pkcs1v1.5
+ SHA-1                A5807, A5822, A5823, A5824                 Message     Length    -        FIPS 180-4
+                                                                 Message Length: 0-
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 10 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm            CAVP Cert                       Properties                                Reference
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA2-224             A5807, A5822, A5823, A5824      Message    Length   -                     FIPS 180-4
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA2-256             A5807, A5822, A5823, A5824      Message    Length   -                     FIPS 180-4
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA2-384             A5807, A5822, A5823, A5824      Message    Length   -                     FIPS 180-4
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA2-512             A5807, A5822, A5823, A5824      Message    Length   -                     FIPS 180-4
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA3-224             A5807                           Message    Length   -                     FIPS 202
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA3-256             A5807                           Message    Length   -                     FIPS 202
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA3-384             A5807                           Message    Length   -                     FIPS 202
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+ SHA3-512             A5807                           Message    Length   -                     FIPS 202
+                                                      Message Length: 0-
+                                                      65536 Increment 8
+                                                      Large Message Sizes -
+                                                      1, 2
+                                 Table 5: Approved Algorithms
+
+
+Vendor-Affirmed Algorithms:
+
+N/A for this module.
+
+Non-Approved, Allowed Algorithms:
+
+N/A for this module.
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 11 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+
+ Name                               Use and Function
+ AES-GCM with external IV           Encryption with external IV (not compliant to FIPS 140-3 IG
+                                    C.H)
+ KBKDF in libkcapi                  Key derivation with implementation not tested by CAVP
+ HKDF in libkcapi                   Key derivation with implementation not tested by CAVP
+ PBKDF2 in libkcapi                 Password-based key derivation with implementation not
+                                    tested by CAVP
+ RSA PKCS#1 v1.5 with pre-          Signature generation; Signature verification
+ hashed message
+ RSA PKCS#1 v1.5                  Key encapsulation (not compliant to SP 800-56Br2); Key un-
+                                  encapsulation (not compliant to SP 800-56Br2)
+ RSA primitive                    Encryption primitive; Decryption primitive (not compliant to SP
+                                  800-56Br2)
+                           Table 6: Non-Approved, Not Allowed Algorithms
+
+
+2.6 Security Function Implementations
+ Name                  Type                   Description            Properties             Algorithms
+ Encryption            BC-UnAuth              Encrypt            a                          AES-CBC:
+                                              plaintext                                     (A5807, A5810,
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+                                                                                            AES-CBC-CS3:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-CFB128:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-CTR:
+                                                                                            (A5807, A5810,
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+                                                                                            AES-ECB:
+                                                                                            (A5807, A5808,
+                                                                                            A5809, A5810,
+                                                                                            A5811, A5812,
+                                                                                            A5813, A5814,
+                                                                                            A5815, A5816,
+                                                                                            A5817, A5818,
+                                                                                            A5819, A5820,
+                                                                                            A5821)
+                                                                                            AES-XTS Testing
+                                                                                            Revision   2.0:
+                                                                                            (A5807, A5810,
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 12 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Type                   Description            Properties             Algorithms
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+ Decryption            BC-UnAuth              Decrypt            a                          AES-CBC:
+                                              ciphertext                                    (A5807, A5810,
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+                                                                                            AES-CBC-CS3:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-CFB128:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-CTR:
+                                                                                            (A5807, A5810,
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+                                                                                            AES-ECB:
+                                                                                            (A5807, A5808,
+                                                                                            A5809, A5810,
+                                                                                            A5811, A5812,
+                                                                                            A5813, A5814,
+                                                                                            A5815, A5816,
+                                                                                            A5817, A5818,
+                                                                                            A5819, A5820,
+                                                                                            A5821)
+                                                                                            AES-XTS Testing
+                                                                                            Revision   2.0:
+                                                                                            (A5807, A5810,
+                                                                                            A5813, A5816,
+                                                                                            A5819)
+ Authenticated         BC-Auth                Encrypt     and                               AES-CCM:
+ encryption                                   authenticate a                                (A5807, A5810,
+                                              plaintext                                     A5816, A5819)
+                                                                                            AES-KW:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-GCM:
+                                                                                            (A5808, A5811,
+                                                                                            A5814, A5817,
+                                                                                            A5820)
+ Authenticated         BC-UnAuth              Decrypt     and                               AES-CCM:
+ decryption                                   authenticate a                                (A5807, A5810,
+                                              ciphertext                                    A5816, A5819)
+                                                                                            AES-KW:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-GCM:
+                                                                                            (A5807, A5809,
+                                                                                            A5810, A5812,
+                                                                                            A5813, A5815,
+                                                                                            A5816, A5818,
+                                                                                            A5819, A5821)
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 13 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Type                   Description            Properties             Algorithms
+ Message digest        SHA                    Compute      a                                SHA-1: (A5807,
+                                              message digest                                A5822, A5823,
+                                                                                            A5824)
+                                                                                            SHA2-224:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            SHA2-256:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            SHA2-384:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            SHA2-512:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            SHA3-224:
+                                                                                            (A5807)
+                                                                                            SHA3-256:
+                                                                                            (A5807)
+                                                                                            SHA3-384:
+                                                                                            (A5807)
+                                                                                            SHA3-512:
+                                                                                            (A5807)
+ Message               MAC                    Compute a MAC                                 AES-CMAC:
+ authentication                               tag                                           (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            AES-GMAC:
+                                                                                            (A5807, A5810,
+                                                                                            A5816, A5819)
+                                                                                            HMAC-SHA-1:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            HMAC-SHA2-
+                                                                                            224:    (A5807,
+                                                                                            A5822, A5823,
+                                                                                            A5824)
+                                                                                            HMAC-SHA2-
+                                                                                            256:    (A5807,
+                                                                                            A5822, A5823,
+                                                                                            A5824)
+                                                                                            HMAC-SHA2-
+                                                                                            384:    (A5807,
+                                                                                            A5822, A5823,
+                                                                                            A5824)
+                                                                                            HMAC-SHA2-
+                                                                                            512:    (A5807,
+                                                                                            A5822, A5823,
+                                                                                            A5824)
+                                                                                            HMAC-SHA3-
+                                                                                            224:    (A5807)
+                                                                                            HMAC-SHA3-
+                                                                                            256:    (A5807)
+                                                                                            HMAC-SHA3-
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 14 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Type                   Description            Properties             Algorithms
+                                                                                            384:    (A5807)
+                                                                                            HMAC-SHA3-
+                                                                                            512: (A5807)
+ Random                DRBG                   Generate                                      Counter DRBG:
+ number                                       random bytes                                  (A5807, A5808,
+ generation                                                                                 A5809, A5810,
+                                                                                            A5811, A5812,
+                                                                                            A5813, A5814,
+                                                                                            A5815, A5816,
+                                                                                            A5817, A5818,
+                                                                                            A5819, A5820,
+                                                                                            A5821)
+                                                                                            Hash      DRBG:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+                                                                                            HMAC      DRBG:
+                                                                                            (A5807, A5822,
+                                                                                            A5823, A5824)
+ Signature             DigSig-SigVer          Verify a digital                              RSA       SigVer
+ verification                                 signature                                     (FIPS186-5):
+                                                                                            (A5807)
+                             Table 7: Security Function Implementations
+
+
+2.7 Algorithm Specific Information
+
+2.7.1 AES-GCM IV
+For IPsec, the module offers the AES-GCM implementation and uses the context of Scenario 1
+of FIPS 140-3 IG C.H. The mechanism for IV generation is compliant with RFC 4106. IVs
+generated using this mechanism may only be used in the context of AES GCM encryption
+within the IPsec protocol.
+
+The module does not implement IPsec. The module’s implementation of AES GCM is used
+together with an application that runs outside the module’s cryptographic boundary. This
+application must use RFC 7296 compliant IKEv2 to establish the shared secret SKEYSEED from
+which the AES-GCM encryption keys are derived.
+
+The design of the IPsec protocol implicitly ensures that the counter (the nonce_explicit part of
+the IV) does not exhaust the maximum number of possible values for a given session key. In
+the event the module’s power is lost and restored, the consuming application must ensure
+that a new key for use with the AES-GCM key encryption or decryption under this scenario
+shall be established.
+
+The module also provides a non-approved AES-GCM encryption service which accepts
+arbitrary external IVs from the operator. This service can be requested by invoking the
+crypto_aead_encrypt API function with an AES-GCM handle. When this is the case, the API will
+not set an approved service indicator, as described in this document.
+
+2.7.2 AES-XTS
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 15 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+The length of a single data unit encrypted or decrypted with AES-XTS shall not exceed 220
+AES blocks, that is 16MB, of data per XTS instance. An XTS instance is defined in Section 4 of
+SP 800-38E.
+
+The XTS mode shall only be used for the cryptographic protection of data on storage devices.
+It shall not be used for other purposes, such as the encryption of data in transit.
+
+To meet the requirement stated in IG C.I, the module implements a check to ensure that the
+two AES keys used in AES XTS mode are not identical. As the module does not implement
+symmetric key generation, this check is performed when the keys are input by the operator.
+Key_1 and Key_2 shall be generated and/or established independently according to the rules
+for component symmetric keys from NIST SP 800-133r2, Section 6.3.
+
+2.7.3 RSA
+All supported modulus sizes for RSA signature verification have been CAVP tested.
+
+2.7.4 Authenticated Encryption/Decryption
+The module does not establish SSPs using an approved key transport scheme (KTS).
+However, it does offer approved authenticated algorithms that can be used by an external
+operator/application as part of an approved KTS.
+
+2.7.5 SHA-1
+Digital signature generation using SHA-1 is non-approved and not allowed in approved
+services.
+2.8 RBG and Entropy
+ Cert         Vendor
+ Number       Name
+ E205         Ctrl IQ, Inc.
+                                         Table 8: Entropy Certificates
+
+
+ Name                   Type             Operational               Sample       Entropy      Conditioning
+                                         Environment               Size         per          Component
+                                                                                Sample
+ Rocky      Linux       Non-             Rocky Linux 8 on Intel    256 bits     256 bits     SHA3-256
+ Kernel CPU Time        Physical         Kaby Lake Xeon E3-                                  (A5807)
+ Jitter      RNG                         1270 v6
+ Entropy Source
+                                           Table 9: Entropy Sources
+
+
+The module implements three different Deterministic Random Bit Generator (DRBG)
+implementations based on SP 800-90Ar1: CTR_DRBG, Hash_DRBG, and HMAC_DRBG. Each of
+these DRBG implementations can be instantiated by the operator of the module. When
+instantiated, these DRBGs can be used to generate random numbers for external usage.
+
+Additionally, the module employs a specific HMAC-SHA2-512 DRBG implementation for
+internal purposes (e.g. to generate initialization vectors). This DRBG is initially seeded with
+384 output bits from the entropy source (384 bits of entropy) and reseeded with 256 output
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 16 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+bits from the entropy source (256 bits of entropy). Outputs of multiple GetEntropy() calls are
+concatenated to receive the entropy input length greater than 256 bits. The output is
+truncated to get the entropy input string which is not a multiple of 256.
+
+E.g. The 384 bits of entropy source output is obtained by calling the GetEntropy() twice, with
+each call providing 256 bits of output. The second call output is truncated to 128 bits and
+concatenated to the 256 bit output from the first call.
+
+The module complies with the Public Use Document for ESV certificate E205 by reading
+entropy data from the jent_kcapi_random() function, which corresponds to the GetEntropy()
+conceptual interface. The operational environment on the ESV certificate is identical to the
+operating system described in this document. There are no maintenance requirements for the
+entropy source.
+
+2.9 Key Generation
+The module does not implement any key generation methods.
+
+2.10 Key Establishment
+The module does not implement any automated key establishment methods.
+
+2.11 Industry Protocols
+AES-GCM with internal IV generation in the approved mode is compliant with RFC 4106 and
+shall only be used in conjunction with the IPsec protocol. No parts of this protocol, other than
+the AES-GCM implementation, have been tested by the CAVP and CMVP.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 17 of 51
+Rocky Linux 8 Kernel Cryptographic API                                    FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+3 Cryptographic Module Interfaces
+
+3.1 Ports and Interfaces
+ Physical       Logical             Data That Passes
+ Port           Interface(s)
+ N/A            Data Input          API data input parameters, AF_ALG type sockets
+ N/A            Data Output         API data output parameters, AF_ALG type sockets,
+                                    /proc/sys/crypto virtual files
+ N/A            Control Input       API function calls, API control input parameters, AF_ALG type
+                                    sockets
+ N/A            Status              API return values, AF_ALG type sockets, kernel logs
+                Output
+                                         Table 10: Ports and Interfaces
+
+
+The logical interfaces are the APIs through which the applications request services. These
+logical interfaces are logically separated from each other by the API design and AF_ALG type
+socket message types.
+
+The module does not support a control output interface.
+
+
+
+
+                                 © 2025 Ctrl IQ, Inc., atsec information security.
+       This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                      Page 18 of 51
+Rocky Linux 8 Kernel Cryptographic API                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+4 Roles, Services, and Authentication
+
+4.1 Authentication Methods
+The module does not implement any authentication methods.
+
+4.2 Roles
+ Name                             Type                   Operator Type           Authentication
+                                                                                 Methods
+ Crypto Officer                   Role                Crypto Officer             None
+                                              Table 11: Roles
+
+
+No support is provided for multiple concurrent operators.
+
+4.3 Approved Services
+ Name           Descript      Indicator                     Inputs        Output       Security       SSP
+                ion                                                       s            Function       Access
+                                                                                       s
+ Encryptio      Encrypt a     crypto_skcipher_setke         AES           Cipherte     Encryptio      Crypto
+ n              plaintext     y returns 0                   key,          xt           n              Officer
+                                                            plaintex                                  -    AES
+                                                            t, IV (if                                 key: W,E
+                                                            require
+                                                            d)
+ Decryptio      Decrypt a     crypto_skcipher_setke         AES           Plaintex     Decryptio      Crypto
+ n              ciphertex     y returns 0                   key,          t            n              Officer
+                t                                           cipherte                                  -    AES
+                                                            xt, IV (if                                key: W,E
+                                                            require
+                                                            d)
+ Authentic      Encrypt       For all except AES            AES           Cipherte     Authentic      Crypto
+ ated           and           GCM:                          key,          xt, MAC      ated           Officer
+ encryptio      authentic     crypto_aead_setkey            plaintex      tag          encryptio      -    AES
+ n              ate     a     returns 0; For AES            t,     IV     (CCM/G       n              key: W,E
+                plaintext     GCM:                          (CCM/G        CM)
+                              crypto_aead_get_flags         CM)
+                              (tfm)     has     the
+                              CRYPTO_TFM_FIPS_CO
+                              MPLIANCE flag set
+ Authentic      Decrypt       crypto_aead_setkey            AES           Plaintex     Authentic      Crypto
+ ated           and           returns 0                     key,          t       or   ated           Officer
+ decryptio      authentic                                   cipherte      failure      decryptio      -    AES
+ n              ate     a                                   xt,   IV                   n              key: W,E
+                ciphertex                                   (CCM/G
+                t                                           CM),
+                                                            MAC tag
+                                                            (CCM/G
+                                                            CM)
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 19 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name           Descript      Indicator                     Inputs       Output       Security       SSP
+                ion                                                      s            Function       Access
+                                                                                      s
+ Message        Compute       crypto_shash_init             Messag       Digest       Message        Crypto
+ digest         a             returns 0                     e            value        digest         Officer
+                message
+                digest
+ Message        Compute       crypto_shash_init             AES key      MAC tag      Message        Crypto
+ authentic      a    MAC      returns 0                     or                        authentic      Officer
+ ation          tag                                         HMAC                      ation          -     AES
+                                                            key,                                     key: W,E
+                                                            messag                                   - HMAC
+                                                            e                                        key: W,E
+ Random         Generate      crypto_rng_get_bytes          Output       Random       Random         Crypto
+ number         random        returns 0                     length       bytes        number         Officer
+ generatio      bytes                                                                 generatio      -
+ n                                                                                    n              Entropy
+                                                                                                     input (IG
+                                                                                                     D.L):
+                                                                                                     G,E,Z
+                                                                                                     -
+                                                                                                     CTR_DR
+                                                                                                     BG seed
+                                                                                                     (IG D.L):
+                                                                                                     G,E,Z
+                                                                                                     -
+                                                                                                     HMAC_D
+                                                                                                     RBG
+                                                                                                     seed (IG
+                                                                                                     D.L):
+                                                                                                     G,E,Z
+                                                                                                     -
+                                                                                                     Hash_D
+                                                                                                     RBG
+                                                                                                     seed (IG
+                                                                                                     D.L):
+                                                                                                     G,E,Z
+                                                                                                     -
+                                                                                                     CTR_DR
+                                                                                                     BG
+                                                                                                     internal
+                                                                                                     state (V,
+                                                                                                     Key) (IG
+                                                                                                     D.L):
+                                                                                                     G,W,E
+                                                                                                     -
+                                                                                                     HMAC_D
+                                                                                                     RBG
+                                                                                                     internal
+                                                                                                     state (V,
+                                                                                                     Key) (IG
+                                                                                                     D.L):
+                                                                                                     G,W,E
+                                                                                                     -
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 20 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name           Descript      Indicator                     Inputs       Output       Security       SSP
+                ion                                                      s            Function       Access
+                                                                                      s
+                                                                                                     Hash_D
+                                                                                                     RBG
+                                                                                                     internal
+                                                                                                     state (V,
+                                                                                                     C)    (IG
+                                                                                                     D.L):
+                                                                                                     G,W,E
+ Error          Compute       None                          Messag       EDC          None           Crypto
+ detection      an EDC                                      e                                        Officer
+ code           (crc32,
+                crc32c,
+                crct10dif
+                )
+ Compress       Compres       None                          Data         Compre       None           Crypto
+ ion            s     data                                               ssed                        Officer
+                (deflate,                                                data
+                lz4,
+                lz4hc,
+                lzo, zlib-
+                deflate,
+                zstd)
+ Generic        Use the       None                          Identifie    Various      None           Crypto
+ system         kernel to                                   r,           return                      Officer
+ call           perform                                     various      values
+                various                                     argume
+                non-                                        nts
+                cryptogr
+                aphic
+                operation
+                s
+ Show           Return        None                          N/A          Module       None           Crypto
+ version        the                                                      name                        Officer
+                module                                                   and
+                name                                                     version
+                and
+                version
+                informati
+                on
+ Show           Return        None                          N/A          Module       None           Crypto
+ status         the                                                      status                      Officer
+                module
+                status
+ Self-test      Perform       None                          N/A          Pass/fail    Encryptio      Crypto
+                the                                                                   n              Officer
+                CASTs                                                                 Decryptio
+                and                                                                   n
+                integrity                                                             Authentic
+                tests                                                                 ated
+                                                                                      encryptio
+                                                                                      n
+                                                                                      Authentic
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 21 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name           Descript      Indicator                     Inputs       Output       Security       SSP
+                ion                                                      s            Function       Access
+                                                                                      s
+                                                                                      ated
+                                                                                      decryptio
+                                                                                      n
+                                                                                      Message
+                                                                                      digest
+                                                                                      Message
+                                                                                      authentic
+                                                                                      ation
+                                                                                      Random
+                                                                                      number
+                                                                                      generatio
+                                                                                      n
+                                                                                      Signature
+                                                                                      verificatio
+                                                                                      n
+ Zeroizatio     Zeroize       None                          Any SSP      N/A          None           Crypto
+ n              SSPs                                                                                 Officer
+                                                                                                     -    AES
+                                                                                                     key:    Z
+                                                                                                     - HMAC
+                                                                                                     key:    Z
+                                                                                                     -
+                                                                                                     Entropy
+                                                                                                     input (IG
+                                                                                                     D.L): Z
+                                                                                                     -
+                                                                                                     CTR_DR
+                                                                                                     BG seed
+                                                                                                     (IG D.L):
+                                                                                                     Z
+                                                                                                     -
+                                                                                                     HMAC_D
+                                                                                                     RBG
+                                                                                                     seed (IG
+                                                                                                     D.L): Z
+                                                                                                     -
+                                                                                                     Hash_D
+                                                                                                     RBG
+                                                                                                     seed (IG
+                                                                                                     D.L): Z
+                                                                                                     -
+                                                                                                     CTR_DR
+                                                                                                     BG
+                                                                                                     internal
+                                                                                                     state (V,
+                                                                                                     Key) (IG
+                                                                                                     D.L): Z
+                                                                                                     -
+                                                                                                     HMAC_D
+                                                                                                     RBG
+                                                                                                     internal
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 22 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name           Descript      Indicator                     Inputs       Output       Security       SSP
+                ion                                                      s            Function       Access
+                                                                                      s
+                                                                                                     state (V,
+                                                                                                     Key) (IG
+                                                                                                     D.L): Z
+                                                                                                     -
+                                                                                                     Hash_D
+                                                                                                     RBG
+                                                                                                     internal
+                                                                                                     state (V,
+                                                                                                     C)    (IG
+                                                                                                     D.L): Z
+                                         Table 12: Approved Services
+
+
+For the above table, the convention below applies when specifying the access permissions
+(types) that the service has for each SSP.
+    • Generate (G): The module generates or derives the SSP.
+    • Read (R): The SSP is read from the module (e.g. the SSP is output).
+    • Write (W): The SSP is updated, imported, or written to the module.
+    • Execute (E): The module uses the SSP in performing a cryptographic operation.
+    • Zeroize (Z): The module zeroizes the SSP.
+4.4 Non-Approved Services
+ Name                          Description                              Algorithms                   Role
+ AES-GCM           with        Encrypt and authenticate a               AES-GCM              with    Crypto
+ external IV encryption        plaintext using AES-GCM with             external IV                  Officer
+                               an external IV
+ Key derivation                Derive a key from a key-                 KBKDF in libkcapi            Crypto
+                               derivation key, shared secret,           HKDF    in    libkcapi       Officer
+                               or password                              PBKDF2 in libkcapi
+ Pre-hashed message            Generate a digital signature for         RSA PKCS#1 v1.5              Crypto
+ signature generation          a pre-hashed message                     with      pre-hashed         Officer
+                                                                        message
+ Pre-hashed message            Verify a digital signature for a         RSA PKCS#1 v1.5              Crypto
+ signature verification        pre-hashed message                       with      pre-hashed         Officer
+                                                                        message
+ Key encapsulation             Key encapsulation using RSA              RSA PKCS#1 v1.5              Crypto
+                               PKCS#1 v1.5                                                           Officer
+ Key un-encapsulation          Key un-encapsulation using RSA PKCS#1 v1.5                            Crypto
+                               RSA PKCS#1 v1.5                                                       Officer
+ Encryption primitive          Compute the RSA encryption RSA primitive                              Crypto
+                               primitive                                                             Officer
+ Decryption primitive          Compute the RSA decryption RSA primitive                              Crypto
+                               primitive                                                             Officer
+                                   Table 13: Non-Approved Services
+
+
+4.5 External Software/Firmware Loaded
+The module does not load external software or firmware.
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 23 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+On system boot, the sha512hmac binary and libkcapi library are first integrity tested using
+the HMAC-SHA2-512 and HMAC-SHA2-256 algorithms (respectively) implemented by the
+module. Then, the kernel binary is integrity tested using the HMAC-SHA2-512 algorithm. These
+tests are all performed using a key hardcoded in the sha512hmac binary, by recomputing the
+MAC tags and verifying they are equal to the MAC tags specified in the .hmac file.
+Finally, the kernel crypto object files are loaded on start-up by the kernel binary and verified
+using RSA signature verification with PKCS#1 v1.5 padding, SHA2-256, and a hardcoded 3072-
+bit key. The signature is stored inside the kernel object file. If the signature verification fails,
+the integrity test is unsuccessful.
+
+5.2 Initiate on Demand
+Integrity tests are performed as part of the pre-operational self-tests, which are executed
+when the module is initialized. The integrity tests can be invoked on demand by unloading
+and subsequently re-initializing the module (i.e., rebooting the system), which will perform
+(among others) the software integrity tests.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 24 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+
+How Requirements are Satisfied:
+
+The operating system provides process isolation and memory protection mechanisms that
+ensure appropriate separation for memory access among the processes on the system. Each
+process has control over its own data and uncontrolled access to the data of other processes
+is prevented.
+
+6.2 Configuration Settings and Restrictions
+The module shall be installed as stated in Section 11.1.
+
+Instrumentation tools like the ptrace system call, gdb and strace, as well as other tracing
+mechanisms offered by the Linux environment such as ftrace or systemtap, shall not be used
+in the operational environments. The use of any of these tools implies that the cryptographic
+module is running in a non-validated operational environment.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 25 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+7 Physical Security
+The module is comprised of software only and therefore this Section is not applicable.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 26 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+8 Non-Invasive Security
+The module does not implement any non-invasive security mechanisms.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 27 of 51
+Rocky Linux 8 Kernel Cryptographic API                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+ Storage         Description                                                                     Persistence
+ Area                                                                                            Type
+ Name
+ Module          Temporary storage for SSPs used by the module as part of                        Dynamic
+ RAM             service execution
+                                   Table 14: Storage Areas
+
+
+The module does not perform persistent storage of SSPs; SSPs in use by the module exist in
+volatile memory only. SSPs are provided to the module by the calling process and are
+destroyed when released by the appropriate zeroization function calls.
+
+9.2 SSP Input-Output Methods
+ Name              From                  To          Format      Distribution       Entry          SFI     or
+                                                     Type        Type               Type           Algorithm
+ API   input       Operator              Module      Plaintext   Manual             Electronic
+ parameters        calling               RAM
+                   application
+                   (TOEPP)
+ AF_ALG type       Operator              Module      Plaintext   Manual             Electronic
+ sockets           calling               RAM
+                   application
+                   (TOEPP)
+                                  Table 15: SSP Input-Output Methods
+
+
+9.3 SSP Zeroization Methods
+ Zeroization        Description               Rationale                  Operator Initiation
+ Method
+ Free   cipher      Zeroizes    the           Memory occupied by         By calling the appropriate
+ handle             SSPs contained            SSPs is overwritten        zeroization functions: AES key:
+                    within      the           with zeroes, which         crypto_free_skcipher          and
+                    cipher handle             renders     the    SSP     crypto_free_aead; HMAC key:
+                                              values irretrievable.      crypto_free_shash             and
+                                              The completion of the      crypto_free_ahash;        Entropy
+                                              zeroization     routine    input: crypto_free_rng; DRBG
+                                              indicates that the         seed: crypto_free_rng; DRBG
+                                              zeroization procedure      internal state: crypto_free_rng
+                                              succeeded.
+ Remove             De-allocates the          Volatile memory used       By removing power
+ power from         volatile memory           by the module is
+ the module         used to store             overwritten      within
+                    SSPs                      nanoseconds       when
+                                              power is removed.
+                                              Module    power      off
+                                              indicates that the
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                     Page 28 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Zeroization        Description           Rationale                     Operator Initiation
+ Method
+                                      zeroization procedure
+                                      succeeded.
+ Automatic          Automatically     Memory occupied by N/A
+                    zeroized by the SSPs is overwritten
+                    module    when with zeroes, which
+                    no       longer renders       the    SSP
+                    needed            values irretrievable.
+                                Table 16: SSP Zeroization Methods
+
+
+All data output is inhibited during zeroization.
+
+9.4 SSPs
+ Name            Descripti       Size    -    Type     -         Generat        Establish        Used By
+                 on              Strengt      Category           ed By          ed By
+                                 h
+ AES key         Symmetric       128,         Symmetric                                          Encryption
+                 key used        256 bits     key - CSP                                          Decryption
+                 for    AES      (AES-                                                           Message
+                 operations      XTS);                                                           authenticati
+                                 128,                                                            on
+                                 192,                                                            Authenticat
+                                 256 bits                                                        ed
+                                 (others)                                                        encryption
+                                 -    128,                                                       Authenticat
+                                 256 bits                                                        ed
+                                 (AES-                                                           decryption
+                                 XTS);
+                                 128,
+                                 192,
+                                 256 bits
+                                 (others)
+ HMAC key        Symmetric       112-         Authenticati                                       Message
+                 key used        524288       on key - CSP                                       authenticati
+                 for HMAC        bits     -                                                      on
+                 operations      112-256
+                                 bits
+ Entropy         Entropy         128-384      Entropy            Random                          Random
+ input   (IG     input used      bits     -   input - CSP        number                          number
+ D.L)            to     seed     128-384                         generatio                       generation
+                 DRBGs (IG       bits                            n
+                 D.L)
+ CTR_DRBG        CTR_DRBG        256,         Seed - CSP         Random                          Random
+ seed  (IG       seed            320,                            number                          number
+ D.L)            derived         384 bits                        generatio                       generation
+                 from            -   128,                        n
+                 entropy         192,
+                 input and       256 bits
+                 additional
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 29 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name            Descripti       Size  -      Type     -         Generat        Establish        Used By
+                 on              Strengt      Category           ed By          ed By
+                                 h
+                 data     (IG
+                 D.L)
+ Hash_DRB        Hash_DRB        440,         Seed - CSP         Random                          Random
+ G seed (IG      G      seed     888 bits                        number                          number
+ D.L)            derived         -   128,                        generatio                       generation
+                 from            256 bits                        n
+                 entropy
+                 input and
+                 additional
+                 data     (IG
+                 D.L)
+ HMAC_DR         HMAC_DR         440,         Seed - CSP         Random                          Random
+ BG     seed     BG     seed     888 bits                        number                          number
+ (IG D.L)        derived         -   128,                        generatio                       generation
+                 from            256 bits                        n
+                 entropy
+                 input and
+                 additional
+                 data     (IG
+                 D.L)
+ CTR_DRBG        Internal        256,      Internal       Random                                 Random
+ internal        state     of    320,      state - CSP    number                                 number
+ state    (V,    CTR_DRBG        348 bits                 generatio                              generation
+ Key)     (IG    (IG D.L)        -    128,                n
+ D.L)                            192,
+                                 256 bits
+ HMAC_DR         Internal        320,      Internal       Random                                 Random
+ BG internal     state    of     512,      state - CSP    number                                 number
+ state   (V,     HMAC_DR         1024                     generatio                              generation
+ Key)    (IG     BG (IG D.L)     bits    -                n
+ D.L)                            128,
+                                 256 bits
+ Hash_DRB        Internal        880,      Internal       Random                                 Random
+ G internal      state    of     1776      state - CSP    number                                 number
+ state (V, C)    Hash_DRB        bits    -                generatio                              generation
+ (IG D.L)        G (IG D.L)      128,                     n
+                                 256 bits
+                                         Table 17: SSP Table 1
+
+
+ Name               Input     -      Storage             Storage            Zeroization        Related
+                    Output                               Duration                              SSPs
+ AES key            API   input      Module              Until cipher       Free cipher
+                    parameters       RAM:Plaintext       handle     is      handle
+                    AF_ALG                               freed     or       Remove
+                    type                                 module     is      power from
+                    sockets                              powered off        the module
+ HMAC key           API   input      Module              Until cipher       Free cipher
+                    parameters       RAM:Plaintext       handle     is      handle
+                    AF_ALG                               freed     or       Remove
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 30 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name               Input        -   Storage             Storage            Zeroization        Related
+                    Output                               Duration                              SSPs
+                    type                                 module     is      power from
+                    sockets                              powered off        the module
+ Entropy input                       Module              From               Automatic          CTR_DRBG
+ (IG D.L)                            RAM:Plaintext       generation                            seed       (IG
+                                                         until DRBG                            D.L):Derives
+                                                         seed       is                         HMAC_DRBG
+                                                         created                               seed       (IG
+                                                                                               D.L):Derives
+                                                                                               Hash_DRBG
+                                                                                               seed       (IG
+                                                                                               D.L):Derives
+ CTR_DRBG                            Module              While     the      Automatic          Entropy input
+ seed (IG D.L)                       RAM:Plaintext       DRBG        is                        (IG
+                                                         being                                 D.L):Derived
+                                                         instantiated                          From
+                                                                                               CTR_DRBG
+                                                                                               internal state
+                                                                                               (V, Key) (IG
+                                                                                               D.L):Derives
+ Hash_DRBG                           Module              While     the      Automatic          Entropy input
+ seed (IG D.L)                       RAM:Plaintext       DRBG        is                        (IG
+                                                         being                                 D.L):Derived
+                                                         instantiated                          From
+                                                                                               Hash_DRBG
+                                                                                               internal state
+                                                                                               (V,   C)   (IG
+                                                                                               D.L):Derives
+ HMAC_DRBG                           Module              While     the      Automatic          Entropy input
+ seed (IG D.L)                       RAM:Plaintext       DRBG        is                        (IG
+                                                         being                                 D.L):Derived
+                                                         instantiated                          From
+                                                                                               HMAC_DRBG
+                                                                                               internal state
+                                                                                               (V, Key) (IG
+                                                                                               D.L):Derives
+ CTR_DRBG                            Module        Until cipher             Free cipher        CTR_DRBG
+ internal state                      RAM:Plaintext handle     is            handle             seed       (IG
+ (V, Key) (IG                                      freed      or            Remove             D.L):Derived
+ D.L)                                              module     is            power from         From
+                                                   powered off              the module
+ HMAC_DRBG                           Module        Until cipher             Free cipher        HMAC_DRBG
+ internal state                      RAM:Plaintext handle     is            handle             seed       (IG
+ (V, Key) (IG                                      freed      or            Remove             D.L):Derived
+ D.L)                                              module     is            power from         From
+                                                   powered off              the module
+ Hash_DRBG                           Module        Until cipher             Free cipher        Hash_DRBG
+ internal state                      RAM:Plaintext handle     is            handle             seed       (IG
+ (V, C) (IG D.L)                                   freed      or            Remove             D.L):Derived
+                                                   module     is            power from         From
+                                                   powered off              the module
+                                        Table 18: SSP Table 2
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 31 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+9.5 Transitions
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes,
+starting January 1, 2031.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 32 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+10 Self-Tests
+While the module is executing the self-tests, services are not available, and data output (via
+the data output interface) is inhibited until the tests are successfully completed. The module
+does not return control to the calling application until the tests are completed. If any of the
+self-tests fails, the module immediately transitions to the error state.
+
+10.1 Pre-Operational Self-Tests
+ Algorithm or        Test                Test Method        Test          Indicator           Details
+ Test                Properties                             Type
+ HMAC-SHA2-          128-bit key         Message            SW/FW
+                                                                Module                        Integrity test
+ 512 (A5824) -                           authentication     Integrity
+                                                                becomes                       for
+ sha512hmac                                                     operational                   sha512hmac
+ binary                                                         and services                  binary
+                                                                are available
+                                                                for use
+ HMAC-SHA2-          256-bit key   Message          SW/FW       Module                        Integrity test
+ 256 (A5824) -                     authentication Integrity becomes                           for    libkcapi
+ libkcapi library                                               operational                   shared library
+                                                                and services
+                                                                are available
+                                                                for use
+ HMAC-SHA2-          128-bit key   Message          SW/FW       Module                        Integrity test
+ 512 (A5824) -                     authentication Integrity becomes                           for      Kernel
+ Kernel                                                         operational                   binary
+                                                                and services
+                                                                are available
+                                                                for use
+ RSA     SigVer      3072-bit key Signature         SW/FW       Module                        Integrity test
+ (FIPS186-5)         with SHA2- verification        Integrity becomes                         for      kernel
+ (A5807)             256                                        operational                   object files
+                                                                and services
+                                                                are available
+                                                                for use
+                               Table 19: Pre-Operational Self-Tests
+
+
+The pre-operational software integrity tests are performed automatically when the module is
+powered on, before the module transitions into the operational state.
+
+10.2 Conditional Self-Tests
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ AES-CBC -       128, 192,       KAT         CAS      Module              is   Encryption        Module
+ Encrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-CBC         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5813) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 33 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ AES-CBC         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5816) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-CBC-        128-bit         KAT         CAS      Module              is   Encryption        Module
+ CS3      -      keys                        T        operational                                initializatio
+ Encrypt                                                                                         n
+ AES-CBC-        128-bit         KAT         CAS      Module              is   Encryption        Module
+ CS3             keys                        T        operational                                initializatio
+ (A5816) -                                                                                       n
+ Encrypt
+ AES-CCM -       128, 192,       KAT         CAS      Module              is   Encryption        Module
+ Encrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-CCM         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5816) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-            128, 192,       KAT         CAS      Module              is   Encryption        Module
+ CFB128 -        256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-            128, 192,       KAT         CAS      Module              is   Encryption        Module
+ CFB128          256-bit                     T        operational                                initializatio
+ (A5816) -       keys                                                                            n
+ Encrypt
+ AES-CTR -       128, 192,       KAT         CAS      Module              is   Encryption        Module
+ Encrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5813)     -   256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5816)     -   256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5819)     -   256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-ECB     -   128, 192,       KAT         CAS      Module              is   Encryption        Module
+ Encrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5810) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5813) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5819) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-GCM -       128, 192,       KAT         CAS      Module              is   Encryption        Module
+ Encrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 34 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ AES-GCM         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5815) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-GCM         128, 192,       KAT         CAS      Module              is   Encryption        Module
+ (A5818) -       256-bit                     T        operational                                initializatio
+ Encrypt         keys                                                                            n
+ AES-XTS         256, 512-       KAT         CAS      Module              is   Encryption        Module
+ Testing         bit keys                    T        operational                                initializatio
+ Revision                                                                                        n
+ 2.0      -
+ Encrypt
+ AES-XTS         256, 512-       KAT         CAS      Module              is   Encryption        Module
+ Testing         bit keys                    T        operational                                initializatio
+ Revision                                                                                        n
+ 2.0
+ (A5813) -
+ Encrypt
+ AES-CBC -       128, 192,       KAT         CAS      Module              is   Decryption        Module
+ Decrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-CBC         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5813) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-CBC         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5816) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-CBC-        128-bit         KAT         CAS      Module              is   Decryption        Module
+ CS3      -      keys                        T        operational                                initializatio
+ Decrypt                                                                                         n
+ AES-CBC-        128-bit         KAT         CAS      Module              is   Decryption        Module
+ CS3             keys                        T        operational                                initializatio
+ (A5816) -                                                                                       n
+ Decrypt
+ AES-CCM -       128, 192,       KAT         CAS      Module              is   Decryption        Module
+ Decrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-CCM         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5816) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-            128, 192,       KAT         CAS      Module              is   Decryption        Module
+ CFB128 -        256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-            128, 192,       KAT         CAS      Module              is   Decryption        Module
+ CFB128          256-bit                     T        operational                                initializatio
+ (A5816) -       keys                                                                            n
+ Decrypt
+ AES-CTR -       128, 192,       KAT         CAS      Module              is   Decryption        Module
+ Decrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 35 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5813)     -   256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5816)     -   256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-CTR         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5819)     -   256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-ECB     -   128, 192,       KAT         CAS      Module              is   Decryption        Module
+ Decrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5810) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5813) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-ECB         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5819) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-GCM -       128, 192,       KAT         CAS      Module              is   Decryption        Module
+ Decrypt         256-bit                     T        operational                                initializatio
+                 keys                                                                            n
+ AES-GCM         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5815) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-GCM         128, 192,       KAT         CAS      Module              is   Decryption        Module
+ (A5818) -       256-bit                     T        operational                                initializatio
+ Decrypt         keys                                                                            n
+ AES-XTS         256, 512-       KAT         CAS      Module              is   Decryption        Module
+ Testing         bit keys                    T        operational                                initializatio
+ Revision                                                                                        n
+ 2.0      -
+ Decrypt
+ AES-XTS         256, 512-       KAT         CAS      Module              is   Decryption        Module
+ Testing         bit keys                    T        operational                                initializatio
+ Revision                                                                                        n
+ 2.0
+ (A5813) -
+ Decrypt
+ SHA-1           0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA-1           0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5822)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA-1           0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5823)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 36 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ SHA-1           0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5824)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-224        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-224        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5822)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-224        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5823)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-224        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5824)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-256        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-256        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5822)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-256        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5823)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-256        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5824)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-384        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-384        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5822)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-384        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5823)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-384        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5824)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-512        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-512        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5822)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA2-512        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5823)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 37 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ SHA2-512        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5824)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA3-224        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA3-256        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA3-384        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ SHA3-512        0-8184-bit      KAT         CAS      Module              is   Message           Module
+ (A5807)         messages                    T        operational              digest            initializatio
+                                                                                                 n
+ AES-CMAC        128, 256-       KAT         CAS      Module              is   Message           Module
+                 bit keys                    T        operational              authenticatio     initializatio
+                                                                               n                 n
+ AES-CMAC        128, 256-       KAT         CAS      Module              is   Message           Module
+ (A5816)         bit keys                    T        operational              authenticatio     initializatio
+                                                                               n                 n
+ HMAC-           32-64-bit       KAT         CAS      Module              is   Message           Module
+ SHA-1           keys                        T        operational              authenticatio     initializatio
+                                                                               n                 n
+ HMAC-           32-64-bit       KAT         CAS      Module              is   Message           Module
+ SHA-1           keys                        T        operational              authenticatio     initializatio
+ (A5824)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-224        bit keys                    T        operational              authenticatio     initializatio
+                                                                               n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-224        bit keys                    T        operational              authenticatio     initializatio
+ (A5824)                                                                       n                 n
+ HMAC-           32-64-bit       KAT         CAS      Module              is   Message           Module
+ SHA2-256        keys                        T        operational              authenticatio     initializatio
+                                                                               n                 n
+ HMAC-           32-64-bit       KAT         CAS      Module              is   Message           Module
+ SHA2-256        keys                        T        operational              authenticatio     initializatio
+ (A5824)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-384        bit keys                    T        operational              authenticatio     initializatio
+                                                                               n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-384        bit keys                    T        operational              authenticatio     initializatio
+ (A5824)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-512        bit keys                    T        operational              authenticatio     initializatio
+                                                                               n                 n
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 38 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator                Details           Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA2-512        bit keys                    T        operational              authenticatio     initializatio
+ (A5824)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA3-224        bit keys                    T        operational              authenticatio     initializatio
+ (A5807)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA3-256        bit keys                    T        operational              authenticatio     initializatio
+ (A5807)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA3-384        bit keys                    T        operational              authenticatio     initializatio
+ (A5807)                                                                       n                 n
+ HMAC-           32-1048-        KAT         CAS      Module              is   Message           Module
+ SHA3-512        bit keys                    T        operational              authenticatio     initializatio
+ (A5807)                                                                       n                 n
+ Counter         AES-128,        KAT         CAS      Module              is   Instantiate,      Module
+ DRBG            AES-192,                    T        operational              seed, reseed,     initializatio
+                 AES-256                                                       generate          n
+                 with/witho                                                    (compliant to
+                 ut                                                            SP        800-
+                 prediction                                                    90Ar1
+                 resistance                                                    Section 11.3)
+ Hash            SHA-1,          KAT         CAS      Module              is   Instantiate,      Module
+ DRBG            SHA2-256,                   T        operational              seed, reseed,     initializatio
+                 SHA2-512                                                      generate          n
+                 with/witho                                                    (compliant to
+                 ut                                                            SP        800-
+                 prediction                                                    90Ar1
+                 resistance                                                    Section 11.3)
+ HMAC            SHA-1,          KAT         CAS      Module              is   Instantiate,      Module
+ DRBG            SHA2-256,                   T        operational              seed, reseed,     initializatio
+                 SHA2-512                                                      generate          n
+                 with/witho                                                    (compliant to
+                 ut                                                            SP        800-
+                 prediction                                                    90Ar1
+                 resistance                                                    Section 11.3)
+ RSA SigVer      PKCS#1          KAT         CAS      Module              is   Signature         Module
+ (FIPS186-       v1.5 with                   T        operational              verification      initializatio
+ 5) (A5807)      SHA-512                                                                         n
+                 and 4096-
+                 bit key
+ Entropy         Cutoff C =      APT         CAS      Entropy source is        Entropy           Entropy
+ source APT      325;                        T        operational              source start-     source
+ initializatio   Windows                                                       up test on        initializatio
+ n               size = 512                                                    1024              n
+                                                                               samples
+ Entropy         Cutoff C =      RCT         CAS      Entropy source is        Entropy           Entropy
+ source RCT      31                          T        operational              source start-     source
+ initializatio                                                                 up test on        initializatio
+ n                                                                             1024              n
+                                                                               samples
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 39 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test            Test        Test     Indicator               Details            Condition
+ or Test         Propertie       Metho       Typ                                                 s
+                 s               d           e
+ Entropy         Cutoff C =      APT         CAS      jent_kcapi_rando        Entropy            Continuousl
+ source          355;                        T        m returns 0             source             y        as
+ continuous      Windows                                                      continuous         entropy is
+ APT             size = 512                                                   test               requested
+ Entropy         Cutoff C =      RCT         CAS      jent_kcapi_rando        Entropy            Continuousl
+ source          61                          T        m returns 0             source             y        as
+ continuous                                                                   continuous         entropy is
+ RCT                                                                          test               requested
+                                     Table 20: Conditional Self-Tests
+
+
+10.3 Periodic Self-Test Information
+ Algorithm       or    Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ HMAC-SHA2-            Message                SW/FW Integrity        On demand              Manually
+ 512 (A5824) -         authentication
+ sha512hmac
+ binary
+ HMAC-SHA2-            Message                SW/FW Integrity        On demand              Manually
+ 256 (A5824) -         authentication
+ libkcapi library
+ HMAC-SHA2-            Message                SW/FW Integrity        On demand              Manually
+ 512 (A5824) -         authentication
+ Kernel
+ RSA        SigVer     Signature              SW/FW Integrity        On demand              Manually
+ (FIPS186-5)           verification
+ (A5807)
+                            Table 21: Pre-Operational Periodic Information
+
+
+ Algorithm   or        Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ AES-CBC      -        KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-CBC               KAT                    CAST                   On demand              Manually
+ (A5813)      -
+ Encrypt
+ AES-CBC               KAT                    CAST                   On demand              Manually
+ (A5816)      -
+ Encrypt
+ AES-CBC-CS3 -         KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-CBC-CS3           KAT                    CAST                   On demand              Manually
+ (A5816)      -
+ Encrypt
+ AES-CCM      -        KAT                    CAST                   On demand              Manually
+ Encrypt
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 40 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm    or       Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ AES-CCM               KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Encrypt
+ AES-CFB128    -       KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-CFB128            KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Encrypt
+ AES-CTR       -       KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5813)       -
+ Encrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Encrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5819)       -
+ Encrypt
+ AES-ECB       -       KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5810)       -
+ Encrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5813)       -
+ Encrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5819)       -
+ Encrypt
+ AES-GCM       -       KAT                    CAST                   On demand              Manually
+ Encrypt
+ AES-GCM               KAT                    CAST                   On demand              Manually
+ (A5815)       -
+ Encrypt
+ AES-GCM               KAT                    CAST                   On demand              Manually
+ (A5818)       -
+ Encrypt
+ AES-XTS Testing       KAT                    CAST                   On demand              Manually
+ Revision 2.0 -
+ Encrypt
+ AES-XTS Testing       KAT                    CAST                   On demand              Manually
+ Revision    2.0
+ (A5813)       -
+ Encrypt
+ AES-CBC       -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-CBC               KAT                    CAST                   On demand              Manually
+ (A5813)       -
+ Decrypt
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 41 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm    or       Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ AES-CBC               KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Decrypt
+ AES-CBC-CS3 -         KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-CBC-CS3           KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Decrypt
+ AES-CCM       -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-CCM               KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Decrypt
+ AES-CFB128    -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-CFB128            KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Decrypt
+ AES-CTR       -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5813)       -
+ Decrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5816)       -
+ Decrypt
+ AES-CTR               KAT                    CAST                   On demand              Manually
+ (A5819)       -
+ Decrypt
+ AES-ECB       -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5810)       -
+ Decrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5813)       -
+ Decrypt
+ AES-ECB               KAT                    CAST                   On demand              Manually
+ (A5819)       -
+ Decrypt
+ AES-GCM       -       KAT                    CAST                   On demand              Manually
+ Decrypt
+ AES-GCM               KAT                    CAST                   On demand              Manually
+ (A5815)       -
+ Decrypt
+ AES-GCM               KAT                    CAST                   On demand              Manually
+ (A5818)       -
+ Decrypt
+ AES-XTS Testing       KAT                    CAST                   On demand              Manually
+ Revision 2.0 -
+ Decrypt
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 42 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm    or       Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ AES-XTS Testing       KAT                    CAST                   On demand              Manually
+ Revision    2.0
+ (A5813)       -
+ Decrypt
+ SHA-1 (A5807)         KAT                    CAST                   On demand              Manually
+ SHA-1 (A5822)         KAT                    CAST                   On demand              Manually
+ SHA-1 (A5823)         KAT                    CAST                   On demand              Manually
+ SHA-1 (A5824)         KAT                    CAST                   On demand              Manually
+ SHA2-224              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA2-224              KAT                    CAST                   On demand              Manually
+ (A5822)
+ SHA2-224              KAT                    CAST                   On demand              Manually
+ (A5823)
+ SHA2-224              KAT                    CAST                   On demand              Manually
+ (A5824)
+ SHA2-256              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA2-256              KAT                    CAST                   On demand              Manually
+ (A5822)
+ SHA2-256              KAT                    CAST                   On demand              Manually
+ (A5823)
+ SHA2-256              KAT                    CAST                   On demand              Manually
+ (A5824)
+ SHA2-384              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA2-384              KAT                    CAST                   On demand              Manually
+ (A5822)
+ SHA2-384              KAT                    CAST                   On demand              Manually
+ (A5823)
+ SHA2-384              KAT                    CAST                   On demand              Manually
+ (A5824)
+ SHA2-512              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA2-512              KAT                    CAST                   On demand              Manually
+ (A5822)
+ SHA2-512              KAT                    CAST                   On demand              Manually
+ (A5823)
+ SHA2-512              KAT                    CAST                   On demand              Manually
+ (A5824)
+ SHA3-224              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA3-256              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA3-384              KAT                    CAST                   On demand              Manually
+ (A5807)
+ SHA3-512              KAT                    CAST                   On demand              Manually
+ (A5807)
+ AES-CMAC              KAT                    CAST                   On demand              Manually
+ AES-CMAC              KAT                    CAST                   On demand              Manually
+ (A5816)
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 43 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       or    Test Method            Test Type              Period                 Periodic
+ Test                                                                                       Method
+ HMAC-SHA-1            KAT                    CAST                   On demand              Manually
+ HMAC-SHA-1            KAT                    CAST                   On demand              Manually
+ (A5824)
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 224
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 224 (A5824)
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 256
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 256 (A5824)
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 384
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 384 (A5824)
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 512
+ HMAC-SHA2-            KAT                    CAST                   On demand              Manually
+ 512 (A5824)
+ HMAC-SHA3-            KAT                    CAST                   On demand              Manually
+ 224 (A5807)
+ HMAC-SHA3-            KAT                    CAST                   On demand              Manually
+ 256 (A5807)
+ HMAC-SHA3-            KAT                    CAST                   On demand              Manually
+ 384 (A5807)
+ HMAC-SHA3-            KAT                    CAST                   On demand              Manually
+ 512 (A5807)
+ Counter DRBG          KAT                    CAST                   On demand              Manually
+ Hash DRBG             KAT                    CAST                   On demand              Manually
+ HMAC DRBG             KAT                    CAST                   On demand              Manually
+ RSA         SigVer    KAT                    CAST                   On demand              Manually
+ (FIPS186-5)
+ (A5807)
+ Entropy source        APT                    CAST                   On demand              Manually
+ APT initialization
+ Entropy source        RCT                    CAST                   On demand              Manually
+ RCT
+ initialization
+ Entropy source        APT                    CAST                   On demand              Manually
+ continuous APT
+ Entropy source        RCT                    CAST                   On demand              Manually
+ continuous RCT
+                              Table 22: Conditional Periodic Information
+
+
+10.4 Error States
+ Name      Description                              Conditions             Recovery               Indicator
+                                                                           Method
+ Error     The Linux kernel immediately             Any     self-test      Restart of      the    Kernel
+           stops executing                          failure                module                 panic
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 44 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+                                          Table 23: Error States
+
+
+In the error state, the output interface is inhibited, and the module accepts no more inputs or
+requests (as the module is no longer running).
+
+10.5 Operator Initiation of Self-Tests
+All self-tests, except for the entropy source continuous health tests, can be invoked on
+demand by unloading and subsequently re-initializing the module.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 45 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+11 Life-Cycle Assurance
+
+11.1 Installation, Initialization, and Startup Procedures
+The module is distributed as a part of the Rocky Linux 8 distribution, in the form of the kernel-
+4.18.0-553.16.1.el8_6.ciqfips.0.5, libkcapi-1.2.0-2.el8, and libkcapi-hmaccalc-1.2.0-2.el8 RPM
+packages.
+
+The module can achieve FIPS validated configuration by:
+   • Adding the fips=1 option to the kernel command line during the system installation.
+      During the software selection stage, do not install any third-party software.
+   • Switching the system into the validated configuration after installation. Execute the
+      “fips- mode-setup --enable” command. Restart the system.
+
+In both cases, the Crypto Officer must verify the system operates in the validated
+configuration by executing the “fips-mode-setup --check” command, which should output
+“FIPS mode is enabled.”
+
+11.2 Administrator Guidance
+After installation of the RPM packages, the Crypto Officer must execute the “cat
+/proc/sys/crypto/fips_name” command. The Crypto Officer must ensure that the proper name
+is listed in the output as follows:
+
+Rocky Linux 8 - Kernel Cryptographic API
+
+Then, the Crypto Officer must execute the “cat /proc/sys/crypto/fips_version” and “rpm -qa |
+grep kcapi” commands. These commands must output the following (one line per output):
+
+$ cat /proc/sys/crypto/fips_version
+rocky8.20240923
+
+$ rpm -qa | grep kcapi
+libkcapi-hmaccalc-1.2.0-2.el8.x86_64
+libkcapi-1.2.0-2.el8.x86_64
+
+11.3 Non-Administrator Guidance
+There is no non-administrator guidance.
+
+11.4 Design and Rules
+Not applicable.
+
+11.5 Maintenance Requirements
+Not applicable.
+
+11.6 End of Life
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 46 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+As the module does not persistently store SSPs, secure sanitization of the module consists of
+unloading the module. This will zeroize all SSPs in volatile memory. Then, if desired, the kernel-
+4.18.0-553.16.1.el8_6.ciqfips.0.5, libkcapi-1.2.0-2.el8, and libkcapi-hmaccalc-1.2.0-2.el8 RPM
+packages can be uninstalled from the Rocky Linux 8 system.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 47 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+12 Mitigation of Other Attacks
+The module does not implement security mechanisms to mitigate other attacks.
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 48 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+A Glossary and Abbreviations
+ AES                     Advanced Encryption Standard
+ API                     Application Programming Interface
+ CAST                    Cryptographic Algorithm Self-Test
+ CAVP                    Cryptographic Algorithm Validation Program
+ CBC                     Cipher Block Chaining
+ CBC-CS3                 Cipher Block Chaining with Ciphertext Stealing 3
+ CCM                     Counter with Cipher Block Chaining-Message Authentication Code
+ CFB                     Cipher Feedback
+ CMAC                    Cipher-based Message Authentication Code
+ CMVP                    Cryptographic Module Validation Program
+ CSP                     Critical Security Parameter
+ CTR                     Counter
+ DRBG                    Deterministic Random Bit Generator
+ ECB                     Electronic Code Book
+ FIPS                    Federal Information Processing Standards
+ GCM                     Galois Counter Mode
+ GMAC                    Galois Counter Mode Message Authentication Code
+ HMAC                    Keyed-Hash Message Authentication Code
+ IPsec                   Internet Protocol Security
+ IG                      Implementation Guidance
+ IV                      Initialization Vector
+ KAT                     Known Answer Test
+ KW                      Key Wrap
+ MAC                     Message Authentication Code
+ NIST                    National Institute of Science and Technology
+ PAA                     Processor Algorithm Acceleration
+ PAI                     Processor Algorithm Implementation
+ PCT                     Pair-wise Consistency Test
+ PSP                     Public Security Parameter
+ RSA                     Rivest Shamir Adleman
+ SHA                     Secure Hash Algorithm
+ SSP                     Sensitive Security Parameter
+ TOEPP                   Tested Operational Environment’s Physical Perimeter
+ XTS                     XEX-based Tweaked-codebook mode with cipher text Stealing
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 49 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+B References
+ FIPS 140-3             Security Requirements For Cryptographic Modules
+                        March 2019
+                        https://doi.org/10.6028/NIST.FIPS.140-3
+ FIPS 140-3 IG          Implementation Guidance for FIPS PUB 140-3 and the
+                        Cryptographic Module Validation Program
+                        https://csrc.nist.gov/CSRC/media/Projects/cryptographic-module-
+                        validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf
+ FIPS 180-4             Secure Hash Standard (SHS)
+                        August 2015
+                        https://doi.org/10.6028/NIST.FIPS.180-4
+ FIPS 186-5             Digital Signature Standard (DSS)
+                        February 2023
+                        https://doi.org/10.6028/NIST.FIPS.186-5
+ FIPS 197               Advanced Encryption Standard (AES)
+                        November 2001; Updated May 2023
+                        https://doi.org/10.6028/NIST.FIPS.197-upd1
+ FIPS 198-1             The Keyed-Hash Message Authentication Code (HMAC)
+                        July 2008
+                        https://doi.org/10.6028/NIST.FIPS.198-1
+ FIPS 202               SHA-3 Standard: Permutation-Based Hash and Extendable-
+                        Output Functions
+                        August 2015
+                        https://doi.org/10.6028/NIST.FIPS.202
+ PKCS#1                 PKCS #1: RSA Cryptography Specifications Version 2.2
+                        November 2016
+                        https://doi.org/10.17487/RFC8017
+ SP 800-38A             Recommendation for Block Cipher Modes of Operation: Methods
+                        and Techniques
+                        December 2001
+                        https://doi.org/10.6028/NIST.SP.800-38A
+ SP      800-38A-       Recommendation for Block Cipher Modes of Operation: Three
+ Add                    Variants of Ciphertext Stealing for CBC Mode
+                        October 2010
+                        https://doi.org/10.6028/NIST.SP.800-38A-Add
+ SP 800-38B             Recommendation for Block Cipher Modes of Operation: the
+                        CMAC Mode for Authentication
+                        May 2005; Updated October 2016
+                        https://doi.org/10.6028/NIST.SP.800-38B
+ SP 800-38C             Recommendation for Block Cipher Modes of Operation: the CCM
+                        Mode for Authentication and Confidentiality
+                        May 2004; Updated July 2007
+                        https://doi.org/10.6028/NIST.SP.800-38C
+ SP 800-38D             Recommendation for Block Cipher Modes of Operation:
+                        Galois/Counter Mode (GCM) and GMAC
+                        November 2007
+                        https://doi.org/10.6028/NIST.SP.800-38D
+ SP 800-38E             Recommendation for Block Cipher Modes of Operation: the XTS-
+                        AES Mode for Confidentiality on Storage Devices
+                        January 2010
+                        https://doi.org/10.6028/NIST.SP.800-38E
+ SP 800-38F             Recommendation for Block Cipher Modes of Operation: Methods
+                        for Key Wrapping
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 50 of 51
+Rocky Linux 8 Kernel Cryptographic API                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+                        December 2012
+                        https://doi.org/10.6028/NIST.SP.800-38F
+ SP 800-90Ar1           Recommendation for Random Number Generation Using
+                        Deterministic Random Bit Generators
+                        June 2015
+                        https://doi.org/10.6028/NIST.SP.800-90Ar1
+ SP 800-90B             Recommendation for the Entropy Sources Used for Random Bit
+                        Generation
+                        January 2018
+                        https://doi.org/10.6028/NIST.SP.800-90B
+ SP 800-131Ar2          Transitioning the Use of Cryptographic Algorithms and Key
+                        Lengths
+                        Marcy 2019
+                        https://doi.org/10.6028/NIST.SP.800-131Ar2
+ SP 800-140Br1          Cryptographic Module Validation Program (CMVP) Security
+                        Policy Requirements: CMVP Validation Authority Updates to
+                        ISO/IEC 24759 and ISO/IEC 19790 Annex B
+                        November 2023
+                        https://doi.org/10.6028/NIST.SP.800-140Br1
+
+
+
+
+                               © 2025 Ctrl IQ, Inc., atsec information security.
+     This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+                                                                                                    Page 51 of 51
+

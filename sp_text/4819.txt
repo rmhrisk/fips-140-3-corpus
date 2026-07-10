@@ -1,0 +1,1028 @@
+                        Advanced Micro Devices, Inc. (AMD)
+
+                          AMD Pensando PenTrust Security Module
+
+                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                                                  1
+FIPS 140-3 Non-Proprietary Security Policy
+Disclaimer
+
+
+AMD, the AMD Arrow logo, Pensando and combinations thereof are trademarks of Advanced Micro
+Devices, Inc.
+
+This Security Policy document may be reproduced only in its original entirety (without revision).
+
+© 2023 Advanced Micro Devices, Inc. All Rights Reserved.
+
+
+
+
+                                                                                                    2
+FIPS 140-3 Non-Proprietary Security Policy
+Table of Contents
+1 – General ................................................................................................................................ 6
+   1.1 Overview .......................................................................................................................... 6
+   1.2 Security Levels ................................................................................................................. 6
+2 – Cryptographic Module Specification ..................................................................................... 6
+   2.1 Description ....................................................................................................................... 6
+   2.2 Tested and Vendor Affirmed Module Version and Identification ........................................ 7
+   2.3 Excluded Components...................................................................................................... 8
+   2.4 Modes of Operation .......................................................................................................... 8
+   2.5 Algorithms ........................................................................................................................ 9
+   2.6 Security Function Implementations ..................................................................................10
+   2.7 Algorithm Specific Information .........................................................................................10
+   2.8 RBG and Entropy ............................................................................................................10
+   2.9 Key Generation................................................................................................................11
+   2.10 Key Establishment .........................................................................................................11
+   2.11 Industry Protocols ..........................................................................................................11
+3 Cryptographic Module Interfaces............................................................................................11
+   3.1 Ports and Interfaces ........................................................................................................11
+   3.2 Trusted Channel Specification .........................................................................................11
+   3.3 Control Interface Not Inhibited .........................................................................................11
+4 Roles, Services, and Authentication .......................................................................................11
+   4.1 Authentication Methods ...................................................................................................11
+   4.2 Roles ...............................................................................................................................12
+   4.3 Approved Services ..........................................................................................................12
+   4.4 Non-Approved Services ...................................................................................................16
+   4.5 External Software/Firmware Loaded ................................................................................16
+   4.6 Bypass Actions and Status ..............................................................................................16
+   4.7 Cryptographic Output Actions and Status ........................................................................16
+5 Software/Firmware Security ...................................................................................................16
+   5.1 Integrity Techniques ........................................................................................................16
+   5.2 Initiate on Demand ..........................................................................................................16
+   5.3 Open-Source Parameters ................................................................................................16
+6 Operational Environment........................................................................................................16
+   6.1 Operational Environment Type and Requirements ..........................................................16
+7 Physical Security ....................................................................................................................17
+
+                                                                                                                                            3
+FIPS 140-3 Non-Proprietary Security Policy
+8 Non-Invasive Security ............................................................................................................17
+   8.1 Mitigation Techniques ......................................................................................................17
+9 Sensitive Security Parameters Management ..........................................................................17
+   9.1 Storage Areas .................................................................................................................17
+   9.2 SSP Input-Output Methods ..............................................................................................17
+   9.3 SSP Zeroization Methods ................................................................................................17
+   9.4 SSPs ...............................................................................................................................18
+10 Self-Tests .............................................................................................................................19
+   10.1 Pre-Operational Self-Tests ............................................................................................19
+   10.2 Conditional Self-Tests....................................................................................................20
+   10.3 Periodic Self-Test Information........................................................................................21
+   10.4 Error States ...................................................................................................................22
+   10.5 Operator Initiation of Self-Tests .....................................................................................22
+11 Life-Cycle Assurance ...........................................................................................................22
+   11.1 Installation, Initialization, and Startup Procedures..........................................................22
+   11.2 Administrator Guidance .................................................................................................23
+   11.3 Non-Administrator Guidance..........................................................................................23
+   11.4 Design and Rules ..........................................................................................................23
+   11.5 Maintenance Requirements ...........................................................................................23
+   11.6 End of Life .....................................................................................................................24
+12 Mitigation of Other Attacks ...................................................................................................24
+
+
+
+
+                                                                                                                                           4
+FIPS 140-3 Non-Proprietary Security Policy
+List of Tables
+Table 1: Security Levels ............................................................................................................. 6
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) .... 8
+Table 3: Tested Module Identification – Hybrid Disjoint Hardware .............................................. 8
+Table 4: Tested Operational Environments - Software, Firmware, Hybrid .................................. 8
+Table 5: Modes List and Description .......................................................................................... 9
+Table 6: Approved Algorithms .................................................................................................... 9
+Table 7: Security Function Implementations..............................................................................10
+Table 8: Ports and Interfaces ....................................................................................................11
+Table 9: Roles ...........................................................................................................................12
+Table 10: Approved Services ....................................................................................................15
+Table 11: Storage Areas ...........................................................................................................17
+Table 12: SSP Input-Output Methods........................................................................................17
+Table 13: SSP Zeroization Methods ..........................................................................................18
+Table 14: SSP Table 1 ..............................................................................................................19
+Table 15: SSP Table 2 ..............................................................................................................19
+Table 16: Pre-Operational Self-Tests ........................................................................................19
+Table 17: Conditional Self-Tests ...............................................................................................21
+Table 18: Pre-Operational Periodic Information.........................................................................21
+Table 19: Conditional Periodic Information ................................................................................22
+Table 20: Error States ...............................................................................................................22
+
+
+List of Figures
+Figure 1: Block Diagram............................................................................................................. 7
+
+
+
+ Date                        Version                     Description
+ 10/13/2023                  1.0                         Initial Release
+ 05/16/2024                  1.1                         Address CMVP Comments
+ 08/28/2024                  1.2                         Address CMVP Comments
+
+
+
+
+                                                                                                                                          5
+FIPS 140-3 Non-Proprietary Security Policy
+1 – General
+1.1 Overview
+This document defines the Security Policy for AMD Pensando PenTrust Security Module,
+hereafter referred to as the Module. The Module meets FIPS 140-3 overall Level 1
+requirements, with security levels as described in section 1.2 below.
+
+1.2 Security Levels
+
+ Section            Title                                            Security Level
+ 1                  General                                          1
+ 2                  Cryptographic module specification               1
+ 3                  Cryptographic module interfaces                  1
+ 4                  Roles, services, and authentication              1
+ 5                  Software/Firmware security                       1
+ 6                  Operational environment                          1
+ 7                  Physical security                                N/A
+ 8                  Non-invasive security                            N/A
+ 9                  Sensitive security parameter management          1
+ 10                 Self-tests                                       1
+ 11                 Life-cycle assurance                             1
+ 12                 Mitigation of other attacks                      N/A
+                    Overall Level                                    1
+Table 1: Security Levels
+
+
+
+
+2 – Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+
+The Module is a software-hybrid module intended for use by customers seeking to implement
+approved cryptography.
+
+Module Type: Software-hybrid
+
+Module Embodiment: SingleChip
+
+Module Characteristics:
+Module is not a Sub-chip and there are no special characteristics.
+
+Cryptographic Boundary:
+
+The Module is a software hybrid Module that comprises of software and hardware components.
+The software component of the Module can only support cryptographic algorithms by utilizing
+the Processor Algorithm Implementations (PAI), which are enabled by software and process
+
+
+                                                                                            6
+FIPS 140-3 Non-Proprietary Security Policy
+service requests from the consuming application (outside of the cryptographic boundary) via the
+Mailbox API. The cryptographic boundary of the Module is defined by the pentrustfw.img.
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+
+The TOEPP is the physical perimeter of the AMD Pensando DPU 08-0010-01. The Module
+executes from the ARM Cortex M0 CPU, a single-threaded CPU, with no underlying OS. The
+consuming application (outside of the cryptographic boundary) executes from GPC Hardware
+outside of the boundary (e.g. A72 ARM Processor).
+
+
+
+
+Figure 1: Block Diagram
+
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+
+                                                                                              7
+FIPS 140-3 Non-Proprietary Security Policy
+N/A for this module.
+
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+
+ Package or File           Software/ Firmware        Features                 Integrity Test
+ Name                      Version
+ pentrustfw.img            5.0.0                                              ECDSA P-384 with
+                                                                              SHA2-384 digital
+                                                                              signature verification
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+
+Tested Module Identification – Hybrid Disjoint Hardware:
+
+ Model and/or Part Number         Hardware      Firmware Processors                         Features
+                                  Version       Version
+ AMD Pensando DPU 08-             version                ARM Cortex M0 CPU with
+ 0010-01                          01                     PAI
+Table 3: Tested Module Identification – Hybrid Disjoint Hardware
+
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+
+ Operating Hardware Platform                  Processors       PAA/PAI Hypervisor Version(s)
+ System                                                                or Host OS
+ N/A       AMD Pensando DPU 08-               ARM Cortex       Yes                5.0.0
+           0010-01, version 01                M0
+Table 4: Tested Operational Environments - Software, Firmware, Hybrid
+
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+
+N/A for this module.
+
+CMVP makes no statement as to the correct operation of the Module or the security strengths of
+the keys when so ported if the specific operational environment is not listed on the validation
+certificate.
+
+2.3 Excluded Components
+The Module does not support excluded components.
+
+2.4 Modes of Operation
+Modes List and Description:
+
+
+
+
+                                                                                                       8
+FIPS 140-3 Non-Proprietary Security Policy
+ Mode Name             Description              Type     Status Indicator
+ Approved mode         Invoke approved          Approved Global Indicator as per FIPS 140-3 IG
+ of operation          services of the module            2.4.C. Module only supports
+                                                         approved services.
+Table 5: Modes List and Description
+
+
+
+Degraded Mode Description:
+
+The Module does not support degraded mode.
+
+2.5 Algorithms
+Approved Algorithms:
+
+ Algorithm                  CAVP         Properties                               Reference
+                            Cert
+ AES-CBC                    A4453        Direction - Decrypt                      SP 800-38A
+                                         Key Length - 128, 192, 256
+ AES-CTR                    A4453        Direction - Decrypt                      SP 800-38A
+                                         Key Length - 128, 192, 256
+ AES-ECB                    A4453        Direction - Decrypt                      SP 800-38A
+                                         Key Length - 128, 192, 256
+ AES-GCM                    A4453        Direction - Decrypt                      SP 800-38D
+                                         IV Generation - External
+                                         Key Length - 128, 192, 256
+ AES-GMAC                   A4453        Direction - Decrypt                      SP 800-38D
+                                         IV Generation - External
+                                         Key Length - 128, 192, 256
+ ECDSA SigVer               A4453        Component - No                           FIPS 186-4
+ (FIPS186-4)                             Curve - P-384
+                                         Hash Algorithm - SHA2-384
+ RSA SigVer                 A4453        Signature Type - PKCS 1.5, PKCSPSS       FIPS 186-4
+ (FIPS186-4)                             Modulo - 2048, 4096
+ SHA2-256                   A4453        Message Length - Message Length: 0-      FIPS 180-4
+                                         65536 Increment 8
+ SHA2-384                   A4453        Message Length - Message Length: 0-      FIPS 180-4
+                                         65536 Increment 8
+ SHA2-512                   A4453        Message Length - Message Length: 0-      FIPS 180-4
+                                         65536 Increment 8
+Table 6: Approved Algorithms
+
+
+
+Vendor-Affirmed Algorithms:
+
+N/A for this module.
+
+
+
+
+                                                                                                 9
+FIPS 140-3 Non-Proprietary Security Policy
+Non-Approved, Allowed Algorithms:
+
+N/A for this module.
+
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+
+N/A for this module.
+
+
+Non-Approved, Not Allowed Algorithms:
+
+N/A for this module.
+
+
+2.6 Security Function Implementations
+
+ Name                  Type                  Description         Properties   Algorithms
+ Digital Signature     DigSig-SigVer         Verify signatures                ECDSA SigVer
+                                                                              (FIPS186-4)
+                                                                              RSA SigVer
+                                                                              (FIPS186-4)
+                                                                              SHA2-256
+                                                                              SHA2-384
+                                                                              SHA2-512
+ Secure Hash           SHA                   Hash Messages                    SHA2-256
+                                                                              SHA2-384
+                                                                              SHA2-512
+ Block Cipher          BC-UnAuth             Decrypt                          AES-CBC
+                                             messages                         AES-CTR
+                                                                              AES-ECB
+ Authenticated         BC-Auth               Decrypt and                      AES-GCM
+ Block Cipher                                authenticate                     AES-GMAC
+                                             messages
+Table 7: Security Function Implementations
+
+
+
+
+2.7 Algorithm Specific Information
+There are no additional requirements for documentation of the algorithms supported by the
+Module.
+
+2.8 RBG and Entropy
+N/A for this module.
+
+N/A for this module.
+
+
+
+                                                                                             10
+FIPS 140-3 Non-Proprietary Security Policy
+2.9 Key Generation
+
+
+2.10 Key Establishment
+
+
+2.11 Industry Protocols
+The Module does not support industry protocols.
+
+
+3 Cryptographic Module Interfaces
+
+3.1 Ports and Interfaces
+
+ Physical     Logical           Data That Passes
+ Port         Interface(s)
+ Mailbox      Data Input        All data being input or output to/from the module, control
+ API          Data Output       information and parameters passed via the module`s API, and
+              Control           status output returned from the API. All information travels through
+              Input             the module’s API; with the module’s process memory being
+              Status            physically in SRAM and executing on the platform’s CPU. No
+              Output            information is transmitted by the module over a physical port on the
+                                platform.
+ DMA          Data Input        Data input or output resulting from Mailbox API request.
+              Data Output
+Table 8: Ports and Interfaces
+
+
+
+
+3.2 Trusted Channel Specification
+The Module does not support a Trusted Channel.
+
+3.3 Control Interface Not Inhibited
+The Module does not support a Control Output Interface.
+
+
+4 Roles, Services, and Authentication
+
+4.1 Authentication Methods
+N/A for this module.
+
+
+
+
+                                                                                                  11
+FIPS 140-3 Non-Proprietary Security Policy
+4.2 Roles
+
+ Name                         Type                    Operator Type     Authentication Methods
+ Crypto Officer               Role                    CO
+Table 9: Roles
+
+
+As per FIPS 140-3, the Module supports the Crypto Officer (CO) operator role implicitly. The
+role is implicitly assumed by the service requested. The Module does not support
+authentication. The Module does not support multiple concurrent operators, a maintenance role
+or bypass capability.
+
+4.3 Approved Services
+Please see below for the Approved Services supported by the Module. As per FIPS 140-3 IG,
+Section 2.4.C, a global indicator applies to this Module as it only supports Approved Services in
+an approved manner. An implicit indication via the successful completion of a service is the
+global indicator of the Module.
+
+Please note that columns for “Input” and “Output” below are documented from the standpoint of
+the API parameters. It is important to note that independent of the parameters, module supports
+a status indicator per service to indicate success or failure. All service inputs result in a service
+output.
+
+ Name                Description             Indica    Inputs      Outputs      Security    SSP
+                                             tor                                Function    Access
+                                                                                s
+ HASH                SHA2-256 SHA2-                    DataIn      Digest       Secure      Crypto
+                     384 SHA2-512                      size,                    Hash        Officer
+                                                       DataIn
+ HASH_FIRST          SHA2-256 SHA2-                    DataIn      StateOut     Secure      Crypto
+                     384 SHA2-512                      size,                    Hash        Officer
+                                                       DataIn
+ HASH_UPD            SHA2-256 SHA2-                    DataIn      StateOut     Secure      Crypto
+                     384 SHA2-512                      size,                    Hash        Officer
+                                                       StateIn,
+                                                       DataIn
+ HASH_FINISH         SHA2-256 SHA2-                    DataIn      DataIn       Secure      Crypto
+                     384 SHA2-512                      size,       size,        Hash        Officer
+                                                       StateIn,    StateIn,
+                                                       DataIn      DataIn
+ VERIFY              RSA: algorithms                   Algorithm   Success      Digital     Crypto
+                     RSA2048 /SHA2-                    : RSA or    or Failure   Signature   Officer
+                     256 and                           ECDSA,                               - API
+                     RSA4096/SHA2-                     Padding                              RSA
+                     512, Padding                      type,                                Key:
+                     PKCS and PSS                      Hash                                 W,E,Z
+                     ECDSA: Curve                      algorithm                            - API
+                     P-384, Hash                       , Key                                ECDSA
+                                                       Size,                                Key:
+
+                                                                                                      12
+FIPS 140-3 Non-Proprietary Security Policy
+ Name                Description             Indica   Inputs       Outputs      Security   SSP
+                                             tor                                Function   Access
+                                                                                s
+                     Algorithm SHA2-                  Message                              W,E,Z
+                     384                              Size,                                - SM
+                                                      Public                               Public
+                                                      Key,                                 Key: E
+                                                      Message
+                                                      ,
+                                                      Signature
+ FIPS_GET_MO         Returns the                      DMA          Data                    Crypto
+ DULE_VERSIO         module version                   pointer to   containin               Officer
+ N                   information. This                store        g the
+                     is the show                      result       version
+                     module version                                informati
+                     service required                              on for the
+                     by FIPS 140-3.                                module
+ CMD_FIPS_ZE         Zeroises long                                                         Crypto
+ ROIZE               lived SSPs                                                            Officer
+                                                                                           - CM
+                                                                                           Public
+                                                                                           Key: Z
+                                                                                           - SM
+                                                                                           Public
+                                                                                           Key: Z
+ BOOT_SUCCES Used for the A72                                                              Crypto
+ S            to signal to                                                                 Officer
+              PenTrust that
+              boot is
+              successful
+ DIAG_GET_STA Reads the boot                                       FaultStat               Crypto
+ TUS          status from                                          us, Boot                Officer
+              PenTrust.                                            status
+              Includes which                                       info
+              PenTrust image
+              (0 or 1) was
+              loaded, and
+              which A72 image
+              (0 or 1) was
+              loaded
+ DIAG_READPU Used to read out                                      Key                     Crypto
+ BKEYBOOT     the public key                                       (public                 Officer
+              material for SM                                      key of                  - CM
+              Public Key or CM                                     system                  Public
+              Public Key                                           authentic               Key: R
+                                                                   ation                   - SM
+                                                                   algorithm               Public
+                                                                   type)                   Key: R
+
+
+
+
+                                                                                                     13
+FIPS 140-3 Non-Proprietary Security Policy
+ Name                Description             Indica   Inputs       Outputs      Security    SSP
+                                             tor                                Function    Access
+                                                                                s
+ DIAG_SERIAL_        Used to read out                              Serial                   Crypto
+ NUMBER              the PenTrust                                  number                   Officer
+                     serial number                                 (128-bit)
+ DIAG_SET_UP         Sets an internal                                                       Crypto
+ GRADE_FLAG          PenTrust flag                                                          Officer
+                     that will make it
+                     re-evaluate which
+                     image to boot at
+                     the next reset
+ REVOKE_PUB_         Used to revoke                   Key                                   Crypto
+ KEY_BOOT            the CM Public                    index                                 Officer
+                     Key or SM Public                 (select                               - CM
+                     Key stored by the                which                                 Public
+                     consuming                        key is                                Key: E
+                     application in                   being                                 - SM
+                     GPC hardware                     revoked),                             Public
+                     outside the                      Certificat                            Key: E
+                     boundary                         e from
+                                                      manufact
+                                                      urer,
+                                                      Signature
+                                                      of the
+                                                      comman
+                                                      d (based
+                                                      on
+                                                      system
+                                                      authentic
+                                                      ation
+                                                      algorithm
+                                                      )
+ GCM_DECR            AES 128/192/256                  Key          Plaintext,   Authentic   Crypto
+                     decrypt in GCM                   metadata     MAC          ated        Officer
+                     and GMAC                         , AAD                     Block       - API
+                     modes, GMAC                      size,                     Cipher      AES Key:
+                     generation and                   Ciphertex                             W,E,Z
+                     verification                     t size,
+                                                      Key, IV,
+                                                      AAD,
+                                                      Ciphertex
+                                                      t, MAC
+ DECRYPT             AES 128/192/256                  Key          Plaintext,   Block       Crypto
+                     decrypt in ECB,                  metadata     Context      Cipher      Officer
+                     CBC, CTR                         ,                                     - API
+                                                      Ciphertex                             AES Key:
+                                                      t size,                               W,E,Z
+                                                      Key, IV
+                                                      or
+
+
+                                                                                                      14
+FIPS 140-3 Non-Proprietary Security Policy
+ Name                Description             Indica   Inputs      Outputs      Security   SSP
+                                             tor                               Function   Access
+                                                                               s
+                                                      context,
+                                                      Ciphertex
+                                                      t
+ READ_CHIP_C         Reads and                                    Chip                    Crypto
+ ERT                 outputs the X.509                            Certificat              Officer
+                     chip certificate                             e
+                     (binary blob)
+                     which is outside
+                     of the boundary
+                     and not an SSP.
+                     This is a helper
+                     function.
+ SHOW_STATU          This is the Show                             See                     Crypto
+ S                   Status service                               Section                 Officer
+                     required by FIPS                             10 for
+                     140-3. The                                   more
+                     service is                                   informati
+                     provided by the                              on
+                     module`s API
+                     and will
+                     automatically
+                     report status of
+                     the module
+                     during Self-Tests
+                     and the Error
+                     State. See
+                     Section 10 for
+                     more information.
+ SELF_TEST           This is the Self-                            See                     Crypto
+                     Tests service                                Section                 Officer
+                     required by FIPS                             10 for                  - CM
+                     140-3. The                                   more                    Public
+                     service is                                   informati               Key: E
+                     provided                                     on                      - SW
+                     automatically by                                                     image
+                     the module upon                                                      authentic
+                     power-cycle,                                                         ation
+                     reset, or reboot.                                                    public
+                     All Self-Tests are                                                   key: E
+                     executed by the
+                     module during
+                     power-on.
+Table 10: Approved Services
+
+
+
+
+                                                                                                    15
+FIPS 140-3 Non-Proprietary Security Policy
+4.4 Non-Approved Services
+N/A for this module.
+
+
+4.5 External Software/Firmware Loaded
+The Module does not support a software load test. The Module is a hybrid software module and
+the loaded software image is a complete image replacement of the disjoint software component.
+
+4.6 Bypass Actions and Status
+The Module does not support Bypass Actions.
+
+4.7 Cryptographic Output Actions and Status
+The Module does not support self-initiated cryptographic output capability.
+
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The Module uses ECDSA P-384 with SHA2-384 Signature Verification (ECDSA Cert. #A4453)
+as the approved integrity technique. The Module executes an ECDSA P-384 with SHA2-384
+Signature Verification Known Answer Test (KAT) prior to the software integrity test.
+
+
+5.2 Initiate on Demand
+To initiate the integrity test on demand the operator can power-cycle, reset, reboot the Module
+as per FIPS 140-3 IG 2.4.C.
+
+5.3 Open-Source Parameters
+The Module is not Open-Source.
+
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+The Module supports a modifiable Operational Environment.
+
+How Requirements are Satisfied:
+
+The modifiable Operational Environment supports a single threaded CPU where the only
+process that can execute at any point in time is the AMD Pensando PenTrust Security Module.
+
+
+                                                                                              16
+FIPS 140-3 Non-Proprietary Security Policy
+No other processes can run concurrently with the Module, and there can be only one instance of
+the Module. The modifiable Operational Environment does not support an operating system.
+Hence, the Module has control over its own SSPs, does not support uncontrolled access nor
+modifications to SSPs, and does not require restrictions or configurations of the operational
+environment for the Module to operate in an approved mode.
+
+
+7 Physical Security
+8 Non-Invasive Security
+8.1 Mitigation Techniques
+The Module does not support Non-Invasive Security. As per SP 800-140F, no additional
+requirements are applicable.
+
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+
+ Storage Description           Persistence
+ Area                          Type
+ Name
+ SRAM    Volatile in SRAM only Dynamic
+Table 11: Storage Areas
+
+
+
+
+9.2 SSP Input-Output Methods
+
+ Name      From                To             Format Distribution Entry      SFI or
+                                              Type      Type      Type       Algorithm
+ API       Entered via         SRAM inside    Plaintext Automated Electronic
+ SSP       Mailbox API         the boundary
+ input     from outside the
+           boundary
+ PSP       SRAM inside         Outside the    Plaintext Automated     Electronic
+ output    the boundary        boundary via
+                               Mailbox API
+Table 12: SSP Input-Output Methods
+
+
+
+
+9.3 SSP Zeroization Methods
+
+ Zeroization Method        Description                                Rationale Operator
+                                                                                Initiation
+ CMD_FIPS_ZEROIZE Service available to the consuming                            API
+                  application to Zeroise Long lived SSPs.
+
+                                                                                           17
+FIPS 140-3 Non-Proprietary Security Policy
+ Zeroization Method        Description                                    Rationale Operator
+                                                                                    Initiation
+ In-line zeroise           In-line zeroisation performed automatically              Automatic
+                           by the module upon completion of the
+                           service.
+Table 13: SSP Zeroization Methods
+
+
+
+
+9.4 SSPs
+ Name              Description       Size -     Type -      Generated    Established   Used By
+                                     Strength   Category    By           By
+ CM Public         ECDSA P-384       384 bits   Public -                               ECDSA
+ Key               Public Key        - 192      PSP                                    SigVer
+                   used to verify    bits                                              (FIPS186-
+                   SW image                                                            4)
+                   authentication                                                      (A4453)
+                   public key
+ SW image          ECDSA P-384       384 bits   public -                               ECDSA
+ authentication    Public Key        - 192      PSP                                    SigVer
+ public key        used for the      bits                                              (FIPS186-
+                   software                                                            4)
+                   integrity test.                                                     (A4453)
+ SM Public         ECDSA P-384       384 bits   Public -                               ECDSA
+ Key               Public Key        - 192      PSP                                    SigVer
+                   used to verify    bits                                              (FIPS186-
+                   external A72                                                        4)
+                   image.                                                              (A4453)
+ API AES Key       Keys provided     128        Symmetric                              AES-CBC
+                   by the users of   bits,      Key - CSP                              (A4453)
+                   the API from      192                                               AES-CTR
+                   outside the       bits,                                             (A4453)
+                   cryptographic     256 bits                                          AES-ECB
+                   boundary.         - 128                                             (A4453)
+                   Modes             bits,                                             AES-
+                   supported are:    192                                               GCM
+                   ECB, CBC,         bits,                                             (A4453)
+                   CTR, GCM,         256 bits                                          AES-
+                   GMAC                                                                GMAC
+                                                                                       (A4453)
+ API RSA Key       Keys provided     2048       Public -                               RSA
+                   by the users of   bits,      PSP                                    SigVer
+                   the API from      4096                                              (FIPS186-
+                   outside the       bits -                                            4)
+                   cryptographic     112                                               (A4453)
+                   boundary for      bits,
+                   Signature         128 bits
+                   Verification
+                   Services.
+
+
+                                                                                                 18
+FIPS 140-3 Non-Proprietary Security Policy
+ Name             Description          Size -      Type -     Generated    Established     Used By
+                                       Strength    Category   By           By
+                  Signature
+                  types
+                  supported are:
+                  PKCS 1.5,
+                  PKCSPSS
+ API ECDSA        Keys provided        384 bits    Public -                                ECDSA
+ Key              by the users of      - 192       PSP                                     SigVer
+                  the API from         bits                                                (FIPS186-
+                  outside the                                                              4)
+                  cryptographic                                                            (A4453)
+                  boundary for
+                  Signature
+                  Verification
+                  Services
+Table 14: SSP Table 1
+
+
+ Name                   Input -   Storage        Storage          Zeroization                Related
+                        Output                   Duration                                    SSPs
+ CM Public Key          PSP       SRAM:Plaintext While in         CMD_FIPS_ZEROIZE
+                        output                   use
+ SW image                         SRAM:Plaintext While in         N/A
+ authentication                                  use
+ public key
+ SM Public Key          PSP       SRAM:Plaintext While in         CMD_FIPS_ZEROIZE
+                        output                   use
+ API AES Key            API       SRAM:Plaintext While in         In-line zeroise
+                        SSP                      use
+                        input
+ API RSA Key            API       SRAM:Plaintext While in         In-line zeroise
+                        SSP                      use
+                        input
+ API ECDSA Key          API       SRAM:Plaintext While in         In-line zeroise
+                        SSP                      use
+                        input
+Table 15: SSP Table 2
+
+
+
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+
+ Algorithm Test                   Test            Test Type   Indicator                      Details
+ or Test   Properties             Method
+ ECDSA     P-384 with             SW              SW/FW       Image self-test: Passed or     Verify
+           SHA2-384               Integrity       Integrity   Image self-test: FAILED
+Table 16: Pre-Operational Self-Tests
+
+
+                                                                                                      19
+FIPS 140-3 Non-Proprietary Security Policy
+10.2 Conditional Self-Tests
+
+ Algorithm      Test              Test   Test Indicator            Details   Conditions
+ or Test        Properties        Method Type
+ SHA2-256       256 bits hash     KAT    CAST KATS:                Hash      Before first
+                                              algorithm_name                 use
+                                              DONE or KATS:
+                                              algorithm_name
+                                              FAILED
+ SHA2-512       512 bits hash     KAT    CAST KATS:                Hash      Before first
+                                              algorithm_name                 use
+                                              DONE or KATS:
+                                              algorithm_name
+                                              FAILED
+ RSA-           2048 bits key     KAT    CAST KATS:                Verify    Before first
+ PKCSPSS-       with SHA2-                    algorithm_name                 use
+ 2048           256 and                       DONE or KATS:
+                Signature                     algorithm_name
+                Type                          FAILED
+                PKCSPSS
+ RSA-PKCS       2048 bits key     KAT        CAST KATS:            Verify    Before first
+ 1.5-2048       with SHA2-                        algorithm_name             use
+                256 and                           DONE or KATS:
+                Signature                         algorithm_name
+                Type PKCS                         FAILED
+                1.5
+ RSA-           4096 bits key     KAT        CAST KATS:            Verify    Before first
+ PKCSPSS-       with SHA2-                        algorithm_name             use
+ 4096           512 and                           DONE or KATS:
+                Signature                         algorithm_name
+                Type                              FAILED
+                PKCSPSS
+ RSA-PKCS       4096 bits key     KAT        CAST KATS:            Verify    Before first
+ 1.5-4096       with SHA2-                        algorithm_name             use
+                512 and                           DONE or KATS:
+                Signature                         algorithm_name
+                Type PKCS                         FAILED
+                1.5
+ ECDSA          P-384 with        KAT        CAST KATS:            Verify    Before first
+                SHA2-384                          algorithm_name             use
+                                                  DONE or KATS:
+                                                  algorithm_name
+                                                  FAILED
+ AES-GCM        256 bit key       KAT        CAST KATS:            Decrypt Before first
+                size, GCM                         algorithm_name           use
+                mode                              DONE or KATS:
+                                                  algorithm_name
+                                                  FAILED
+
+                                                                                        20
+FIPS 140-3 Non-Proprietary Security Policy
+ Algorithm       Test              Test   Test Indicator                    Details   Conditions
+ or Test         Properties        Method Type
+ AES-CTR         128 bit key       KAT    CAST KATS:                        Decrypt Before first
+                 size, CTR                     algorithm_name                       use
+                 mode                          DONE or KATS:
+                                               algorithm_name
+                                               FAILED
+ AES-CBC         128 bit key       KAT    CAST KATS:                        Decrypt Before first
+                 size, CBC                     algorithm_name                       use
+                 mode                          DONE or KATS:
+                                               algorithm_name
+                                               FAILED
+ AES-ECB         256 bit key       KAT    CAST KATS:                        Decrypt Before first
+                 size, ECB                     algorithm_name                       use
+                 mode                          DONE or KATS:
+                                               algorithm_name
+                                               FAILED
+Table 17: Conditional Self-Tests
+
+
+
+
+10.3 Periodic Self-Test Information
+
+ Algorithm or         Test Method            Test Type         Period             Periodic
+ Test                                                                             Method
+ ECDSA                SW Integrity           SW/FW Integrity   Automatically on   Power cycle
+                                                               power on
+Table 18: Pre-Operational Periodic Information
+
+
+ Algorithm or         Test Method            Test Type         Period             Periodic
+ Test                                                                             Method
+ SHA2-256             KAT                    CAST              Automatically on   Power cycle
+                                                               power on
+ SHA2-512             KAT                    CAST              Automatically on   Power cycle
+                                                               power on
+ RSA-PKCSPSS-         KAT                    CAST              Automatically on   Power cycle
+ 2048                                                          power on
+ RSA-PKCS 1.5-        KAT                    CAST              Automatically on   Power cycle
+ 2048                                                          power on
+ RSA-PKCSPSS-         KAT                    CAST              Automatically on   Power cycle
+ 4096                                                          power on
+ RSA-PKCS 1.5-        KAT                    CAST              Automatically on   Power cycle
+ 4096                                                          power on
+ ECDSA                KAT                    CAST              Automatically on   Power cycle
+                                                               power on
+ AES-GCM              KAT                    CAST              Automatically on   Power cycle
+                                                               power on
+ AES-CTR              KAT                    CAST              Automatically on   Power cycle
+                                                               power on
+
+
+                                                                                                21
+FIPS 140-3 Non-Proprietary Security Policy
+ Algorithm or            Test Method         Test Type        Period             Periodic
+ Test                                                                            Method
+ AES-CBC                 KAT                 CAST             Automatically on   Power cycle
+                                                              power on
+ AES-ECB                 KAT                 CAST             Automatically on   Power cycle
+                                                              power on
+Table 19: Conditional Periodic Information
+
+
+
+
+10.4 Error States
+
+ Name      Description                          Conditions    Recovery     Indicator
+                                                              Method
+ Error     Module has failed a Self-Test.       Pre-          Power        Image self-test:
+ State     FIPS approved services are           Operational   cycle        FAILED or KATS:
+           not provided by the module           Self-Tests                 algorithm_name
+           when it is in this state and data    Conditional                FAILED
+           output is inhibited.                 Self-Tests
+Table 20: Error States
+
+
+
+
+10.5 Operator Initiation of Self-Tests
+To initiate the Self-Tests on demand the operator can power-cycle, reset, reboot the Module as
+per FIPS 140-3 IG 2.4.C. The Module executes all Self-Tests during power-on.
+
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+The Module is included inside the AMD DPU ASIC, which will be assembled together with other
+parts by manufacturing (AMD) into a larger product for the end user. There are no specific
+installation procedures or initialization procedures required for the end user.
+
+
+
+
+                                                                                               22
+FIPS 140-3 Non-Proprietary Security Policy
+The startup procedures of the module are:
+   1. Connect a console with terminal access.
+   2. Power on the Module.
+   3. Inspect the console output and confirm all Self-Tests Passed. See Section 10.1 and 10.2
+       above for successful indicators.
+   4. Issue the service FIPS_GET_MODULE_VERSION by issuing the following API:
+
+               ./pentrust_test show_module_version
+               Manufacturer: AMD
+               Hardware name: Pensando DPU 08-0010-01
+               Software name: AMD Pensando PenTrust Security Module
+               Hardware version: 1
+               Hardware build: 0
+               Software version: 5.0.0
+               Crypto version: 1.0.0
+
+   5. Crypto Officer shall confirm the output of the Module matches the information above.
+      Module is now ready to accept services in the Approved Mode of operation.
+
+11.2 Administrator Guidance
+The security parameters, physical ports, and logical interfaces for the Administrator (Crypto
+Officer) are defined via this Security Policy. Given the Module does not support authentication,
+the Crypto Officer role is implicitly assumed by invoking the services of the Module. The Crypto
+Officer is responsible for taking the following security rules into consideration:
+
+   1. The Module does not provide authentication.
+   2. If on-demand Self-Tests are needed, the Module must be power-cycled. All Self-Test are
+      performed at power-up automatically.
+   3. Data output is inhibited during self-tests, zeroisation and error states.
+   4. Status information does not contain CSPs or sensitive information that if misused would
+      lead to a compromise.
+   5. The Module performs both in-line zeroisation automatically for its APIs and offers the
+      service CMD_FIPS_ZEROIZE for PSPs in SRAM.
+   6. The Module does not support concurrent operators.
+
+There are no other administrative functions or security events other than what is listed above.
+For any questions, please contact FIPS@amd.com.
+
+11.3 Non-Administrator Guidance
+The Module does not support a Non-Administrator.
+
+11.4 Design and Rules
+Please see section 11.2 for security rules.
+
+11.5 Maintenance Requirements
+
+
+                                                                                                  23
+FIPS 140-3 Non-Proprietary Security Policy
+The Module does not support Maintenance.
+
+11.6 End of Life
+If the Crypto Officer would like to render the Module as no longer operable (end of life), the
+Crypto Officer must securely sanitize the Module by issuing the CMD_FIPS_ZEROIZE service
+followed by a power-cycle. Any private and public key records stored outside of the
+cryptographic boundary shall also be destroyed by the Crypto Officer.
+
+
+12 Mitigation of Other Attacks
+
+
+
+
+                                                                                             24
+FIPS 140-3 Non-Proprietary Security Policy
+

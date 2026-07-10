@@ -144,18 +144,24 @@ def build_index():
     no_update = N - rc["modules_with_updates"]
     interim = S["assurance"]["type_dist"].get("Interim (2-yr)", 0)
     upstream = len({m["cert"] for m in json.load(open("drift.json"))}) if os.path.exists("drift.json") else 0
+    # version completeness is an extraction-dependent metric (metadata-only records do
+    # not carry parsed version fields), so it is scoped to the full-extraction subset.
+    NF = S.get("n_full_extraction", N)
     have_ver = 0
     for p in sorted(__import__("glob").glob("corpus140_3/records/*.json")):
-        c = json.load(open(p)).get("certificate") or {}
+        rec = json.load(open(p))
+        if (rec.get("extraction") or {}).get("level") == "metadata+text":
+            continue
+        c = rec.get("certificate") or {}
         if (c.get("softwareVersions") or c.get("firmwareVersions")):
             have_ver += 1
 
     # Each statistic carries a one-sentence reading of why it matters, so the
     # numbers are interpreted rather than left to speak for themselves.
     obs = [
-        (f"{N}", "sampled modules",
-         "Large enough to show how the certified state ages in aggregate, while staying a directional "
-         "cross-section rather than a census of every FIPS 140-3 module."),
+        (f"{N}", "FIPS 140-3 modules",
+         "A near-census of the FIPS 140-3 modules validated in this certificate-number window, enough to show "
+         "how the certified state ages across the population rather than in a small sample."),
         (f"{no_update}", "no recorded update",
          "Most certified modules show no public update after their first validation, so their approved-mode "
          "code is effectively frozen while the world around it keeps moving."),
@@ -165,9 +171,9 @@ def build_index():
         (f"{interim}", "interim validations",
          "Nearly a fifth arrived through the backlog-reduction path, which grants a shorter, less deeply "
          "reviewed certificate, so two certificates do not always carry the same assurance."),
-        (f"{have_ver}", f"record a version ({round(100*have_ver/N)}%)",
-         "Almost four in ten certificates pin no software or firmware version, so for those modules you "
-         "cannot even check whether your deployed build is the one that was validated."),
+        (f"{have_ver}", f"record a version ({round(100*have_ver/max(1,NF))}% of full-extraction)",
+         "Among modules with full Security-Policy extraction, many still pin no software or firmware version, "
+         "so you cannot check whether your deployed build is the one that was validated."),
     ]
     th = "".join(f"<div class='obs-row'><div class='obs-k'><div class='obs-v'>{esc(v)}</div>"
                  f"<div class='obs-l'>{esc(l)}</div></div><div class='obs-why'>{esc(w)}</div></div>"
@@ -224,7 +230,7 @@ def build_index():
         "<p class='dek'>FIPS 140-3 is the US and Canadian government standard for validating that a cryptographic "
         "module correctly implements approved algorithms and meets a defined security bar. It exists to give buyers, "
         "originally federal agencies, assurance before they procure. It is widely referenced, expensive and slow to "
-        "obtain, and frequently misunderstood. This site reads the public validation record for a sampled set of "
+        "obtain, and frequently misunderstood. This site reads the public validation record for a near-census of "
         "modules to make what a certificate does and does not cover concrete.</p>"
 
         "<h2>What FIPS 140-3 validates</h2>"
@@ -373,7 +379,7 @@ def build_index():
         "<blockquote class='pull'><p>A FIPS certificate is an unexpectedly rich source of architectural intelligence.</p>"
         "<p>If you read enough Security Policies, you can start to understand how the industry actually builds "
         "cryptographic systems.</p></blockquote>"
-        "<p>This static site reads the public CMVP certificates and Security Policies for a sampled certificate-number "
+        "<p>This static site reads the public CMVP certificates and Security Policies for the FIPS 140-3 modules validated in a certificate-number "
         "sweep of FIPS 140-3 modules. It turns the abstractions above into something you can inspect: what a given "
         "module actually had validated, how long its certified state has stood, and where the public record stops and "
         "vendor or deployment evidence would have to take over.</p>"
@@ -382,7 +388,7 @@ def build_index():
         f"{N} modules</div><p>Open any module to see its full Security Policy and the questions the public record "
         "cannot resolve.</p></a>"
         "<a class='card' href='report.html'><h3>Understand</h3><div class='big'>Read the corpus findings</div>"
-        "<p>How the certified state ages across the sampled set, and the method behind it.</p></a>"
+        "<p>How the certified state ages across the corpus, and the method behind it.</p></a>"
         "</div>"
 
         "<div class='panel' style='padding:18px 22px'>"
@@ -410,8 +416,8 @@ def build_index():
         "<a href='https://csrc.nist.gov/pubs/fips/140-3/final' target='_blank' rel='noopener'>FIPS 140-3</a> itself.</p>"
         "</div>"
 
-        "<h2>What we observed in the sampled corpus</h2>"
-        "<p class='muted'>Findings from a sampled sweep that took every third certificate from #4700 to #5157, not the complete "
+        "<h2>What we observed across the corpus</h2>"
+        "<p class='muted'>Findings across the FIPS 140-3 modules validated in cert window #4650 to #5159, a near-census rather than the complete "
         "FIPS 140-3 population. Absence of a successor or update entry does not prove none exists.</p>"
         f"<div class='obs'>{th}</div>"
         "<p class='muted' style='font-size:13px;margin-top:18px'>The timeline is estimated elapsed time, strongest for "

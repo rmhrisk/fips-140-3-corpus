@@ -1,0 +1,2089 @@
+ FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+   Juniper Networks PTX1000 Packet Transport
+                    Router
+                               Firmware: Junos OS 22.4R2.8
+                                      Document Version: 1.0
+
+
+                                      Date: December 28, 2023
+
+
+
+
+Prepared by:
+
+
+
+
+www.acumensecurity.net
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 1 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+Table of Contents
+1.     General.................................................................................................................................................. 3
+2.     Cryptographic Module Specification..................................................................................................... 5
+3.     Cryptographic Module Interfaces ....................................................................................................... 14
+4.     Roles, Services, and Authentication.................................................................................................... 15
+5.     Software/Firmware Security ............................................................................................................... 27
+6.     Operational Environment ................................................................................................................... 28
+7.     Physical Security.................................................................................................................................. 29
+8.     Non-invasive Security.......................................................................................................................... 30
+9.     Sensitive Security Parameter Management ....................................................................................... 31
+10.    Self-tests.............................................................................................................................................. 42
+11.    Life-cycle Assurance ............................................................................................................................ 44
+12.    Mitigation of Other Attacks ................................................................................................................ 47
+
+
+
+
+List of Tables
+Table 1 - Security Levels ................................................................................................................................ 4
+Table 2 – Cryptographic Module Tested Configuration ................................................................................ 5
+Table 3 – Approved Algorithms .................................................................................................................. 12
+Table 4 – Non-Approved Algorithms Not Allowed in the Approved Mode of Operation .......................... 13
+Table 5 – Ports and Interfaces .................................................................................................................... 14
+Table 6 – Roles, Service Commands, Input and Output.............................................................................. 16
+Table 7 – Roles and Authentication ............................................................................................................ 18
+Table 8 – Approved Services ....................................................................................................................... 23
+Table 9 – Non-Approved Services ............................................................................................................... 26
+Table 10 – SSPs............................................................................................................................................ 41
+Table 11 – Non-Deterministic Random Number Generation Specification................................................ 41
+
+
+
+List of Figures
+Figure 1 –PTX1000 ........................................................................................................................................ 5
+Figure 2 – High-level PTX1000 Block Diagram .............................................................................................. 6
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                                               Page 2 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+1.        General
+     Introduction
+     Federal Information Processing Standards Publication 140-3 — Security Requirements for Cryptographic
+     Modules specifies requirements for cryptographic modules to be deployed in a Sensitive but Unclassified
+     environment. The National Institute of Standards and Technology (NIST) and Canadian Centre for Cyber
+     Security (CCCS) Cryptographic Module Validation Program (CMVP) run the FIPS 140-3 program. The NVLAP
+     accredits independent testing labs to perform FIPS 140-3 testing; the CMVP validates modules meeting
+     FIPS 140-3 validation. Validated is the term given to a module that is documented and tested against the
+     FIPS 140-3 criteria.
+
+     More information is available on the CMVP website at:
+     https://csrc.nist.gov/projects/cryptographic-module-validation-program.
+
+
+     About this Document
+     This non-proprietary Cryptographic Module Security Policy for the Juniper Networks, Inc. Juniper
+     Networks PTX1000 Packet Transport Router provides an overview of the product and a high-level
+     description of how it meets the overall Level 1 security requirements of FIPS 140-3.
+
+     The Juniper Networks PTX1000 Packet Transport Router may also be referred to as the “module” in this
+     document.
+
+     Disclaimer
+     The contents of this document are subject to revision without notice due to continued progress in
+     methodology, design, and manufacturing. Juniper Networks shall have no liability for any error or
+     damages of any kind resulting from the use of this document.
+
+     Notices
+     This document may be freely reproduced and distributed in its entirety without modification.
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 3 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+This document describes the cryptographic module security policy for the Juniper Networks, Inc. Juniper
+Networks PTX1000 Packet Transport Router (Hardware version: PTX1000) cryptographic module (also
+referred to as the “module” hereafter) with firmware version Junos OS 22.4R2.8 . The module has a multi-
+chip standalone embodiment. It contains specification of the security rules, under which the cryptographic
+module operates, including the security rules derived from the requirements of the FIPS 140-3 standard.
+
+The following table lists the level of validation for each area in FIPS 140-3:
+
+                 ISO/IEC 24759                      FIPS 140-3 Section Title                     Security Level
+                   Section 6.
+                [Number Below]
+                        1                                    General                                   1
+                        2                    Cryptographic module specification                        1
+                        3                     Cryptographic module interfaces                          1
+                        4                    Roles, services, and authentication                       3
+                        5                         Software/Firmware security                           1
+                        6                          Operational environment                             1
+                        7                               Physical security                              1
+                        8                            Non-invasive security                            N/A
+                        9                 Sensitive security parameter management                      1
+                       10                                   Self-tests                                 1
+                       11                             Life-cycle assurance                             1
+                       12                          Mitigation of other attacks                        N/A
+             Table 1 - Security Levels
+
+
+
+
+The module claims an overall Security Level 1.
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 4 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+2.        Cryptographic Module Specification
+     The versions of the module are as follows:
+
+                 Model                         Hardware                     Firmware Version             Distinguishing Features
+                                           [Part Number and
+                                                Version]
+               PTX1000                          PTX1000                    Junos OS 22.4R2.8                       N/A
+     Table 2 – Cryptographic Module Tested Configuration
+
+
+
+
+     Module Usage and Cryptographic Boundary
+
+     The cryptographic module provides for an encrypted connection, using SSH, between the management
+     station and the module.
+
+     The cryptographic module’s operational environment is a limited operational environment. The images
+     below depict the cryptographic boundary of the hardware module (the entirety of the module/chassis).
+     This includes the Routing Engine (RE). No components have been excluded from the cryptographic
+     boundary of the module.
+
+
+
+
+                                                          Figure 1 –PTX1000
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                                 Page 5 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+                                     Figure 2 – High-level PTX1000 Block Diagram
+
+
+The module claims an overall Security Level of 1 with all individual sections at a Security Level 1 with the
+exceptions of Roles, Services and Authentication (claimed at Security Level 3). The module does not
+implement any non-invasive security mitigations or mitigations of other attacks and thus the
+requirements per these sections are inapplicable.
+
+
+
+Modes Of Operation
+
+The module supports one Approved mode of operation and a non-Approved mode of operation. The
+module must always be zeroised when switching between the Approved mode of operation and the
+non-Approved mode of operation and vice versa.
+
+
+
+Approved Mode
+
+The hardware versions contained in Table 2, with Junos OS 22.4R2.8 installed, contain one Approved
+mode of operation and a non-Approved mode of operation. The Junos OS 22.4R2.8 firmware image
+must be installed on the module. The module is configured during initialization by the Crypto Officer to
+operate in the Approved mode or the non-Approved mode. The Crypto Officer can place the module in
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 6 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+the Approved mode of operation by following the instructions specified in Section 11 Life-Cyle
+Assurance in this document (Crypto Officer guidance).
+
+
+The Crypto Officer can verify that the cryptographic module is in the Approved mode by observing the
+console prompt and running the “show version” command. When operating in the Approved mode, the
+prompt will read “<operator>@<device name>:fips#” (e.g. crypto-officer@ptx1000fips#). The “show
+version” command will allow the Crypto Officer to verify that the validated firmware version is running
+on the module. The Crypto Officer can also use the “show system fips chassis level” command (returns
+“level 1”) to determine if the module is operating in the Approved mode.
+
+
+The Approved mode is entered when the module is configured for it and successfully passes all self-tests
+(both pre-operational and conditional cryptographic algorithm self-tests (CASTs)) .
+
+
+Non-Approved Mode
+
+The cryptographic module supports a non-Approved mode of operation. When operated in the non-
+Approved mode of operation, the module supports non-Approved algorithms identified below in this
+section as well as the algorithms supported in the Approved mode of operation. The Crypto Officer can
+place the module into the non-Approved mode of operation by following the instructions in the Section
+11 Life-Cyle Assurance in this document (Crypto Officer guidance).
+
+
+
+Degraded Operation
+
+The module does not support a degraded mode of operation.
+
+
+
+Overall Security Rules of Operation
+
+The module design corresponds to the security rules below. The term shall in this context specifically
+refers to a requirement for correct usage of the module in the Approved mode; all other statements
+indicate a security rule implemented by the module.
+
+     1. The module clears previous authentications on power cycle.
+     2. When the module has not been placed in a valid role, the operator does not have access to any
+        cryptographic services.
+     3. Self-tests do not require any operator action.
+     4. Data output is inhibited during SSP generation, self-test execution, zeroisation, and error states.
+     5. Status information does not contain SSPs or sensitive data that if misused could lead to a
+        compromise of the module.
+     6. There are no restrictions on which SSPs are zeroised by the zeroisation service.
+     7. The module does not support a maintenance interface or role.
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 7 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+     8. The module does not output intermediate key values.
+     9. The module does not output plaintext CSPs.
+     10. The Crypto officer shall verify that the firmware image to be loaded on the module is a FIPS 140-
+         3 validated image. If any non-validated firmware image is loaded the module will no longer be a
+         validated module.
+     11. The Crypto Officer shall retain control of the module while zeroisation is in process.
+     12. The virtual chassis feature is not supported in Approved mode and shall not be configured on
+         the module.
+     13. The module shall not be configured to use a radius server and the radius server capability shall
+         be disabled.
+     14. No parts of the SSH protocol, other than the approved cryptographic algorithms and the KDFs,
+         have been tested by the CAVP and CMVP.
+
+
+                                                                          Description/Key
+    CAVP Cert1      Algorithm and Standard          Mode/Method                                        Use/Function
+                                                                         Size/Key Strength
+
+                                                                         Key sizes 128, 192,
+                                                                           256 with 128 to
+      A4301                  AES-CBC                      CBC                                        Encrypt, Decrypt
+                                                                           256 bits of key
+                                                                              strength
+                                                                         Key sizes 128, 192,
+                                                                           256 with 128 to
+      A4301                  AES-CTR                      CTR                                        Encrypt, Decrypt
+                                                                           256 bits of key
+                                                                              strength
+                                                                         Key sizes 128, 192,
+                                                                           256 with 128 to
+      A4301                  AES-ECB                      ECB                                        Encrypt, Decrypt
+                                                                           256 bits of key
+                                                                              strength
+                                                                         Curve sizes P-256,
+                         ECDSA KeyGen                                    P-384, P-521 with
+      A4301                                         ECDSA KeyGen                                      Key Generation
+                          (FIPS186-4)                                    128 to 256 bits of
+                                                                              strength
+                                                                         Curve sizes P-256,
+                          ECDSA KeyVer                                   P-384, P-521 with
+      A4301                                         ECDSA KeyVer                                      Key Verification
+                           (FIPS186-4)                                   128 to 256 bits of
+                                                                              strength
+                                                                          Curve sizes P-256
+                                                                         (SHA2-256), P-384
+                          ECDSA SigGen                                   (SHA2-384), P-521
+      A4301                                         ECDSA SigGen                                   Signature Generation
+                           (FIPS186-4)                                    (SHA2-512) with
+                                                                         128 to 256 bits of
+                                                                              strength
+
+
+
+
+1
+ There are algorithms, modes, and key/moduli sizes that have been CAVP-tested but are not used by any
+approved service of the module. Only the algorithms, modes/methods, and key lengths/curves/moduli shown in
+this table are used by an approved service of the module.
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 8 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                                                                          Description/Key
+  CAVP Cert1        Algorithm and Standard          Mode/Method                                        Use/Function
+                                                                         Size/Key Strength
+
+                                                                          Curve sizes P-256
+                                                                         (SHA2-256), P-384
+                          ECDSA SigVer                                   (SHA2-384), P-521
+     A4301                                           ECDSA SigVer                                  Signature Verification
+                           (FIPS186-4)                                    (SHA2-512) with
+                                                                         128 to 256 bits of
+                                                                              strength
+                                                                          Key size 256-bits
+                                                     HMAC-SHA2-
+     A4301                 HMAC DRBG                                      with 256-bits of        Random Bit Generation
+                                                        256
+                                                                            key strength
+                                                                          SHA-1: Key size
+                                                                         160 bits with 160       Message Authentication,
+     A4301                HMAC-SHA-1                     SHA-1
+                                                                             bits of key             DRBG Primitive
+                                                                              strength
+                                                                          SHA2-256: Key
+                                                                        size: 256 bits with      Message Authentication,
+     A4301              HMAC-SHA2-256                  SHA2-256
+                                                                          256-bits of key            DRBG Primitive
+                                                                              strength
+                                                                          SHA2-512: Key
+                                                                        size: 512 bits with      Message Authentication,
+     A4301              HMAC-SHA2-512                  SHA2-512
+                                                                          512-bits of key            DRBG Primitive
+                                                                              strength
+                                                                        Curve sizes P-256,
+                           KAS-ECC-SSC                Ephemeral         P-384, P-521 with         Key Agreement Shared
+     A4301
+                           SP800-56Ar3                 Unified            128 bits to 256          Secret Computation
+                                                                          bits of strength
+                                                                              Domain
+                                                                             Parameter
+                          KAS-FFC-SSC                                       Generation            Key Agreement Shared
+     A4301                                           dhEphemeral
+                          SP800-56Ar3                                    Method: MODP-             Secret Computation
+                                                                          2048 with 2048
+                                                                          bits of strength
+                                                                        Key sizes 128, 192,
+                                                                          256 with 128 to
+     A4301                   KDF SSH                      SSH                                    Key Derivation Function
+                                                                          256 bits of key
+                                                                              strength
+                                                                        Moduli 2048, 3072
+                           RSA KeyGen                                   and 4096 bits with
+     A4301                                           RSA KeyGen                                       Key Generation
+                           (FIPS186-4)                                   112, 128 and 152
+                                                                          bits of strength
+                                                                           Moduli 2048
+                                                                        (SHA2-256, SHA2-
+                                                                        512), 3072 (SHA2-
+                                                                          256, SHA2-512)
+                           RSA SigGen
+     A4301                                            RSA SigGen         and 4096 (SHA2-           Signature Generation
+                           (FIPS186-4)
+                                                                          256, SHA2-512)
+                                                                        bits with 112, 128
+                                                                          and 152 bits of
+                                                                              strength
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 9 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                                                                          Description/Key
+  CAVP Cert1        Algorithm and Standard          Mode/Method                                        Use/Function
+                                                                         Size/Key Strength
+
+                                                                            Moduli 2048
+                                                                         (SHA2-256, SHA2-
+                                                                         512), 3072 (SHA2-
+                                                                           256, SHA2-512)
+                           RSA SigVer
+     A4301                                            RSA SigVer          and 4096 (SHA2-          Signature Verification
+                           (FIPS186-4)
+                                                                           256, SHA2-512)
+                                                                         bits with 112, 128
+                                                                           and 152 bits of
+                                                                              strength
+                                                                           SHA-1: Key size
+                                                                         160 bits with 160            Message Digest
+     A4301                    SHA-1                      SHA-1
+                                                                             bits of key               Generation
+                                                                              strength
+                                                                           SHA2-256: Key
+                                                                         size 256 bits with           Message Digest
+     A4301                  SHA2-256                   SHA2-256
+                                                                           256-bits of key             Generation
+                                                                              strength
+                                                                           SHA2-384: Key
+                                                                         size 384 bits with           Message Digest
+     A4301                  SHA2-384                   SHA2-384
+                                                                           256-bits of key             Generation
+                                                                              strength
+                                                                           SHA2-512: Key
+                                                                         size 512 bits with           Message Digest
+     A4301                  SHA2-512                   SHA2-512
+                                                                           256-bits of key             Generation
+                                                                              strength
+                                                                          Key size 256-bits
+                                                     HMAC-SHA2-
+     A4303                 HMAC DRBG                                      with 256-bits of        Random Bit Generation
+                                                        256
+                                                                            key strength
+                                                                          SHA-1: Key size
+                                                                         160 bits with 160       Message Authentication,
+     A4303                HMAC-SHA-1                     SHA-1
+                                                                            bits of key              DRBG primitive
+                                                                             strength
+                                                                           SHA2-256: Key
+                                                                         size: 256 bits with     Message Authentication,
+     A4303              HMAC-SHA2-256                  SHA2-256
+                                                                           256-bits of key           DRBG primitive
+                                                                               strength
+                                                                          SHA-1: Key size
+                                                                         160 bits with 160            Message Digest
+     A4303                    SHA-1                      SHA-1
+                                                                            bits of key                Generation
+                                                                             strength
+                                                                           SHA2-256: Key
+                                                                         size 256 bits with           Message Digest
+     A4303                  SHA2-256                   SHA2-256
+                                                                          256-bits of key              Generation
+                                                                              strength
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 10 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                                                                          Description/Key
+  CAVP Cert1        Algorithm and Standard          Mode/Method                                        Use/Function
+                                                                         Size/Key Strength
+
+                                                                           SHA2-384: Key
+                                                                         size 384 bits with           Message Digest
+     A4303                  SHA2-384                   SHA2-384
+                                                                          256-bits of key              Generation
+                                                                              strength
+                                                                           SHA2-512: Key
+                                                                         size 512 bits with           Message Digest
+     A4303                  SHA2-512                   SHA2-512
+                                                                          256-bits of key              Generation
+                                                                              strength
+                                                                          SHA-1: Key size
+                                                                         160 bits with 160       Message Authentication,
+     A4306                HMAC-SHA-1                     SHA-1
+                                                                            bits of key              DRBG primitive
+                                                                             strength
+                                                                           SHA2-256: Key
+                                                                         size: 256 bits with     Message Authentication,
+     A4306              HMAC-SHA2-256                  SHA2-256
+                                                                           256-bits of key           DRBG primitive
+                                                                               strength
+                                                                          SHA-1: Key size
+                                                                         160 bits with 160            Message Digest
+     A4306                    SHA-1                      SHA-1
+                                                                            bits of key                Generation
+                                                                             strength
+                                                                           SHA2-256: Key
+                                                                         size 256 bits with           Message Digest
+     A4306                  SHA2-256                   SHA2-256
+                                                                          256-bits of key              Generation
+                                                                              strength
+                                                                           SHA2-512: Key
+                                                                         size 512 bits with           Message Digest
+     A4306                  SHA2-512                   SHA2-512
+                                                                          256-bits of key              Generation
+                                                                              strength
+                                                                             Section 4:              Cryptographic Key
+                                                                         Asymmetric seed                Generation
+                                                                         generation using
+                                                                           an unmodified
+                                                                          output from an
+                                                       Section 4         Approved DRBG;
+
+                                                      Section 5.1         Section 5.1: Key
+     Vendor                    CKG                                        Pairs for Digital
+                                                      Section 5.2            Signature
+    Affirmed           NIST SP 800-133r2
+                                                     Section 6.2.1           Schemes;
+
+                                                                          Section 5.2: Key
+                                                                           Pairs for Key
+                                                                          Establishment;
+
+                                                                           Section 6.2.1:
+                                                                           Derivation of
+                                                                          symmetric keys
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 11 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                                                                          Description/Key
+  CAVP Cert1        Algorithm and Standard          Mode/Method                                        Use/Function
+                                                                         Size/Key Strength
+
+ KAS-ECC-SSC                                                                                        Key Agreement for
+    SP800-                                         SP 800-56Arev3                                         SSHv2
+ 56Ar3/A4301
+                                                    KAS-ECC per IG
+      KDF                                                                 P-256, P-384, P-
+                              KAS-1                 D.F Scenario 2
+   SSH/A4301                                                                521 curves
+                                                       path (2)
+
+
+
+
+ KAS-FFC-SSC                                                                                        Key Agreement for
+    SP800-                                         SP 800-56Arev3                                         SSHv2
+ 56Ar3/A4301
+                              KAS-2                 KAS-FFC per IG          MODP-2048
+      KDF                                           D.F Scenario 2
+   SSH/A4301                                           path (2)
+
+
+     AES-                                                                                        Key Transport for SSHv2
+  CBC/A4301
+
+      AES-
+   CTR/A4301
+                                                                         128, 192, and 256-
+  HMAC-SHA-                                        SP 800-38A AES
+                                                                         bit keys providing
+   1/A4301                                          CBC, CTR and
+                               KTS-1                                      128, 192, or 256
+                                                   HMAC 198 per
+ HMAC-SHA2-                                                              bits of encryption
+                                                       IG D.G
+  256/A4301                                                                   strength
+
+ HMAC-SHA2-
+  512/A4301
+
+
+
+Table 3 – Approved Algorithms
+
+
+
+The following protocol is supported by the module in the Approved mode:
+    • SSHv2 (EC Diffie-Hellman P-256, P-384, P-521; Diffie-Hellman MODP2048; RSA 2048, 4096;
+        ECDSA P-256; AES CBC 128, 192, 256 bits; AES CTR 128, 192, 256 bits, HMAC-SHA-1, HMAC-
+        SHA2-256, HMAC-SHA2-512)
+
+The SSH protocol allows independent selection of key exchange, authentication, cipher and integrity
+algorithms.
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                             Page 12 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+The module does not support any non-Approved algorithms in the Approved mode, i.e., it does not
+support Non-Approved Algorithms Allowed in the Approved Mode of Operation and Non-Approved
+Algorithms Allowed in the Approved Mode of Operation with No Security Claimed.
+
+In addition to all Approved algorithms supported in the Approved mode of operation, the following non-
+Approved Algorithms Not Allowed in the Approved Mode of Operation are supported only in the non-
+Approved mode:
+
+                     Algorithm/Function                                                  Use/Function
+              RSA with key size less than 2048                                               SSH
+                ECDSA with ed25519 curve                                                     SSH
+           EC Diffie-Hellman with ed25519 curve                                              SSH
+                          ARCFOUR                                                            SSH
+                           Blowfish                                                          SSH
+                             CAST                                                            SSH
+           DSA (SignGen, SigVer, non-compliant)                                              SSH
+                         HMAC-MD5                                                            SSH
+                     HMAC-RIPEMD160                                                          SSH
+                            UMAC                                                             SSH
+Table 4 – Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 13 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+3. Cryptographic Module Interfaces
+              Physical port                            Logical interface                      Data that passes over
+                                                                                                  port/interface
+                Ethernet                     Control input interface, Data input           LAN, Communications/remote
+                                              interface, Data output interface,                   management
+                                                   Status output interface
+
+
+                  Serial                     Control input interface, Data input                 Console Serial Port
+                                              interface, Data output interface,
+                                                   Status output interface
+                   USB                       Control input interface, Data input            USB port, load Junos Image
+                                                          interface
+                  Power                                Power interface                           Power connector
+                  LEDs                             Status output interface                    Status indicator lighting
+
+
+              Reset Button                          Control input interface                              Reset
+
+Table 5 – Ports and Interfaces
+
+
+
+
+The module does not support control output.
+
+There are additional ethernet interfaces, 10 Hz pulses-per-second (PPS) Sub-Miniature B (SMB) connector and
+10 MHz SMB timing connector (10MHz) which are reserved for future use (disabled).
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 14 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+4.        Roles, Services, and Authentication
+The module supports two roles: Crypto Officer (CO) and User. The module supports concurrent operators
+but does not support a maintenance role and/or bypass capability. The module enforces the separation of
+roles using identity-based operator authentication. The module implements two forms of identity-based
+authentication, username, and password over the console and SSH connections, as well as username and
+an ECDSA or RSA public key-based authentication over SSH.
+
+The Crypto Officer role configures and monitors the module via a console or SSH connection. As root or
+super-user, the Crypto Officer has permission to view and configure passwords and public keys within the
+module. The User role monitors the module via the console or SSH. The User role does not have the
+permission to modify the configuration.
+
+                 Role                           Service                           Input                              Output
+             Crypto Officer                Configure security                  Commands                              Traffic
+                                           (security relevant)             (SSH configuration:
+                                                                         set system services ssh
+                                                                             root-login allow
+                                                                                     )
+
+                                              Configure                        Commands                              Traffic
+                                        (non-security relevant)              (miscellaneous
+                                                                          commands e.g., for IP
+                                                                         address configuration,
+                                                                         routing protocols, etc.)
+                                              Show status                      Command                             CLI output
+                                                                                 (show)
+                                           Show status (LED)                       N/A                                LED
+                                            Show module’s                       Command                            CLI output
+                                        versioning information               (show version)
+                                         Perform zeroisation                    Command                               N/A
+                                                                       (request vmhost zeroise)
+                                           Perform approved                     Command                            SSH session
+                                           security functions           (set system services ssh
+                                            (SSH connection)                root-login allow)
+                                             Console access               Username, password                          N/A
+                                                                         (set system login user
+                                                                           <username> class
+                                                                          <crypto-officer/user
+                                                                             class> operator
+                                                                       authentication plaintext-
+                                                                                password)
+                                           Perform self-tests          Control input/reset signal                     N/A
+                                            (remote reset)             (request vmhost reboot)
+
+                                           Perform self-tests          Control input/reset signal                     N/A
+                                              (local reset)
+                                              Load image                   Image, commands                             N/A
+                  User                       Show status                      Command                              CLI Output
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                                    Page 15 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+             Role                           Service                           Input                             Output
+                                                                             (show)
+                                     Show status (LED)                         N/A                                LED
+                                       Show module’s                       Command                            CLI output
+                                   versioning information               (show version)
+                                     Perform approved                     Commands                            SSH session
+                                   security functions (SSH         (set system services ssh
+                                         connection)                   root-login allow)
+                                       Console access                Username, password                          N/A
+                                                                    (set system login user
+                                                                      <username> class
+                                                                     <crypto-officer/user
+                                                                        class> operator
+                                                                  authentication plaintext-
+                                                                           password)
+                                      Perform self-tests          Control input/reset signal                     N/A
+                                       (remote reset)             (request vmhost reboot)
+
+                                      Perform self-tests          Control input/reset signal                     N/A
+                                         (local reset)
+Table 6 – Roles, Service Commands, Input and Output
+
+
+
+                 Role                              Authentication Method                      Authentication Strength
+       Crypto Officer (CO), User                  1. Username and password                         1. For Password
+                                                      over the console and SSH                      Authentication: The
+                                                    2. Username and ECDSA                           module enforces 10-
+                                                        public key over SSH                       character passwords (at
+                                                  3. Username and RSA public                      minimum) chosen from
+                                                            key over SSH                          the 96 human readable
+                                                                                                      ASCII characters;
+                                                                                                  The maximum password
+                                                                                                  length is 20-characters;
+                                                                                                 Thus, the probability of a
+                                                                                                     successful random
+                                                                                                   attempt is 1/(96^10),
+                                                                                                      which is less than
+                                                                                                    1/1,000,000 (million)
+
+                                                                                                   The module enforces a
+                                                                                                  timed access mechanism
+                                                                                                   as follows: For the first
+                                                                                                     two failed attempts
+                                                                                                     (assuming 0 time to
+                                                                                                  process), no timed access
+                                                                                                         is enforced;
+                                                                                                   Upon the third attempt,
+                                                                                                  the module enforces a 5-
+                                                                                                        second delay;
+                                                                                                     Each failed attempt
+                                                                                                   thereafter results in an
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                    Page 16 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                   Role                            Authentication Method                      Authentication Strength
+                                                                                                 additional 5-second delay
+                                                                                                  above the previous (e.g.,
+                                                                                                   4th failed attempt = 10-
+                                                                                                   second delay, 5th failed
+                                                                                                     attempt = 15-second
+                                                                                                 delay, 6th failed attempt =
+                                                                                                    20- second delay, 7th
+                                                                                                     failed attempt = 25-
+                                                                                                         second delay);
+                                                                                                  This leads to a maximum
+                                                                                                 of 7 possible attempts in a
+                                                                                                    one-minute period for
+                                                                                                           each getty;
+                                                                                                 The best approach for the
+                                                                                                     attacker would be to
+                                                                                                  disconnect after 4 failed
+                                                                                                   attempts and wait for a
+                                                                                                 new getty to be spawned;
+                                                                                                     This would allow the
+                                                                                                     attacker to perform
+                                                                                                  roughly 9.6 attempts per
+                                                                                                 minute (576 attempts per
+                                                                                                 hour/60 mins); this would
+                                                                                                 be rounded down to 9 per
+                                                                                                  minute, because there is
+                                                                                                     no such thing as 0.6
+                                                                                                            attempts;
+                                                                                                      The probability of a
+                                                                                                    success with multiple
+                                                                                                 consecutive attempts in a
+                                                                                                     one-minute period is
+                                                                                                   9/(96^10), which is less
+                                                                                                        than 1/100,000
+
+                                                                                                  2. ECDSA signature
+                                                                                                   verification: SSH public-
+                                                                                                      key authentication;
+                                                                                                     The module supports
+                                                                                                  ECDSA (P-256, P-384, and
+                                                                                                      P-521), which has a
+                                                                                                     minimum equivalent
+                                                                                                  computational resistance
+                                                                                                    to attack of either 2128,
+                                                                                                  2192 or 2256 depending on
+                                                                                                            the curve;
+                                                                                                  Thus, the probability of a
+                                                                                                       successful random
+                                                                                                  attempt is 1/(2128), which
+                                                                                                   is less than 1/1,000,000
+                                                                                                             (million)
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 17 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+                   Role                            Authentication Method                      Authentication Strength
+                                                                                                      Configurable SSH
+                                                                                                 connection establishment
+                                                                                                  rate limits the number of
+                                                                                                 connection attempts, and
+                                                                                                 thus failed authentication
+                                                                                                 attempts in a one-minute
+                                                                                                   period to a maximum of
+                                                                                                      15,000 attempts;
+                                                                                                     The probability of a
+                                                                                                    success with multiple
+                                                                                                 consecutive attempts in a
+                                                                                                    one-minute period is
+                                                                                                 15,000/(2128), which is less
+                                                                                                       than 1/100,000
+
+                                                                                             3.   RSA signature verification:
+                                                                                                          SSH public-key
+                                                                                                         authentication;
+                                                                                                  The module supports RSA
+                                                                                                   (2048, 4096 bits), which
+                                                                                                  has a minimum equivalent
+                                                                                                  computational resistance
+                                                                                                     to attack of 2112 (2048
+                                                                                                               bits);
+                                                                                                   Thus, the probability of a
+                                                                                                        successful random
+                                                                                                  attempt is 1/ (2112), which
+                                                                                                    is less than 1/1,000,000
+                                                                                                             (million)
+
+                                                                                                       Configurable SSH
+                                                                                                  connection establishment
+                                                                                                   rate limits the number of
+                                                                                                  connection attempts, and
+                                                                                                  thus failed authentication
+                                                                                                  attempts in a one-minute
+                                                                                                    period to a maximum of
+                                                                                                       15,000 attempts;
+                                                                                                      The probability of a
+                                                                                                     success with multiple
+                                                                                                  consecutive attempts in a
+                                                                                                     one-minute period is
+                                                                                                  15,000/(2112), which is less
+                                                                                                        than 1/100,000
+Table 7 – Roles and Authentication
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 18 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+   Service        Description             Approved           Keys and/or SSP’s         Roles      Access rights to    Indicator
+                                           Security                                                Keys and/or
+                                          Functions                                                    SSP’s
+  Configure        Security           All (per Table 3)       SSH Private Host        Crypto          (G, E)             Global
+   security        relevant                                          Key              Officer                         Approved
+  (security      configuration                               SSH ECDH Private          (CO)             (G, E)           Mode
+  relevant)                                                          Key                                               indicator
+                                                            SSH DH Private Key                          (G, E)       “fips” at the
+                                                              SSH Session Key                           (G, E)            CLI
+                                                               User Password                            (W, E)        combined
+                                                                CO Password                             (W, E)            with
+                                                             HMAC_DRBG Key                              (G, E)        successful
+                                                                    Value                                            completion
+                                                               HMAC_DRBG V                              (G, E)          of each
+                                                                    value                                               service
+                                                                HMAC_DRBG                               (G, E)
+                                                                entropy input
+                                                             HMAC_DRBG seed                             (G, E)
+                                                                HMAC_DRBG                               (G, E)
+                                                                   output
+                                                            ECDH Shared Secret                          (G, E)
+                                                             DH Shared Secret                           (G, E)
+                                                                 HMAC Key                               (G, E)
+                                                            SSH Public Host Key                         (G, E)
+                                                                    User                                (W, E)
+                                                               Authentication
+                                                                 Public Keys
+                                                             CO Authentication                          (W, E)
+                                                                 Public Keys
+                                                               JuniperRootCA                            (W, E)
+                                                                 PackageCA                              (W, E)
+                                                              SSH ECDH Public                           (G, E)
+                                                                     Key
+                                                             SSH DH Public Key                          (G, E)
+
+
+
+
+  Configure      Non-security               N/A                      N/A              Crypto             N/A             Global
+    (non-          relevant                                                           Officer                         Approved
+   security      configuration                                                         (CO)                              Mode
+  relevant)                                                                                                            indicator
+                                                                                                                     “fips” at the
+                                                                                                                          CLI
+                                                                                                                      combined
+                                                                                                                          with
+                                                                                                                      successful
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 19 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+   Service        Description            Approved            Keys and/or SSP’s         Roles      Access rights to    Indicator
+                                          Security                                                 Keys and/or
+                                         Functions                                                     SSP’s
+                                                                                                                     completion
+                                                                                                                         of each
+                                                                                                                         service
+    Show          Query the                 N/A                      N/A              Crypto             N/A              Global
+    status       module status                                                        Officer                          Approved
+                                                                                       (CO),                              Mode
+                                                                                       User                             indicator
+                                                                                                                     “fips” at the
+                                                                                                                           CLI
+                                                                                                                       combined
+                                                                                                                           with
+                                                                                                                      successful
+                                                                                                                     completion
+                                                                                                                         of each
+                                                                                                                         service
+    Show          LEDs on the               N/A                      N/A              Crypto             N/A           LED(s) on
+    status          module                                                            Officer                         the chassis
+    (LED)           provide                                                            (CO),                           turned on
+                    physical                                                           User,
+                 status output                                                        Unauth
+                                                                                      orised
+    Show           Query the                N/A                      N/A              Crypto             N/A             Global
+  module’s          module’s                                                          Officer                         Approved
+ versioning        versioning                                                          (CO),                             Mode
+ informatio       information                                                          User                            indicator
+      n                                                                                                              “fips” at the
+                                                                                                                          CLI
+                                                                                                                      combined
+                                                                                                                          with
+                                                                                                                      successful
+                                                                                                                     completion
+                                                                                                                        of each
+                                                                                                                        service
+  Perform          Destroy all              N/A               SSH Private Host        Crypto              (Z)            Global
+ zeroisation         SSPs                                            Key              Officer                         Approved
+                                                              SSH ECDH Private         (CO)                              Mode
+                                                                     Key                                               indicator
+                                                             SSH DH Private Key                                      “fips” at the
+                                                               SSH Session Key                                            CLI
+                                                                User Password                                         combined
+                                                                 CO Password                                              with
+                                                              HMAC_DRBG Key                                           successful
+                                                                    Value                                            completion
+                                                               HMAC_DRBG V                                              of each
+                                                                    value                                               service
+                                                                HMAC_DRBG
+                                                                entropy input
+                                                             HMAC_DRBG seed
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 20 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+   Service        Description            Approved            Keys and/or SSP’s         Roles      Access rights to    Indicator
+                                          Security                                                 Keys and/or
+                                         Functions                                                     SSP’s
+                                                                HMAC_DRBG
+                                                                   output
+                                                            ECDH Shared Secret
+                                                             DH Shared Secret
+                                                                 HMAC Key
+                                                            SSH Public Host Key
+                                                                    User
+                                                               Authentication
+                                                                 Public Keys
+                                                             CO Authentication
+                                                                 Public Keys
+                                                               JuniperRootCA
+                                                                 PackageCA
+                                                              SSH ECDH Public
+                                                                    Key
+                                                             SSH DH Public Key
+
+   Perform        Initiate SSH         ECDSA (P-256,          SSH Private Host        Crypto            (G, E)           Global
+  approved        connection              SHA2-256,                  Key              Officer                         Approved
+   security         for SSH           KeyGen, SIgVer,        SSH ECDH Private          (CO),                             Mode
+  functions       monitoring           Cert. #A4301),                Key               User                            indicator
+     (SSH         and control          RSA (2048 bits,      SSH DH Private Key                                       “fips” at the
+ connection           (CLI)          SHA2-256, SHA2-          SSH Session Key                                             CLI
+       )                                512, KeyGen,         HMAC_DRBG Key                                            combined
+                                         SIgVer, Cert.              Value                                                 with
+                                       #A4301), KAS-           HMAC_DRBG V                                            successful
+                                    ECC-SSC (P-256, P-              value                                            completion
+                                     384, P-512, Cert.          HMAC_DRBG                                               of each
+                                    #A4301), KAS-FFC-           entropy input                                           service
+                                     SSC (MODP 2048,         HMAC_DRBG seed
+                                       Cert. #A4301),           HMAC_DRBG
+                                       AES (CBC, CTR               output
+                                    128, 192, 256 bits,     ECDH Shared Secret
+                                       Cert. #A4301),        DH Shared Secret
+                                       KDF SSH (Cert.            HMAC Key
+                                           #A4301),         SSH Public Host Key
+                                        HMAC_DRBG                   User
+                                    (HMAC-SHA2-256,           SSH ECDH Public
+                                         CAVP Certs.                 Key
+                                      A4303, A4301),         SSH DH Public Key
+                                       HMAC (SHA-1,
+                                     SHA2-256, SHA2-
+                                     512, CAVP Certs.
+                                     #A4303, #A4301,
+                                       #A4306; SHA2-
+                                     384, CAVP Certs.
+                                        #A4303); SHA
+                                    (SHA-1, SHA2-256,
+                                      SHA2-512, CAVP
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 21 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+   Service        Description           Approved             Keys and/or SSP’s         Roles      Access rights to      Indicator
+                                         Security                                                  Keys and/or
+                                        Functions                                                      SSP’s
+                                      Certs. #A4303,
+                                     #A4301, #A4306;
+                                     SHA2-384, CAVP
+                                      Certs. #A4303),
+                                            CKG
+
+
+
+
+   Console         Console                  N/A                      N/A              Crypto             N/A              Global
+   Access         monitoring                                                          Officer                          Approved
+                  and control                                                          (CO),                              Mode
+                     (CLI)                                                             User                             indicator
+                                                                                                                      “fips” at the
+                                                                                                                           CLI
+                                                                                                                       combined
+                                                                                                                           with
+                                                                                                                       successful
+                                                                                                                      completion
+                                                                                                                         of each
+                                                                                                                         service
+  Perform          Software           All (per Table 3)      SSH ECDH Private         Crypto              (Z)             Global
+  self-tests       initiated                                       Key,               Officer                          Approved
+  (remote            reset,                                 SSH DH Private Key,        (CO),             (Z)              Mode
+    reset)       performs self-                              SSH Session Key,          User              (Z)            indicator
+                    tests on                                 HMAC_DRBG Key                             (G, Z, E)      “fips” at the
+                   demand                                         Value                                                    CLI
+                                                                                                       (G, Z, E)       combined
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 22 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+   Service        Description            Approved            Keys and/or SSP’s         Roles      Access rights to      Indicator
+                                          Security                                                 Keys and/or
+                                         Functions                                                     SSP’s
+                                                               HMAC_DRBG V                                                 with
+                                                                    value                              (G, Z, E)        successful
+                                                                HMAC_DRBG                                              completion
+                                                                entropy input                          (G, Z, E)         of each
+                                                             HMAC_DRBG seed                            (G, Z, E)         service
+                                                                HMAC_DRBG
+                                                                   output                                (Z)
+                                                            ECDH Shared Secret                           (Z)
+                                                             DH Shared Secret                          (G, Z, E)
+                                                                 HMAC Key                               (G, E)
+                                                              SSH ECDH Public
+                                                                     Key                                (G, E)
+                                                             SSH DH Public Key
+  Perform          Hardware           All (per Table 3)      SSH ECDH Private         Crypto              (Z)             Global
+  self-tests        reset or                                         Key,             Officer                          Approved
+    (local        power cycle                               SSH DH Private Key,        (CO),             (Z)              Mode
+    reset)                                                    SSH Session Key,         User,             (Z)            indicator
+                                                             HMAC_DRBG Key            Unauth           (G, Z, E)      “fips” at the
+                                                                    Value             orised                               CLI
+                                                               HMAC_DRBG V                             (G, Z, E)       combined
+                                                                    value                                                  with
+                                                                HMAC_DRBG                              (G, Z, E)       successful
+                                                                entropy input                                         completion
+                                                             HMAC_DRBG seed                            (G, Z, E)         of each
+                                                                HMAC_DRBG                              (G, Z, E)         service
+                                                                   output
+                                                            ECDH Shared Secret                           (Z)
+                                                             DH Shared Secret                            (Z)
+                                                                 HMAC Key                              (G, Z, E)
+                                                              SSH ECDH Public                           (G, E)
+                                                                     Key
+                                                             SSH DH Public Key                          (G, E)
+     Load         Verification       ECDSA (P-256,                   N/A              Crypto             N/A              Global
+    Image        and loading of     SHA2-256, SigVer,                                 Officer                          Approved
+                   a validated         CAVP Cert.                                      (CO)                               Mode
+                    firmware            #A4301)                                                                         indicator
+                   image into                                                                                         “fips” at the
+                       the                                                                                                 CLI
+                 router/switch.                                                                                        combined
+                                                                                                                           with
+                                                                                                                       successful
+                                                                                                                      completion
+                                                                                                                         of each
+                                                                                                                         service
+Table 8 – Approved Services
+
+  G = Generate: The module generates or derives the SSP.
+
+  R = Read: The SSP is read from the module (e.g. the SSP is output).
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 23 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+  W = Write: The SSP is updated, imported, or written to the module.
+
+   E = Execute: The module uses the SSP in performing a cryptographic operation.
+
+   Z = Zeroise: The module zeroises the SSP.
+
+      Service                 Description               Algorithms Accessed                 Role                   Indicator
+    Configure              Security relevant              All (per Table 3)               Crypto              Lack of the global
+ security (security          configuration                                              Officer (CO)           Approved Mode
+     relevant)                                                                                                indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+  Configure (non-       Non-security relevant                     N/A                     Crypto              Lack of the global
+ security relevant)        configuration                                                Officer (CO)           Approved Mode
+                                                                                                              indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+    Show status           Query the module                        N/A                      Crypto             Lack of the global
+                               status                                                   Officer (CO),          Approved Mode
+                                                                                            User              indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+    Show status          LEDs on the module                       N/A                     Crypto                 LED(s) on the
+       (LED)               provide physical                                            Officer (CO),          chassis turned on
+                            status output                                                  User,
+                                                                                       Unauthorised
+  Show module’s          Query the module’s                       N/A                     Crypto              Lack of the global
+    versioning               versioning                                                Officer (CO),           Approved Mode
+   information              information                                                    User               indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+      Perform               Destroy all SSPs                      N/A                     Crypto              Lack of the global
+     zeroisation                                                                        Officer (CO)           Approved Mode
+                                                                                                              indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+      Perform                Initiate SSH                        AES                       Crypto             Lack of the global
+     approved             connection for SSH        (CBC, CTR, 128, 192 and 256         Officer (CO),          Approved Mode
+      security              monitoring and                      bits);                      User              indicator "fips" at
+   functions (SSH            control (CLI)                 KAS-ECC-SSC                                        the CLI combined
+    connection)                                        (P-256, P-384, P-521);                                   with successful
+                                                            KAS-FFC-SSC
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                   Page 24 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+       Service                Description                Algorithms Accessed                Role                 Indicator
+                                                             (MODP 2048)                                      completion of the
+                                                                   RSA                                            service
+                                                           (2048, 4096 bits);
+                                                                 ECDSA
+                                                                (P-256);
+                                                                 HMAC
+                                                      (SHA-1, SHA2-256, SHA2-
+                                                                  512);
+                                                                   SHA
+                                                      (SHA-1, SHA2-256, SHA2-
+                                                                  512);
+                                                                SSH KDF;
+                                                        RSA (key size <= 2048);
+                                                       ECDSA (ed25519 curve);
+                                                       EC DH (ed25519 curve);
+                                                               ARCFOUR ;
+                                                                Blowfish;
+                                                                  CAST;
+                                                     DSA (SignGen, SigVer, non-
+                                                              compliant);
+                                                              HMAC-MD5;
+                                                          HMAC-RIPEMD160;
+                                                                 UMAC
+
+
+
+
+  Console Access         Console monitoring                       N/A                      Crypto             Lack of the global
+                          and control (CLI)                                             Officer (CO),          Approved Mode
+                                                                                            User              indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+   Perform self-          Software initiated               All (per Table 3)               Crypto             Lack of the global
+   tests (remote         reset, performs self-                                          Officer (CO),          Approved Mode
+       reset)              tests on demand                                                  User              indicator "fips" at
+                                                                                                              the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+    Perform self-         Hardware reset or                All (per Table 3)              Crypto              Lack of the global
+         tests              power cycle                                                Officer (CO),           Approved Mode
+     (local reset)                                                                         User,              indicator "fips" at
+                                                                                       Unauthorised           the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                   Page 25 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+      Service                 Description               Algorithms Accessed                 Role                   Indicator
+    Load Image              Verification and                   ECDSA                      Crypto              Lack of the global
+                        loading of a validated           (P-256, SHA2-256)              Officer (CO)           Approved Mode
+                         firmware image into                                                                  indicator "fips" at
+                           the router/switch.                                                                 the CLI combined
+                                                                                                                with successful
+                                                                                                              completion of the
+                                                                                                                    service
+Table 9 – Non-Approved Services
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                   Page 26 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+5.        Software/Firmware Security
+     The module performs the firmware integrity check using ECDSA P-256 with SHA2-256. The operator can
+     initiate the integrity test on demand by rebooting the module. The module firmware image is delivered
+     in the form of a pre-compiled tarball (.tgz). The module supports loading of firmware from an external
+     source and a firmware load test using ECDSA P-256 with SHA2-256 is performed in support of the load.
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 27 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+6.        Operational Environment
+The module contains a limited operational environment. The Junos OS 22.4R2.8 operating system is
+contained within the module, i.e., the tested configurations listed in Table 2 of this document. Security rules
+and restrictions for configuration of the operational environment have been specified in Section 2 (Overall
+Security Rules of Operation) and Section 11 (Installing The Firmware Image and Enabling the Approved
+Mode of Operation) of this document.
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 28 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+7.        Physical Security
+The module’s physical embodiment is that of a multi-chip standalone meeting Level 1 Physical Security
+requirements. The module is completely enclosed in a rectangular nickel or clear zinc coated, cold rolled
+steel, plated steel and brushed aluminum enclosure. The module enclosure is made of production grade
+materials. There are no ventilation holes, gaps, slits, cracks, slots, or crevices that would allow for any sort
+of observation of any component contained within the cryptographic boundary. No actions are required by
+the operator to ensure that physical security is maintained.
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 29 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+8.        Non-invasive Security
+The module does not implement any non-invasive security mitigations and thus the requirements per this
+section do not apply to the module.
+
+
+
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 30 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+9.        Sensitive Security Parameter Management
+      Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-         Use &
+      Name/                         Function     ation           /Export     -                              isation       related
+      Type                          and Cert.                                ment                                         keys
+                                    Number
+
+
+
+         SSH           128 bits       ECDSA       Generated      Import:        N/A         Plaintext:      Zeroisation      Host
+        Private          for          (P-256,     internally       N/A                      Persistent       command       keypairs
+       Host Key        ECDSA,          SHA2-      using NIST                                                  (request    generated,
+         CSP           112 bits         256,       SP 800-       Export:                                       vmhost      used to
+                       for RSA      KeyGen,         90Ar1         N/A                                       zeroise no-    identify
+                                        Cert.     HMAC_DR                                                   forwarding     the host
+                                    #A4301),          BG                                                          )
+                                        RSA
+                                       (2048
+                                        bits,
+                                       SHA2-
+                                        256,
+                                       SHA2-
+                                        512,
+                                    KeyGen,
+                                        Cert.
+                                    #A4301),
+                                    HMAC_D
+                                        RBG
+                                     (HMAC-
+                                       SHA2-
+                                        256,
+                                        Cert.
+                                    #A4301)
+                                       HMAC
+                                      (SHA2-
+                                        256,
+                                        Cert.
+                                    #A4301)
+                                        SHA
+                                      (SHA2-
+                                        256,
+                                       SHA2-
+                                        512,
+                                        Cert.
+                                    #A4301),
+                                        CKG
+       SSH ECDH       128 bits,     KAS-ECC-      Generated      Import:        N/A          Plaintext:     Zeroisation   Ephemeral
+        Private       192 bits,         SSC       internally       N/A                         RAM           command       EC Diffie-
+          Key         256 bits        (P-256,     using NIST                                                  (request     Hellman
+          CSP                         P-384,       SP 800-       Export:                                       vmhost     private key
+                                                    90Ar1         N/A                                       zeroise no-     used in
+                                                                                                                              SSH
+
+     (Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 31 of 47
+                           Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-         Use &
+ Name/                         Function     ation           /Export     -                              isation       related
+ Type                          and Cert.                                ment                                         keys
+                               Number
+
+
+
+                                P-512,       HMAC_DR                                                    forwarding
+                                 Cert.         BG                                                            ),
+                               #A4301),                                                                   power-
+                               HMAC_D                                                                      cycle
+                                  RBG
+                               (HMAC-
+                                SHA2-
+                                 256,
+                                 Cert.
+                               #A4301)
+                                HMAC
+                                (SHA2-
+                                 256,
+                                 Cert.
+                               #A4301)
+                                  SHA
+                                (SHA2-
+                                 256,
+                                SHA2-
+                                 512,
+                                 Cert.
+                               #A4301),
+                                  CKG
+
+
+   SSH DH         112 bits     KAS-FFC-      Generated      Import:        N/A          Plaintext:     Zeroisation   Ephemeral
+   Private                        SSC        internally       N/A                         RAM           command         Diffie-
+     Key                        (MODP        using NIST                                                  (request     Hellman
+     CSP                         2048,        SP 800-       Export:                                       vmhost     private key
+                                  Cert.        90Ar1         N/A                                       zeroise no-     used in
+                               #A4301),      HMAC_DR                                                   forwarding        SSH
+                               HMAC_D            BG                                                          ),
+                                  RBG                                                                     power-
+                               (HMAC-                                                                      cycle
+                                 SHA2-
+                                  256,
+                                  Cert.
+                               #A4301)
+                                 HMAC
+                                (SHA2-
+                                  256,
+                                  Cert.
+                               #A4301)
+                                  SHA
+                                (SHA2-
+                                  256,
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 32 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-         Use &
+ Name/                         Function     ation           /Export     -                              isation       related
+ Type                          and Cert.                                ment                                         keys
+                               Number
+
+
+
+                                SHA2-
+                                 512,
+                                 Cert.
+                               #A4301),
+                                 CKG
+
+
+     SSH         128 bits,         AES          N/A         Import:       Key           Plaintext:     Zeroisation      SSH
+   Session       192 bits,        (CBC,                       N/A       Agreeme           RAM           command       Session
+     Key         256 bits      CTR 128,                                    nt                            (request      keys
+     CSP                       192, 256                     Export:     Scheme                            vmhost
+                                   bits,                     N/A         (KAS),                        zeroise no-
+                                   Cert.                                Derived                        forwarding
+                               #A4301),                                  using                               ),
+                               KAS-ECC-                                 KDF SSH                           power-
+                                   SSC                                                                     cycle,
+                                 (P-256,                                                                  session
+                                 P-384,                                                                terminatio
+                                  P-512,                                                                     n
+                                   Cert.
+                               #A4301),
+                               KAS-FFC-
+                                   SSC
+                                (MODP
+                                  2048,
+                                   Cert.
+                               #A4301),
+                               KDF SSH
+                                  (Cert.
+                               #A4301),
+                               HMAC_D
+                                   RBG
+                                (HMAC-
+                                  SHA2-
+                                   256,
+                                   Cert.
+                               #A4301),
+                                 HMAC
+                                (SHA-1,
+                                  SHA2-
+                                   256,
+                                  SHA2-
+                                   512,
+                                   Cert.
+                               #A4301),
+                                   SHA
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 33 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-          Use &
+ Name/                         Function     ation           /Export     -                              isation        related
+ Type                          and Cert.                                ment                                          keys
+                               Number
+
+
+
+                                (SHA-1,
+                                 SHA2-
+                                  256,
+                                 SHA2-
+                                  512,
+                                  Cert.
+                               #A4301),
+                                  CKG
+    User         256 bits,        SHA         Password      Import:        N/A            Non-         Zeroisation      Used to
+  Password       512 bits       (SHA2-           hash       Manual                      Plaintext:      command       authentica
+     CSP                          256,       generated       entry                     Persistent        (request     te users to
+                                  Cert.       internally    via CLI,                   (Password          vmhost          the
+                               #A4306,       (Password      manual                        Hash)        zeroise no-      module
+                                 SHA2-            is          SSP                                      forwarding
+                                  512,       configured      entry                                           )
+                                  Cert.         by the        test                                          and
+                               #A4306)          Crypto       perfor                                       explicit
+                                               Officer)       med                                          delete
+                                                                                                        command
+
+                                                            Export:
+                                                              N/A
+     CO          256 bits,        SHA         Password      Import:        N/A            Non-         Zeroisation      Used to
+  Password       512 bits       (SHA2-           hash       Manual                      plaintext:      command       authentica
+     CSP                         256,        generated       entry                     Persistent        (request      te COs to
+                                 Cert.        internally    via CLI,                   (Password          vmhost          the
+                               #A4306,       (Password      manual                        Hash)        zeroise no-      module
+                                SHA2-             is          SSP                                      forwarding
+                                 512,        configured      entry                                           )
+                                 Cert.          by the        test                                          and
+                               #A4306)          Crypto       perfor                                       explicit
+                                               Officer)       med                                          delete
+                                                                                                        command
+
+                                                            Export:
+                                                              N/A
+ HMAC_DR          256 bits     HMAC_D        Generated      Import:        N/A          Plaintext:        Power        A critical
+ BG V value                       RBG        internally       N/A                         RAM              cycle       value of
+    CSP                        (HMAC-        using NIST                                                                   the
+                                SHA2-         SP 800-       Export:                                                    internal
+                                 256),         90Ar1         N/A                                                       state of
+                                HMAC         HMAC_DR                                                                    DRBG
+                                (SHA2-           BG
+                                 256),
+                                  SHA
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 34 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-          Use &
+ Name/                         Function     ation           /Export     -                              isation        related
+ Type                          and Cert.                                ment                                          keys
+                               Number
+
+
+
+                                (SHA2-
+                                  256,
+                                 CAVP
+                                 Certs.
+                                A4303,
+                                A4301)
+
+ HMAC_DR          256 bits     HMAC_D        Generated      Import:        N/A          Plaintext:        Power        A critical
+  BG Key                          RBG        internally       N/A                         RAM              cycle       value of
+   value                       (HMAC-        using NIST                                                                   the
+    CSP                         SHA2-         SP 800-       Export:                                                    internal
+                                 256),         90Ar1         N/A                                                       state of
+                                HMAC         HMAC_DR                                                                    DRBG
+                                (SHA2-           BG
+                                 256),
+                                  SHA
+                                (SHA2-
+                                  256,
+                                 CAVP
+                                 Certs.
+                                A4303,
+                                A4301)
+ HMAC_DR          256 bits     HMAC_D          NIST SP      Import:        N/A          Plaintext:        Power        Entropy
+    BG                            RBG         800-90B         N/A                         RAM              cycle       input to
+  entropy                      (HMAC-         ENT (NP)                                                                   the
+   input                        SHA2-         entropy       Export:                                                   HMAC_DR
+    CSP                          256),         source        N/A                                                          BG
+                                HMAC
+                                (SHA2-
+                                 256),
+                                  SHA
+                                (SHA2-
+                                  256,
+                                 CAVP
+                                 Certs.
+                                A4303,
+                                A4301)
+ HMAC_DR          256 bits     HMAC_D          NIST SP      Import:        N/A          Plaintext:        Power         Seed
+  BG seed                         RBG         800-90B         N/A                         RAM              cycle      provided
+    CSP                        (HMAC-         ENT (NP)                                                                 to the
+                                SHA2-         entropy       Export:                                                   HMAC_DR
+                                 256),         source        N/A                                                         BG
+                                HMAC
+                                (SHA2-
+                                 256),
+                                  SHA
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 35 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-          Use &
+ Name/                         Function     ation           /Export     -                              isation        related
+ Type                          and Cert.                                ment                                          keys
+                               Number
+
+
+
+                                 (SHA2-
+                                   256,
+                                  CAVP
+                                  Certs.
+                                 A4303,
+                                A4301)
+ HMAC_DR          256 bits     HMAC_D        Generated      Import:        N/A          Plaintext:        Power       Unmodifie
+ BG output                         RBG       internally       N/A                         RAM              cycle      d output of
+    CSP                         (HMAC-       using NIST                                                                   the
+                                  SHA2-       SP 800-       Export:                                                   HMAC_DR
+                                  256),        90Ar1         N/A                                                      BG used in
+                                 HMAC        HMAC_DR                                                                      SSP
+                                 (SHA2-          BG                                                                   generation
+                                  256),
+                                   SHA
+                                 (SHA2-
+                                   256,
+                                  CAVP
+                                  Certs.
+                                 A4303,
+                                A4301)
+    ECDH         128 bits,     KAS-ECC-         N/A         Import:     KAS-ECC-        Plaintext:     Zeroisation    Used in EC
+   Shared        192 bits,         SSC                        N/A          SSC            RAM           command         Diffie-
+   Secret        256 bits        (P-256,                                Ephemer                          (request      Hellman
+     CSP                         P-384,                     Export:         al                            vmhost       (ECDH)
+                                 P-521,                      N/A         Unified                       zeroise no-    exchange
+                                   Cert.                                 scheme                        forwarding
+                               #A4301)                                                                       ),
+                                                                                                          power-
+                                                                                                           cycle,
+                                                                                                          session
+                                                                                                       terminatio
+                                                                                                             n
+
+ DH Shared        112 bits     KAS-FFC-         N/A         Import:     KAS-FCC-        Plaintext:     Zeroisation      Used in
+  Secret                          SSC                         N/A          SSC            RAM           command         Diffie-
+    CSP                         (MODP                                    dhEphe                          (request      Hellman
+                                 2048,                      Export:       meral                           vmhost         (DH)
+                                 Cert.                       N/A         scheme                        zeroise no-     exchange
+                               #A4301)                                                                 forwarding
+                                                                                                             ),
+                                                                                                          power-
+                                                                                                           cycle,
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                Page 36 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-            Use &
+ Name/                         Function     ation           /Export     -                              isation          related
+ Type                          and Cert.                                ment                                            keys
+                               Number
+
+
+
+                                                                                                          session
+                                                                                                        terminatio
+                                                                                                             n
+
+
+
+
+ HMAC Key        160 bits,     HMAC_D        Generated      Import:        N/A          Plaintext:     Zeroisation      HMAC Key
+   CSP           256 bits,        RBG        internally       N/A                         RAM           command
+                 384 bits,     (HMAC-        using NIST                                                  (request
+                 512 bits        SHA2-        SP 800-                                                     vmhost
+                                  256,         90Ar1        Export:                                    zeroise no-
+                                 CAVP        HMAC_DR         N/A                                       forwarding
+                                 Certs.          BG                                                          ),
+                                A4303,                                                                    power-
+                                A4301),                                                                    cycle
+                                 HMAC
+                                (SHA-1,
+                                 SHA2-
+                                  256,
+                                 SHA2-
+                                  512,
+                                 CAVP
+                                 Certs.
+                               #A4303,
+                               #A4301,
+                               #A4306;
+                                 SHA2-
+                                  384,
+                                 CAVP
+                                 Certs.
+                               #A4303);
+                                  SHA
+                                (SHA-1,
+                                 SHA2-
+                                  256,
+                                 SHA2-
+                                  512,
+                                 CAVP
+                                 Certs.
+                               #A4303,
+                               #A4301,
+                               #A4306;
+                                 SHA2-
+                                  384,
+                                 CAVP
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                                  Page 37 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-         Use &
+ Name/                         Function     ation           /Export     -                              isation       related
+ Type                          and Cert.                                ment                                         keys
+                               Number
+
+
+
+                                Certs.
+                               #A4303)
+
+
+
+ SSH Public       128 bits      ECDSA        Generated      Import:        N/A         Plaintext:      Zeroisation      Host
+  Host Key          for         (P-256,      internally       N/A                      Persistent       command       keypairs
+    PSP           ECDSA,         SHA2-       using NIST                                                  (request    generated,
+                  112 bits        256,        SP 800-       Export:                                       vmhost      used to
+                  for RSA      KeyGen,         90Ar1         N/A                                       zeroise no-    identify
+                                  Cert.      HMAC_DR                                                   forwarding     the host
+                               #A4301),          BG                                                          )
+                                  RSA
+                                 (2048
+                                  bits,
+                                 SHA2-
+                                  256,
+                                 SHA2-
+                                  512,
+                               KeyGen,
+                                  Cert.
+                               #A4301),
+                               HMAC_D
+                                  RBG
+                               (HMAC-
+                                 SHA2-
+                                  256,
+                                  Cert.
+                               #A4301)
+                                 HMAC
+                                (SHA2-
+                                  256,
+                                  Cert.
+                               #A4301)
+                                  SHA
+                                (SHA2-
+                                  256,
+                                 SHA2-
+                                  512,
+                                  Cert.
+                               #A4301),
+                                  CKG
+    User         128 bits,      ECDSA           N/A         Import:        N/A         Plaintext:      Zeroisation     Used to
+ Authentica      192 bits,       SigVer                      Entere                    Persistent       command      authentica
+ tion Public     256 bits       (P-256,                       d by                                       (request    te users to
+    Keys                       P-384, P-                      the                                         vmhost
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 38 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-          Use &
+ Name/                         Function     ation           /Export     -                              isation        related
+ Type                          and Cert.                                ment                                          keys
+                               Number
+
+
+
+     PSP            for           521,                       Crypto                                     zeroise no-     the
+                  ECDSA,          Cert.                      Officer                                    forwarding     module
+                 112 bits,     #A4301);                                                                      )
+                 152 bits         RSA                       Export:
+                 for RSA         SigVer                      N/A
+                                 (2048,
+                                  4096
+                                  bits,
+                                  Cert.
+                               #A4301)
+     CO          128 bits,      ECDSA           N/A         Import:         NA         Plaintext:      Zeroisation      Used to
+ Authentica      192 bits,       SigVer                      Entere                    Persistent       command       authentica
+ tion Public     256 bits       (P-256,                       d by                                       (request      te the CO
+    Keys            for        P-384, P-                      the                                         vmhost         to the
+     PSP          ECDSA,          521,                       Crypto                                    zeroise no-      module
+                 112 bits,        Cert.                      Officer                                   forwarding
+                 152 bits      #A4301);                                                                      )
+                 for RSA          RSA                       Export:
+                                 SigVer                      N/A
+                                 (2048,
+                                  4096
+                                  bits,
+                                  Cert.
+                               #A4301)
+  JuniperRo       128 bits      ECDSA           N/A         Import:        N/A         Plaintext:      Zeroisation      ECDSA
+    otCA                        (P-256,                     Loaded                     Persistent       command       prime256v
+     PSP                          Cert.                        at                                        (request     1 X.509 V3
+                               #A4301)                      manufa                                        vmhost      Certificate
+                                                             cture                                     zeroise no-
+                                                             time                                      forwarding      Used to
+                                                                                                             )        verify the
+                                                            Export:                                                   validity of
+                                                             N/A                                                          the
+                                                                                                                      PackagCA
+ PackageCA        128 bits      ECDSA           N/A         Import:        N/A         Plaintext:      Zeroisation      ECDSA
+    PSP                         (P-256,                     Loaded                     Persistent       command       prime256v
+                                 Cert.                         at                                        (request     1 X.509 V3
+                               #A4301)                      manufa                                        vmhost      Certificate
+                                                             cture                                     zeroise no-
+                                                             time                                      forwarding     Certificate
+                                                                                                             )        that holds
+                                                            Export:                                                    the public
+                                                             N/A                                                      key for the
+                                                                                                                      signing key
+                                                                                                                         used to
+                                                                                                                        generate
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 39 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP         Strength      Security     Gener-          Import      Establish     Storage          Zero-         Use &
+ Name/                         Function     ation           /Export     -                              isation       related
+ Type                          and Cert.                                ment                                         keys
+                               Number
+
+
+
+                                                                                                                        all the
+                                                                                                                     signatures
+                                                                                                                       used on
+                                                                                                                         the
+                                                                                                                      packages
+                                                                                                                         and
+                                                                                                                      signature
+                                                                                                                         lists
+  SSH ECDH       128 bits,     KAS-ECC-      Generated      Import:        N/A          Plaintext:     Zeroisation   Ephemeral
+  Public Key     192 bits,         SSC       internally       N/A                         RAM           command       EC Diffie-
+     PSP         256 bits        (P-256,     using NIST                                                  (request      Hellman
+                                 P-384,       SP 800-       Export:                                       vmhost     public key
+                                  P-512,       90Ar1         N/A                                       zeroise no-     used in
+                                   Cert.     HMAC_DR                                                   forwarding        SSH
+                               #A4301),          BG                                                          ),
+                               HMAC_D                                                                     power-
+                                   RBG                                                                     cycle
+                                (HMAC-
+                                  SHA2-
+                                   256,
+                                   Cert.
+                               #A4301)
+                                 HMAC
+                                 (SHA2-
+                                   256,
+                                   Cert.
+                               #A4301)
+                                   SHA
+                                 (SHA2-
+                                   256,
+                                  SHA2-
+                                   512,
+                                   Cert.
+                               #A4301),
+                                   CKG
+
+
+   SSH DH         112 bits     KAS-FFC-      Generated      Import:        N/A          Plaintext:     Zeroisation   Ephemeral
+  Public Key                      SSC        internally       N/A                         RAM           command        Diffie-
+     PSP                        (MODP        using NIST                                                  (request     Hellman
+                                 2048,        SP 800-       Export:                                       vmhost     public key
+                                 Cert.         90Ar1         N/A                                       zeroise no-    used in
+                               #A4301),      HMAC_DR                                                   forwarding       SSH
+                               HMAC_D            BG                                                          ),
+                                  RBG                                                                     power-
+                                                                                                           cycle
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                              Page 40 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+ Key/SSP          Strength     Security     Gener-          Import      Establish     Storage          Zero-         Use &
+ Name/                         Function     ation           /Export     -                              isation       related
+ Type                          and Cert.                                ment                                         keys
+                               Number
+
+
+
+                               (HMAC-
+                                SHA2-
+                                 256,
+                                 Cert.
+                               #A4301)
+                                HMAC
+                                (SHA2-
+                                 256,
+                                 Cert.
+                               #A4301)
+                                  SHA
+                                (SHA2-
+                                 256,
+                                SHA2-
+                                 512,
+                                 Cert.
+                               #A4301),
+                                  CKG
+
+
+Table 10 – SSPs
+
+
+
+            Entropy sources                     Minimum number of bits of                               Details
+                                                           entropy
+          SP 800-90B ENT (NP)                The module generates a minimum                Entropy input for seeding the
+            ESV Cert. #E104                   of 448 bits of overall entropy per           approved NIST SP 800-90Ar1
+                                             512-bit output sample, 0.875 bits                        DRBGs
+                                                  of entropy per bit for SSP
+                                                          generation
+Table 11 – Non-Deterministic Random Number Generation Specification
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                               Page 41 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+10. Self-tests
+The module performs the following self-tests:
+      • Pre-operational Self-Tests:
+              o Firmware Integrity Test: using ECDSA P-256 with SHA2-256
+
+
+        •    Conditional Self-Tests:
+                o Conditional Cryptographic Algorithm Self-tests (CAST):
+                         o Kernel KATs (CAVP Cert. #A4303)
+                                 ▪ HMAC-SHA2-256 DRBG KAT
+                                      • Generate, Instantiate and Reseed
+                                 ▪ HMAC-SHA-1 KAT
+                                 ▪ HMAC-SHA2-256 KAT
+                                 ▪ SHA2-384 KAT
+                                 ▪ SHA2-512 KAT
+
+                            o    OpenSSL KATs (CAVP Cert. #A4301)
+                                    ▪ AES CBC 128 bits Encrypt KAT
+                                    ▪ AES CBC 192 bits Encrypt KAT
+                                    ▪ AES CBC 256 bits Encrypt KAT
+                                    ▪ AES CBC 128 bits Decrypt KAT
+                                    ▪ AES CBC 192 bits Decrypt KAT
+                                    ▪ AES CBC 256 bits Decrypt KAT
+                                    ▪ HMAC-SHA2-256 DRBG KAT
+                                           • Generate, Instantiate and Reseed
+                                    ▪ HMAC-SHA-1 KAT
+                                    ▪ HMAC-SHA2-256 KAT
+                                    ▪ HMAC-SHA2-512 KAT
+                                    ▪ KAS-ECC-SSC P-256 KAT
+                                    ▪ KAS-ECC-SCC P-384 KAT
+                                    ▪ KAS-FFC-SSC MODP-2048 KAT
+                                    ▪ KDF SSH KAT
+                                    ▪ RSA 2048 bits SHA2-256 Sign KAT
+                                    ▪ RSA 2048 bits SHA2-256 Verify KAT
+                                    ▪ ECDSA P-256 Sig Gen KAT
+                                    ▪ ECDSA P-256 Sig Ver KAT
+                                    ▪ ECDSA P-384 Sig Gen KAT
+                                    ▪ ECDSA P-384 Sig Ver KAT
+                                    ▪ SHA2-384 KAT
+
+                            o    LibMD KATs (CAVP Cert. #A4306)
+                                     ▪ HMAC-SHA-1
+                                     ▪ HMAC-SHA2-256
+                                     ▪ SHA2-512
+
+
+   (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 42 of 47
+                         Public Material – May be reproduced only in its original entirety (without revision).
+                         o    NIST SP 800-90B Repetitive Count Test (RCT)
+                         o    NIST SP 800-90B Adaptive Proportion Test (APT)
+
+               o    Pairwise consistency test when generating ECDSA key pairs (for signature
+                    generation/verification and KAS-ECC SSP agreement)
+               o    Pairwise consistency test when generating RSA key pairs (for signature
+                    generation/verification)
+               o    Pairwise consistency test when generating DSA key pairs (for KAS-FFC SSP agreement)
+               o    Firmware Load Test (ECDSA P-256 SHA2-256 signature verification)
+
+
+Each time the module is powered up it tests that all the cryptographic algorithms operate correctly, and
+that sensitive data have not been damaged. Pre-operational as well as Conditional Cryptographic
+Algorithm Self-tests (CAST) are performed on each power up/boot of the module and on demand by
+power cycling the module (Perform self-tests (remote reset) service). The module performs a CAST for
+ECDSA P-256 with SHA2-256 prior to executing the firmware integrity check on each boot.
+
+The pre-operational firmware integrity test as well as all CASTs must be completed successfully prior to
+any other use of cryptography by the module in the Approved mode of operation. These tests can also be
+performed periodically by rebooting the module. If the pre-operation firmware integrity test or if any of
+the CASTs fail, then the module returns the error indicator “FIPS error: self-test failure”, inhibits all data
+output and enters the hard error state.
+
+Conditional Self-Tests are performed by the module when the corresponding condition is met. The
+pairwise consistency tests are performed on key pair generation for use in signature
+generation/verification (ECDSA and/or RSA tests) and/or for use in KAS-ECC SSP agreement (ECDSA tests).
+The firmware load test is performed when a firmware image is loaded onto the module from an external
+source. If the conditional self-tests fail, the module enters the soft error state, i.e., it rejects the generated
+keypair/loaded image, returns an error indicator and resumes normal operation. The error indicator is the
+return code -1 in case of a pairwise consistency test failure and “ERROR: Failed signature check” for the
+firmware load test failure.
+
+
+
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 43 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+11. Life-cycle Assurance
+The Crypto Officer must follow the procedures defined below for secure installation, initialization, startup
+and operation of the module.
+
+
+Crypto Officer Guidance
+
+The Crypto Officer must check to verify the firmware image being loaded on the module is the FIPS 140-3
+validated version/image. If the image is the FIPS 140-3 validated image, then proceed with installation of
+the image.
+
+
+Installing The Firmware Image
+
+Download the validated firmware image from https://www.juniper.net/support/downloads/junos.html.
+Log in to the Juniper Networks authentication system using the username (generally your e-mail address)
+and password supplied by Juniper Networks representatives. Select the validated firmware image.
+Download the firmware image to a local host or to an internal software distribution site.
+
+Connect to the console port on the device from your management device and log in to the Junos OS CLI.
+Copy the firmware package to the device to the /var/tmp/ directory. Install the new package on the device
+using the following command: operator@device> request vmhost software add /var/tmp/<package>.tgz.
+
+NOTE: If you need to terminate the installation, do not reboot your device; instead, finish the installation
+and then issue the request system software delete package.tgz command, where package.tgz is, for
+example, junos-vmhost-install-ptx-x86-64-22.4R2.8.tgz.This is your last chance to stop the installation.
+
+
+Reboot the device to complete the load and start the installation:
+operator@device> request vmhost reboot
+
+After the reboot has completed, log in and use the show version command to verify that the new version
+of the firmware is successfully installed.
+
+Also install the built-in fips-mode.tgz package needed for enabling the Approved-mode and the jpfe-fips
+package needed for execution of the CASTs. Please note that this is a one-time installation post which the
+module remains in the Approved mode once enabled and automatically executes the CASTs on each boot
+without requiring any operator or external intervention. The following are the commands used for installing
+these packages:
+               operator@device >request system software add optional://fips-mode.tgz
+
+               operator@device >request system software add optional://jpfe-fips.tgz
+
+
+
+
+   Enabling Approved Mode of Operation
+   (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 44 of 47
+                         Public Material – May be reproduced only in its original entirety (without revision).
+The Crypto Officer is responsible for initializing the module in the Approved mode of operation. The
+Approved mode of operation is not automatically enabled. The Crypto Officer shall place the module in
+the Approved mode by first zeroising it to ensure no SSPs are present. Next, the cryptographic officer
+shall follow the steps found in the Junos OS FIPS Evaluated Configuration Guide for PTX1000, Release
+22.4R2 document Chapter 2 to place the module into an Approved mode of operation. The steps from
+the aforementioned document have been reiterated below.
+
+
+To enable the Approved mode in Junos OS on the module:
+
+       1. Zeroise the module using the “request vmhost zeroize” command. Once the module comes up
+          in the “amnesiac mode” post zeroisation, connect to it using the console port with username
+          “root”, enter the configuration mode and configure the root-authentication password (i.e.,
+          Crypto Officer credentials) as follows:
+
+            root@device> edit
+            Entering configuration mode
+
+
+            [edit]
+
+            root@device# set system root-authentication plain-text-password
+            New password:
+
+            Retype new password:
+
+
+            [edit]
+
+            root@device# commit
+            configuration check succeeds
+            commit complete
+
+
+       2. Enable Approved mode on the device by setting the Approved level to 1, and verify the level:
+
+            [edit]
+
+            root@device# set system fips level 1
+
+
+            [edit]
+
+            root@device# show system fips level
+            level 1;
+
+
+       4. Commit the configuration
+
+(Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 45 of 47
+                      Public Material – May be reproduced only in its original entirety (without revision).
+               [edit ]
+
+               root@device# commit
+
+               configuration check succeeds
+
+                  Generating RSA key /etc/ssh/fips_ssh_host_key
+
+                  Generating RSA2 key /etc/ssh/fips_ssh_host_rsa_key
+
+                  Generating ECDSA key /etc/ssh/fips_ssh_host_ecdsa_key
+
+             'system' reboot is required to transition to fips level 1
+              commit complete
+
+          5. Reboot the device:
+               [edit]
+
+               root@device# run request system reboot
+
+               Reboot the system ? [yes,no] (no) yes
+
+
+               During the reboot, the device runs the pre-operational firmware integrity test and all
+               CASTs. It returns a login prompt as follows:
+               root@device:fips>
+
+
+          6. After the reboot has completed, log in and use the show version command to verify the
+             firmware version is the validated version:
+               root@device:fips > show version
+
+
+
+
+Placing the Module in the Non-Approved Mode of Operation
+
+As Crypto Officer, the operator needs to disable the Approved mode of operation on the device to return
+it to the non-Approved mode of operation. To disable the Approved mode on the device, the module must
+be zeroised (step 1 defined above).
+
+No other maintenance requirements apply for operation of the module in the Approved/non-Approved
+modes as defined above. For further information and for the Administrator and non-Administrator
+guidance, please see the Junos OS FIPS Evaluated Configuration Guide for PTX1000, Release 22.4R2
+document.
+
+
+
+
+   (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 46 of 47
+                         Public Material – May be reproduced only in its original entirety (without revision).
+12. Mitigation of Other Attacks
+The module does not implement any mitigation of other attacks and thus the requirements per this section
+do not apply to the module.
+
+
+
+
+   (Juniper Networks, Inc. © 2023)                         Version 1.0                                           Page 47 of 47
+                         Public Material – May be reproduced only in its original entirety (without revision).
+

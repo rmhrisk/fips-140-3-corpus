@@ -1,0 +1,1607 @@
+                                            PAN-OS 10.2 VM-Series
+                                                                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                                                                                           Version: 1.2
+
+                                                                                      Revision Date: August 13, 2024
+
+
+
+
+Palo Alto Networks, Inc.
+www.paloaltonetworks.com
+© 2024 Palo Alto Networks, Inc. Palo Alto Networks is a registered trademark of Palo Alto Networks. A list of our
+trademarks can be found at https://www.paloaltonetworks.com/company/trademarks.html. All other marks
+mentioned herein may be trademarks of their respective companies.
+
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Table of Contents
+1. General                                                                         3
+2. Cryptographic Module Specification                                              3
+3. Cryptographic Module Interfaces                                                 9
+4. Roles, Services, and Authentication                                         10
+5. Software/Firmware SecurityS                                                 17
+6. Operational Environment                                                     18
+7. Physical Security                                                           18
+8. Non-Invasive Security                                                       18
+9. Sensitive Security Parameters                                               18
+10. Self-Tests                                                                 22
+11. Life-Cycle Assurance                                                       23
+12. Mitigation of Other Attacks                                                25
+13. References                                                                 25
+14. Definitions and Acronyms                                                   25
+
+
+
+
+© 2024 Palo Alto Networks, Inc.          PAN-OS 10.2 VM-Series Security Policy 2
+1.          General
+The PAN-OS 10.2.8-h4 VM-Series module is available in multiple capacity options. All models can be deployed as guest
+virtual machines on VMware ESXi, Hyper-V, and Linux server that is running the KVM (Kernel-based Virtual Machine) using
+a common base image distributed in a compatible hypervisor format.
+
+
+
+The PAN-OS VM-Series is the virtualized form factor of the Palo Alto Networks next-generation firewall. The VM-Series is
+used to protect applications/data from cyber threats using Palo Alto Networks’ next-generation firewall and advanced threat
+prevention features.
+
+The cryptographic module meets the overall requirements applicable to Level 1 security of FIPS 140-3.
+
+                                                         Table 1 - Security Levels
+         ISO/IEC 24759 Section 6.                  FIPS 140-3 Section Title                         Security Level
+     1                                General                                           1
+     2                                Cryptographic Module Specification                1
+     3                                Cryptographic Module Interfaces                   1
+     4                                Roles, Services, and Authentication               3
+     5                                Software/Firmware Security                        1
+     6                                Operational Environment                           1
+     7                                Physical Security                                 N/A
+     8                                Non-Invasive Security                             N/A
+     9                                Sensitive Security Parameter Management           1
+     10                               Self-Tests                                        1
+     11                               Life-Cycle Assurance                              3
+     12                               Mitigation of Other Attacks                       N/A
+                                     Overall Level                                      1
+
+
+
+
+2.          Cryptographic Module Specification
+
+The tested operational environments are highlighted in Table 2.
+
+
+                                           Table 2 - Tested Operational Environments
+          Operating System             Hardware Platform                   Processor                     PAA/Acceleration
+  Hyper-V 2019 on Microsoft         Dell PowerEdge R740                     Intel Xeon Gold 6248                N/A
+  Hyper-V Server 2019
+  KVM 4 on Ubuntu 20.04             Dell PowerEdge R740                     Intel Xeon Gold 6248                N/A
+  VMware ESXi v7.0                  Dell PowerEdge R740                     Intel Xeon Gold 6248                N/A
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                         PAN-OS 10.2 VM-Series Security Policy 3
+                                    Table 3 - Vendor Affirmed Operational Environments
+                     Operating System                                                Hardware Platform
+  Amazon Web Services (AWS)                                     x86 Architecture
+  Google Cloud Platform (GCP)                                   (Note: Specific processor/hardware is dependent on
+                                                                Instance/Machine Type selected for operation system)
+  Microsoft Azure
+
+
+Operator Porting Rules
+The CMVP allows user porting of a validated software module to an operational environment which was not included as part
+of the validation testing. An operator may install and run a VM-series firewall on any general purpose computer (GPC) or
+platform using the specified hypervisor and operating system on the validation certificate or other compatible operating
+and/or hypervisor system and affirm the modules continued FIPS 140-3 validation compliance.
+
+The CMVP makes no statement as to the correct operation of the module or the security strengths of the generated keys
+when ported and executed in an operational environment not listed on the validation certificate.
+
+Approved Mode of Operation
+The following procedure will put the module into the Approved mode of operation:
+
+        ●   During initial boot up, break the boot sequence via the console port connection (by entering “maint”) to access
+            the main menu.
+        ●   Select “Continue.”
+        ●   Select the “Set FIPS-CC Mode” option to enter FIPS-CC mode.
+        ●   Select “Enable FIPS-CC Mode”.
+        ●   When prompted, select “Reboot” and the module will re-initialize and continue into FIPS-CC mode (Approved
+            mode).
+        ●   The module will reboot.
+        ●   In FIPS-CC mode, the console port is available only as a status output port.
+        ●   Once the module has finished booting, the Crypto Officer can authenticate using the default credentials that
+            come with the module
+                 o Once authenticated, the module will automatically require the operator to change their password; and
+                     the default credential is overwritten
+
+The module will automatically indicate the Approved mode of operation in the following manner:
+
+        ●   Status output interface will indicate “**** FIPS-CC MODE ENABLED ****” via the CLI session.
+        ●   Status output interface will indicate “FIPS-CC mode enabled successfully” via the console port.
+        ●   The module will display “FIPS-CC” at all times in the status bar at the bottom of the web interface.
+
+Should one or more power-up self-tests fail, the Approved mode of operation will not be achieved. Feedback will consist of:
+
+        ●   The module will reboot and enter a state in which the reason for the reboot can be determined.
+        ●   The module will output “FIPS-CC failure.”
+        ●   To determine which self-test caused the system to reboot into the error state, connect the console cable and
+            follow the on-screen instructions to view the self-test output.
+
+Note: Disabling FIPS-CC mode causes a complete factory reset, which is described in the Zeroization section below.
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                  PAN-OS 10.2 VM-Series Security Policy 4
+Non-Compliant State
+
+Failure to follow the directions in the Approved Mode of Operation above or rules noted in Section 11 will result in the
+module operating in a non-compliant state, which is considered out of scope of this validation.
+
+Zeroization
+To perform the zeroization service, follow the procedure below:
+
+
+            ●   Access the module’s CLI via SSH, and command the module to enter maintenance mode; the module will
+                reboot
+                    o Note: Establish a serial connection to the console port
+            ●   After reboot, select “Continue.”
+            ●   Select “Factory Reset.”
+            ●   The module will perform a zeroization, and provide the following message once complete:
+                    o “Factory Reset Status: Success”
+
+Approved and Allowed Algorithms
+The cryptographic modules support the following Approved algorithms. Only the algorithms, modes, and key sizes specified
+in this table are used by the module. The CAVP certificate may contain more tested options than listed in this table.
+
+
+
+                                                Table 4 –Approved Algorithms
+    CAVP Cert            Algorithm and           Mode/Method        Description / Key Size(s) /              Use / Function
+                           Standard                                      Key Strength(s)
+                    Conditioning Component                                                             Vetted conditioning component
+  A1791                                         AES-CBC-MAC          128 bits
+                    AES-CBC-MAC SP 800-90B                                                             for ESV Cert. #E69
+                                                                                                       Encryption
+  A2907             AES-CBC [SP 800-38A]        CBC                  128, 192 and 256 bits             Decryption
+
+                                                                                                       Encryption
+  A2907             AES-CFB128 [SP 800-38A]     CFB128               128 bits                          Decryption
+
+                                                                                                       Encryption
+  A2907             AES-CTR [SP 800-38A]        CTR                  128, 192 and 256 bits             Decryption
+
+                                                                     128 and 256 bits
+                    AES-GCM                     GCM**                                                  Encryption
+  A2907
+                    [SP 800-38D]                                                                       Decryption
+
+                    Counter DRBG                                     AES 256 bits with Derivation
+  A2907                                         CTR DRBG                                               Random Bit Generator
+                    [SP 800-90Arev1]                                 Function Enabled
+                    ECDSA KeyGen                                                                       Key Generation
+  A2907                                         ECDSA KeyGen         P-256, P-384, P-521
+                    (FIPS 186-4)
+                                                                                                       Public Key Validation
+  A2907             ECDSA KeyVer (FIPS 186-4)   ECDSA KeyVer         P-256, P-384, P-521
+
+                                                                     P-256, P-384, P-521 with
+                                                                                                       Signature Generation
+  A2907             ECDSA SigGen (FIPS 186-4)   ECDSA SigGen         SHA2-224, SHA2-256,
+                                                                     SHA2-384, and SHA2-512
+                                                                     P-256, P-384, P-521 with SHA-1,
+  A2907             ECDSA SigVer (FIPS 186-4)   ECDSA SigVer         SHA2-224, SHA2-256,               Signature Verification
+                                                                     SHA2-384, and SHA2-512
+  A2907             HMAC-SHA-1 [FIPS 198-1]     HMAC                 HMAC-SHA-1 with λ=96, 160         Authentication for protocols
+  A2907             HMAC-SHA2-224               HMAC                 HMAC-SHA2-224 with λ=224          Authentication for protocols
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                    PAN-OS 10.2 VM-Series Security Policy 5
+                   [FIPS 198-1]
+  A2907            HMAC-SHA2-256
+                                                HMAC           HMAC-SHA2-256 with λ=256         Authentication for protocols
+                   [FIPS 198-1]
+  A2907            HMAC-SHA2-384
+                                                HMAC           HMAC-SHA2-384 with λ=384         Authentication for protocols
+                   [FIPS 198-1]
+  A2907            HMAC-SHA2-512
+                                                HMAC           HMAC-SHA2-512 with λ=512         Authentication for protocols
+                   [FIPS 198-1]
+                                                KAS            P-256/P-384/P-521
+  A2907            KAS-ECC-SSC SP 800-56Ar3                                                     Key Exchange
+
+  A2907            KAS-FFC-SSC SP 800-56Ar3     KAS            MODP-2048/3072/4096              Key Exchange
+                   KDF IKEv2 [SP 800-135rev1]                  SHA2-256, SHA2-384,
+  A2907                                         IKEv2 KDF                                       IKEv2
+                   (CVL)                                       SHA2-512
+                                                               Engine ID:
+                   KDF SNMP [SP 800-135rev1]
+  A2907                                         SNMPv3 KDF     80001F880430303030303439         SNMPv3
+                   (CVL)
+                                                               35323630
+                   KDF SSH [SP 800-135rev1]
+  A2907                                         SSHv2 KDF      SHA-1, SHA2-256, SHA2-512        SSH
+                   (CVL)
+
+                   KDF TLS                      TLS1.2 KDF
+  A2907                                                        TLS v1.2 Hash Algorithm:         TLS
+                   [SP 800-135rev1] (CVL)
+                                                               SHA2-256, SHA2-384
+                   RSA KeyGen                   RSA KeyGen                                      Key Pair Generation
+  A2907                                                        2048, 3072, and 4096 bits
+                   (FIPS 186-4)                 (FIPS 186-4)
+                   RSA SigGen                   RSA SigGen     2048, 3072, and 4096-bit with    Signature Generation
+  A2907
+                   (FIPS 186-4)                 (FIPS 186-4)   hashes SHA2-256/384/512
+                                                               2048, 3072, 4096-bit (per IG
+                                                               C.F) with hashes
+                                                               SHA-1/SHA2-224+++/256/384/
+                   RSA SigVer                   RSA SigVer
+  A2907                                                        512 (Signature Verification)     Signature Verification
+                   (FIPS 186-4)                 (FIPS 186-4)
+                                                               +++ This Hash algorithm is not
+                                                               supported for ANSI X9.31
+                                                                                                Digital Signature
+                                                                                                Generation/Verification
+                                                               SHA-1
+  A2907            SHA-1 [FIPS 180-4]           SHA
+                                                                                                Non-Digital Signature
+                                                                                                Applications (e.g. component of
+                                                                                                HMAC)
+                                                                                                Digital Signature
+                                                                                                Generation/Verification
+  A2907            SHA2-224 [FIPS 180-4]        SHA2           SHA-224
+                                                                                                Non-Digital Signature
+                                                                                                Applications (e.g. component of
+                                                                                                HMAC)
+                                                                                                Digital Signature
+                                                                                                Generation/Verification
+  A2907            SHA2-256 [FIPS 180-4]        SHA2           SHA-256
+                                                                                                Non-Digital Signature
+                                                                                                Applications (e.g. component of
+                                                                                                HMAC)
+                                                                                                Digital Signature
+                                                                                                Generation/Verification
+  A2907            SHA2-384 [FIPS 180-4]        SHA2           SHA-384
+                                                                                                Non-Digital Signature
+                                                                                                Applications (e.g. component of
+                                                                                                HMAC)
+                                                                                                Digital Signature
+  A2907            SHA2-512 [FIPS 180-4]        SHA2           SHA-512                          Generation/Verification
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                              PAN-OS 10.2 VM-Series Security Policy 6
+                                                                                                                 Non-Digital Signature
+                                                                                                                 Applications (e.g. component of
+                                                                                                                 HMAC)
+                        Safe Primes Key Generation     Safe Primes Key         MODP-2048, MODP-3072,
+  A2907                                                                                                          Safe Primes Key Generation
+                        [RFC 3526]                     Generation              MODP-4096
+                        Safe Primes Key Verification   Safe Primes Key         MODP-2048, MODP-3072,
+  A2907                                                                                                          Safe Primes Key Verification
+                        [RFC 3526]                     Verification            MODP-4096
+                                                       SP 800-38A, FIPS
+                                                       198-1, and SP
+  AES Cert. A2907                                                              128, 192, and 256-bit keys
+                        KTS                            800-38F. KTS (key
+  and HMAC Cert.                                                               providing 128, 192, or 256 bits   Key Wrapping
+                        [SP 800-38F]                   wrapping and
+  A2907                                                                        of encryption strength
+                                                       unwrapping) per IG
+                                                       D.G.
+                                                       SP 800-38D and SP
+                                                       800-38F. KTS (key       128 and 256-bit keys providing
+  AES-GCM Cert.         KTS
+                                                       wrapping and            128 or 256 bits of encryption     Key Wrapping
+  A2907                 [SP 800-38F]
+                                                       unwrapping) per IG      strength
+                                                       D.G.
+                                                                               Palo Alto Networks DRNG
+  ESV Cert. #E69        SP 800-90B                     ESV                                                       Entropy
+                                                                               Entropy Source
+  KAS-ECC-SSC
+                                                       SP 800-56Arev3.         P-256 and P-384 curves
+  Cert. #A2907, KDF                                                                                              Key Exchange with protocol
+                        KAS [SP 800-56Arev3]           KAS-ECC per IG D.F      providing 128 or 192 bits of
+  IKEv2 Cert.                                                                                                    KDF
+                                                       Scenario 2 path (2).    encryption strength
+  #A2907
+  KAS-ECC-SSC                                          SP 800-56Arev3.         P-256, P-384, and P-521 curves
+                                                                                                                 Key Exchange with protocol
+  Cert. #A2907, KDF     KAS [SP 800-56Arev3]           KAS-ECC per IG D.F      providing 128, 192, or 256 bits
+                                                                                                                 KDF
+  SSH Cert. #A2907                                     Scenario 2 path (2).    of encryption strength
+  KAS-ECC-SSC                                          SP 800-56Arev3.         P-256, P-384, and P-521 curves
+                                                                                                                 Key Exchange with protocol
+  Cert. #A2907, KDF     KAS [SP 800-56Arev3]           KAS-ECC per IG D.F      providing 128, 192, or 256 bits
+                                                                                                                 KDF
+  TLS Cert. #A2907                                     Scenario 2 path (2).    of encryption strength
+  KAS-FFC-SSC
+                                                       SP 800-56Arev3.         2048, 3072, and 4096-bit keys
+  Cert. #A2907, KDF                                                                                              Key Exchange with protocol
+                        KAS [SP 800-56Arev3]           KAS-FFC per IG D.F      providing 112, 128, or 150 bits
+  IKEv2 Cert.                                                                                                    KDF
+                                                       Scenario 2 path (2).    of encryption strength
+  #A2907
+  KAS-FFC-SSC                                          SP 800-56Arev3.         2048-bit key providing 112 bits
+                                                                                                                 Key Exchange with protocol
+  Cert. #A2907, KDF     KAS [SP 800-56Arev3]           KAS-FFC per IG D.F      of encryption strength
+                                                                                                                 KDF
+  SSH Cert. #A2907                                     Scenario 2 path (2).
+  KAS-FFC-SSC                                          SP 800-56Arev3.         2048-bit key providing 112 bits
+                                                                                                                 Key Exchange with protocol
+  Cert. #A2907, KDF     KAS [SP 800-56Arev3]           KAS-FFC per IG D.F      of encryption strength
+                                                                                                                 KDF
+  TLS Cert. #A2907                                     Scenario 2 path (2).
+                                                                                                                 Key Generation
+
+                                                                                                                 Note: Symmetric keys and the
+                                                                               Cryptographic Key
+  Vendor                CKG                            Section 5.1, Section                                      seeds used for asymmetric key
+                                                                               Generation; SP 800-
+  Affirmed              (SP 800-133rev2)               5.2, Section 6.1                                          pair generation are produced
+                                                                               133 and IG D.H.
+                                                                                                                 using the unmodified/direct
+                                                                                                                 output of the DRBG
+
+
+
+
+          ● For TLS, The GCM implementation meets Scenario 1 of IG C.H: it is used in a manner compliant with SP 800-52 and in
+            accordance with Section 4 of RFC 5288 for TLS key establishment, and ensures when the nonce_explicit part of the IV
+            exhausts all possible values for a given session key, that a new TLS handshake is initiated per sections 7.4.1.1 and 7.4.1.2 of
+            RFC 5246. During operational testing, the module was tested against an independent version of TLS and found to behave
+            correctly.
+
+                    o    From this RFC 5288, the GCM cipher suites in use are TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                         TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, and
+                         TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                              PAN-OS 10.2 VM-Series Security Policy 7
+           ● For IPsec/IKEv2, The GCM implementation meets Scenario 1 of IG C.H: it is used in a manner compliant with RFCs 4106 and
+             7296 (RFC 5282 is not applicable, as the module does not use GCM within IKEv2 itself), and ensures when the module
+             exhausts all possible values for a given session key that this triggers a rekey condition. During operational testing, the module
+             was tested against an independent version of IPsec with IKEv2 and found to behave correctly.
+
+           ● For SSH, the module meets Scenario 4 of IG C.H. The fixed field is 32 bits in length and is derived using the SSH KDF; this
+             ensures the fixed field is unique for any given GCM session. The invocation field is 64 bits in length and is incremented for each
+             invocation of GCM; this prevents the IV from repeating until the entire invocation field space of 264 is exhausted, which can
+             take hundreds of years. (In FIPS-CC Mode, SSH rekey is automatically configured at 1 GB of data or 1 hour, whichever comes
+             first.)
+
+In all the above cases, the nonce_explicit is always generated deterministically. AES GCM keys are zeroized when the module
+is power-cycled. For each new TLS or SSH session, a new AES GCM key is established.
+
+The module is compliant to IG C.F:
+
+The module utilizes Approved modulus sizes 2048, 3072, and 4096 bits for RSA signatures. This functionality has been CAVP
+tested as noted above. The minimum number of Miller Rabin tests for each modulus size is implemented according to Table
+C.2 of FIPS 186-4. For modulus size 4096, the module implements the largest number of Miller-Rabin tests shown in Table
+C.2. RSA SigVer is CAVP tested for all three supported modulus sizes as noted above. The module does not perform FIPS
+186-2 SigVer. All supported modulus sizes are CAVP testable and tested as noted above. The module does not implement
+RSA key transport in the approved mode.
+
+The module does not have any algorithms that fall under:
+       -   Non-Approved Algorithms Allowed in the Approved Mode of Operation
+       -   Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed
+       -   Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+
+
+                                           Table 5 - Supported Protocols in the Approved Mode
+                                                         Supported Protocols*
+ TLSv1.2
+ SSHv2
+ SNMPv3
+ IPsec and IKEv2
+
+
+*Note: These protocols have not been tested or reviewed by the CMVP or the CAVP.
+
+Cryptographic Boundary
+The PAN-OS 10.2.8-h4 VM-Series is a software cryptographic module and requires an underlying general purpose computer
+(GPC) environment. The module consists of a GPC (multi-chip standalone embodiment) with the cryptographic boundary
+defined below. The cryptographic boundary (CB) includes all of the software components of the module, which is included in
+the file noted in Section 11 (PanOS_vm-10.2.8-h4) and also the configuration file that resides on the virtual machine’s virtual
+disk. The physical perimeter (PP) is defined by the enclosure around the host GPC on which it runs. Figure 1 depicts the
+boundary and illustrates the hardware components of a GPC.
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                             PAN-OS 10.2 VM-Series Security Policy 8
+                                             Figure 1 - Cryptographic Boundary
+
+
+
+
+3.      Cryptographic Module Interfaces
+The module is a software only module that operates on a general purpose computing (GPC) platform. The physical ports and
+logical interfaces are consistent with a GPC operating environment. The module supports the following FIPS 140-3 logical
+interfaces:
+
+                                                Table 6 - Ports and Interfaces
+                  Physical Port               Logical Interface            Data that passes over port/interface
+             Power                      Power In                        Power supplies
+
+             Console, GPC I/O           Status Output                   Self-test status output
+
+             Ethernet                   Data input, control input,      HTTPS, TLS, SNMP, IPsec, and SSH
+                                        data output, status output      traffic data.
+
+
+The module’s physical and electrical characteristics, manual controls, and physical indicators are provided by the host GPC;
+the hypervisors provide virtualized ports and interfaces which map to the GPCs’ physical ports and interfaces (i.e., network
+interfaces and GPC inputs/outputs).
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                  PAN-OS 10.2 VM-Series Security Policy 9
+4.        Roles, Services, and Authentication
+Roles and Services
+While in the Approved mode of operation, all CO and User services are accessed via SSH or TLS sessions. Approved and
+allowed algorithms, relevant CSPs and public keys related to these protocols are accessed to support the following services.
+CSP access by services is further described in the following tables.
+
+                                          Table 7 - Roles, Service Commands, Input and Output
+               Role                      Service                         Input                                         Output
+       Crypto Officer          Show Version                    Query module for version                     Module provides version
+
+
+       Crypto Officer,         Security Configuration          Configuring and managing                     Confirmation of service
+       User                    Management                      cryptographic parameters and                 via Configuration Logs
+                                                               setting/modifying security policy,
+                                                               including creating User accounts
+                                                               and additional CO accounts via CLI
+                                                               or WebUI
+       Crypto Officer          Other Configuration             Networking parameter                         Confirmation of service
+                                                               configuration, logging configuration,        via Configuration Logs
+                                                               and other non-security relevant
+                                                               configuration via CLI or WebUI
+       Crypto Officer,         View Other                      Query module for current                     Confirmation of service
+       User                    Configuration                   non-security relevant configuration          via Configuration Logs
+                                                               via WebUI or CLI
+       Crypto Officer,         Show Status                     Query status of the module via               Module status
+       User, RA VPN,                                           WebUI or CLI                                 information via CLI or
+       S-S VPN                                                                                              System Logs
+       RA VPN, S-S VPN         VPN                             Initialize VPN connection                    Confirmation of service
+                                                                                                            via System Logs
+
+       Crypto Officer          Software Update                 Loading new image                            Message output noting
+                                                                                                            version updated
+                                                                                                            successfully
+       Unauthenticated         Zeroize                         Initiate zeroization command                 The device will overwrite
+                                                                                                            all CSPs and provide
+                                                                                                            status of completion
+       Unauthenticated                                         Power cycling the module                     Self-test status output via
+                               Self-Tests
+                                                                                                            system logs
+
+       Unauthenticated         Show Status                     View status of the module via                Module status via the
+                               (Hypervisor)                    hypervisor.                                  hypervisor
+
+
+
+The zeroization procedure is invoked when the operator initiates the service. The operator must be in control of the module
+during the entire procedure to ensure that it has successfully completed. During the zeroization procedure, no other
+services are available.
+
+     Note: Additional information on the configuration options the module provides can be found at https://docs.paloaltonetworks.com/
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                              PAN-OS 10.2 VM-Series Security Policy 10
+Assumption of Roles
+The modules support four distinct operator roles, User and Cryptographic Officer (CO), Remote Access VPN, and Site-to-site
+VPN. The cryptographic modules enforce the separation of roles using unique authentication credentials associated with
+operator accounts.
+
+The modules do not provide a maintenance role or bypass capability.
+
+The modules all support the use of a password (i.e. Memorized Secret as per SP 800-140E). Upon first boot, the module
+requires that the Cryptographic Officer change the password from the default one to a custom one. The module
+automatically enforces a minimum password length of at least 8 characters. In FIPS-CC mode, the module automatically
+enforces a maximum of 10 failed attempts. Passwords stored in the module are hashed using SHA-256, and any passwords
+that are transported into/out of the module are protected via TLS 1.2.
+
+                                             Table 8 – Roles and Authentication
+                 Role                           Authentication Method                     Authentication Strength
+ Cryptographic Officer                    Memorized Secret                         Memorized Secret (Password-based)
+                                          (Username/password) and/or               The minimum length is eight (8)
+                                          Single-Factor Cryptographic Software     characters1 (95 possible characters).
+                                          (certificate/public key-based            The probability that a random attempt
+                                          authentication)                          will succeed or a false acceptance will
+ User                                     Memorized Secret                         occur is 1/(958) which is less than
+                                          (Username/password) and/or               1/1,000,000. The probability of
+                                          Single-Factor Cryptographic Software     successfully authenticating to the
+                                          (certificate/public key-based            module within one minute is 10/(958),
+                                          authentication)                          which is less than 1/100,000. The
+                                                                                   firewall’s configuration supports at
+ Remote Access VPN (RA VPN)               Memorized Secret                         most ten failed attempts to
+                                          (Username/password) and/or               authenticate in a one-minute period.
+                                          Single-Factor Cryptographic Software
+                                          (certificate/public key-based            Certificate/Public key-based
+                                          authentication)                          The security modules support
+                                                                                   public-key based authentication using
+                                                                                   RSA 2048 and certificate-based
+                                                                                   authentication using RSA 2048, RSA
+                                                                                   3072, RSA 4096, ECDSA P-256,
+                                                                                   P-384, or P-521.
+
+                                                                                   The minimum equivalent strength
+                                                                                   supported is 112 bits. The probability
+                                                                                   that a random attempt will succeed is
+                                                                                   1/(2112) which is less than 1/1,000,000.
+                                                                                   The probability of successfully
+                                                                                   authenticating to the module within a
+                                                                                   one minute period is 3,600,000/(2112),
+                                                                                   which is less than 1/100,000. The
+                                                                                   firewall supports at most 60,000 new
+
+1
+ In FIPS-CC Mode, the module checks and enforces the minimum password length of eight (8) as specified in SP 800-63B.
+Passwords are securely stored hashed with salt value, with very restricted access control, and rate limiting mechanism for
+authentication attempts.
+
+
+© 2024 Palo Alto Networks, Inc.                                                PAN-OS 10.2 VM-Series Security Policy 11
+                                                                           sessions per second to authenticate in
+                                                                           a one-minute period.
+ Site-to-Site VPN (S-S VPN)       IKE/IPSec Pre-shared keys -              The pre-shared key authentication
+                                  Identification with the IP Address and   method has a minimum security
+                                  authentication with the Pre-Shared       strength of 2112. The probability of
+                                  Key (Memorized Secret) or                successfully authenticating to the
+                                  Single-Factor Cryptographic Software     module is 1/(2112), which is less than
+                                  (certificate based authentication)       1/1,000,000. The number of
+                                                                           authentication attempts is limited by
+                                                                           the number of new connections per
+                                                                           second supported (120,000) on the
+                                                                           fastest platform of the Palo Alto
+                                                                           Networks firewalls. The probability of
+                                                                           successfully authenticating to the
+                                                                           module within a one minute period is
+                                                                           7,200,000/(2112), which is less than
+                                                                           1/100,000.
+
+                                                                           The security modules support
+                                                                           public-key based authentication using
+                                                                           RSA 2048 and certificate-based
+                                                                           authentication using RSA 2048, RSA
+                                                                           3072, RSA 4096, ECDSA P-256,
+                                                                           P-384, or P-521.
+
+                                                                           The minimum equivalent strength
+                                                                           supported is 112 bits. The probability
+                                                                           that a random attempt will succeed is
+                                                                           1/(2112) which is less than 1/1,000,000.
+                                                                           The probability of successfully
+                                                                           authenticating to the module within a
+                                                                           one minute period is 3,600,000/(2112),
+                                                                           which is less than 1/100,000. The
+                                                                           firewall supports at most 60,000 new
+                                                                           sessions per second to authenticate in
+                                                                           a one-minute period.
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                       PAN-OS 10.2 VM-Series Security Policy 12
+Definition of CSPs Modes of Access
+The following table defines the relationship between access to CSPs and the different module services. The modes of access
+shown in the table are defined as:
+
+            G = Generate: The module generates or derives the SSP.
+
+            R = Read: The SSP is read from the module (e.g. the SSP is output).
+
+            W = Write: The SSP is updated, imported, or written to the module.
+
+            E = Execute: The module uses the SSP in performing a cryptographic operation.
+
+            Z = Zeroise: The module zeroises the SSP.
+
+
+
+                                                               Table 9 - Approved Services
+  Service                 Description         Approved Security            Keys and/or SSPs      Roles     Access rights to              Indicator
+                                                 Functions                                                 Keys and/or SSPs
+  Show Version       Query the module to    N/A                         N/A                      CO        N/A                Version displayed via System
+                     display the version                                                                                      Logs / CLI / UI
+
+  Security           Configuring and        CKG                         RSA Private Keys         CO        G/W/E              Configuration/System Logs
+  Configuration      managing               RSA KeyGen (FIPS
+  Management         cryptographic          186-4)
+                                            RSA SigGen (FIPS 186-4)
+                     parameters and
+                     setting/modifying      CKG                         ECDSA Private Keys       CO        G/W/E              Configuration/System Logs
+                     security policy,       ECDSA KeyGen
+                                            (FIPS 186-4)
+                     including creating
+                                            ECDSA SigGen
+                     User accounts and      (FIPS 186-4)
+                     additional CO
+                                            KAS         KDF TLS         TLS Pre-Master Secret    CO        G/E/Z              Configuration/System Logs
+                     accounts
+                                                        (CVL)
+                                                        KDF TLS         TLS Master Secret        CO        G/E/Z              Configuration/System Logs
+                                                        (CVL)
+                                                        CKG,            TLS DHE/ECDHE                      G/E/Z
+                                                        ECDSA           Private Components       CO                           Configuration/System Logs
+                                                        KeyGen (FIPS
+                                                                        TLS DHE/ECDHE Public               G/E/R/W/Z
+                                                        186-4),
+                                                                        Components
+                                                        ECDSA
+                                                        KeyVer (FIPS
+                                                        186-4),
+                                                        KAS-ECC-SSC
+                                                        ,
+                                                        KAS-FFC-SSC
+                                                        , Safe Primes
+                                                        Key
+                                                        Generation,
+                                                        Safe Primes
+                                                        Key
+                                                        Verification
+                                            KTS         HMAC-SHA2-      TLS HMAC Keys            CO        G/E/Z              Configuration/System Logs
+                                                        256
+                                                        HMAC-SHA2-
+                                                        384
+                                                        AES-CBC         TLS Encryption Keys      CO        G/E/Z              Configuration/System Logs
+                                            KTS         AES-GCM
+                                            KTS         HMAC-SHA-1      SSH Session              CO        G/E/Z              Configuration/System Logs
+                                                        HMAC-SHA2-      Authentication Keys
+                                                        256
+                                                        HMAC-SHA2-
+                                                        512
+                                                        AES-CBC,        SSH Session Encryption   CO        G/E/Z              Configuration/System Logs
+                                                        AES-CTR         Keys
+                                            KTS         AES-GCM
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                                       PAN-OS 10.2 VM-Series Security Policy 13
+                                           KAS       KDF SSH         SSH DHE/ECDHE             CO        G/E/Z         Configuration/System Logs
+                                                                     Private Components
+                                                     KAS-ECC-SSC
+                                                     KAS-FFC-SSC     SSH DHE/ECDHE Public                G/E/R/W/Z
+                                                     Safe Primes     Components
+                                                     Key
+                                                     Generation,
+                                                     Safe Primes
+                                                     Key
+                                                     Verification
+                                           N/A                       CO, User, RA VPN          CO        G/E/W         Configuration/System Logs
+                                                                     Password
+                                           Counter DRBG, ESV         Entropy Input String      CO        G/E           Configuration/System Logs
+                                                                     DRBG Seed
+                                                                     DRBG V
+                                                                     DRBG Key
+                                           KDF SNMP (CVL)            SNMPv3 Authentication     CO        W/E           Configuration/System Logs
+                                                                     Secret
+                                           KDF SNMP (CVL)            SNMPv3 Privacy Secret     CO        W/E           Configuration/System Logs
+                                           HMAC-SHA-1                Authentication Key        CO        G/E/Z         Configuration/System Logs
+                                           HMAC-SHA2-224
+                                           HMAC-SHA2-256
+                                           HMAC-SHA2-384
+                                           HMAC-SHA2-512
+                                           AES-CFB128                Session Key               CO        G/E/Z         Configuration/System Logs
+                                           N/A                       Protocol Secrets          CO        W/E           Configuration/System Logs
+                                           RSA SigVer (FIPS 186-4)   CA Certificates           CO        G/R/E/W       Configuration/System Logs
+                                           ECDSA SigVer
+                                           (FIPS 186-4)
+                                           ECDSA SigVer              ECDSA Public Keys         CO        G/R/E/W       Configuration/System Logs
+                                           (FIPS 186-4)
+                                           RSA SigVer                RSA Public Keys           CO        G/R/E/W       Configuration/System Logs
+                                           (FIPS 186-4)
+                                           RSA SigVer (FIPS 186-4)   SSH Host Public Key       CO        G/R/E/W       Configuration/System Logs
+                                           ECDSA SigVer
+                                           (FIPS 186-4)
+                                           RSA SigVer (FIPS 186-4)   SSH Client Public Key     CO        W/E           Configuration/System Logs
+                                           RSA SigVer (FIPS 186-4)   Public key for software   CO        W/E           Configuration/System Logs
+                                                                     load test
+  Other           Networking               RSA SigGen                RSA Private Keys          CO        G/W/E         Configuration/System Logs
+  Configuration   parameter                (FIPS 186-4)
+                  configuration, logging   ECDSA SigGen              ECDSA Private Keys        CO        G/W/E         Configuration/System Logs
+                  configuration, and       (FIPS 186-4)
+                  other non-security       KAS       KDF TLS         TLS Pre-Master Secret     CO        G/E/Z         Configuration/System Logs
+                  relevant configuration             (CVL)
+                                                     KDF TLS         TLS Master Secret         CO        G/E/Z         Configuration/System Logs
+                                                     (CVL)
+                                                     CKG,            TLS DHE/ECDHE             CO        G/E/Z         Configuration/System Logs
+                                                     ECDSA           Private Components
+                                                     KeyGen (FIPS
+                                                                     TLS DHE/ECDHE Public                G/E/R/W/Z
+                                                     186-4),
+                                                                     Components
+                                                     ECDSA
+                                                     KeyVer (FIPS
+                                                     186-4),
+                                                     KAS-ECC-SSC
+                                                     ,
+                                                     KAS-FFC-SSC
+                                                     , Safe Primes
+                                                     Key
+                                                     Generation,
+                                                     Safe Primes
+                                                     Key
+                                                     Verification
+                                           HMAC-SHA2-256             TLS HMAC Keys             CO        G/E/Z         Configuration/System Logs
+                                           HMAC-SHA2-384
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                                     PAN-OS 10.2 VM-Series Security Policy 14
+                                          AES-CBC or AES-GCM        TLS Encryption Keys        CO        G/E/Z         Configuration/System Logs
+                                                                                                         G/Z
+                                          HMAC-SHA-1                SSH Session                CO                      Configuration/System Logs
+                                          HMAC-SHA2-256             Authentication Keys
+                                          HMAC-SHA2-512
+                                          AES-CBC, AES-CTR, or      SSH Session Encryption     CO        G/E/Z         Configuration/System Logs
+                                          AES-GCM                   Keys
+                                          KAS       KDF SSH         SSH DHE/ECDHE              CO        G/E/Z         Configuration/System Logs
+                                                    (CVL)           Private Components
+                                                    CKG,
+                                                    ECDSA                                                G/E/R/W/Z
+                                                    KeyGen (FIPS    SSH DHE/ECDHE Public
+                                                    186-4),         Components
+                                                    ECDSA
+                                                    KeyVer (FIPS
+                                                    186-4),
+                                                    KAS-ECC-SSC
+                                                    ,
+                                                    KAS-FFC-SSC
+                                                    , Safe Primes
+                                                    Key
+                                                    Generation,
+                                                    Safe Primes
+                                                    Key
+                                                    Verification
+                                          N/A                       CO, User, RA VPN           CO        G/E/W         Configuration/System Logs
+                                                                    Password
+                                          RSA SigVer (FIPS 186-4)   CA Certificates            CO        G/R/E/W       Configuration/System Logs
+                                          ECDSA SigVer
+                                          (FIPS 186-4)
+                                          ECDSA SigVer              ECDSA Public Keys          CO        G/R/E/W       Configuration/System Logs
+                                          (FIPS 186-4)
+                                          RSA SigVer                RSA Public Keys            CO        G/R/E/W       Configuration/System Logs
+                                          (FIPS 186-4)
+                                          RSA SigVer (FIPS 186-4)   SSH Host Public Key        CO        G/R/E/W       Configuration/System Logs
+                                          ECDSA SigVer
+                                          (FIPS 186-4)
+
+
+
+
+                                          RSA SigVer (FIPS 186-4)   SSH Client Public Key      CO        W/E           Configuration/System Logs
+  View Other      Read-only of            N/A                       CO, User, RA VPN           CO,       W/E           Configuration/System Logs
+  Configuration   non-security relevant                             Password                   User
+                  configuration
+                                                                    Note: includes all items
+                                                                    in “Other Configuration”
+  Show Status     Provides status         RSA SigGen (FIPS 186-4)   RSA Private Keys           CO,       E             Configuration/System Logs
+                  information of the                                                           User
+                  module
+                                          ECDSA SigGen              ECDSA Private Keys         CO,       E             Configuration/System Logs
+                                          (FIPS 186-4)                                         User
+                                          KAS       KDF TLS         TLS Pre-Master Secret      CO,       G/E/Z         Configuration/System Logs
+                                                                                               User
+                                                    KDF TLS         TLS Master Secret          CO,       G/E/Z         Configuration/System Logs
+                                                                                               User
+                                                    CKG,            TLS DHE/ECDHE              CO,       G/E/Z         Configuration/System Logs
+                                                    ECDSA           Private Components         User
+                                                    KeyGen (FIPS
+                                                                    TLS DHE/ECDHE Public                 G/E/R/W/Z
+                                                    186-4),
+                                                                    Components
+                                                    ECDSA
+                                                    KeyVer (FIPS
+                                                    186-4),
+                                                    KAS-ECC-SSC
+                                                    ,
+                                                    KAS-FFC-SSC
+                                                    , Safe Primes
+                                                    Key
+                                                    Generation,
+                                                    Safe Primes
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                                     PAN-OS 10.2 VM-Series Security Policy 15
+                                                  Key
+                                                  Verification
+                                        HMAC-SHA2-256             TLS HMAC Keys            CO,       G/E/Z       Configuration/System Logs
+                                        HMAC-SHA2-384                                      User
+                                        AES-CBC or AES-GCM        TLS Encryption Keys      CO,       G/E/Z       Configuration/System Logs
+                                                                                           User
+                                        HMAC-SHA-1                SSH Session              CO,       G/E/Z       Configuration/System Logs
+                                        HMAC-SHA2-256             Authentication Keys      User
+                                        HMAC-SHA2-512
+                                        AES-CBC, AES-CTR, or      SSH Session Encryption   CO,       G/E/Z       Configuration/System Logs
+                                        AES-GCM                   Keys                     User
+                                        KAS       KDF SSH         SSH DHE Public/Private   CO,       G/E/Z       Configuration/System Logs
+                                                  (CVL)           Components               User
+                                                  CKG,
+                                                  ECDSA           SSH ECDHE                          G/E/R/W/Z
+                                                  KeyGen (FIPS    Public/Private
+                                                  186-4),         Components
+                                                  ECDSA
+                                                  KeyVer (FIPS
+                                                  186-4),
+                                                  KAS-ECC-SSC
+                                                  ,
+                                                  KAS-FFC-SSC
+                                                  , Safe Primes
+                                                  Key
+                                                  Generation,
+                                                  Safe Primes
+                                                  Key
+                                                  Verification
+  VPN           Provide network                   HMAC-SHA-1      S-S VPN IPSec/IKE        S-S VPN   G/E/Z       Configuration/System Logs
+                access for remote       KTS       HMAC-SHA2-      Authentication Keys
+                users or site-to-site             256
+                                                  HMAC-SHA2-
+                connection
+                                                  384
+                                                  HMAC-SHA2-
+                                                  512
+                                                  AES-CBC         S-S VPN IPSec/IKE        S-S VPN   G/E/Z       Configuration/System Logs
+                                                                  Session Keys
+                                        KTS       AES-GCM
+                                        KAS       KDF IKEv2       S-S VPN IPSec/IKE        S-S VPN   G/E/Z       Configuration/System Logs
+                                                  (CVL)           DHE/ECDHE Private
+                                                                  Components
+                                                  CKG,
+                                                  ECDSA
+                                                  KeyGen (FIPS                                       G/E/R/W/Z
+                                                  186-4),
+                                                  ECDSA           S-S VPN IPSec/IKE
+                                                  KeyVer (FIPS    DHE/ECDHE Public
+                                                  186-4),         Components
+                                                  KAS-ECC-SSC
+                                                  ,
+                                                  KAS-FFC-SSC
+                                                  , Safe Primes
+                                                  Key
+                                                  Generation,
+                                                  Safe Primes
+                                                  Key
+                                                  Verification
+                                        N/A                       S-S VPN IPSec            S-S VPN   W/E         Configuration/System Logs
+                                                                  Pre-Shared Keys
+                                        ECDSA SigVer              ECDSA Public Keys        S-S VPN   W/E         Configuration/System Logs
+                                        (FIPS 186-4)
+                                        RSA SigVer                RSA Public Keys          S-S VPN   W/E         Configuration/System Logs
+                                        (FIPS 186-4)
+                                        RSA SigGen                RSA Private Keys         RA VPN    E           Configuration/System Logs
+                                        (FIPS 186-4)
+                                        ECDSA SigGen              ECDSA Private Keys       RA VPN    E           Configuration/System Logs
+                                        (FIPS 186-4)
+                                        KAS       KDF TLS         TLS Pre-Master Secret    RA VPN    G/E/Z       Configuration/System Logs
+                                                  (CVL)
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                               PAN-OS 10.2 VM-Series Security Policy 16
+                                                           KDF TLS           TLS Master Secret                       G/E/Z
+                                                           (CVL)
+                                                           CKG,              TLS DHE/ECDHE Public        RA VPN      G/E/R/W/Z              Configuration/System Logs
+                                                           ECDSA             Components
+                                                           KeyGen (FIPS
+                                                                             TLS DHE/ECDHE               RA VPN      G/E/Z                  Configuration/System Logs
+                                                           186-4),
+                                                                             Private Components
+                                                           ECDSA
+                                                           KeyVer (FIPS
+                                                           186-4),
+                                                           KAS-ECC-SSC
+                                                           ,
+                                                           KAS-FFC-SSC
+                                                           , Safe Primes
+                                                           Key
+                                                           Generation,
+                                                           Safe Primes
+                                                           Key
+                                                           Verification
+                                                 KTS       HMAC-SHA2-        TLS HMAC Keys               RA VPN      G/E/Z                  Configuration/System Logs
+                                                           256
+                                                           HMAC-SHA2-
+                                                           384
+                                                           AES-CBC           TLS Encryption Keys         RA VPN      G/E/Z                  Configuration/System Logs
+                                                 KTS       AES-GCM
+                                                 CKG,                        RA VPN IPSec Session        RA VPN      G/E/Z                  Configuration/System Logs
+                                                 AES-CBC or AES-GCM          Keys
+                                                 CKG,                        RA VPN IPSec                RA VPN      G/E/Z                  Configuration/System Logs
+                                                 HMAC-SHA-1                  Authentication
+                                                 Counter DRBG, ESV           Entropy Input String        RA VPN      G/E                    Configuration/System Logs
+                                                                             DRBG Seed
+                                                                             DRBG V
+                                                                             DRBG Key
+                                                 RSA SigVer (FIPS 186-4))    CA Certificates             RA VPN      W/E                    Configuration/System Logs
+                                                 ECDSA SigVer
+                                                 (FIPS 186-4)
+                                                 ECDSA SigVer                ECDSA Public Keys           RA VPN      W/E                    Configuration/System Logs
+                                                 (FIPS 186-4)
+                                                 RSA SigVer                  RSA Public Keys             RA VPN      W/E                    Configuration/System Logs
+                                                 (FIPS 186-4)
+                                                 RSA SigVer                  Public key for software     CO          E                      Configuration/System Logs
+                                                 (FIPS 186-4)                content load test
+
+                                                                             Note: Includes all keys
+                                                                             from Other
+                                                                             Configuration
+  Zeroize             Destroys all keys in       N/A                         All keys and SSPs           CO          Z                      Zeroization indicator
+                      the module
+  Self-Test           Initiates self-tests and   HMAC-SHA2-256,              Software integrity          CO          E                      System Logs
+                      integrity test             ECDSA SigVer                verification key
+                                                 (FIPS 186-4)
+  Show Status         Provides status of the     N/A                         N/A                         All         R                      Hypervisor VM status
+  (Hypervisor)        module
+
+
+
+Note: Configuration/System Logs for Approved services above will indicate FIPS-CC mode is enabled, configuration requirements from Section 11 are followed, and that the
+service succeeded.
+
+
+
+
+5.            Software/Firmware SecurityS
+The module performs the Software Integrity test by using HMAC-SHA-256 and ECDSA P-256 Signature Verification
+(HMAC/ECDSA Cert. #A2907) with the Software integrity verification key during the Pre-Operational Self-Test. In addition,
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                                                PAN-OS 10.2 VM-Series Security Policy 17
+the module also conducts the software load test by using RSA 2048 with SHA-256 (Cert. #A2907) for the new validated
+software to be uploaded into the module.
+
+Any software loaded into this module that is not shown on the module certificate is out of scope of this validation, and
+requires a separate FIPS 140-3 validation.
+
+
+
+6.        Operational Environment
+The module is a modifiable operational environment as per FIPS 140-3 Level 1 specifications. The hypervisor environment
+provides an isolated operating environment and is the single operator of the virtual machine.
+
+The tested operating environments isolate virtual systems into separate isolated process spaces. Each process space is
+logically separated from all other processes by the operating environments software and hardware. The module functions
+entirely within the process space of the isolated system as managed by the single operational environment. This implicitly
+meets the FIPS 140-3 requirement that only one (1) entity at a time can use the cryptographic module.
+
+
+
+7.        Physical Security
+There are no applicable FIPS 140-3 physical security requirements.
+
+
+
+8.        Non-Invasive Security
+No approved non-invasive attack mitigation test metrics are defined at this time.
+
+
+
+9.        Sensitive Security Parameters
+The following table details all the sensitive security parameters utilized by the module.
+
+                                                                Table 10 - SSPs
+  Key/SSP/Name/     Strength   Security Function   Generation   Import/Expor   Establishmen      Storage       Zeroization1      Use & Related Keys
+       Type                    and Cert. Number                      t               t
+                                                                                                                                ECDSA/RSA Public
+                                                                                                                                key - Used to trust a
+                               RSA SigVer (FIPS
+                                                                                                             HDD – Zeroize      root CA intermediate
+                               186-4)
+                                                                TLS or SSH                                   Service            CA and leaf /end
+                    112 bits   ECDSA SigVer        DRBG, FIPS                                  HDD/RAM
+  CA Certificates                                               Session Key    N/A                           RAM - Zeroize at   entity certificates
+                    minimum    (FIPS 186-4)        186-4                                       – plaintext
+                                                                Encrypted                                    session            (RSA 2048, 3072, and
+                                                                                                             termination        4096 bits)
+                               Cert. #A2907
+                                                                                                                                (ECDSA P-256, P-384,
+                                                                                                                                and P-521)
+                                                                                                                                RSA public keys
+                                                                                                                                managed as
+                                                                                                                                certificates for the
+                                                                TLS or SSH
+                                                                                                                                verification of
+                                                                Session Key
+                               RSA SigVer                                                                                       signatures,
+                    112 bits                       DRBG, FIPS   Encrypted or                   HDD/RAM
+  RSA Public Keys              (FIPS 186-4)                                    N/A                           Zeroize Service    establishment of TLS,
+                    minimum                        186-4        Plaintext                      – plaintext
+                               Cert. #A2907                                                                                     operator
+                                                                TLS
+                                                                                                                                authentication and
+                                                                handshake
+                                                                                                                                peer authentication.
+                                                                                                                                (RSA 2048, 3072, or
+                                                                                                                                4096-bit)
+                               RSA SigGen                       TLS or SSH                                                      RSA Private keys for
+  RSA Private       112 bits                       DRBG, FIPS                                  HDD/RAM       HDD – Zeroize
+                               (FIPS 186-4)                     Session Key    N/A                                              generation of
+  Keys              minimum                        186-4                                       – plaintext   Service
+                               Cert. #A2907                     Encrypted                                                       signatures,
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                               PAN-OS 10.2 VM-Series Security Policy 18
+                                                                                                            RAM - Zeroize at   authentication or key
+                                                                                                            session            establishment.
+                                                                                                            termination        (RSA 2048, 3072, or
+                                                                                                                               4096-bit)
+                                                                                                                               ECDSA public keys
+                                                                                                                               managed as
+                                                                                                                               certificates for the
+                                                            TLS or SSH
+                                                                                                                               verification of
+                                                            Session Key
+                               ECDSA SigVer                                                                                    signatures,
+  ECDSA Public      128 bits                   DRBG, FIPS   Encrypted or                      HDD/RAM
+                               (FIPS 186-4)                                   N/A                           Zeroize Service    establishment of TLS,
+  Keys              minimum                    186-4        Plaintext                         – plaintext
+                               Cert. #A2907                                                                                    operator
+                                                            TLS
+                                                                                                                               authentication and
+                                                            handshake
+                                                                                                                               peer authentication.
+                                                                                                                               (ECDSA P-256, P-384,
+                                                                                                                               or P-521)
+                                                                                                                               ECDSA Private key
+                                                                                                            HDD – Zeroize
+                                                                                                                               for generation of
+                               ECDSA SigGen                 TLS or SSH                                      Service
+  ECDSA Private     128 bits                   DRBG, FIPS                                     HDD/RAM                          signatures and
+                               (FIPS 186-4)                 Session Key       N/A                           RAM - Zeroize at
+  Keys              minimum                    186-4                                          – plaintext                      authentication
+                               Cert. #A2907                 Encrypted                                       session
+                                                                                                                               (P-256, P-384, or
+                                                                                                            termination
+                                                                                                                               P-521)
+                                                                                                                               Ephemeral
+                                                                                                                               Diffie-Hellman
+  TLS
+                               KAS-ECC-SSC     DRBG, SP                                                     Zeroize at         private FFC or EC
+  DHE/ECDHE         112 bits                                                                  RAM -
+                               KAS-FFC-SSC     800-56A      N/A               N/A                           session            component used in
+  Private           minimum                                                                   plaintext
+                               Cert. #A2907    Rev. 3                                                       termination        TLS
+  Components
+                                                                                                                               (DHE 2048, ECDHE
+                                                                                                                               P-256, P-384, P-521)
+                                                                                                                               Diffie_Hellman or EC
+  TLS                                                                                                                          Diffie-Hellman
+                               KAS-ECC-SSC     DRBG, SP                                                     Zeroize at
+  DHE/ECDHE         112 bits                                Plaintext - TLS                                                    Ephemeral values
+                               KAS-FFC-SSC     800-56A                        N/A             N/A           session
+  Public            minimum                                 handshake                                                          used in key agreement
+                               Cert. #A2907    Rev. 3                                                       termination
+  Components                                                                                                                   (DHE 2048, ECDHE
+                                                                                                                               P-256, P-384, P-521)
+                                                                                                                               Secret value used to
+                                               KAS SP                                                       Zeroize at         derive the TLS Master
+  TLS Pre-Master               KDF TLS                                                        RAM –
+                    N/A                        800-56A      N/A               N/A                           session            Secret along with
+  Secret                       Cert. #A2907                                                   plaintext
+                                               Rev. 3                                                       termination        client and server
+                                                                                                                               random nonces
+                                                                                                            Zeroize at         Secret value used to
+  TLS Master                   KDF TLS                                                        RAM –
+                    N/A                        KDF TLS      N/A               N/A                           session            derive the TLS session
+  Secret                       Cert. #A2907                                                   plaintext
+                                                                                                            termination        keys
+                                                                                                                               AES (128 or 256 bit)
+                               AES-CBC or                                     TLS, KAS SP                   Zeroize at
+  TLS Encryption    128 bits                                                                  RAM -                            keys used in TLS
+                               AES-GCM         KDF TLS      N/A               800-56A Rev.                  session
+  Keys              minimum                                                                   plaintext                        connections (GCM;
+                               Cert. #A2907                                   3                             termination
+                                                                                                                               CBC)
+                                                                                                                               HMAC keys used in
+                               HMAC-SHA2-256                                  TLS, KAS SP                   Zeroize at
+                    256 bits                                                                  RAM -                            TLS connections
+  TLS HMAC Keys                HMAC-SHA2-384   KDF TLS      N/A               800-56A Rev.                  session
+                    minimum                                                                   plaintext                        (SHA2- 256/384)
+                               Cert. #A2907                                   3                             termination
+                                                                                                                               (256, 384 bits)
+                                                                                                                               Diffie Hellman or EC
+  SSH                                                                                                                          Diffie-Hellman
+                               KAS-ECC-SSC     DRBG, SP                                                     Zeroize at
+  DHE/ECDHE         112 bits                                                                  RAM -                            private (DH Group
+                               KAS-FFC-SSC     800-56A      N/A               N/A                           session
+  Private           minimum                                                                   plaintext                        14, ECDH P-256,
+                               Cert. #A2907    Rev. 3                                                       termination
+  Components                                                                                                                   ECDH P-384, ECDH
+                                                                                                                               P-521)
+                                                                                                                               Diffie Hellman or EC
+  SSH                                                       Plaintext SSH                                                      Diffie-Hellman public
+                               KAS-ECC-SSC     DRBG, SP                                                     Zeroize at
+  DHE/ECDHE         112 bits                                handshake                         RAM -                            component (DH
+                               KAS-FFC-SSC     800-56A                        N/A                           session
+  Public            minimum                                                                   plaintext                        Group 14, ECDH
+                               Cert. #A2907    Rev. 3                                                       termination
+  Components                                                                                                                   P-256, ECDH P-384,
+                                                                                                                               ECDH P-521)
+                               RSA SigVer
+                                                                                                                               SSH Host Public Key
+                               (FIPS 186-4)
+                                                                                                                               (RSA 2048, RSA 3072,
+  SSH Host Public   112 bits   ECDSA SigVer    DRBG, FIPS                                     HDD/RAM
+                                                            N/A               N/A                           Zeroize Service    RSA 4096, ECDSA
+  Key               minimum    (FIPS 186-4)    186-4                                          – plaintext
+                                                                                                                               P-256, P-384, or
+                                                                                                                               P-521)
+                               Cert. #A2907
+  SSH Client        112 bits   RSA SigVer                   Encrypted via                     HDD/RAM                          Public RSA key used
+                                               N/A                            N/A                           Zeroize Service
+  Public Key        minimum    (FIPS 186-4)                 SSH or TLS                        – plaintext                      to authenticate client.
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                              PAN-OS 10.2 VM-Series Security Policy 19
+                               Cert. #A2907                                                                                (RSA 2048, 3072, and
+                                                                                                                           4096 bits)
+                                                                                                                           Used in all SSH
+                                                                                                                           connections to the
+                                                                                                                           security module’s
+                               AES-CBC,
+                                                                           SSH, KAS SP                   Zeroize at        command line
+  SSH Session       128 bits   AES-CTR, or                                                 RAM -
+                                               KDF SSH     N/A             800-56A Rev.                  session           interface.
+  Encryption Keys   minimum    AES-GCM                                                     plaintext
+                                                                           3                             termination       (128, 192, or 256 bits:
+                               Cert. #A2907
+                                                                                                                           AES CBC or CTR)
+                                                                                                                           (128 or 256 bits: AES
+                                                                                                                           GCM)
+                                                                                                                           Authentication keys
+                                                                                                                           used in all SSH
+                                                                                                                           connections to the
+                               HMAC-SHA-1                                                                                  security module’s
+  SSH Session                                                              SSH, KAS SP                   Zeroize at
+                    160 bits   HMAC-SHA2-256                                               RAM -                           command line
+  Authentication                               KDF SSH     N/A             800-56A Rev.                  session
+                    minimum    HMAC-SHA2-512                                               plaintext                       interface
+  Keys                                                                     3                             termination
+                               Cert. #A2907                                                                                (HMAC-SHA-1,
+                                                                                                                           HMAC-SHA2-256,
+                                                                                                                           HMAC-SHA2-512)
+                                                                                                                           (160, 256, 512 bits)
+                                                                                                                           Diffie-Hellman or EC
+                                                                                                                           Diffie-Hellman
+  S-S VPN                                                                                                                  private component
+  IPSec/IKE DHE                KAS-ECC-SSC     DBRG, SP                                                                    used in key
+                    112 bits                                                               RAM -
+  or ECDHE                     KAS-FFC-SSC     800-56A     N/A             N/A                           Power cycle       establishment
+                    minimum                                                                plaintext
+  Private                      Cert. #A2907    Rev. 3                                                                      (DHE 2048, DHE
+  Components                                                                                                               3072, DHE 4096,
+                                                                                                                           ECDHE P-256, P-384,
+                                                                                                                           P-521)
+                                                                                                                           Diffie-Hellman or EC
+                                                                                                                           Diffie-Hellman public
+  S-S VPN
+                                                                                                                           component used in
+  IPSec/IKE DHE                KAS-ECC-SSC     DRBG, SP
+                    112 bits                                                               RAM -                           key agreement
+  or ECDHE                     KAS-FFC-SSC     800-56A     N/A             N/A                           Power cycle
+                    minimum                                                                plaintext                       (DHE 2048, DHE
+  Public                       Cert. #A2907    Rev. 3
+                                                                                                                           3072, DHE 4096,
+  Components
+                                                                                                                           ECDHE P-256, P-384,
+                                                                                                                           P-521)
+                                                                                                                           Used to encrypt
+                                                                                                                           IKE/IPSec data. These
+                                                                           IPSec/IKE,
+  S-S VPN                      AES-CBC,                                                                  Zeroize at        are AES (128, 192, or
+                    128 bits                                               KAS SP          RAM -
+  IPSec/IKE                    AES-GCM         KDF IKEv2   N/A                                           session           256 CBC) IKE keys
+                    minimum                                                800-56A Rev.    plaintext
+  Session Keys                 Cert. #A2907                                                              termination       and (128, 192 or 256
+                                                                           3
+                                                                                                                           CBC, 128 or 256
+                                                                                                                           GCM) IPSec keys
+                                                                                                                           (HMAC-SHA-1,
+                               HMAC-SHA-1                                                                                  SHA-256, SHA-384 or
+  S-S VPN                                                                  IPSec/IKE,
+                               HMAC-SHA2-256                                                             Zeroize at        SHA-512) Used to
+  IPSec/IKE         160 bits                                               KAS SP          RAM -
+                               HMAC-SHA2-384   KDF IKEv2   N/A                                           session           authenticate the peer
+  Authentication    minimum                                                800-56A Rev.    plaintext
+                               HMAC-SHA2-512                                                             termination       in an IKE/IPSec tunnel
+  Keys                                                                     3
+                               Cert. #A2907                                                                                connection. (160, 256,
+                                                                                                                           384, 512 bits)
+                                                                                                                           PSK used in
+                                                                                                                           conjunction with
+                                                                                                                           HMAC listed above
+  S-S VPN IPSec                                            Encrypted via                   HDD/RAM                         for authentication.
+                    N/A        N/A             N/A                         N/A                           Zeroize Service
+  Pre-Shared Keys                                          SSH or TLS                      – plaintext                     Entered into the
+                                                                                                                           module by the Crypto
+                                                                                                                           Officer once
+                                                                                                                           authenticated
+                                                                                                                           Used to encrypt
+                               AES-CBC or                                                                Zeroize at        remote access
+  RA VPN IPSec      128 bits                   CKG,                                        RAM -
+                               AES-GCM                     N/A             N/A                           session           sessions utilizing
+  Session Keys      minimum                    DRBG                                        plaintext
+                               Cert. #A2907                                                              termination       IPSec. (AES 128-CBC,
+                                                                                                                           128/256-GCM)
+                                                                                                                           (HMAC-SHA-1, 160
+                                                                                                                           bits)
+                                                                                                         Zeroize at
+  RA VPN IPSec                 HMAC-SHA-1      CKG,                                        RAM -                           Used in
+                    160 bits                               N/A             N/A                           session
+  Authentication               Cert. #A2907    DRBG                                        plaintext                       authentication of
+                                                                                                         termination
+                                                                                                                           remote access IPSec
+                                                                                                                           data.
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                           PAN-OS 10.2 VM-Series Security Policy 20
+                                                                                                                          Used to check the
+                                                                                                                          integrity of all
+                                 HMAC-SHA2-256,
+  Software                                                                                                                software code
+                                 ECDSA SigVer                                             HDD -
+  integrity           128 bits                        N/A          N/A             N/A                  N/A               (HMAC-SHA-256 and
+                                 (FIPS 186-4)                                             plaintext
+  verification key                                                                                                        ECDSA P-256)
+                                 Cert. #A2907
+                                                                                                                          (Note: This is not
+                                                                                                                          considered an SSP)
+                                                                                                                          Used to authenticate
+  Public key for                 RSA SigVer                                                                               software and content
+                                                                                          HDD -
+  software            112 bits   (FIPS 186-4)         N/A          N/A             N/A                  N/A               to be installed on the
+                                                                                          plaintext
+  content load test              Cert. #A2907                                                                             firewall (RSA 2048
+                                                                                                                          with SHA-256)
+                                                                                          HDD - a                         Authentication string
+  CO, User, RA                   SHA2-256                          Encrypted via          password                        with a minimum
+                      N/A                             External                     N/A                  Zeroize Service
+  VPN Password                   Cert. #A2907                      SSH or TLS             hash                            length of eight (8)
+                                                                                          (SHA2-256)                      characters.
+                                                                                                                          Secrets used by
+                                                                   Encrypted via
+                                                                                          HDD/RAM                         RADIUS or TACACS+
+  Protocol Secrets    N/A        N/A                  N/A          IPsec, SSH or   N/A                  Zeroize Service
+                                                                                          – plaintext                     (8 characters
+                                                                   TLS
+                                                                                                                          minimum)
+                                 CKG (vendor                                                                              Entropy input string
+                                 affirmed), Counter                                                                       coming from the
+                                                      Entropy as
+  Entropy Input                  DRBG                                                     RAM -                           entropy source
+                      256 bits                        per          N/A             N/A                  Power cycle
+  String                                                                                  plaintext
+                                                      SP 800-90B
+                                 Cert. #A2907                                                                             Input length = 384
+                                                                                                                          bits
+                                 CKG (vendor
+                                                                                                                          DRBG seed coming
+                                 affirmed), Counter
+                                                      Entropy as                                                          from the entropy
+                                 DRBG                                                     RAM -
+  DRBG Seed           256 bits                        per          N/A             N/A                  Power cycle       source
+                                                                                          Plaintext
+                                                      SP 800-90B
+                                 Cert. #A2907
+                                                                                                                          Seed length = 384 bits
+
+                                 CKG (vendor
+                                 affirmed), Counter                                                                       AES 256 CTR DRBG
+                                                      Entropy as
+                                 DRBG                                                     RAM -                           state Key used in the
+  DRBG Key            256 bits                        per          N/A             N/A                  Power cycle
+                                                                                          plaintext                       generation of a
+                                                      SP 800-90B
+                                 Cert. #A2907                                                                             random values
+
+                                 CKG (vendor
+                                 affirmed), Counter                                                                       AES 256 CTR DRBG
+                                                      Entropy as
+                                 DRBG                                                     RAM -                           state V used in the
+  DRBG V              128 bits                        per          N/A             N/A                  Power cycle
+                                                                                          plaintext                       generation of a
+                                                      SP 800-90B
+                                 Cert. #A2907                                                                             random values
+
+  SNMPv3                                                                                                                  Used to support
+  Authentication                 KDF SNMP                          Encrypted via          HDD/RAM                         SNMPv3 services
+                      N/A                             N/A                          N/A                  Zeroize Service
+  Secret                         Cert. #A2907                      TLS/SSH                – plaintext                     (Minimum 8
+                                                                                                                          characters)
+                                                                                                                          Used to support
+  SNMPv3 Privacy                 KDF SNMP                          Encrypted via          HDD/RAM                         SNMPv3 services
+                      N/A                             N/A                          N/A                  Zeroize Service
+  Secret                         Cert. #A2907                      TLS/SSH                – plaintext                     (Minimum 8
+                                                                                                                          characters)
+                                 HMAC-SHA-1
+                                                                                                                          HMAC–SHA-1/224/2
+                                 HMAC-SHA2-224
+                                                                                                                          56/384/512
+  Authentication      160 bits   HMAC-SHA2-256                                            HDD/RAM -
+                                                      KDF SNMP     N/A             N/A                  Zeroize Service   Authentication
+  Key                 minimum    HMAC-SHA2-384                                            Plaintext
+                                                                                                                          protocol key (160
+                                 HMAC-SHA2-512
+                                                                                                                          bits)
+                                 Cert. #A2907
+                                                                                                                          Privacy protocol
+                      128 bits   AES-CFB128                                               HDD/RAM -
+  Session Key                                         KDF SNMP     N/A             N/A                  Zeroize Service   encryption key
+                      minimum    Cert. #A2907                                             Plaintext
+                                                                                                                          (AES 128 CFB)
+
+
+
+
+Note: SSPs are implicitly zeroized when power is lost, or explicitly zeroized by the zeroize service. In the case of implicit
+zeroization, the SSPs are implicitly overwritten with random values due to their ephemeral memory being reset upon power
+loss. For the zeroization service and zeroization at session termination, the SSP's memory location is overwritten with
+random values.
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                          PAN-OS 10.2 VM-Series Security Policy 21
+                              Table 11 - Non-Deterministic Random Number Generation Specification
+             Entropy Source              Minimum number of bits of entropy                          Details
+                                                                             ESV Cert. #E69
+  Palo Alto Networks DRNG Entropy        256 bits
+  Source                                                                     Entropy source provides full entropy, which is
+                                                                             provided in the 384 bit seed.
+
+
+
+
+10. Self-Tests
+The cryptographic module performs the following tests below. The operator can command the module to perform the
+pre-operational and cryptographic algorithm self-tests by cycling power of the module; these tests do not require any
+additional operator action.
+
+Pre-operational Self-Tests
+Pre-operational Software Integrity Test
+    ● Verified with HMAC-SHA-256 and ECDSA P-256 with SHA-256
+
+Note: the ECDSA and HMAC-SHA-256 KATs are performed prior to the Software integrity test
+
+Conditional self-tests
+Cryptographic algorithm self-tests
+   ● AES 128-bit ECB Encrypt Known Answer Test*
+   ● AES 128-bit ECB Decrypt Known Answer Test*
+       *Note: Supported by the module cryptographic implementation, but only utilized for CAST
+   ● AES 128-bit CMAC Known Answer Test*
+       *Note: Supported by the module cryptographic implementation, but only utilized for CAST
+   ● AES 256-bit GCM Encrypt Known Answer Test
+   ● AES 256-bit GCM Decrypt Known Answer Test
+   ● AES 192-bit CCM Encrypt Known Answer Test*
+   ● AES 192-bit CCM Decrypt Known Answer Test*
+       *Note: Supported by the module cryptographic implementation, but only utilized for CAST
+   ● RSA 2048-bit PKCS#1 v1.5 with SHA-256 Sign Known Answer Test
+   ● RSA 2048-bit PKCS#1 v1.5 with SHA-256 Verify Known Answer Test
+   ● RSA 2048-bit Encrypt Known Answer Test
+   ● RSA 2048-bit Decrypt Known Answer Test
+       Note: Encrypt/Decrypt are only used for self-tests
+   ● ECDSA P-256 with SHA-512 Sign Known Answer Test
+   ● ECDSA P-256 with SHA-512 Verify Known Answer Test
+   ● HMAC-SHA-1 Known Answer Test
+   ● HMAC-SHA-256 Known Answer Test
+   ● HMAC-SHA-384 Known Answer Test
+   ● HMAC-SHA-512 Known Answer Test
+   ● SHA-1 Known Answer Test
+   ● SHA-256 Known Answer Test
+   ● SHA-384 Known Answer Test
+   ● SHA-512 Known Answer Test
+   ● SP 800-90Arev1 CTR DRBG Instantiate/Generate/Reseed Known Answer Tests
+   ● SP 800-90Arev1 CTR DRBG Instantiate/Generate/Reseed Section 11.3 Health Tests
+   ● SP 800-56Ar3 KAS-FFC-SSC 2048-bit Known Answer Test
+   ● SP 800-56Ar3 KAS-ECC-SSC P-256 Known Answer Test
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                 PAN-OS 10.2 VM-Series Security Policy 22
+    ●   SP 800-135rev1 TLS 1.2 KDF with SHA-256 Known Answer Test
+    ●   SP 800-135rev1 SSH KDF with SHA-256 Known Answer Test
+    ●   SP 800-135rev1 IKEv2 KDF with SHA-256 Known Answer Test
+    ●   Continuous Random Number Generator (RNG) test – performed on DRBG
+    ●   SP 800-90B RCT/APT Health Tests on Entropy Source
+
+Conditional Pairwise Consistency Self-Tests
+   ● RSA Pairwise Consistency Test
+   ● ECDSA/KAS-ECC Pairwise Consistency Test
+   ● KAS-FFC Pairwise Consistency Test
+
+Conditional Software Load test
+   ● Software Load Test – Verify RSA 2048 with SHA-256 signature on software at time of load
+
+Conditional Critical Functions Tests
+   ● SP 800-56A Rev. 3 Assurance Tests (Based on Sections 5.5.2, 5.6.2, and 5.6.3)
+
+
+Error Handling
+In the event of a conditional test failure, the module will output a description of the error. These are summarized below.
+
+                                               Table 12 - Errors and Indicators
+                       Cause of Error                                               Error State Indicator
+  Conditional Cryptographic Algorithm Self-Test or              FIPS-CC mode failure. <Algorithm test> failed.
+  Software Integrity Test Failure
+  Conditional Pairwise Consistency or Critical Functions        System log prints an error message.
+  Test Failure
+  Conditional Software Load Test Failure                        System prints Invalid image message.
+
+
+
+
+11. Life-Cycle Assurance
+The vendor provided life-cycle assurance documentation describes configuration management, design, finite state model,
+development, testing, delivery & operation, end of life procedures, and guidance. For details regarding the approved mode of
+operation, see “Approved Mode of Operation''. For details regarding secure installation, initialization, startup, and operation
+of the module, see below.
+
+Installation Instructions
+The module can be retrieved by downloading PanOS_vm-10.2.8-h4 from the support site
+(https://support.paloaltonetworks.com/Support/Index), and a checksum (SHA-256) is available to ensure the module is
+correct:
+
+           o 10.2.8-h4: 49224f982fc5e8c5680b1abe6116d870c2df94629c033762b07dc5c19fb7ac94
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                   PAN-OS 10.2 VM-Series Security Policy 23
+ Alternatively, the VM-Series version can be obtained by running the following commands via CLI (as an authorized
+ administrator):
+     1. request system software check
+     2. request system software download version 10.2.8-h4
+     3. request system software install version 10.2.8-h4
+     4. request restart system
+
+
+Palo Alto Network provides an Administrator Guide for additional information noted in the “Reference Documents” section
+of this Security Policy.
+
+The module design corresponds to the module security rules noted in the section below.
+
+Module Enforced Security Rules
+When FIPS-CC mode is enabled, the module runs all the required items noted in Section 10 Self-tests. This section
+documents the security rules enforced by the cryptographic module to implement the security requirements of this FIPS
+140-3 Level 1 module.
+
+    1.  The cryptographic module provides four distinct operator roles. These are the User role, Remote Access VPN role,
+        Site-to-site VPN role, and the Cryptographic Officer role.
+    2. The cryptographic module provides identity-based authentication.
+    3. The cryptographic module clears previous authentications when a power cycle is performed.
+    4. If the cryptographic module remains inactive in any valid role for the administrator specified time interval, the
+        module will automatically log out the operator. The CO will configure the period of inactivity.
+    5. When configured, the module enforces a timed access protection mechanism that supports at most ten
+        authentication attempts per minute. After the administrator specified number of consecutive unsuccessful
+        password validation attempts have occurred, the cryptographic module shall enforce a wait period of at least one (1)
+        minute before any more login attempts can be attempted. This wait period shall be enforced even if the module
+        power is momentarily removed.
+    6. When the module has not been placed in a valid role, the operator does not have access to any cryptographic
+        services.
+    7. The module supports the generation of key material with the approved DRBG. The entropy provided must be equal
+        to or greater than the security strength of the key being generated. The approved DRBG requests a minimum of 256
+        bits of entropy per every 384 bits of seed input.
+    8. The operator can command the module to perform the power-up self-test by cycling power of the module.
+    9. Power-up self-tests do not require any operator action.
+    10. Data output is inhibited during power-up self-tests, zeroization, and error states.
+    11. Status information does not contain CSPs or sensitive data that if misused could lead to a compromise of the module.
+    12. There are no restrictions on which keys or CSPs are zeroized by the zeroization service.
+    13. The module does not support a maintenance interface or role.
+    14. The module does not have any external input/output devices used for entry/output of data.
+    15. The module does not enter or output plaintext CSPs.
+    16. The module does not output intermediate key generation values.
+    17. Pre-shared keys used for IKE/IPsec must be at least 6 bytes in length, but no more than 255 bytes.
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                                               PAN-OS 10.2 VM-Series Security Policy 24
+Vendor Imposed Security Rules
+In FIPS-CC mode, the following rules shall apply:
+
+    1.   The operator should not enable TLSv1.0 or use RSA for key wrapping; it is disabled by default.
+              a. Checked via CLI using “show shared” command
+    2.   The operator should not enable TLSv1.3, it is disabled by default.
+              a. Checked via CLI using “show profiles” command
+    3.   If using RADIUS, it must be configured using TLS.
+              a. Checked via CLI using “show shared” command
+    4.   If using TACACS+, configure the service route via an IPSec tunnel, and ensure the TACACS+ server is configured for
+         a minimum password length of eight (8) characters or greater.
+              a. Checked via CLI using “show deviceconfig” command
+
+Failure to follow these Security Rules will cause the module to operate in a non-compliant state.
+
+
+
+
+Key to Entity
+The cryptographic module associates all keys (secret, private, or public) stored within, entered into or output from the
+module with authenticated operators of the module. Keys stored within the module are only made available to
+authenticated operators via TLS or SSH. Keys are only input or output from the module by the authenticated operator via a
+SSH/TLS/IPsec protected communication. Any attempt to intervene in the key to entity relationship would require defeating
+the module TLS/SSH/IPsec encryption and authentication/integrity mechanism.
+
+
+
+
+12. Mitigation of Other Attacks
+The module is not designed to mitigate any specific attacks outside the scope of FIPS 140-3. These requirements are not
+applicable.
+
+
+
+13. References
+[FIPS 140-3] FIPS Publication 140-3 Security Requirements for Cryptographic Modules
+
+Palo Alto Networks Administrator’s Guide:
+https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/pdf/pan-os/10-2/pan-os-admin/pan-os-admin.pdf
+
+
+
+
+14. Definitions and Acronyms
+AES – Advanced Encryption Standard
+CA – Certificate Authority
+CLI – Command Line Interface
+CO – Crypto-Officer
+CSP – Critical Security Parameter
+
+
+
+© 2024 Palo Alto Networks, Inc.                                                 PAN-OS 10.2 VM-Series Security Policy 25
+CVL – Component Validation List
+DB9 – D-sub series, E size, 9 pins
+DES – Data Encryption Standard
+DH – Diffie-Hellman
+DRBG – Deterministic Random Bit Generator
+EDC – Error Detection Code
+ECDH – Elliptical Curve Diffie-Hellman
+ECDSA – Elliptical Curve Digital Signature Algorithm
+FIPS – Federal Information Processing Standard
+HMAC – (Keyed) Hashed Message Authentication Code
+KDF – Key Derivation Function
+LED – Light Emitting Diode
+RJ45 – Networking Connector
+RNG –Random number generator
+RSA – Algorithm developed by Rivest, Shamir and Adleman
+SHA – Secure Hash Algorithm
+SNMP – Simple Network Management Protocol
+SSH – Secure Shell
+TLS – Transport Layer Security
+USB – Universal Serial Bus
+VGA – Video Graphics Array
+
+
+
+
+© 2024 Palo Alto Networks, Inc.                           PAN-OS 10.2 VM-Series Security Policy 26
+

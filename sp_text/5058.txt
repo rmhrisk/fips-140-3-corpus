@@ -1,0 +1,1888 @@
+                                                                                               HP Inc.
+
+        HP Endpoint Security Controller Cryptographic Library
+                                                                             Hardware Version 2.1.4
+
+
+
+                                     FIPS 140-3 Non-Proprietary Security Policy
+                                                                              Document Version 1.1
+
+                                                                            Last update: 2025-09-15
+
+
+
+
+                                            Prepared by:
+
+                               atsec information security corporation
+
+                               4516 Seton Center Parkway, Suite 250
+
+                                          Austin, TX 78759
+
+                                           www.atsec.com
+
+
+
+
+                             © 2025 HP Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+HP Endpoint Security Controller Cryptographic Library                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Table of Contents
+1 General .......................................................................................................................................................... 5
+   1.1 Overview ................................................................................................................................................. 5
+   1.2 Security Levels ........................................................................................................................................ 5
+2 Cryptographic Module Specification .............................................................................................................. 6
+   2.1 Description .............................................................................................................................................. 6
+   2.2 Tested and Vendor Affirmed Module Version and Identification ............................................................ 7
+   2.3 Excluded Components ............................................................................................................................ 7
+   2.4 Modes of Operation ................................................................................................................................. 7
+   2.5 Algorithms ............................................................................................................................................... 7
+   2.6 Security Function Implementations ...................................................................................................... 10
+   2.7 Algorithm Specific Information.............................................................................................................. 12
+   2.8 RBG and Entropy ................................................................................................................................... 12
+   2.9 Key Generation ..................................................................................................................................... 13
+   2.10 Key Establishment .............................................................................................................................. 13
+   2.11 Industry Protocols ............................................................................................................................... 13
+3 Cryptographic Module Interfaces ................................................................................................................ 14
+   3.1 Ports and Interfaces .............................................................................................................................. 14
+   3.2 Trusted Channel Specification .............................................................................................................. 14
+   3.3 Control Interface Not Inhibited.............................................................................................................. 14
+4 Roles, Services, and Authentication ............................................................................................................ 15
+   4.1 Authentication Methods ........................................................................................................................ 15
+   4.2 Roles ...................................................................................................................................................... 15
+   4.3 Approved Services ................................................................................................................................ 15
+   4.4 Non-Approved Services ......................................................................................................................... 21
+   4.5 External Software/Firmware Loaded ..................................................................................................... 21
+5 Software/Firmware Security ........................................................................................................................ 22
+   5.1 Integrity Techniques ............................................................................................................................. 22
+   5.2 Initiate on Demand ............................................................................................................................... 22
+6 Operational Environment............................................................................................................................. 23
+   6.1 Operational Environment Type and Requirements............................................................................... 23
+7 Physical Security .......................................................................................................................................... 24
+   7.1 Mechanisms and Actions Required ....................................................................................................... 24
+8 Non-Invasive Security .................................................................................................................................. 25
+
+
+                                                 © 2025 HP Inc. / atsec information security.
+  This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                           2 of 41
+HP Endpoint Security Controller Cryptographic Library                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+9 Sensitive Security Parameters Management .............................................................................................. 26
+   9.1 Storage Areas ........................................................................................................................................ 26
+   9.2 SSP Input-Output Methods .................................................................................................................... 26
+   9.3 SSP Zeroization Methods ...................................................................................................................... 26
+   9.4 SSPs ....................................................................................................................................................... 27
+10 Self-Tests ................................................................................................................................................... 31
+   10.1 Pre-Operational Self-Tests .................................................................................................................. 31
+   10.2 Conditional Self-Tests ......................................................................................................................... 31
+   10.3 Periodic Self-Test Information ............................................................................................................. 33
+   10.4 Error States ......................................................................................................................................... 35
+11 Life-Cycle Assurance.................................................................................................................................. 36
+   11.1 Installation, Initialization, and Startup Procedures ............................................................................. 36
+   11.2 Administrator Guidance ...................................................................................................................... 36
+   11.3 Non-Administrator Guidance ............................................................................................................... 36
+   11.4 Design and Rules ................................................................................................................................ 36
+   11.5 Maintenance Requirements ................................................................................................................ 36
+   11.6 End of Life ........................................................................................................................................... 36
+12 Mitigation of Other Attacks ........................................................................................................................ 38
+Glossary and Abbreviations ............................................................................................................................ 39
+References ...................................................................................................................................................... 40
+
+
+
+
+                                                © 2025 HP Inc. / atsec information security.
+  This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                           3 of 41
+HP Endpoint Security Controller Cryptographic Library                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+List of Tables
+Table 1: Security Levels .................................................................................................................................... 5
+Table 2: Tested Module Identification – Hardware ........................................................................................... 7
+Table 3: Modes List and Description ................................................................................................................. 7
+Table 4: Approved Algorithms .......................................................................................................................... 9
+Table 5: Vendor-Affirmed Algorithms ............................................................................................................... 9
+Table 6: Security Function Implementations .................................................................................................. 12
+Table 7: Entropy Certificates .......................................................................................................................... 12
+Table 8: Entropy Sources ................................................................................................................................ 13
+Table 9: Ports and Interfaces .......................................................................................................................... 14
+Table 10: Roles ............................................................................................................................................... 15
+Table 11: Approved Services .......................................................................................................................... 20
+Table 12: Mechanisms and Actions Required ................................................................................................. 24
+Table 13: Storage Areas ................................................................................................................................. 26
+Table 14: SSP Input-Output Methods .............................................................................................................. 26
+Table 15: SSP Zeroization Methods ................................................................................................................ 26
+Table 16: SSP Table 1 ..................................................................................................................................... 28
+Table 17: SSP Table 2 ..................................................................................................................................... 30
+Table 18: Conditional Self-Tests ..................................................................................................................... 33
+Table 19: Conditional Periodic Information .................................................................................................... 35
+Table 20: Error States ..................................................................................................................................... 35
+
+
+
+
+List of Figures
+Figure 1: Block Diagram ................................................................................................................................... 6
+Figure 2: Nuvoton NPCX998HB0BX .................................................................................................................. 7
+
+
+
+
+                                               © 2025 HP Inc. / atsec information security.
+  This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                       4 of 41
+HP Endpoint Security Controller Cryptographic Library              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for Hardware version 2.1.4 of the HP
+Endpoint Security Controller Cryptographic Library. It has a one-to-one mapping to the [SP 800-140Br1]
+starting with section B.2.1 named “General” that maps to section 1 in this document and ending with
+section B.2.12 named “Mitigation of other attacks” that maps to section 12 in this document. This
+document also contains the security rules under which the module must operate and describes how this
+module meets the requirements as specified in FIPS PUB 140-3 (Federal Information Processing Standards
+Publication 140-3) for a Security Level 1 module.
+
+1.2 Security Levels
+Table 1 describes the individual security areas of FIPS 140-3, as well as the Security Levels of those
+individual areas:
+
+ Section             Title                                                 Security Level
+
+ 1                   General                                               1
+
+ 2                   Cryptographic module specification                    1
+
+ 3                   Cryptographic module interfaces                       1
+
+ 4                   Roles, services, and authentication                   1
+
+ 5                   Software/Firmware security                            N/A
+
+ 6                   Operational environment                               1
+
+ 7                   Physical security                                     1
+
+ 8                   Non-invasive security                                 N/A
+
+ 9                   Sensitive security parameter management               1
+
+ 10                  Self-tests                                            1
+
+ 11                  Life-cycle assurance                                  1
+
+ 12                  Mitigation of other attacks                           N/A
+
+                     Overall Level                                         1
+
+Table 1: Security Levels
+
+
+
+
+                                  © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                         5 of 41
+HP Endpoint Security Controller Cryptographic Library               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The HP Endpoint Security Controller Cryptographic Library (hereafter referred to as “the module”) is a
+Hardware Single Chip cryptographic module. More specifically, the module is considered a sub-chip
+cryptographic subsystem as defined in IG 2.3.B. This module validation is a re-branding of a sub-chip
+cryptographic subsystem that was previously validated under Certificate #5008.
+Module Type: Hardware
+Module Embodiment: SingleChip
+
+Cryptographic Boundary:
+The block diagram below shows the cryptographic boundary of the module, and its interfaces with the
+operational environment. The cryptographic boundary encompasses the entire physical chip.
+
+
+
+
+                                          Figure 1: Block Diagram
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The red outline in Figure 1 above indicates the Tested Operational Environment’s Physical Perimeter
+(TOEPP).
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                       6 of 41
+HP Endpoint Security Controller Cryptographic Library              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                         Figure 2: Nuvoton NPCX998HB0BX
+
+Figure 2 shows a picture of the NPCX998HB0BX (e.g., EC) in which the sub-chip module is embedded.
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+
+ Model and/or Part Number                  Hardware   Firmware     Processors                 Features
+                                           Version    Version
+
+ Notebook Embedded Controller (EC)         2.1.4      N/A          Nuvoton NPCX998HB0BX       N/A
+
+Table 2: Tested Module Identification – Hardware
+
+The EC component is rebranded as the HP Endpoint Security Controller and is used in select HP
+Commercial PC products including Notebooks, Desktops, Desktop Workstations, Mobile Workstations,
+Retail Point of Sale Terminals, and Thin Clients.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary excluded from the FIPS 140-3 requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+The module supports approved services in the approved mode of operation. There are no non-approved
+services supported by the module.
+
+ Mode Name          Description                             Type       Status
+                                                                       Indicator
+
+ Approved Mode      Only approved algorithms are used       Approved   1
+
+Table 3: Modes List and Description
+
+2.5 Algorithms
+Approved Algorithms:
+The table below lists all security functions of the module, including specific key strengths employed for
+approved services, and implemented modes of operation.
+
+
+
+                                  © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                      7 of 41
+HP Endpoint Security Controller Cryptographic Library              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm           CAVP Cert      Properties                                           Reference
+
+ AES-CBC             A2825          Direction - Decrypt, Encrypt                         SP 800-38A
+                                    Key Length - 128, 192, 256
+
+ AES-CCM             A2825          Key Length - 128, 192, 256                           SP 800-38C
+
+ AES-CFB128          A2825          Direction - Decrypt, Encrypt                         SP 800-38A
+                                    Key Length - 128, 192, 256
+
+ AES-CMAC            A2825          Direction - Generation, Verification                 SP 800-38B
+                                    Key Length - 128, 192, 256
+
+ AES-CTR             A2825          Direction - Decrypt, Encrypt                         SP 800-38A
+                                    Key Length - 128, 192, 256
+
+ AES-ECB             A2825          Direction - Decrypt, Encrypt                         SP 800-38A
+                                    Key Length - 128, 192, 256
+
+ AES-GCM             A2825          Direction - Decrypt, Encrypt                         SP 800-38D
+                                    IV Generation - Internal
+                                    IV Generation Mode - 8.2.2
+                                    Key Length - 128, 192, 256
+
+ AES-GMAC            A2825          Direction - Decrypt, Encrypt                         SP 800-38D
+                                    IV Generation - Internal
+                                    IV Generation Mode - 8.2.2
+                                    Key Length - 128, 192, 256
+
+ AES-OFB             A2825          Direction - Decrypt, Encrypt                         SP 800-38A
+                                    Key Length - 128, 192, 256
+
+ ECDSA KeyGen        A2825          Curve - P-256, P-384, P-521                          FIPS 186-4
+ (FIPS186-4)
+
+ ECDSA KeyVer        A2825          Curve - P-256, P-384, P-521                          FIPS 186-4
+ (FIPS186-4)
+
+ ECDSA SigGen        A2825          Component - No, Yes                                  FIPS 186-4
+ (FIPS186-4)                        Curve - P-256, P-384, P-521
+
+ ECDSA SigVer        A2825          Component - No                                       FIPS 186-4
+ (FIPS186-4)                        Curve - P-256, P-384, P-521
+
+ Hash DRBG           A2825          Prediction Resistance - No, Yes                      SP 800-90A Rev. 1
+                                    Mode - SHA2-512
+
+ HMAC-SHA2-256       A2825          Key Length - Key Length: 256-512 Increment 8         FIPS 198-1
+
+ HMAC-SHA2-384       A2825          Key Length - Key Length: 256-512 Increment 8         FIPS 198-1
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                      8 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm             CAVP Cert      Properties                                        Reference
+
+ HMAC-SHA2-512         A2825          Key Length - Key Length: 256-512 Increment 8      FIPS 198-1
+
+ KAS-ECC-SSC           A2825          Domain Parameter Generation Methods - P-256,      SP 800-56A Rev. 3
+ Sp800-56Ar3                          P-384, P-521
+                                      Scheme -
+                                      ephemeralUnified -
+                                      KAS Role - initiator, responder
+
+ KTS-IFC               A2825          Modulo - 2048, 3072                               SP 800-56B Rev. 2
+                                      Key Generation Methods - rsakpg2-basic
+                                      Scheme -
+                                      KTS-OAEP-basic -
+                                      KAS Role - initiator, responder
+                                      Key Length - 1024
+
+ RSA SigGen            A2825          Signature Type - PKCS 1.5, PKCSPSS                FIPS 186-4
+ (FIPS186-4)                          Modulo - 2048, 3072
+
+ RSA SigVer            A2825          Signature Type - PKCS 1.5, PKCSPSS                FIPS 186-4
+ (FIPS186-4)                          Modulo - 2048, 3072
+
+ SHA2-256              A2825          -                                                 FIPS 180-4
+
+ SHA2-384              A2825          -                                                 FIPS 180-4
+
+ SHA2-512              A2825          -                                                 FIPS 180-4
+
+Table 4: Approved Algorithms
+
+Vendor-Affirmed Algorithms
+
+ Name               Properties             Implementation      Reference
+
+ CKG                Type:Asymmetric        N/A                 CKG for asymmetric keys as per SP 800-
+ (ECDSA/ECDH)       Curves:P-256, P-                           133Rev2 section 4 example 1 with no post
+                    384, P-521                                 processing on the U value
+
+Table 5: Vendor-Affirmed Algorithms
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+N/A for this module.
+
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                     9 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+2.6 Security Function Implementations
+ Name               Type                Description         Properties                  Algorithms
+
+ AES-CBC            BC-UnAuth           AES Encryption      Key Size:128, 192, 256      AES-CBC:
+                                        and AES             bits                        (A2825)
+                                        Decryption          Key Strength:128, 192,
+                                                            256 bits
+
+ AES-CCM            BC-Auth             Authenticated       Key Size:128, 192, 256      AES-CCM:
+                                        AES Encryption      bits                        (A2825)
+                                        and AES             Key Strength:128, 192,
+                                        Decryption          256 bits
+
+ AES-CFB128         BC-UnAuth           AES Encryption      Key Size:128, 192, 256      AES-CFB128:
+                                        and AES             bits                        (A2825)
+                                        Decryption          Key Strength:128, 192,
+                                                            256 bits
+
+ AES-CMAC           MAC                 CMAC Message        Key Size:128, 192, 256      AES-CMAC:
+                                        Authentication      bits                        (A2825)
+                                        Code Generation
+                                        and CMAC
+                                        Message
+                                        Authentication
+                                        Code Verification
+
+ AES-CTR            BC-UnAuth           AES Encryption      Key Size:128, 192, 256      AES-CTR:
+                                        and AES             bits                        (A2825)
+                                        Decryption          Key Strength:128, 192,
+                                                            256 bits
+
+ AES-ECB            BC-UnAuth           AES Encryption      Key Size:128, 192, 256      AES-ECB:
+                                        and AES             bits                        (A2825)
+                                        Decryption          Key Strength:128, 192,
+                                                            256 bits
+
+ AES-GCM            BC-Auth             Authenticated       Key Size:128, 192, 256      AES-GCM:
+                                        AES Encryption      bits                        (A2825)
+                                        and AES             Key Strength:128, 192,
+                                        Decryption          256 bits
+
+ AES-GMAC           MAC                 GMAC Message        Key Size:128, 192, 256      AES-GMAC:
+                                        Authentication      bits                        (A2825)
+                                        Code Generation     Key Strength:128, 192,
+                                        and GMAC            256 bits
+                                        Message
+                                        Authentication
+                                        Code Verification
+
+
+
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                   10 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name               Type                Description         Properties                  Algorithms
+
+ AES-OFB            BC-UnAuth           AES Encryption      Key Size:128, 192, 256      AES-OFB:
+                                        and AES             bits                        (A2825)
+                                        Decryption          Key Strength:128, 192,
+                                                            256 bits
+
+ HMAC               MAC                 HMAC Message        Key Size:256, 384, 512      HMAC-SHA2-256:
+                                        Authentication      bits                        (A2825)
+                                        Code Generation     Key Strength:256, 384,      HMAC-SHA2-384:
+                                                            512 bits                    (A2825)
+                                                                                        HMAC-SHA2-512:
+                                                                                        (A2825)
+
+ RSA SigGen         DigSig-SigGen       RSA Signature       Signature Types:PKCS#1      RSA SigGen
+                                        Generation          v1.5, RSA-PSS               (FIPS186-4):
+                                                            Message Digest:SHA2-        (A2825)
+                                                            256, SHA2-384, SHA2-512
+                                                            Modulus Size:2048, 3072
+
+ RSA SigVer         DigSig-SigVer       RSA Signature       Signature Types:PKCS#1      RSA SigVer
+                                        Verification        v1.5, RSA-PSS               (FIPS186-4):
+                                                            Message Digest:SHA2-        (A2825)
+                                                            256, SHA2-384, SHA2-512
+                                                            Modulus Size:2048, 3072
+
+ KTS-IFC (Wrap)     KTS-Wrap            RSA Key             Scheme:KTS-OAEP-basic       KTS-IFC: (A2825)
+                                        Transport (key      Modulus Size:2048, 3072
+                                        wrapping)
+
+ KTS-IFC (Unwrap)   KTS-Wrap            RSA Key             Scheme:KTS-OAEP-basic       KTS-IFC: (A2825)
+                                        Transport (key      Modulus Size:2048, 3072
+                                        unwrapping)
+
+ ECDSA KeyGen       AsymKeyPair-        ECDSA Key           Generation Method:B.4.2     ECDSA KeyGen
+                    KeyGen              Generation          Testing Candidates          (FIPS186-4):
+                                                            Curves:P-256, P-384, P-     (A2825)
+                                                            521
+
+ ECDSA KeyVer       AsymKeyPair-        ECDSA Key           Curves:P-256, P-384, P-     ECDSA KeyVer
+                    KeyVer              Verification        521                         (FIPS186-4):
+                                                                                        (A2825)
+
+ ECDSA SigGen       DigSig-SigGen       ECDSA Signature     Message Digest:SHA2-        ECDSA SigGen
+                                        Generation          256, SHA2-384, SHA2-512     (FIPS186-4):
+                                                            Curves:P-256, P-384, P-     (A2825)
+                                                            521
+
+ ECDSA SigVer       DigSig-SigVer       ECDSA Signature     Message Digest:SHA2-        ECDSA SigVer
+                                        Verification        256, SHA2-384, SHA2-512     (FIPS186-4):
+                                                                                        (A2825)
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                   11 of 41
+HP Endpoint Security Controller Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Type                  Description         Properties                 Algorithms
+                                                                 Curves:P-256, P-384, P-
+                                                                 521
+
+ ECDSA SigGen          DigSig-SigGen         ECDSA Signature     Curves:P-256, P-384, P-    ECDSA SigGen
+ Component                                   Generation          521                        (FIPS186-4):
+                                             Component                                      (A2825)
+
+ SHS                   SHA                   Message Digest                                 SHA2-256:
+                                             Generation                                     (A2825)
+                                                                                            SHA2-384:
+                                                                                            (A2825)
+                                                                                            SHA2-512:
+                                                                                            (A2825)
+
+ KAS-ECC-SSC           KAS-SSC               EC Diffie-Hellman   Scheme:ephemeralUnified    KAS-ECC-SSC
+                                             Shared Secret       Curves:P-256, P-384, P-    Sp800-56Ar3:
+                                             Computation         521                        (A2825)
+
+ Hash_DRBG             DRBG                  Random Number       Mode:SHA2-512              Hash DRBG:
+                                             Generation                                     (A2825)
+
+Table 6: Security Function Implementations
+
+2.7 Algorithm Specific Information
+The module’s AES-GCM implementation conforms to IG C.H scenario 2. The module uses the approved
+Hash_DRBG to generate the IV with a length of 96-bits. The entropy source producing the DRBG seed is
+located inside the module’s cryptographic boundary.
+Steps to comply with the SP800-56Brev2 assurances can be found in section 11.3 Non-Administrator
+Guidance.
+Compliance to FIPS 186-5 is met using FIPS 186-4 CAVP certs as allowed by additional comment 2 of IG
+C.K.
+
+2.8 RBG and Entropy
+The module employs a Hash_DRBG using a SHA-512 PRF. Per section 10.1.1.1 of [SP800-90A], the internal
+state of the Hash_DRBG is the V, C, and reseed counter. The Hash_DRBG is seeded by the physical entropy
+source which provides 256-bits of entropy to seed and reseed the DRBG during initialization and reseeding.
+The estimated amount of entropy per entropy output bit is ~0.6/bit. The DRBG internal state is not
+accessible by non-DRBG functions. All random values used by approved security functions, SSP generation,
+or SSP establishment method are provided by the Hash_DRBG.
+
+ Cert        Vendor
+ Number      Name
+
+ E114        Nuvoton
+
+Table 7: Entropy Certificates
+
+
+
+                                  © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                      12 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name          Type        Operational    Sample     Entropy    Conditioning Component
+                           Environment    Size       per
+                                                     Sample
+
+ Nuvoton       Physical    NPCX998HB0BX   1 bit      0.6 bits   The entropy pool is filled with random bits
+ NTCES02                                                        provided by an SP800-90B compliant
+                                                                entropy source whose noise source is
+                                                                from Ring Oscillators in hardware TRNG.
+
+Table 8: Entropy Sources
+
+2.9 Key Generation
+The module generates Keys and SSPs in accordance with FIPS 140-3 IG D.H. The cryptographic module
+performs Cryptographic Key Generation (CKG) for asymmetric keys as per [SP800-133rev2] (vendor
+affirmed), compliant with [FIPS186-4] and using DRBG compliant with [SP800-90Arev1]. A seed (i.e., the
+random value) used in asymmetric key generation is obtained from [SP800-90Arev1] DRBG as described in
+Section 4 of [SP800-133rev2]. The key generation service for ECDSA, as well as the [SP 800-90Arev1]
+DRBG have been ACVT tested with algorithm certificates found in Table 3.
+
+2.10 Key Establishment
+The module provides the following key/SSP establishment services:
+   1.   The module implements KAS-ECC-SSC EC Diffie-Hellman Shared Secret Computation compliant to
+        [SP800-56Arev3] and IG D.F Scenario (2) path (1).
+        o The shared secret computation provides between 128 and 256 bits of encryption strength.
+   2.   Within the TOEPP, the module offers RSA key wrapping and unwrapping using KTS-OAEP-basic
+        scheme. The implementation supports 2048 and 3072 modulus size, with both key encapsulation
+        and un-encapsulation supported. The module does not implement key confirmation. See section
+        11.3 Non-Administrator Guidance.
+The SSP establishment methodology provides 112 or 128 bits of encryption strength.
+
+2.11 Industry Protocols
+N/A for this module.
+
+
+
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                   13 of 41
+HP Endpoint Security Controller Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+The underlying logical interfaces of the module are the module’s C language Application Programming
+Interfaces (APIs). All data input and data output, status ports and control ports are directed through the
+interface of the module’s logical component, which are the APIs while the physical interface is considered
+the I/O ports of the sub-chip module through which the data input and data output, status output and
+control input traverse.
+
+ Physical     Logical           Data That Passes
+ Port         Interface(s)
+
+ I/O Ports    Data Input        Data inputs are provided in the variables passed in the API and callable
+                                service invocations, generally through caller-supplied buffers.
+
+ I/O Ports    Data Output       Data outputs are provided in the variables passed in the API and callable
+                                service invocations, generally through caller-supplied buffers.
+
+ I/O Ports    Control Input     Control inputs which control the operation of the module are provided
+                                through dedicated parameters.
+
+ I/O Ports    Status            Status output is provided in return codes and through messages.
+              Output            Documentation for each API lists possible return codes. A complete list of all
+                                return codes returned by the C language APIs within the module is provided
+                                in the header files and the API documentation. Messages are documented
+                                also in the API documentation.
+
+ Power        Power             Power interface is provided internally by TEOPP in which the cryptographic
+ Port                           module is embedded.
+
+Table 9: Ports and Interfaces
+
+The module does not implement a Control Output Interface.
+
+3.2 Trusted Channel Specification
+The module does not transmit unprotected SSPs over any of its interfaces. All authentication data is
+transmitted between the module and the other endpoints in protected manner on both the contact
+and contactless interfaces.
+
+3.3 Control Interface Not Inhibited
+The control interface is inhibited while in the error state without any exceptions.
+
+
+
+
+                                   © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                        14 of 41
+HP Endpoint Security Controller Cryptographic Library              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+FIPS 140-3 does not require authentication mechanism for level 1 modules. Therefore, the module does
+not implement an authentication mechanism.
+N/A for this module.
+
+4.2 Roles
+The module supports two authorized roles: A Crypto Officer Role and a User Role. No support is provided
+for a Maintenance operator. The module does not implement a bypass mode nor concurrent operators.
+
+ Name                          Type                Operator Type       Authentication Methods
+
+ Crypto Officer                Role                CO                  None
+
+ User                          Role                User                None
+
+Table 10: Roles
+
+When a device is delivered, the Crypto Officer is responsible for initializing the module i.e., configure the
+device by properly setting up key registers for storage of keys/CSPs. The Crypto Officer is implicitly
+assumed. The User can perform services from Table 5 and 5a only after the Crypto Officer takes
+possession by initializing it, thus creating data to be protected is generated. The Users of the module are
+software applications that implicitly assume the User Role when requesting any cryptographic services
+provided by the module.
+
+4.3 Approved Services
+The module only implements Approved security functions in an Approved mode. The Table 5 below lists
+services available. The module provides an approved service indicator by receiving a return code of
+“NCL_STATUS_OK to indicate that the service executed an approved security function.
+NOTE: The module does not implement any non-Approved Algorithms in the Approved Mode of Operation
+(neither with nor without security claim). The module does not implement any non-approved security
+functions.
+
+The abbreviations of the access rights to keys and SSPs have the following interpretation:
+G = Generate: The module generates or derives the SSP.
+R = Read: The SSP is read from the module (e.g., the SSP is output).
+W = Write: The SSP is updated, imported, or written to the module.
+E = Execute: The module uses the SSP in performing a cryptographic operation.
+Z = Zeroise: The module zeroises the SSP.
+
+
+
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                       15 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description      Indicator   Inputs       Outputs             Security     SSP Access
+                                                                                Functions
+
+ AES              Data             NCL         AES key      cipher text         AES-CBC      User
+ Encryption       Encryption       STATUS      and plain                        AES-CCM      - AES key:
+                                   OK          text                             AES-         W,E
+                                                                                CFB128
+                                                                                AES-CTR
+                                                                                AES-ECB
+                                                                                AES-GCM
+                                                                                AES-OFB
+
+ AES              AES              NCL         AES key      plain text          AES-CBC      User
+ Decryption       Decryption       STATUS      and                              AES-CCM      - AES key:
+                                   OK          cipher                           AES-         W,E
+                                               text                             CFB128
+                                                                                AES-CTR
+                                                                                AES-ECB
+                                                                                AES-GCM
+                                                                                AES-OFB
+
+ CMAC             Message          NCL         AES key      MAC                 AES-CMAC     User
+ Message          Authentication   STATUS      and                                           - AES key:
+ Authentication   Code             OK          message                                       W,E
+ Code             Generation
+ Generation
+
+ CMAC             Message          NCL         MAC and      "VALID" or          AES-CMAC     User
+ Message          Authentication   STATUS      Message      "INVALID"                        - AES key:
+ Authentication   Code             OK                                                        W,E
+ Code             Verification
+ Verification
+
+ GMAC             Message          NCL         AES key,     authentication      AES-GMAC     User
+ Message          Authentication   STATUS      AAD          tag                              - AES key:
+ Authentication   Code             OK                                                        W,E
+ Code             Generation
+ Generation
+
+ GMAC             Message          NCL         AES key,     "PASS" or "FAIL"    AES-GMAC     User
+ Message          Authentication   STATUS      AAD, IV,                                      - AES key:
+ Authentication   Code             OK          tag                                           W,E
+ Code             Verification
+ Verification
+
+ HMAC             Message          NCL         HMAC key     MAC                 HMAC         User
+ Message          Authentication   STATUS      and                                           - HMAC Key:
+ Authentication   Code             OK          message                                       W,E
+ Code             Generation
+ Generation
+
+
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                   16 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description       Indicator   Inputs       Outputs            Security     SSP Access
+                                                                                Functions
+
+ Message          SHS Message       NCL         message      digest (hash       SHS          User
+ Digest           Digest            STATUS                   value)
+ Generation       Generation        OK
+
+ RSA Key          Key Wrapping      NCL         RSA          encrypted key      KTS-IFC      User
+ Transport (key   using KTS-        STATUS      public key                      (Wrap)       - RSA KTS
+ wrapping)        OAEP-basic        OK          and key                                      public key:
+                                                to be                                        W,E
+                                                wrapped
+
+ RSA Key          Key Un-           NCL         RSA          plaintext key      KTS-IFC      User
+ Transport (key   wrapping          STATUS      private                         (Unwrap)     - RSA KTS
+ unwrapping)      using KTS-        OK          key and                                      private key:
+                  OAEP-basic                    key to be                                    W,E
+                                                un-
+                                                wrapped
+
+ RSA Digital      Digital           NCL         RSA          signature          RSA SigGen   User
+ Signature        Signature         STATUS      private                         Hash_DRBG    - RSA Sig
+ Generation       Generation        OK          key and                                      private key:
+                                                message                                      W,E
+
+ RSA Digital      Digital           NCL         RSA          True or False      RSA SigGen   User
+ Signature        Signature         STATUS      public key                                   - RSA Sig
+ Verification     Verification      OK          and                                          public key:
+                                                signature                                    W,E
+
+ ECDSA Digital    Digital           NCL         ECDSA        signature          ECDSA        User
+ Signature        Signature         STATUS      private                         SigGen       - ECDSA
+ Generation       Generation        OK          key and                         Hash_DRBG    private key:
+                                                message                                      W,E
+
+ ECDSA Digital    Digital           NCL         ECDSA        signature          ECDSA        User
+ Signature        Signature         STATUS      private                         SigGen       - ECDSA
+ Generation       Generation        OK          key and                         Component    private key:
+ Component        Component                     message                         Hash_DRBG    W,E
+                                                digest
+
+ ECDSA Digital    Digital           NCL         ECDSA        True or False      ECDSA        User
+ Signature        Signature         STATUS      public key                      SigVer       - ECDSA
+ Verification     Verification      OK          and                                          public key:
+                                                signature                                    W,E
+
+ ECDSA Key        Asymmetric        NCL         Curve size   generated          ECDSA        User
+ Generation       Key Pair          STATUS                   private and        KeyGen       - ECDSA
+                  Generation        OK                       public key pair    Hash_DRBG    private key:
+                                                                                             G,R
+                                                                                             - ECDSA
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                    17 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name            Description        Indicator   Inputs       Outputs            Security     SSP Access
+                                                                                Functions
+                                                                                             public key:
+                                                                                             G,R
+
+ ECDSA Key       Asymmetric         NCL         Public Key   True or False      ECDSA        User
+ Verification    Public Key         STATUS                                      KeyVer       - ECDSA
+                 Verification       OK                                                       public key:
+                                                                                             W,E
+                                                                                             - ECDH
+                                                                                             public key
+                                                                                             (including
+                                                                                             intermediate
+                                                                                             key
+                                                                                             generation
+                                                                                             values): W,E
+
+ EC Diffie-      Shared Secret      NCL         received     shared secret      KAS-ECC-     User
+ Hellman         Computation        STATUS      public key                      SSC          - ECDH
+ Shared Secret   using Elliptic     OK          and                                          public key
+ Computation     Curve                          possessed                                    (including
+                 Cryptography                   private                                      intermediate
+                                                key                                          key
+                                                                                             generation
+                                                                                             values): W,E
+                                                                                             - ECDH
+                                                                                             private key
+                                                                                             (including
+                                                                                             intermediate
+                                                                                             key
+                                                                                             generation
+                                                                                             values): E
+                                                                                             - ECC
+                                                                                             Shared
+                                                                                             Secret: G,R
+
+ Random          Deterministic      NCL         Seed         random numbers     Hash_DRBG    User
+ Number          Random             STATUS                                                   - Entropy
+ Generation      Number             OK                                                       Input String
+                 Generation                                                                  + Nonce: W
+                                                                                             - DRBG
+                                                                                             internal
+                                                                                             state (i.e.,
+                                                                                             Hash_DRB G
+                                                                                             V and C
+                                                                                             values),
+                                                                                             Seed: G
+
+ Module          Outputs            N/A         None         Module Name +      None         User
+ Version Info    Module Name                                 Module Version
+                                                             Number
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                    18 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name            Description      Indicator   Inputs       Outputs            Security     SSP Access
+                                                                              Functions
+                 + Version
+                 Number
+
+ SSP             zeroizes         N/A         handle of    zeroized and       None         User
+ Zeroisation     crypto                       crypto       released                        - AES key: Z
+                 function                     function     memory space                    - RSA KTS
+                 context and                  context                                      private key:
+                 releases                                                                  Z
+                 memory                                                                    - RSA KTS
+                 space                                                                     public key: Z
+                                                                                           - RSA Sig
+                                                                                           private key:
+                                                                                           Z
+                                                                                           - RSA Sig
+                                                                                           public key: Z
+                                                                                           - ECDSA
+                                                                                           private key:
+                                                                                           Z
+                                                                                           - ECDSA
+                                                                                           public key: Z
+                                                                                           - HMAC Key:
+                                                                                           Z
+                                                                                           - ECDH
+                                                                                           private key
+                                                                                           (including
+                                                                                           intermediate
+                                                                                           key
+                                                                                           generation
+                                                                                           values): Z
+                                                                                           - ECDH
+                                                                                           public key
+                                                                                           (including
+                                                                                           intermediate
+                                                                                           key
+                                                                                           generation
+                                                                                           values): Z
+                                                                                           - ECC
+                                                                                           Shared
+                                                                                           Secret: Z
+                                                                                           - Entropy
+                                                                                           Input String
+                                                                                           + Nonce: Z
+                                                                                           - DRBG
+                                                                                           internal
+                                                                                           state (i.e.,
+                                                                                           Hash_DRB G
+                                                                                           V and C
+                                                                                           values),
+                                                                                           Seed: Z
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 19 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description       Indicator   Inputs       Outputs             Security     SSP Access
+                                                                                 Functions
+
+ Show-Status      Outputs           N/A         None         Operational/Error   None         User
+                  Operational/                               status
+                  Error status of
+                  the module
+
+ Self-test        Executes on-      NCL         None         Pass/Fail status    AES-CBC      User
+                  demand self-      STATUS                                       AES-CCM      - HMAC Key:
+                  test and          OK                                           HMAC         E
+                  outputs                                                        RSA SigGen   - AES key: E
+                  Pass/Fail                                                      RSA SigVer   - RSA KTS
+                  status                                                         KTS-IFC      private key:
+                                                                                 (Wrap)       E
+                                                                                 KTS-IFC      - RSA KTS
+                                                                                 (Unwrap)     public key: E
+                                                                                 ECDSA        - RSA Sig
+                                                                                 SigGen       private key:
+                                                                                 ECDSA        E
+                                                                                 SigVer       - RSA Sig
+                                                                                 SHS          public key: E
+                                                                                 KAS-ECC-     - ECDSA
+                                                                                 SSC          private key:
+                                                                                 Hash_DRBG    E
+                                                                                              - ECDSA
+                                                                                              public key: E
+                                                                                              - ECDH
+                                                                                              private key
+                                                                                              (including
+                                                                                              intermediate
+                                                                                              key
+                                                                                              generation
+                                                                                              values): E
+                                                                                              - ECDH
+                                                                                              public key
+                                                                                              (including
+                                                                                              intermediate
+                                                                                              key
+                                                                                              generation
+                                                                                              values): E
+                                                                                              - DRBG
+                                                                                              internal
+                                                                                              state (i.e.,
+                                                                                              Hash_DRB G
+                                                                                              V and C
+                                                                                              values),
+                                                                                              Seed: E
+
+Table 11: Approved Services
+
+
+
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                     20 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+4.4 Non-Approved Services
+N/A for this module.
+
+4.5 External Software/Firmware Loaded
+N/A for this module.
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 21 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The module’s executable code is programmed in a masked ROM which is a type of Read-Only Memory
+(ROM) where content is programmed by the integrated circuit manufacturer during the silicon
+manufacturing (rather than by the Operator of the module). The memory technology is non reconfigurable
+memory as defined in IG 5.A, which will not have any change or degradation of data for a minimum of 10
+years after manufactured date. As such, it is considered a hardware only module with a non-modifiable
+operational environment. The requirements of this area are not applicable to the module.
+
+5.2 Initiate on Demand
+The module does not implement any software/firmware integrity test. The requirements of this area are
+not applicable to the module.
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 22 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+The HP Endpoint Security Controller operates in a non-modifiable operational environment. The module is
+programmed by the manufacturer during the silicon manufacturing (rather than by the user). It maintains
+its own memory region which can only be accessed by the module. There is no additional application
+present within the operating environment. The module does not spawn any cryptographic processes.
+Type of Operational Environment: Non-Modifiable
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 23 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+The HP Endpoint Security Controller Cryptographic Library is a Hardware cryptographic module in a single
+chip embodiment. More specifically, the module is considered a sub-chip cryptographic subsystem.
+The module consists of production-grade components that include standard passivation techniques (e.g., a
+conformal coating applied over the module’s circuitry to protect against environmental or other physical
+damage). The module does not implement a maintenance role and has no maintenance access interface.
+
+ Mechanism                  Inspection                  Inspection Guidance
+                            Frequency
+
+ Hard tamper-evident        Determined by the           Observe the coating surrounding the chip for any
+ coating                    operator                    signs of damage
+
+Table 12: Mechanisms and Actions Required
+
+
+
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                    24 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+8 Non-Invasive Security
+Currently, the non-invasive security is not required by FIPS 140-3 (see NIST SP 800-140F). The
+requirements of this area are not applicable to the module.
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                  25 of 41
+HP Endpoint Security Controller Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+The module does not provide persistent storage for keys/SSPs. Keys/SSPs are stored in memory only and
+are received for use by the module only at the request of the User firmware.
+
+ Storage      Description                   Persistence
+ Area                                       Type
+ Name
+
+ RAM          Stored in volatile memory     Dynamic
+
+Table 13: Storage Areas
+
+9.2 SSP Input-Output Methods
+Keys/SSPs entered or output the module are electronically entered in plaintext form from the invoking User
+firmware running on the same device. No Keys/SSPs are entered or output from the module to outside the
+TOEPP. According to IG 2.3.B, Transferring SSPs including the entropy input between a sub-chip
+cryptographic subsystem and an intervening functional subsystem for Security Levels 1 and 2 on the same
+single chip is considered as not having Sensitive Security Parameter Establishment crossing the HMI of the
+sub-chip module per IG 9.5.A.
+
+ Name          From                  To                 Format      Distribution   Entry        SFI or
+                                                        Type        Type           Type         Algorithm
+
+ API input     Within the TOEPP      RAM                Plaintext   Automated      Electronic
+
+ API output    RAM                   Within the TOEPP   Plaintext   Automated      Electronic
+
+Table 14: SSP Input-Output Methods
+
+9.3 SSP Zeroization Methods
+Keys and SSPs are explicitly zeroized automatically when structure associated with the cipher is
+deallocated or implicitly when the device is powered down thereby rendering the data irretrievable.
+Interface with the module is inhibited while zeroization is being performed. For Keys and SSPs explicitly
+zeroized automatically the successful completion of a requested service suffices as the implicit indicator
+that zeroisation has completed.
+
+ Zeroization          Description                          Rationale                     Operator Initiation
+ Method
+
+ Module Reset         Power cycles the module              All SSPs in RAM are cleared   Initiated by operator
+                                                           after power reset
+
+ Deallocate           Automatic zeroization when           Wipes the SSP's contents in   Automatically by the
+ Structure            structure is deallocated             memory                        module
+
+Table 15: SSP Zeroization Methods
+
+
+                                    © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                       26 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+9.4 SSPs
+The following summarizes the keys and Sensitive Security Parameters (SSPs) that are used by the
+cryptographic services implemented in the module. Modification of PSPs by unauthorized operators is
+prohibited.
+
+ Name            Description         Size -        Type -        Generated    Established    Used By
+                                     Strength      Category      By           By
+
+ AES key         AES Symmetric       128, 192,     Symmetric -                               AES-CBC
+                 key used in Data    256 bits -    CSP                                       AES-CCM
+                 Encryption, Data    128, 192,                                               AES-
+                 Decryption and      256 bits                                                CFB128
+                 Message                                                                     AES-CMAC
+                 Authentication                                                              AES-CTR
+                 Code Generation                                                             AES-ECB
+                 and verification                                                            AES-GCM
+                                                                                             AES-GMAC
+
+ RSA KTS         Key Wrapping        2048,         Asymmetric                                KTS-IFC
+ private key     and Un-wrapping     3072 bits -   key pair -                                (Wrap)
+                                     112 to 128    CSP                                       KTS-IFC
+                                     bits                                                    (Unwrap)
+
+ RSA KTS         Key Wrapping        2048,         Asymmetric                                KTS-IFC
+ public key      and Un-wrapping     3072 bits -   key pair -                                (Wrap)
+                                     112 to 128    PSP                                       KTS-IFC
+                                     bits                                                    (Unwrap)
+
+ RSA Sig         Signature           2048,         Asymmetric                                RSA SigGen
+ private key     Generation and      3072 bits -   key pair -                                RSA SigVer
+                 Verification        112 to 128    CSP
+                                     bits
+
+ RSA Sig         Signature           2048,         Asymmetric                                RSA SigGen
+ public key      Generation and      3072 bits -   key pair -                                RSA SigVer
+                 Verification        112 to 128    PSP
+                                     bits
+
+ ECDSA           Key Verification,   P-256, P-     Asymmetric    ECDSA                       ECDSA
+ private key     Signature           384, P-521    key pair -    KeyGen                      SigGen
+                 Generation and      curves -      CSP           Hash_DRBG                   ECDSA
+                 Verification        112 to 256                                              SigVer
+                                     bits
+
+ ECDSA public    Key Verification,   P-256, P-     Asymmetric    ECDSA                       ECDSA
+ key             Signature           384, P-521    key pair -    KeyGen                      KeyVer
+                 Generation and      curves -      PSP           Hash_DRBG                   ECDSA
+                 Verification        112 to 256                                              SigGen
+                                     bits                                                    ECDSA
+                                                                                             SigVer
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                  27 of 41
+HP Endpoint Security Controller Cryptographic Library                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name              Description          Size -        Type -           Generated    Established    Used By
+                                        Strength      Category         By           By
+
+ HMAC Key          Hashed Message       112 bits or   Symmetric -                                  HMAC
+                   Authentication       greater -     CSP
+                   Code Generation      112 bits or
+                                        greater
+
+ ECDH private      ECDH Shared          P-256, P-     Asymmetric       ECDSA                       KAS-ECC-
+ key (including    Secret               384, P-521    key pair -       KeyGen                      SSC
+ intermediate      Computation          curves -      CSP              Hash_DRBG
+ key                                    112 to
+ generation                             256-bits
+ values)
+
+ ECDH public       ECDH Shared          P-256, P-     Asymmetric       ECDSA                       ECDSA
+ key (including    Secret               384, P-521    key pair -       KeyGen                      KeyVer
+ intermediate      Computation          curves -      PSP              Hash_DRBG                   KAS-ECC-
+ key                                    112 to                                                     SSC
+ generation                             256-bits
+ values)
+
+ ECC Shared        ECDH Shared          112 to        Asymmetric                    KAS-ECC-
+ Secret            Secret               256-bits -    shared                        SSC
+                   Computation          112 to        secret - CSP
+                                        256-bits
+
+ Entropy Input     Seed DRBG            256-bits -    DRBG - CSP                                   Hash_DRBG
+ String +                               256-bits
+ Nonce
+
+ DRBG internal     Maintaining          256-bits -    DRBG - CSP                                   Hash_DRBG
+ state (i.e.,      DRBG internal        256-bits
+ Hash_DRB G        state
+ V and C
+ values), Seed
+
+Table 16: SSP Table 1
+
+
+ Name                   Input -     Storage           Storage           Zeroization     Related SSPs
+                        Output                        Duration
+
+ AES key                API         RAM:Plaintext     Until             Module Reset
+                        input                         deallocated or    Deallocate
+                                                      on module         Structure
+                                                      reset
+
+ RSA KTS private        API         RAM:Plaintext     Until             Module Reset    RSA KTS public
+ key                    input                         deallocated or    Deallocate      key:Paired With
+                                                      on module         Structure
+                                                      reset
+
+                                   © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                          28 of 41
+HP Endpoint Security Controller Cryptographic Library               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Input -    Storage          Storage           Zeroization     Related SSPs
+                       Output                      Duration
+
+ RSA KTS public key    API        RAM:Plaintext    Until             Module Reset    RSA KTS private
+                       input                       deallocated or    Deallocate      key:Paired With
+                                                   on module         Structure
+                                                   reset
+
+ RSA Sig private key   API        RAM:Plaintext    Until             Module Reset    RSA Sig public
+                       input                       deallocated or    Deallocate      key:Paired With
+                                                   on module         Structure
+                                                   reset
+
+ RSA Sig public key    API        RAM:Plaintext    Until             Module Reset    RSA Sig private
+                       input                       deallocated or    Deallocate      key:Paired With
+                                                   on module         Structure
+                                                   reset
+
+ ECDSA private key     API        RAM:Plaintext    Until             Module Reset    DRBG internal state
+                       input                       deallocated or    Deallocate      (i.e., Hash_DRB G V
+                       API                         on module         Structure       and C values),
+                       output                      reset                             Seed:Derived From
+                                                                                     ECDSA public
+                                                                                     key:Paired With
+
+ ECDSA public key      API        RAM:Plaintext    Until             Module Reset    DRBG internal state
+                       input                       deallocated or    Deallocate      (i.e., Hash_DRB G V
+                       API                         on module         Structure       and C values),
+                       output                      reset                             Seed:Derived From
+                                                                                     ECDSA private
+                                                                                     key:Paired With
+
+ HMAC Key              API        RAM:Plaintext    Until             Module Reset
+                       input                       deallocated or    Deallocate
+                                                   on module         Structure
+                                                   reset
+
+ ECDH private key      API        RAM:Plaintext    Until             Module Reset    DRBG internal state
+ (including            input                       deallocated or    Deallocate      (i.e., Hash_DRB G V
+ intermediate key      API                         on module         Structure       and C values),
+ generation values)    output                      reset                             Seed:Derived From
+                                                                                     ECDH public key
+                                                                                     (including intermediate
+                                                                                     key generation
+                                                                                     values):Paired With
+
+ ECDH public key       API        RAM:Plaintext    Until             Module Reset    DRBG internal state
+ (including            input                       deallocated or    Deallocate      (i.e., Hash_DRB G V
+ intermediate key      API                         on module         Structure       and C values),
+ generation values)    output                      reset                             Seed:Derived From
+                                                                                     ECDH private key
+
+                                 © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                       29 of 41
+HP Endpoint Security Controller Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                   Input -    Storage          Storage           Zeroization     Related SSPs
+                        Output                      Duration
+                                                                                      (including intermediate
+                                                                                      key generation
+                                                                                      values):Paired With
+
+ ECC Shared Secret      API        RAM:Plaintext    Until             Module Reset
+                        output                      deallocated or    Deallocate
+                                                    on module         Structure
+                                                    reset
+
+ Entropy Input                     RAM:Plaintext    Until             Module Reset
+ String + Nonce                                     deallocated or    Deallocate
+                                                    on module         Structure
+                                                    reset
+
+ DRBG internal state               RAM:Plaintext    Until             Module Reset    Entropy Input String +
+ (i.e., Hash_DRB G V                                deallocated or    Deallocate      Nonce:Derived From
+ and C values), Seed                                on module         Structure
+                                                    reset
+
+Table 17: SSP Table 2
+
+
+
+
+                                  © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                      30 of 41
+HP Endpoint Security Controller Cryptographic Library                       FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+Self-tests ensure that the module is not corrupted and that the cryptographic algorithms work as expected.
+While the module is executing the self-test, no services are not available, and input and output are
+inhibited. The module will boot only after successfully passing the HMAC-SHA2-512 and SHA2-256 CASTs. If
+an error is detected in any self-test, the module will enter the Error State.
+N/A for this module.
+The module is solely implemented in hardware (i.e., only contains executable code that is stored in non-
+reconfigurable masked ROM1). As such, the module does not perform any pre-operational
+software/firmware integrity test, but instead performs a Cryptographic Algorithm Self-Test on the HMAC-
+SHA2-512 and SHA2-256 algorithms when the module is powered on.
+The module does not implement a pre-operational bypass test nor pre-operational critical functions test.
+
+10.2 Conditional Self-Tests
+The module conducts conditional cryptographic algorithm self-test prior to the first operational use of each
+cryptographic algorithm. The table below describe the conditional tests supported by the module.
+
+ Algorithm         Test Properties                  Test        Test     Indicator      Details            Conditions
+ or Test                                            Method      Type
+
+ HMAC-             HMAC-SHA2-512 MAC                KAT         CAST     NCL            MAC                Performed
+ SHA2-512          Generation KAT                                        STATUS         Generation         when the
+ (A2825)                                                                 OK                                module is
+                                                                                                           powered on
+
+ SHA2-256          SHA2-256 Message Digest          KAT         CAST     NCL            Message            Performed
+ (A2825)           KAT                                                   STATUS         Digest             when the
+                                                                         OK                                module is
+                                                                                                           powered on
+
+ AES-CCM           AES-CCM Encryption KAT           KAT         CAST     NCL            AES                Prior to the
+ (A2825)           using 128-bit key                                     STATUS         Encryption         first
+                                                                         OK                                operational
+                                                                                                           use of the
+                                                                                                           algorithm
+
+ AES-CBC           AES-CBC Decryption KAT           KAT         CAST     NCL            AES                Prior to the
+ (A2825)           using 128-bit key                                     STATUS         Decryption         first
+                                                                         OK                                operational
+                                                                                                           use of the
+                                                                                                           algorithm
+
+
+
+
+1 A masked ROM is a type of Read-Only Memory (ROM) where content is programmed by the integrated circuit manufacturer during
+the silicon manufacturing.
+
+                                     © 2025 HP Inc. / atsec information security.
+  This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    31 of 41
+HP Endpoint Security Controller Cryptographic Library            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm     Test Properties             Test         Test   Indicator   Details         Conditions
+ or Test                                   Method       Type
+
+ RSA SigGen    Signature Generation KAT    KAT          CAST   NCL         RSA Signature   Prior to the
+ (FIPS186-4)   with 2048-bit key and                           STATUS      Generation      first
+ (A2825)       SHA2-256                                        OK                          operational
+                                                                                           use of the
+                                                                                           algorithm
+
+ RSA SigVer    PKCS#1 v1.5 Signature       KAT          CAST   NCL         RSA Signature   Prior to the
+ (FIPS186-4)   Verification KAT with                           STATUS      Verification    first
+ (A2825)       2048 -bit key and SHA2-                         OK                          operational
+               256 PKCS#1 v1.5                                                             use of the
+                                                                                           algorithm
+
+ KTS-IFC       KTS-OAEP-basic              KAT          CAST   NCL         KTS-OAEP-       Prior to the
+ (A2825)       Encryption/Decryption                           STATUS      basic           first
+               KAT with 2048 -bit key                          OK          Encryption      operational
+               and SHA2-256                                                and             use of the
+                                                                           Decryption      algorithm
+
+ ECDSA         Pairwise consistency test   PCT          PCT    NCL         Pairwise        Performed
+ KeyGen                                                        STATUS      consistency     upon
+ (FIPS186-4)                                                   OK          test            generation of
+ (A2825)                                                                                   a new ECDSA
+                                                                                           key pair
+
+ ECDSA         ECDSA Signature             KAT          CAST   NCL         ECDSA           Prior to the
+ SigGen        Generation KAT with P-                          STATUS      Signature       first
+ (FIPS186-4)   256 curve and SHA2-256                          OK          Generation      operational
+ (A2825)                                                                                   use of the
+                                                                                           algorithm
+
+ ECDSA         ECDSA Signature             KAT          CAST   NCL         ECDSA           Prior to the
+ SigVer        Verification KAT with P-                        STATUS      Signature       first
+ (FIPS186-4)   256 curve and SHA2-256                          OK          Verification    operational
+ (A2825)                                                                                   use of the
+                                                                                           algorithm
+
+ KAS-ECC-      ECDH shared secret          KAT          CAST   NCL         ECDH shared     Prior to the
+ SSC Sp800-    computation KAT with P-                         STATUS      secret          first
+ 56Ar3         256 curve                                       OK          computation     operational
+ (A2825)                                                                                   use of the
+                                                                                           algorithm
+
+ Hash DRBG     Hash_DRBG random            KAT          CAST   NCL         Hash_DRBG       Prior to the
+ (A2825)       number generation KAT                           STATUS      random          first
+               using predefined data.                          OK          number          operational
+                                                                           generation      use of the
+                                                                                           algorithm
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                  32 of 41
+HP Endpoint Security Controller Cryptographic Library               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm       Test Properties               Test        Test   Indicator   Details           Conditions
+ or Test                                       Method      Type
+
+ ENT             RCT (Repetition Count         RCT         CAST   NCL         Continuous        Performed
+                 Test)                                            STATUS      Health Test       when the
+                                                                  OK                            module is
+                                                                                                powered on
+
+ ENT             APT (Adaptive Proportion      APT         CAST   NCL         Continuous        Performed
+                 Test)                                            STATUS      Health Test       when the
+                                                                  OK                            module is
+                                                                                                powered on
+
+Table 18: Conditional Self-Tests
+
+The module does not implement a Software/Firmware Load Test, Manual Entry Test, Conditional Bypass
+Test nor Conditional Critical Functions Test.
+
+10.3 Periodic Self-Test Information
+During runtime, operators can initiate the conditional self-tests on demand by calling NCL_MISC_SelfTest
+and passing the algorithm as an argument.
+The module’s entropy source is powered on only momentarily to seed the module’s SP800-90B DRBG. The
+module performs ENT health tests defined in Section 4 of SP800-90B on the generated output prior to
+seeding the SP800-90B DRBG. After completing its execution, the entropy source powers down.
+N/A for this module.
+
+ Algorithm or            Test Method           Test Type            Period                  Periodic Method
+ Test
+
+ HMAC-SHA2-512           KAT                   CAST                 On demand               By calling
+ (A2825)                                                                                    NCL_MISC_SelfTest
+                                                                                            and passing the
+                                                                                            algorithm as an
+                                                                                            argument
+
+ SHA2-256 (A2825)        KAT                   CAST                 On demand               By calling
+                                                                                            NCL_MISC_SelfTest
+                                                                                            and passing the
+                                                                                            algorithm as an
+                                                                                            argument
+
+ AES-CCM (A2825)         KAT                   CAST                 On demand               By calling
+                                                                                            NCL_MISC_SelfTest
+                                                                                            and passing the
+                                                                                            algorithm as an
+                                                                                            argument
+
+ AES-CBC (A2825)         KAT                   CAST                 On demand               By calling
+                                                                                            NCL_MISC_SelfTest
+                                                                                            and passing the
+
+                                   © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                      33 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or         Test Method          Test Type            Period               Periodic Method
+ Test
+                                                                                     algorithm as an
+                                                                                     argument
+
+ RSA SigGen           KAT                  CAST                 On demand            By calling
+ (FIPS186-4)                                                                         NCL_MISC_SelfTest
+ (A2825)                                                                             and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ RSA SigVer           KAT                  CAST                 On demand            By calling
+ (FIPS186-4)                                                                         NCL_MISC_SelfTest
+ (A2825)                                                                             and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ KTS-IFC (A2825)      KAT                  CAST                 On demand            By calling
+                                                                                     NCL_MISC_SelfTest
+                                                                                     and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ ECDSA KeyGen         PCT                  PCT                  N/A                  N/A
+ (FIPS186-4)
+ (A2825)
+
+ ECDSA SigGen         KAT                  CAST                 On demand            By calling
+ (FIPS186-4)                                                                         NCL_MISC_SelfTest
+ (A2825)                                                                             and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ ECDSA SigVer         KAT                  CAST                 On demand            By calling
+ (FIPS186-4)                                                                         NCL_MISC_SelfTest
+ (A2825)                                                                             and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ KAS-ECC-SSC          KAT                  CAST                 On demand            By calling
+ Sp800-56Ar3                                                                         NCL_MISC_SelfTest
+ (A2825)                                                                             and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+ Hash DRBG            KAT                  CAST                 On demand            By calling
+ (A2825)                                                                             NCL_MISC_SelfTest
+                                                                                     and passing the
+                                                                                     algorithm as an
+                                                                                     argument
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 34 of 41
+HP Endpoint Security Controller Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or            Test Method             Test Type            Period                Periodic Method
+ Test
+
+ ENT                     RCT                     CAST                 On demand             Powering the chip
+                                                                                            off and on
+
+ ENT                     APT                     CAST                 On demand             Powering the chip
+                                                                                            off and on
+
+Table 19: Conditional Periodic Information
+
+10.4 Error States
+For any of the conditional self-tests, the module enters an error state upon failing the self-test. A failure in
+the conditional CAST or conditional PCT results in “NCL_STATUS_FAIL”. Likewise, a failure of the ENT health
+tests will result in an “ENTROPY_SRC_ERROR” status returned to the user. When in the error state, no
+cryptographic services are provided, control and data output is prohibited. The only method to clear this
+error state is to power cycle the device and then successfully pass the conditional self-tests.
+
+ Name                       Description            Conditions       Recovery              Indicator
+                                                                    Method
+
+ NCL_STATUS_FAIL            When in this error     Failure in       The only method       NCL_STATUS_FAIL
+                            state, no              conditional      to clear this error
+                            cryptographic          self-test        state is to power
+                            services are           (conditional     cycle the device
+                            provided, control      CAST or          and then
+                            and data output is     conditional      successfully pass
+                            prohibited.            PCT)             the conditional
+                                                                    self-tests.
+
+ ENTROPY_SRC_ERROR          When in this error     Failure of the   The only method       ENTROPY_SRC_ERROR
+                            state, no              ENT health       to clear this error
+                            cryptographic          test             state is to power
+                            services are                            cycle the device
+                            provided, control                       and then
+                            and data output is                      successfully pass
+                            prohibited.                             the conditional
+                                                                    self-tests.
+
+Table 20: Error States
+
+
+
+
+                                   © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                       35 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+As explained in Section 10.1 Pre-Operational Self-Tests, the module is placed in a masked ROM by
+manufacturer during the silicon manufacturing. The module is delivered as part of the Nuvoton
+NPCX998HB0BX platform (listed in Table 2). During manufacturing – each chip is tested to make sure the
+masked ROM was manufactured correctly; this is done using CRC32 algorithm on the entire masked ROM
+code on each device before it is shipped out.
+During execution – As part of the device boot process, the code is verified by a dedicated hardware inside
+the chip that checks every byte of code compared to a known parity bit. If any byte fails, the parity test
+then an internal error is generated; the error is handled by the application (User) firmware.
+
+11.2 Administrator Guidance
+The module is configured to be operational by default. If the device starts up successfully and has
+successfully passed the HMAC-SHA2-512 and SHA2-256 CAST, it is operating correctly and can begin
+servicing User requests.
+
+11.3 Non-Administrator Guidance
+The entity using the IUT must obtain required assurances listed in section 6.4 of SP 800-56BRev2 by
+performing the following steps:
+   1. The entity requesting the RSA key unwrapping (un-encapsulation) service from the module, shall
+       only use an RSA private key that was generated by an active FIPS validated module that
+       implements FIPS 186-5 compliant RSA key generation service and performs the key pair validity
+       and the pairwise consistency as stated in section 6.4.1.1 of the SP 800-56BRev2. Additionally, the
+       entity shall renew these assurances over time by using any method described in section 6.4.1.5 of
+       the SP 800-56BRev2.
+   2. For use of an RSA key wrapping (encapsulation) service in the context of key transport per IG D.G,
+       the entity using the module, shall verify the validity of the peer's public key using any method
+       specified in section 6.4.2.1 of the SP 800-56BRev2.
+The entity using the module, shall confirm the peer's possession of private key by using any method
+specified in section 6.4.2.3 of the SP 800-56BRev2.
+
+11.4 Design and Rules
+N/A for this module.
+
+11.5 Maintenance Requirements
+N/A for this module.
+
+11.6 End of Life
+Once the module reaches its end-of-life stage (End of Life (EOL) date for the HP Endpoint Security
+Controller Cryptographic Library is 10 years from manufacturing date) or sanitation is initiated by the
+module’s Operator, it is the Operator’s responsibility to clear all existing SSPs from the module. This can
+be achieved by either performing a full device reset, or by explicitly invoking the following sequence of
+APIs to clear the data from all modules:
+   •   NCL_SHA_Clear - For each of existing SHA and HMAC contexts
+
+                                © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                     36 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+   •   NCL_DRBG_Clear - For each of existing DRBG contexts
+   •   NCL_AES_Clear - For each of existing AES contexts
+   •   NCL_RSA_Clear - For each of existing RSA contexts
+   •   NCL_ECC_Clear - For each of existing ECDSA and ECDH contexts
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 37 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+12 Mitigation of Other Attacks
+The module does not implement security mechanisms to mitigate other attacks.
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 38 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Glossary and Abbreviations
+       AES             Advanced Encryption Standard
+       ACVP            Algorithm Certification Validation Program
+       CBC             Cipher Block Chaining
+       CAST            Cryptographic Algorithm Self-Test
+       CCM             Counter with Cipher Block Chaining-Message Authentication Code
+       CFB             Cipher Feedback
+       CMAC            Cipher-based Message Authentication Code
+       CMVP            Cryptographic Module Validation Program
+       CSP             Critical Security Parameter
+       CTR             Counter Mode
+       DRBG            Deterministic Random Bit Generator
+       ECB             Electronic Code Book
+       ECC             Elliptic Curve Cryptography
+       ENT             Entropy Source
+       EOL             End Of Life
+       FIPS            Federal Information Processing Standards Publication
+       GCM             Galois Counter Mode
+       HMAC            Hash Message Authentication Code
+       KAS             Key Agreement Scheme
+       KAT             Known Answer Test
+       MAC             Message Authentication Code
+       NIST            National Institute of Science and Technology
+       OFB             Output Feedback
+       PSS             Probabilistic Signature Scheme
+       RSA             Rivest, Shamir, Addleman
+       SHA             Secure Hash Algorithm
+       SHS             Secure Hash Standard
+       SSC             Shared Secret Computation
+       TOEPP           Tested Operational Environment’s Physical Perimeter
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 39 of 41
+HP Endpoint Security Controller Cryptographic Library             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+References
+FIPS140-3         FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+                  March 2019
+                  https://doi.org/10.6028/NIST.FIPS.140-3
+
+FIPS140-3_IG      Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module Validation
+                  Program
+                  January 2024
+                  https://csrc.nist.gov/CSRC/media/Projects/cryptographic-module-validation-
+                  program/documents/fips 140-3/FIPS 140-3 IG.pdf
+
+FIPS180-4         Secure Hash Standard (SHS)
+                  March 2012
+                  http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS186-5         Digital Signature Standard (DSS)
+                  February 2023
+                  http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
+
+FIPS197           Advanced Encryption Standard
+                  November 2001
+                  http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS198-1         The Keyed Hash Message Authentication Code (HMAC)
+                  July 2008
+                  http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+PKCS#1            Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                  Specifications Version 2.1
+                  February 2003
+                  http://www.ietf.org/rfc/rfc3447.txt
+
+RFC3394           Advanced Encryption Standard (AES) Key Wrap Algorithm
+                  September 2002
+                  http://www.ietf.org/rfc/rfc3394.txt
+
+RFC5649           Advanced Encryption Standard (AES) Key Wrap with Padding Algorithm
+                  September 2009
+                  http://www.ietf.org/rfc/rfc5649.txt
+
+SP800-38A         NIST Special Publication 800-38A - Recommendation for Block Cipher Modes of
+                  Operation Methods and Techniques
+                  December 2001
+                  http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP800-38B         NIST Special Publication 800-38B - Recommendation for Block Cipher Modes of
+                  Operation: The CMAC Mode for Authentication
+                  May 2005
+                  http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                   40 of 41
+HP Endpoint Security Controller Cryptographic Library           FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+SP800-38C         NIST Special Publication 800-38C - Recommendation for Block Cipher Modes of
+                  Operation: the CCM Mode for Authentication and Confidentiality
+                  May 2004
+                  http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+SP800-38D         NIST Special Publication 800-38D - Recommendation for Block Cipher Modes of
+                  Operation: Galois/Counter Mode (GCM) and GMAC
+                  November 2007
+                  http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+
+SP800-38F         NIST Special Publication 800-38F - Recommendation for Block Cipher Modes of
+                  Operation: Methods for Key Wrapping
+                  December 2012
+                  http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP800-56Arev3     NIST Special Publication 800-56A Revision 3 - Recommendation for Pair Wise Key
+                  Establishment Schemes Using Discrete Logarithm Cryptography
+                  April 2018
+                  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+SP800-56Brev2     Recommendation for Pair-Wise Key Establishment Schemes Using Integer Factorization
+                  Cryptography
+                  March 2019
+                  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Br2.pdf
+
+SP800-90Ar1       NIST Special Publication 800-90A - Revision 1 - Recommendation for Random Number
+                  Generation Using Deterministic Random Bit Generators
+                  June 2015
+                  http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+SP800-90B         NIST Special Publication 800-90B - Recommendation for the Entropy Sources Used for
+                  Random Bit Generation
+                  January 2018
+                  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+SP800-133rev2     NIST Special Publication 800-133 - Recommendation for Cryptographic
+                  Key Generation
+                  December 2012
+                  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+SP800-140Br1      NIST Special Publication 800-140Br1 - CMVP Security Policy Requirements
+                  November 2023
+                  https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140Br1.pdf
+
+
+
+
+                               © 2025 HP Inc. / atsec information security.
+ This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                 41 of 41
+

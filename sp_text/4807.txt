@@ -1,0 +1,1973 @@
+                                                WildFire 10.1 WF-500
+
+                                                                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                                                                                         Version: 0.8
+
+                                                                                   Revision Date: February 13, 2025
+
+
+
+
+Palo Alto Networks, Inc.
+www.paloaltonetworks.com
+© 2025 Palo Alto Networks, Inc. Palo Alto Networks, Inc. is a registered trademark of Palo Alto Networks, Inc. A list
+of our trademarks can be found at https://www.paloaltonetworks.com/company/trademarks.html. All other marks
+mentioned herein may be trademarks of their respective companies.
+
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Table of Contents
+1. General                                                                                                           3
+2. Cryptographic Module Specification                                                                                4
+3. Cryptographic Module Interfaces                                                                                  11
+4. Roles, Services, and Authentication                                                                              13
+5. Software/Firmware Security                                                                                       21
+6. Operational Environment                                                                                          21
+7. Physical Security                                                                                                22
+8. Non-Invasive Security                                                                                            23
+9. Sensitive Security Parameter Management                                                                          23
+10. Self-Tests                                                                                                      28
+11. Life-cycle Assurance                                                                                            29
+12. Mitigation of Other Attacks                                                                                     30
+13. References                                                                                                      30
+14. Definitions and Acronyms                                                                                        30
+Appendix A – WF-500 Physical Kit Installation Guide (12 Tamper-Evident Seals)                                       31
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                 WildFire 10.1 WF-500 Security Policy 2
+1.      General
+
+The Wildfire 10.1 WF-500 from Palo Alto Networks Inc., hereafter referred to as “WildFire” or the “cryptographic module”
+is a multi-chip standalone hardware cryptographic module designed to fulfill FIPS 140-3 level 2 requirements. The WildFire
+10.1 WF-500 module identifies unknown malware, zero-day exploits, and Advanced Persistent Threats (APTs) through
+dynamic analysis, and automatically disseminates protection in near real-time to help security teams meet the challenge of
+advanced cyber-attacks.
+
+Unknown files are analyzed by WildFire (WF) in a scalable sandbox environment where new threats are identified, and
+protections are automatically developed and delivered in the form of an update. The result is a unique, closed loop
+approach to controlling cyber threats that begins with positive security controls to reduce the attack surface, inspection of
+all traffic, ports, and protocols to block all known threats, and rapid detection of unknown threats by observing their actual
+behavior.
+
+The cryptographic module meets the overall requirements applicable to Level 2 security of FIPS 140-3.
+
+                                                     Table 1 – Security Levels
+
+                     ISO/IEC 24759      FIPS 140-3 Section Title                       Security Level
+                       Section 6.
+                    [Number Below]
+                            1           General                                              2
+                            2           Cryptographic module specification                   2
+                            3           Cryptographic module interfaces                      2
+                            4           Roles, services, authentication                      3
+                            5           Software/Firmware security                           2
+                            6           Operational environment                             N/A
+                            7           Physical security                                    2
+                            8           Non-Invasive security                               N/A
+                            9           Sensitive security parameter                         2
+                                        management
+                           10           Self-tests                                           2
+                           11           Life-cycle assurance                                 3
+                           12           Mitigation of other attacks                         N/A
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                         WildFire 10.1 WF-500 Security Policy 3
+2.      Cryptographic Module Specification
+
+The Palo Alto Networks, Inc. WF-500 is a multi-chip standalone module. The module is shown in Figure 1. The
+module boundary is the outer chassis enclosure. The cryptographic boundary includes all the logical components of
+the modules and the physical perimeter is the outer perimeter of the enclosure of the WF-500. Figure 2 through
+Figure 5 provide images of the module with the FIPS kit’s opacity shields in place. See the Physical Security section
+for details regarding the module’s physical security mechanisms.
+
+                                       Table 2 - Cryptographic Module Tested Configuration
+
+                Model             Hardware [Part Number           Firmware Version            Distinguishing Features
+                                      and Version]
+               WF-500                   910-000097                       10.1.5              See ‘Cryptographic Module
+                                  Physical Kit: 920-000145                                       Interfaces’ Section
+
+
+
+
+Approved Mode of Operation
+The module supports only one mode, which is the Approved mode of operation (FIPS-CC mode). The following section
+details the procedure necessary to place the module into the Approved mode of operation.
+
+The following procedure will initialize the module into the Approved mode of operation:
+
+        ●   Install module and interface connections in addition to the physical kit.
+        ●   The tamper-evident seals and opacity shields must be installed as per Appendix A for the module to operate in
+            the Approved mode of operation.
+        ●   Apply power to the device.
+        ●   Establish a serial connection to the console port and command the module to enter into maintenance mode.
+                 o During initial boot up, break the boot sequence via the console port connection (by pressing the maint
+                     button when instructed to do so) to access the main menu.
+        ●   Select “Continue.”
+        ●   Select the “Set FIPS-CC” option, and press enter.
+        ●   Select “Enable FIPS-CC Mode,” and press enter.
+        ●   When prompted, select “Reboot” and the module will re-initialize and continue into the Approved mode.
+        ●   The module will reboot.
+        ●   In the Approved mode, the console port is available only as a status output port.
+        ●   Once the module has finished booting, the Crypto Officer can authenticate using the default credentials that
+            come with the module
+                 o Once authenticated, the module will automatically require the operator to change their password; and
+                     the default credential is overwritten
+
+The module will automatically indicate the Approved mode of operation in the following manner:
+      ● Status output interface will indicate “**** FIPS-CC MODE ENABLED ****” via the CLI session.
+      ● Status output interface will indicate “FIPS-CC mode enabled successfully” via the console port.
+
+Should one or more power-up self-tests fail, the module will not enter the Approved mode of operation. Feedback will
+consist of:
+
+        ●   The module will output “FIPS-CC failure.”
+        ●   The module will reboot and enter a state in which the reason for the reboot can be determined by following
+            the on-screen instructions.
+
+
+© 2025 Palo Alto Networks, Inc.                                                              WildFire 10.1 WF-500 Security Policy 4
+Note: Disabling “FIPS-CC” mode causes a complete factory reset, which is described in the Zeroization section below.
+
+The module does not support a degraded mode of operation.
+
+
+Non-Compliant State
+
+Failure to follow the directions in the Approved Mode of Operation above or rules noted in Section 11 will result in the
+module operating in a non-compliant state, which is considered out of scope of this validation.
+
+Zeroization
+
+To initiate the zeroization service, perform the following steps:
+
+                ●   Access the module’s CLI via SSH, and command the module to enter maintenance mode; the module will
+                    reboot
+                        o Note: Establish a serial connection to the console port
+                ●   After reboot, select “Continue.”
+                ●   Select “Factory Reset.”
+                ●   The module will perform a zeroization, and provide the following message once complete:
+                        o “Factory Reset Status: Success”
+
+
+
+Approved and Allowed Algorithms
+The cryptographic module has the following CAVP certificates:
+
+                                                    Table 3 - Approved Algorithms1
+
+            CAVP Cert            Algorithm and             Mode/Method                 Description / Key           Use / Function
+                                   Standard                                              Size(s) / Key
+                                                                                          Strength(s)
+                                                                                                               Encryption,
+    A2137                    AES-CBC [SP 800-38A]      CBC                           128, 192 and 256 bits     Decryption
+
+                                                                                                               Encryption,
+    A2137                    AES-CFB128 [SP 800-38A]   CFB128                        128 bits                  Decryption
+
+                                                                                                               Encryption,
+    A2137                    AES-CTR [SP 800-38A]      CTR                           128, 192 and 256 bits     Decryption
+
+                                                                                     128 and 256 bits
+                                                       GCM*                                                    Encryption,
+    A2137                    AES-GCM [SP 800-38D]
+                                                                                                               Decryption
+
+                                                                                     AES 256 bits with
+                             Counter DRBG
+    A2137                                              CTR DRBG                      Derivation Function       Random Bit Generator
+                             [SP 800-90Arev1]
+                                                                                     Enabled
+                             ECDSA KeyGen                                                                      Key Generation
+    A2137                                              ECDSA KeyGen                  P-256, P-384, P-521
+                             (FIPS 186-4)
+                             ECDSA KeyVer                                                                      Public Key Validation
+    A2137                                              ECDSA KeyVer                  P-256, P-384, P-521
+                             (FIPS 186-4)
+
+
+1
+ Only the algorithms, modes, and key sizes specified in this table are used by the module. The CAVP certificate may
+contain more tested options than listed in this table.
+
+© 2025 Palo Alto Networks, Inc.                                                                  WildFire 10.1 WF-500 Security Policy 5
+         CAVP Cert          Algorithm and                Mode/Method           Description / Key                Use / Function
+                              Standard                                           Size(s) / Key
+                                                                                  Strength(s)
+                                                                             P-256, P-384, P-521 with
+                        ECDSA SigGen                                                                      Signature Generation
+ A2137                                             ECDSA SigGen              SHA2-224, SHA2-256,
+                        (FIPS 186-4)
+                                                                             SHA2-384, and SHA2-512
+                                                                             P-256, P-384, P-521 with
+                        ECDSA SigVer (FIPS 186-                              SHA-1, SHA2-224, SHA2-
+ A2137                                             ECDSA SigVer                                           Signature Verification
+                        4)                                                   256, SHA2-384, and
+                                                                             SHA2-512
+                        HMAC-SHA-1 [FIPS 198-
+ A2137                                             HMAC                      HMAC-SHA-1 with λ=160        For Protocols
+                        1]
+                        HMAC-SHA2-224                                        HMAC-SHA2-224 with
+ A2137                                             HMAC                                                   For Protocols
+                        [FIPS 198-1]                                         λ=224
+                        HMAC-SHA2-256                                        HMAC-SHA2-256 with
+ A2137                                             HMAC                                                   For Protocols
+                        [FIPS 198-1]                                         λ=256
+                        HMAC-SHA2-384                                        HMAC-SHA2-384 with
+ A2137                                             HMAC                                                   For Protocols
+                        [FIPS 198-1]                                         λ=384
+                        HMAC-SHA2-512                                        HMAC-SHA2-512 with
+ A2137                                             HMAC                                                   For Protocols
+                        [FIPS 198-1]                                         λ=512
+                                                                             Ephemeral Unified Model:
+                        KAS-ECC-SSC SP800-         KAS                                                    Key Agreement, Shared
+ A2137                                                                       P-256/P-384/P-521
+                        56Ar3                                                                             Secret Computation
+
+                        KAS-FFC-SSC SP 800-                                                               Key Agreement, Shared
+ A2137                                             KAS                       dhEphem: MODP-2048
+                        56Ar3                                                                             Secret Computation
+                        KDF IKEv2                                            SHA2-256, SHA2-384,
+ A2137                                             IKEv2 KDF                                              IKEv2
+                        [SP 800-135rev1] (CVL)                               SHA2-512
+                                                                             Engine ID:
+                        KDF SNMP
+ A2137                                             SNMPv3 KDF                80001F88043030303030         SNMPv3
+                        [SP 800-135rev1] (CVL)
+                                                                             343935323630
+                        KDF SSH [SP 800-                                     SHA-1, SHA2-256, SHA2-
+ A2137                                             SSHv2 KDF                                              SSH
+                        135rev1] (CVL)                                       512
+                                                   TLS 1.0/1.1 KDF, TLS1.2   TLS v1.0/1.1
+                        KDF TLS [SP 800-135rev1]
+ A2137                                             KDF                       TLS v1.2 Hash Algorithm:     TLS
+                        (CVL)
+                                                                             SHA2-256, SHA2-384
+                        RSA KeyGen                 RSA KeyGen                                             Key Pair Generation
+ A2137                                                                       2048, 3072, and 4096 bits
+                        (FIPS 186-4)               (FIPS 186-4)
+                                                                             (ANSI X9.31, RSASSA-
+                                                                             PKCS1_v1-5, RSASSA-
+                        RSA SigGen                 RSA SigGen                                             Signature Generation
+ A2137                                                                       PSS): 2048, 3072, and
+                        (FIPS 186-4)               (FIPS 186-4)
+                                                                             4096-bit with hashes
+                                                                             SHA2-256/384/512
+                                                                             (ANSI X9.31, RSASSA-
+                                                                             PKCS1_v1-5, RSASSA-
+                                                                             PSS): 2048, 3072, 4096-bit
+                                                                             (per IG C.F) with hashes
+                                                                             SHA-1 and SHA2-
+                        RSA SigVer                 RSA SigVer
+ A2137                                                                       224+++/256/384/512           Signature Verification
+                        (FIPS 186-4)               (FIPS 186-4)
+                                                                             (Signature Verification)
+
+                                                                             +++ This Hash algorithm is
+                                                                             not supported for ANSI
+                                                                             X9.31
+                                                                                                          Digital Signature
+                                                                                                          Generation/Verification
+                                                                             SHA-1
+ A2137                  SHA-1 [FIPS 180-4]         SHA
+                                                                                                          Non-Digital Signature
+                                                                                                          Applications (e.g.
+                                                                                                          component of HMAC)
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                          WildFire 10.1 WF-500 Security Policy 6
+         CAVP Cert             Algorithm and               Mode/Method              Description / Key               Use / Function
+                                 Standard                                             Size(s) / Key
+                                                                                       Strength(s)
+                                                                                                                Digital Signature
+                                                                                                                Generation/Verification
+ A2137                     SHA2-224 [FIPS 180-4]     SHA2                         SHA-224
+                                                                                                                Non-Digital Signature
+                                                                                                                Applications (e.g.
+                                                                                                                component of HMAC)
+                                                                                                                Digital Signature
+                                                                                                                Generation/Verification
+ A2137                     SHA2-256 [FIPS 180-4]     SHA2                         SHA-256
+                                                                                                                Non-Digital Signature
+                                                                                                                Applications (e.g.
+                                                                                                                component of HMAC)
+                                                                                                                Digital Signature
+                                                                                                                Generation/Verification
+ A2137                     SHA2-384 [FIPS 180-4]     SHA2                         SHA-384
+                                                                                                                Non-Digital Signature
+                                                                                                                Applications (e.g.
+                                                                                                                component of HMAC)
+                                                                                                                Digital Signature
+                                                                                                                Generation/Verification
+ A2137                     SHA2-512 [FIPS 180-4]     SHA2                         SHA-512
+                                                                                                                Non-Digital Signature
+                                                                                                                Applications (e.g.
+                                                                                                                component of HMAC)
+                           Safe Primes Key           Safe Primes Key                                            Safe Primes Key
+ A2137                                                                            MODP-2048
+                           Generation [RFC 3526]     Generation                                                 Generation
+                           Safe Primes Key           Safe Primes Key                                            Safe Primes Key
+ A2137                                                                            MODP-2048
+                           Verification [RFC 3526]   Verification                                               Verification
+                                                                                                                Key Wrapping. AES-CBC
+                                                     SP 800-38A, FIPS 198-1,
+                                                                                  128, 192, and 256-bit keys    or AES-CTR with HMAC-
+ AES Cert. #A2137 and      KTS                       and SP 800-38F. KTS (key
+                                                                                  providing 128, 192, or 256    SHA-1, HMAC-SHA2-256,
+ HMAC Cert. #A2137         [SP 800-38F]              wrapping and unwrapping)
+                                                                                  bits of encryption strength   HMAC-SHA2-384, or
+                                                     per IG D.G.
+                                                                                                                HMAC-SHA2-512
+                                                     SP 800-38D and SP 800-
+                                                                                  128 and 256-bit keys
+                           KTS                       38F. KTS (key wrapping
+ AES-GCM Cert. #A2137                                                             providing 128 or 256 bits     Key Wrapping. AES-GCM.
+                           [SP 800-38F]              and unwrapping) per IG
+                                                                                  of encryption strength
+                                                     D.G.
+ ESV Cert. #E130                                                                  Palo Alto Networks RTC
+                           SP 800-90B                ESV                                                        Entropy
+                                                                                  Entropy Source
+ KAS-ECC-SSC Cert.                                   SP 800-56Arev3. KAS-ECC      P-256, P-384 curves
+                                                                                                                Key Exchange with
+ #A2137, KDF IKEv2 Cert.   KAS [SP 800-56Arev3]      per IG D.F Scenario 2 path   providing 128 or 192 bits
+                                                                                                                protocol KDF
+ #A2137                                              (2).                         of encryption strength
+ KAS-ECC-SSC Cert.                                                                P-256, P-384, and P-521
+                                                     SP 800-56Arev3. KAS-ECC
+ #A2137, KDF SSH Cert.                                                            curves providing 128, 192,    Key Exchange with
+                           KAS [SP 800-56Arev3]      per IG D.F Scenario 2 path
+ #A2137                                                                           or 256 bits of encryption     protocol KDF
+                                                     (2).
+                                                                                  strength
+ KAS-ECC-SSC Cert.                                                                P-256, P-384, and P-521
+                                                     SP 800-56Arev3. KAS-ECC
+ #A2137, KDF TLS Cert.                                                            curves providing 128, 192,    Key Exchange with
+                           KAS [SP 800-56Arev3]      per IG D.F Scenario 2 path
+ #A2137                                                                           or 256 bits of encryption     protocol KDF
+                                                     (2).
+                                                                                  strength
+ KAS-FFC-SSC Cert.                                   SP 800-56Arev3. KAS-FFC
+                                                                                  2048-bit key providing 112    Key Exchange with
+ #A2137, KDF IKEv2 Cert.   KAS [SP 800-56Arev3]      per IG D.F Scenario 2 path
+                                                                                  bits of encryption strength   protocol KDF
+ #A2137                                              (2).
+ KAS-FFC-SSC Cert.                                   SP 800-56Arev3. KAS-FFC
+                                                                                  2048-bit key providing 112    Key Exchange with
+ #A2137, KDF SSH Cert.     KAS [SP 800-56Arev3]      per IG D.F Scenario 2 path
+                                                                                  bits of encryption strength   protocol KDF
+ #A2137                                              (2).
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                               WildFire 10.1 WF-500 Security Policy 7
+       CAVP Cert              Algorithm and           Mode/Method                Description / Key               Use / Function
+                                Standard                                           Size(s) / Key
+                                                                                    Strength(s)
+ KAS-FFC-SSC Cert.                                SP 800-56Arev3. KAS-FFC
+                                                                               2048-bit key providing 112    Key Exchange with
+ #A2137, KDF TLS Cert.    KAS [SP 800-56Arev3]    per IG D.F Scenario 2 path
+                                                                               bits of encryption strength   protocol KDF
+ #A2137                                           (2).
+                                                                                                             Key Generation
+
+                                                                                                             Note: The seeds used for
+                                                                               Cryptographic Key
+ Vendor                   CKG                                                                                asymmetric key pair
+                                                  Section 5.1, Section 5.2     Generation; SP 800-
+ Affirmed                 [ SP 800-133rev2]                                                                  generation are produced
+                                                                               133 and IG D.I.
+                                                                                                             using the
+                                                                                                             unmodified/direct output
+                                                                                                             of the DRBG
+
+
+
+*The module is compliant to IG C.H: GCM is used in the context of TLS, IPsec/IKEv2, and SSH:
+        ● For TLS, The GCM implementation meets Scenario 1 of IG C.H: it is used in a manner compliant with SP
+          800-52 and in accordance with Section 4 of RFC 5288 for TLS key establishment, and ensures when
+          the nonce_explicit part of the IV exhausts all possible values for a given session key, that a new TLS
+          handshake is initiated per sections 7.4.1.1 and 7.4.1.2 of RFC 5246. During operational testing, the
+          module was tested against an independent version of TLS and found to behave correctly.
+                 o From this RFC 5288, the GCM cipher suites in use are
+                     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                     TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, and
+                     TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384.)
+        ● For IPsec/IKEv2, The GCM implementation meets Scenario 1 of IG C.H: it is used in a manner compliant
+          with RFCs 4106 and 7296 (RFC 5282 is not applicable, as the module does not use GCM within IKEv2
+          itself), and ensures when the module exhausts all possible values for a given session key that this
+          triggers a rekey condition. During operational testing, the module was tested against an independent
+          version of IPsec with IKEv2 and found to behave correctly.
+        ● For SSH, the module meets Scenario 1 of IG C.H. The module conforms to RFCs 4252, 4253, and 5647.
+          The fixed field is 4-byte in length and is derived using the SSH KDF; this ensures the fixed field is
+          unique for any given GCM session. The invocation field is 8-byte in length and is incremented for each
+          invocation of GCM; this prevents the IV from repeating until the entire invocation field space of 264 is
+          exhausted, which can take hundreds of years. (In FIPS-CC Mode, SSH rekey is automatically configured
+          at 1 GB of data or 1 hour, whichever comes first.)
+
+In all the above cases, the nonce_explicit is always generated deterministically. AES GCM keys are zeroized when
+the module is power-cycled. For each new TLS or SSH session, a new AES GCM key is established.
+
+
+The module is compliant to IG C.F:
+The module utilizes approved modulus sizes 2048, 3072, and 4096 bits for RSA signatures. This functionality has
+been CAVP tested as noted above. The minimum number of Miller Rabin tests for each modulus size is
+implemented according to Table C.2 of FIPS 186-4. For modulus size 4096 the module implements the largest
+number of Miller-Rabin tests shown in Table C.2. RSA SigVer is CAVP tested for all three supported modulus sizes
+as noted above. The module does not perform FIPS 186-2 SigVer. All supported modulus sizes are CAVP testable
+and tested as noted above. The module does not implement RSA key transport in the approved mode.
+
+
+The cryptographic module does not support Non-Approved Algorithms Allowed in the Approved Mode of
+Operation.
+
+© 2025 Palo Alto Networks, Inc.                                                            WildFire 10.1 WF-500 Security Policy 8
+The cryptographic module supports the following non-Approved algorithms that are allowed for use in the Approved mode
+of operation:
+
+
+
+                Table 4 - Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed
+
+                    Algorithm                          Caveat                               Use / Function
+                   MD5             Only allowed as the PRF in TLSv1.1 per IG          Message digest used in TLSv1.0
+                                   2.4.AOnly allowed as the PRF in TLSv1.0 and v1.1   /v1.1 KDF only
+                                   per IG 2.4.A
+
+
+
+The cryptographic module supports the following non-approved algorithms not allowed for use in the approved mode of
+operation.
+
+
+                                         Table 5 - Supported Protocols in the Approved Mode
+
+                                                    Supported Protocols*
+                         TLS v1.1, 1.2
+                         SSHv2
+                         SNMPv3
+                         IPsec and IKEv2
+
+(*): These protocols have not been tested or reviewed by the CMVP or the CAVP.
+
+(**): See vendor imposed security rule in Security Rules section
+
+
+
+The module does not have any algorithms that fall under:
+
+    ●   Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+    ●   Non-Approved Algorithms
+
+
+
+
+Module Diagrams
+Figures 1 - 5 depict the module and its interfaces. The cryptographic boundary includes the physical perimeter of the
+enclosure of the appliance with the physical kit installed and all logical components within.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                WildFire 10.1 WF-500 Security Policy 9
+                                           Figure 1 - Front view of WF-500
+
+
+
+
+                                  Figure 2 - Front view of WF-500 with opacity shield
+
+
+
+
+                                  Figure 3 - Rear view of WF-500 with opacity shield
+
+
+
+
+                                  Figure 4 - Right side of WF-500 with opacity shields
+
+
+
+
+                                  Figure 5 - Left side of WF-500 with opacity shields
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                     WildFire 10.1 WF-500 Security Policy 10
+3.     Cryptographic Module Interfaces
+The WF-500 provides the following ports and interfaces:
+
+
+
+
+                                          Figure 6 - Front Ports and Interfaces
+
+
+
+
+                                          Figure 7 - Rear Ports and Interfaces
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                   WildFire 10.1 WF-500 Security Policy 11
+                                                 Table 6 - Ports and Interfaces
+
+                        Physical Port                    Logical Interface           Data that passes over
+                                                                                        port/interface
+             1      Power Button and Reset         Control input                  None
+             2      Front LED Panel                Status output                  LED information for
+                                                                                  module’s status
+             3      Drive LEDs                     Status output                  LED information
+             4      Power                          Power Input                    None
+             5      DB9                            Data input, Control input,     Console access (Note: In the
+                                                   Data output, Status output,    Approved mode, the Console
+                                                   Control output                 port is only available as
+                                                                                  Status output)
+             6      USB                            Disabled except for power      None -- disabled except for
+                                                                                  power out
+             7      RJ45                           Data input, Control input,     Used for TLS and SSH
+                                                   Data output, Status output,
+                                                   Control output
+                                                   Data input, Data Output        Used for TLS and SSH
+                                                   Data input, Control input,     SSH and or IKE/IPsec
+                                                   Data output, Status output
+                                                   Data input, Control input,     SSH and or IKE/IPsec
+                                                   Data output, Status output
+             8      UID Button with LED            Control input, Status output   LED information to help
+                                                                                  identify device
+
+
+                 NOTE: Port number 8 (VGA) is omitted intentionally because it is disabled and so N/A.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                      WildFire 10.1 WF-500 Security Policy 12
+4.      Roles, Services, and Authentication
+Services
+When initialized into the Approved mode of operation, all authenticated services are accessed via SSH or TLS sessions.
+Approved and allowed algorithms, relevant CSPs and public keys related to these protocols are accessed to support the
+following services. CSP access by services is further described in the following tables.
+
+The Crypto-Officer (CO) may access all services and has the ability to define multiple Crypto-Officer roles. The User role
+provides read-only access to the system via the System Audit service. The Peer-to-Peer VPN role consists in managing the
+establishment of VPN connections between several WildFire WF-500 modules.
+
+                                      Table 7 – Roles, Service Commands, Input and Output
+
+             Role                           Service                          Input                            Output
+ CO                            Show Version                     Query module for version             Module provides version
+
+
+ CO                            System Operational               Configuring and managing             Confirmation of service
+                               Management                       networking parameter                 via System Logs
+                                                                configuration, logging
+                                                                configuration, and other
+                                                                non-security relevant
+                                                                configuration via CLI
+ CO                            System Configuration             Configuring and managing             Confirmation of service
+                               Management                       cryptographic parameters             via System Logs
+                                                                and setting/modifying
+                                                                security policy, including
+                                                                creating User accounts and
+                                                                additional CO accounts via
+                                                                CLI
+ CO                            Data Analysis Management         Configure data submission,           Confirmation of service
+                                                                analysis and reporting               via System Logs
+                                                                functions via CLI
+ CO                            Check Status                     Query status of the module           Module status
+                                                                via CLI                              information via CLI or
+                                                                                                     System Logs
+ User                          System Audit                     View the System Logs via             System Logs
+                                                                CLI
+
+ Peer-to-Peer VPN              IKE/IPsec configuration          Initialize VPN connection            Confirmation of service
+                                                                                                     via System Logs
+
+ Unauthenticated               Zeroize                          Initialize Factory Reset via         Console Output
+                                                                Maintenance Mode
+
+ Unauthenticated               Self-Tests                       Power removal                        Console Output
+
+
+ Unauthenticated               Show Status                      N/A                                  LEDs
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                             WildFire 10.1 WF-500 Security Policy 13
+    CO                          Configuration Management        Configuring and managing        Confirmation of service
+                                                                cryptographic parameters        via Configuration/System
+                                                                and setting/modifying           Logs
+                                                                communication
+
+
+Assumption of Roles
+The module supports distinct operator roles. The cryptographic module enforces the separation of roles using unique
+authentication credentials associated with operator accounts.
+
+The module supports concurrent operators with identity-based authentication.
+
+The module does not provide a maintenance role or bypass capability.
+
+                                              Table 8 – Roles and Authentication
+
+                   Role                Authentication Method                       Authentication Strength
+                                    Username/password and/or           Password-based
+          Crypto-Officer (CO)       certificate/public key-based       Minimum length is eight (8) characters2 (95
+                                    authentication                     possible characters). The probability that a
+                                                                       random attempt will succeed or a false
+                                                                       acceptance will occur is 1/(958) which is less
+                                                                       than 1/1,000,000. The probability of
+                                                                       successfully authenticating to the module
+                                                                       within one minute is 10/(958), which is less
+                                                                       than 1/100,000. The module’s configuration
+                                                                       supports at most ten failed attempts to
+                                                                       authenticate in a one-minute period.
+
+                                                                       Certificate/Public key-based
+                                                                       The security modules support public-key based
+                                    Username/password and/or           authentication using RSA 2048 and certificate-
+          User                                                         based authentication using RSA 2048, RSA
+                                    certificate/public key-based
+                                    authentication                     3072, RSA 4096, ECDSA P-256, P-384, or P-
+                                                                       521.
+
+                                                                       The minimum equivalent strength supported is
+                                                                       112 bits. The probability that a random
+                                                                       attempt will succeed is 1/(2112) which is less
+                                                                       than 1/1,000,000. The probability of
+                                                                       successfully authenticating to the module
+                                                                       within a one minute period is 3,600,000/(2112),
+                                                                       which is less than 1/100,000. The module
+                                                                       supports at most 60,000 new sessions per
+                                                                       second to authenticate in a one-minute period.
+                                                                       Certificate/Public key-based
+                                    Username/password and/or
+                                                                       The security modules support public-key based
+          Peer-to-peer VPN          certificate-based
+                                                                       authentication using RSA 2048 and certificate-
+                                    authentication
+                                                                       based authentication using RSA 2048, RSA
+
+
+2
+ In FIPS-CC Mode, the module checks and enforces the minimum password length of eight (8) as specified in SP 800-63B.
+Passwords are securely stored hashed with salt value, with very restricted access control, and rate limiting mechanism for
+authentication attempts.
+
+© 2025 Palo Alto Networks, Inc.                                                        WildFire 10.1 WF-500 Security Policy 14
+                                                                                      3072, RSA 4096, ECDSA P-256, P-384, or P-
+                                                                                      521.
+
+                                                                                      The minimum equivalent strength supported is
+                                                                                      112 bits. The probability that a random
+                                                                                      attempt will succeed is 1/(2112) which is less
+                                                                                      than 1/1,000,000. The probability of
+                                                                                      successfully authenticating to the module
+                                                                                      within a one minute period is 3,600,000/(2112),
+                                                                                      which is less than 1/100,000. The module
+                                                                                      supports at most 60,000 new sessions per
+                                                                                      second to authenticate in a one-minute period.
+
+
+
+
+CSP Access Rights
+The following table defines the access to CSPs and the different module services. While in the Approved mode, all
+authenticated services and CSPs are accessed via authenticated TLS or SSH sessions. Approved and allowed algorithms,
+relevant CSPs, and public keys related to these protocols are used to access the services as listed in Table 15. The modes
+of access shown in the table are defined as:
+
+         G = Generate: The module generates or derives the SSP.
+
+         R = Read: The SSP is read from the module (e.g. the SSP is output).
+
+         W = Write: The SSP is updated, imported, or written to the module.
+
+         E = Execute: The module uses the SSP in performing a cryptographic operation.
+
+         Z = Zeroise: The module zeroises the SSP.
+
+                                                              Table 9 – Approved Services
+
+     Service          Description            Approved Security Functions       Keys and/or SSPs        Roles       Access rights to       Indicator
+                                                                                                                  Keys and/or SSPs
+                   Query the module                                            N/A                CO              N/A                 Version displayed
+ Show Version      to display the      N/A                                                                                            via System Logs /
+                   version                                                                                                            CLI
+                                       CKG                                     RSA Private Keys   CO              G/W/E               System Logs
+                                       RSA KeyGen (FIPS 186-4)
+                                       RSA SigGen (FIPS 186-4)
+                                       CKG                                     ECDSA Private                      G/W/E
+                                       ECDSA KeyGen                            Keys
+                                       (FIPS 186-4)
+                                       ECDSA SigGen
+                   Perform system      (FIPS 186-4)
+                   management                               KDF TLS (CVL)      TLS Pre-Master                     G/E/Z
+                   functions                                                   Secret
+ System
+                   including
+ Operational                                                KDF TLS (CVL)      TLS Master                         G/E/Z
+                   firmware updates,
+ Management                                                                    Secret
+                   licensing,
+                   diagnostics and
+                                                            CKG,               TLS DHE/ECDHE                      G/E/Z
+                   debug functions.
+                                       KAS                  ECDSA KeyGen       Private
+                                                            (FIPS 186-4),      Components
+                                                            ECDSA KeyVer
+                                                                               TLS DHE/ECDHE                      G/E/R/W/Z
+                                                            (FIPS 186-4),
+                                                                               Public
+                                                            KAS-ECC-SSC,
+                                                                               Components
+                                                            KAS-FFC-SSC,
+                                                            Safe Primes Key
+                                                            Generation, Safe
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                          WildFire 10.1 WF-500 Security Policy 15
+                                                  Primes Key
+                                                  Verification
+
+                                                  HMAC-SHA2-         TLS HMAC Keys                G/E/Z
+                                                  256
+                                                  HMAC-SHA2-
+                              KTS                 384
+                                                                     TLS Encryption               G/E/Z
+                                                  AES-CBC            Keys
+
+
+                              KTS                 AES-GCM
+
+                                                                     SSH                          G/E/Z
+                                                                     DHE/ECDHE
+                                                  KDF SSH (CVL)
+                                                                     Private
+                                                                     Components
+
+                              KAS                 KAS-ECC-SSC        SSH                          G/E/R/W/Z
+                                                  KAS-FFC-SSC        DHE/ECDHE
+                                                  Safe Primes Key    Public
+                                                  Generation, Safe   Components
+                                                  Primes Key
+                                                  Verification
+                                                  HMAC-SHA-1         SSH Session                  G/E/Z
+                                                  HMAC-SHA2-         Authentication
+                                                  256                Keys
+                                                  HMAC-SHA2-
+                              KTS
+                                                  512
+
+                                                  AES-CBC,           SSH Session                  G/E/Z
+                                                  AES-CTR            Encryption Keys
+
+
+                              KTS                 AES-GCM
+
+                                                                     CO, User                     G/E/W
+                              N/A                                    Password
+
+                                                                     Entropy Input                G/E
+                                                                     String
+                                                                     DRBG Seed
+                              Counter DRBG, ESV
+                                                                     DRBG V
+                                                                     DRBG Key
+                                                                     IPSec/IKE                    G/E/Z
+                                                                     DHE/ECDHE
+                                                  KDF IKEv2 (CVL)
+                                                                     Public
+                                                                     Components
+                                                  CKG,               IPSec/IKE                    G/E/Z
+                                                  ECDSA KeyGen       DHE/ECDHE
+                                                  (FIPS 186-4),      Private
+                              KAS                 ECDSA KeyVer       Components
+                                                  (FIPS 186-4),
+                                                  KAS-ECC-SSC,
+                                                  KAS-FFC-SSC,
+                                                  Safe Primes Key
+                                                  Generation, Safe
+                                                  Primes Key
+                                                  Verification
+                                                  HMAC-SHA2-         IPSec/IKE                    G/E/Z
+                                                  256                Authentication
+                                                  HMAC-SHA2-         Keys
+                                                  384
+                              KTS                 HMAC-SHA2-
+                                                  512
+                                                                     IPSec/IKE Session
+                                                  AES-CBC            Keys
+
+                                                                     IPSec/IKE Session            G/E/Z
+                              KTS                 AES-GCM            Keys
+
+
+                              N/A                                    Protocol Secrets             W/E
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                          WildFire 10.1 WF-500 Security Policy 16
+                                                                              RSA Public Keys                   G/R/E/W
+                                       RSA SigVer (FIPS 186-4)
+
+                                                                              ECDSA Public                      G/R/E/W
+                                       ECDSA SigVer (FIPS 186-4)              Keys
+
+                                       RSA SigVer (FIPS 186-4)                SSH Client Public                 W/E
+                                                                              Key
+
+                                       RSA SigVer (FIPS 186-4)                SSH Host Public                   G/R/E/W
+                                       ECDSA SigVer (FIPS 186-4)              Key
+
+                                       HMAC-SHA2-256,                         Firmware                          E
+                                       ECDSA SigVer                           Integrity Check
+                                       (FIPS 186-4)                           Key
+                                                                              Public key for                    W/E
+                                                                              firmware load
+                                       RSA SigVer (FIPS 186-4)
+                                                                              test
+
+
+                                       CKG                                    RSA Private Keys    CO            G/W/E           System Logs
+                                       RSA KeyGen (FIPS 186-4)
+                                       RSA SigGen (FIPS 186-4)
+                                       CKG                                    ECDSA Private                     G/W/E
+                                       ECDSA KeyGen                           Keys
+                                       (FIPS 186-4)
+                                       ECDSA SigGen
+                                       (FIPS 186-4)
+                                                           KDF TLS (CVL)      TLS Pre-Master                    G/E/Z
+                                                                              Secret
+
+                                                           KDF TLS (CVL)      TLS Master                        G/E/Z
+                                                                              Secret
+
+                 Presents                                  CKG,               TLS DHE/ECDHE                     G/E/Z
+                 configuration                             ECDSA KeyGen       Private
+                 options for           KAS                 (FIPS 186-4),      Components
+                 management                                ECDSA KeyVer       TLS DHE/ECDHE                     G/E/R/W/Z
+                 interfaces and                            (FIPS 186-4),      Public
+                 communication                             KAS-ECC-SSC,       Components
+                 for peer services.                        KAS-FFC-SSC,
+                                                           Safe Primes Key
+                 Import, Export,                           Generation, Safe
+                 Save, Load, revert                        Primes Key
+                 and validate                              Verification
+                 configurations
+                                                                              SSH                               G/E/Z
+ System          and state.
+                                                                              DHE/ECDHE
+ Configuration                                             KDF SSH (CVL)
+                                                                              Private
+ Management      Define access
+                                                                              Components
+                 control methods
+                 via admin role        KAS                 KAS-ECC-SSC        SSH                               G/E/R/W/Z
+                 profiles, configure                       KAS-FFC-SSC        DHE/ECDHE
+                 administrators/us                         Safe Primes Key    Public
+                 ers, and password                         Generation, Safe   Components
+                 profiles.                                 Primes Key
+                                                           Verification
+                 Configure                                 HMAC-SHA-1         SSH Session                       G/E/Z
+                 operators and                             HMAC-SHA2-         Authentication
+                 authentication                            256                Keys
+                 profiles.                                 HMAC-SHA2-
+                                       KTS
+                                                           512
+                                                           AES-CBC,           SSH Session                       G/E/Z
+                                                           AES-CTR            Encryption Keys
+
+
+                                       KTS                 AES-GCM
+
+                                                                              CO, User                          G/E/W
+                                       N/A                                    Password
+
+                                                                              Entropy Input                     G/E
+                                                                              String
+                                       Counter DRBG, ESV                      DRBG Seed
+                                                                              DRBG V
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                        WildFire 10.1 WF-500 Security Policy 17
+                                                                        DRBG Key
+                                  KDF SNMP (CVL)                        SNMPv3                            W/E
+                                                                        Authentication
+                                                                        Secret
+                                  KDF SNMP (CVL)                        SNMPv3 Privacy                    W/E
+                                                                        Secret
+
+                                  HMAC-SHA-1                            Authentication                    G/E/Z
+                                  HMAC-SHA2-224                         Key
+                                  HMAC-SHA2-256
+                                  HMAC-SHA2-384
+                                  HMAC-SHA2-512
+                                  AES-CFB128                            Session Key                       G/E/Z
+
+
+                                                                        IPSec/IKE                         G/E/Z
+                                                                        DHE/ECDHE
+                                                     KDF IKEv2 (CVL)
+                                                                        Public
+                                                                        Components
+                                                     CKG,               IPSec/IKE                         G/E/Z
+                                                     ECDSA KeyGen       DHE/ECDHE
+                                                     (FIPS 186-4),      Private
+                                  KAS                ECDSA KeyVer       Components
+                                                     (FIPS 186-4),
+                                                     KAS-ECC-SSC,
+                                                     KAS-FFC-SSC,
+                                                     Safe Primes Key
+                                                     Generation, Safe
+                                                     Primes Key
+                                                     Verification
+                                                     HMAC-SHA2-         IPSec/IKE                         G/E/Z
+                                                     256                Authentication
+                                                     HMAC-SHA2-         Keys
+                                                     384
+                                  KTS                HMAC-SHA2-
+                                                     512
+                                                                        IPSec/IKE Session
+                                                     AES-CBC            Keys
+
+                                                                        IPSec/IKE Session                 G/E/Z
+                                  KTS                AES-GCM            Keys
+
+
+                                  N/A                                   Protocol Secrets                  W/E
+
+                                  RSA SigVer (FIPS 186-4)               SSH Host Public                   G/R/E/W
+                                  ECDSA SigVer (FIPS 186-4)             Key
+
+                                  HMAC-SHA2-256,                        Firmware                          E
+                                  ECDSA SigVer                          Integrity Check
+                                  (FIPS 186-4)                          Key
+                                  CKG                                   RSA Private Keys    CO            G/W/E           System Logs
+                                  RSA KeyGen (FIPS 186-4)
+                                  RSA SigGen (FIPS 186-4)
+                                  CKG                                   ECDSA Private                     G/W/E
+                                  ECDSA KeyGen                          Keys
+                                  (FIPS 186-4)
+                                  ECDSA SigGen
+                                  (FIPS 186-4)
+                                                     KDF TLS (CVL)      TLS Pre-Master                    G/E/Z
+                 Configure data
+                                                                        Secret
+                 submission,
+ Data Analysis
+                 analysis and
+ Management                                          KDF TLS (CVL)      TLS Master                        G/E/Z
+                 reporting
+                                                                        Secret
+                 functions.
+                                                     CKG,               TLS DHE/ECDHE                     G/E/Z
+                                  KAS                ECDSA KeyGen       Private
+                                                     (FIPS 186-4),      Components
+                                                     ECDSA KeyVer       TLS DHE/ECDHE                     G/E/R/W/Z
+                                                     (FIPS 186-4),      Public
+                                                     KAS-ECC-SSC,       Components
+                                                     KAS-FFC-SSC,
+                                                     Safe Primes Key
+                                                     Generation, Safe
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                  WildFire 10.1 WF-500 Security Policy 18
+                                                      Primes Key
+                                                      Verification
+
+                                                      HMAC-SHA2-         TLS HMAC Keys                    G/E/Z
+                                                      256
+                                                      HMAC-SHA2-
+                                  KTS                 384
+                                                                         TLS Encryption                   G/E/Z
+                                                      AES-CBC            Keys
+
+
+                                  KTS                 AES-GCM
+
+                                                                         SSH                              G/E/Z
+                                                                         DHE/ECDHE
+                                                      KDF SSH (CVL)
+                                                                         Private
+                                                                         Components
+
+                                  KAS                 KAS-ECC-SSC        SSH                              G/E/R/W/Z
+                                                      KAS-FFC-SSC        DHE/ECDHE
+                                                      Safe Primes Key    Public
+                                                      Generation, Safe   Components
+                                                      Primes Key
+                                                      Verification
+                                                      HMAC-SHA-1         SSH Session                      G/E/Z
+                                                      HMAC-SHA2-         Authentication
+                                                      256                Keys
+                                                      HMAC-SHA2-
+                                  KTS
+                                                      512
+
+                                                      AES-CBC,           SSH Session                      G/E/Z
+                                                      AES-CTR            Encryption Keys
+
+
+                                  KTS                 AES-GCM
+
+                                                                         CO, User                         G/E/W
+                                  N/A                                    Password
+
+                                                                         DRBG Seed                        G/E
+                                                                         DRBG V
+                                  Counter DRBG, ESV                      DRBG Key
+                                                                         Entropy Input
+                                                                         String
+                                  CKG                                    RSA Private Keys   CO            G/W/E           System Logs
+                                  RSA KeyGen (FIPS 186-4)
+                                  RSA SigGen (FIPS 186-4)
+                                  CKG                                    ECDSA Private                    G/W/E
+                                  ECDSA KeyGen                           Keys
+                                  (FIPS 186-4)
+                                  ECDSA SigGen
+                                  (FIPS 186-4)
+                                                                         SSH                              G/E/Z
+                                                                         DHE/ECDHE
+                                                      KDF SSH (CVL)
+                                                                         Private
+                                                                         Components
+                Review system,
+                                  KAS                 KAS-ECC-SSC        SSH                              G/E/R/W/Z
+                configuration,
+                                                      KAS-FFC-SSC        DHE/ECDHE
+ Check Status   debug logs, and
+                                                      Safe Primes Key    Public
+                show
+                                                      Generation, Safe   Components
+                configurations.
+                                                      Primes Key
+                                                      Verification
+                                                      HMAC-SHA-1         SSH Session                      G/E/Z
+                                                      HMAC-SHA2-         Authentication
+                                                      256                Keys
+                                                      HMAC-SHA2-
+                                  KTS
+                                                      512
+                                                      AES-CBC,           SSH Session                      G/E/Z
+                                                      AES-CTR            Encryption Keys
+
+
+                                  KTS                 AES-GCM
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                  WildFire 10.1 WF-500 Security Policy 19
+                                                                             CO, User                            G/E/W
+                                      N/A                                    Password
+
+                                                                             DRBG Seed                           G/E
+                                                                             DRBG V
+                                      Counter DRBG, ESV                      DRBG Key
+                                                                             Entropy Input
+                                                                             String
+                                      KDF SNMP (CVL)                         SNMPv3                              W/E
+                                                                             Authentication
+                                                                             Secret
+                                      KDF SNMP (CVL)                         SNMPv3 Privacy                      W/E
+                                                                             Secret
+
+                                      HMAC-SHA-1                             Authentication                      G/E/Z
+                                      HMAC-SHA2-224                          Key
+                                      HMAC-SHA2-256
+                                      HMAC-SHA2-384
+                                      HMAC-SHA2-512
+                                      AES-CFB128                             Session Key                         G/E/Z
+
+
+                                      CKG                                    RSA Private Keys   CO               G/W/E           System Logs
+                                      RSA KeyGen (FIPS 186-4)
+                                      RSA SigGen (FIPS 186-4)
+                                      CKG                                    ECDSA Private                       G/W/E
+                                      ECDSA KeyGen                           Keys
+                                      (FIPS 186-4)
+                                      ECDSA SigGen
+                                      (FIPS 186-4)
+                                                                             SSH                                 G/E/Z
+                                                                             DHE/ECDHE
+                                                          KDF SSH (CVL)
+                                                                             Private
+                                                                             Components
+
+                                      KAS                 KAS-ECC-SSC        SSH                                 G/E/R/W/Z
+                                                          KAS-FFC-SSC        DHE/ECDHE
+                                                          Safe Primes Key    Public
+                 Allows review of
+                                                          Generation, Safe   Components
+                 limited
+                                                          Primes Key
+                 configuration and
+                                                          Verification
+                 system status via
+ System Audit    logs, dashboard                          HMAC-SHA-1         SSH Session                         G/E/Z
+                 and configuration                        HMAC-SHA2-         Authentication
+                 screens. Provides                        256                Keys
+                 no configuration                         HMAC-SHA2-
+                                      KTS
+                 commit capability.                       512
+                                                          AES-CBC,           SSH Session                         G/E/Z
+                                                          AES-CTR            Encryption Keys
+
+
+                                      KTS                 AES-GCM
+
+                                                                             CO, User                            G/E/W
+                                      N/A                                    Password
+
+                                                                             Entropy Input                       G/E
+                                                                             String
+                                                                             DRBG Seed
+                                      Counter DRBG, ESV
+                                                                             DRBG V
+                                                                             DRBG Key
+                                      CKG                                    RSA Private Keys   Peer-to-Peer     G/W/E           System Logs
+                                      RSA KeyGen (FIPS 186-4)                                   VPN
+                                      RSA SigGen (FIPS 186-4)
+                 Configures           CKG                                    ECDSA Private                       G/W/E
+ IKE/IPsec       IKE/IPsec setup      ECDSA KeyGen                           Keys
+ Configuration   for peer to peer     (FIPS 186-4)
+                 VPN.                 ECDSA SigGen
+                                      (FIPS 186-4)
+                                                                             Entropy Input                       G/E
+                                      Counter DRBG
+                                                                             String
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                                         WildFire 10.1 WF-500 Security Policy 20
+                                                                            DRBG Seed
+                                                                            DRBG V
+                                                                            DRBG Key
+                                                                            IPSec/IKE                          G/E/Z
+                                                                            DHE/ECDHE
+                                                         KDF IKEv2 (CVL)
+                                                                            Public
+                                                                            Components
+                                                         CKG,               IPSec/IKE                          G/E/Z
+                                                         ECDSA KeyGen       DHE/ECDHE
+                                                         (FIPS 186-4),      Private
+                                     KAS                 ECDSA KeyVer       Components
+                                                         (FIPS 186-4),
+                                                         KAS-ECC-SSC,
+                                                         KAS-FFC-SSC,
+                                                         Safe Primes Key
+                                                         Generation, Safe
+                                                         Primes Key
+                                                         Verification
+                                                         HMAC-SHA2-         IPSec/IKE                          G/E/Z
+                                                         256                Authentication
+                                                         HMAC-SHA2-         Keys
+                                                         384
+                                     KTS                 HMAC-SHA2-
+                                                         512
+                                                                            IPSec/IKE Session
+                                                         AES-CBC            Keys
+
+                                                                            IPSec/IKE Session                  G/E/Z
+                                     KTS                 AES-GCM            Keys
+
+                                                                            RSA Public Keys                    G/R/E/W
+                                     RSA SigVer (FIPS 186-4)
+                                                                            CA Certificates
+
+                                                                            ECDSA Public                       G/R/E/W
+                                     ECDSA SigVer (FIPS 186-4)              Keys
+                                                                            CA Certificates
+                                                                                                                               Console Output /
+                 Destroys all keys
+ Zeroize                             N/A                                    All Keys and SSPs   CO             Z               Zeroization
+                 in the module
+                                                                                                                               indicator
+                 Run power up                                                                   CO             E               System Logs
+                 self-tests on       HMAC-SHA2-256,                         Firmware
+ Self-Tests      demand by power     ECDSA SigVer                           Integrity Check
+                 cycling the         (FIPS 186-4)                           Key
+                 module.
+                 View hardware
+                 status of the
+ Show Status                         N/A                                    N/A                 All            N/A             LEDs
+                 module via the
+                 LEDs.
+
+
+
+
+5.         Software/Firmware Security
+The module performs the Firmware Integrity test by using HMAC-SHA-256 and ECDSA signature verification (HMAC and
+ECDSA Cert. #A2137) during the Pre-Operational Self-Test. In addition, the module also conducts the firmware load test
+by using the Public Verification Key (RSA 2048 with SHA-256, Cert. #A2137) for the new validated firmware to be
+uploaded into the module via the System Operational Management service. The Firmware Integrity Verification key and
+Public key for Firmware Content Load Test used for the Firmware Integrity and Firmware Load test, respectively, are
+generated externally and delivered as part of the module firmware image.
+
+The pre-operational self-tests can be initiated by power cycling the module. When this is performed, the module
+automatically runs the cryptographic algorithm self-tests in addition to the pre-operational firmware integrity test.
+
+
+© 2025 Palo Alto Networks, Inc.                                                                       WildFire 10.1 WF-500 Security Policy 21
+The module’s executable code is in the form of the compiled firmware image loaded onto the module.
+
+
+
+
+6.      Operational Environment
+The FIPS 140-3 Operational Environment requirements are not applicable. The operational environment is limited since the
+Module includes a firmware load service to support necessary updates. New firmware versions within the scope of this
+validation must be validated through the FIPS 140-3 CMVP. Any other firmware loaded into this module is out of the
+scope of this validation and requires a separate FIPS 140-3 validation.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                   WildFire 10.1 WF-500 Security Policy 22
+7.      Physical Security
+Physical Security Mechanisms
+The multi-chip standalone module is production quality and contains standard passivation. Chip components are protected
+by an opaque enclosure. There are tamper-evident seals that are applied on the module by the Crypto-Officer, and any
+unused seals are to be controlled by the Crypto-Officer. The Crypto-Officer must ensure that the module surface is clean
+and dry before applying the seals. The seals prevent removal of the opaque enclosure without evidence, which should be
+inspected by the Crypto-Officer every 30 days for evidence of tampering. If the seals or opacity shields show evidence of
+tamper, the Crypto-Officer should assume that the module has been compromised and contact Customer Support.
+
+Note: For ordering information, see Table 1 for physical kit part numbers and version. Opacity shields are included in the
+physical kits.
+
+Refer to Appendix A for instructions regarding installation of the tamper seals and opacity shields. Tamper-evident seals
+must be pressed firmly onto the adhering surfaces during installation, and once applied, the Crypto-Officer shall permit 24
+hours of cure time for all tamper-evident seals. The placement of the twelve (12) tamper-evident seals are shown in
+Appendix A.
+
+Operator Required Actions
+The following table provides information regarding the various physical security mechanisms, and their recommended
+frequency of inspection/test.
+
+                                        Table 10 - Physical Security Inspection Guidelines
+
+         Physical Security Mechanism          Recommended Frequency                    Inspection/Test Guidance Details
+                                                 of Inspection/Test
+     Tamper-Evident Seals                    30 days                             Verify integrity of tamper-evident seals in
+                                                                                 the locations specified in Appendix A.
+     Front and Rear Opacity Shields          30 days                             Verify that the front and rear opacity shields
+                                                                                 have not been deformed from their original
+                                                                                 shape, thereby reducing their effectiveness.
+     Vent Overlays                           30 days                             Verify that the vent overlays have not been
+                                                                                 removed or deformed. All edges should
+                                                                                 maintain strong adhesion characteristics.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                              WildFire 10.1 WF-500 Security Policy 23
+ 8.          Non-Invasive Security
+ There are currently no defined Approved non-invasive attack mitigation test metrics in SP 800-140F.
+
+
+
+
+ 9.          Sensitive Security Parameter Management
+ The following table details all the sensitive security parameters utilized by the module.
+
+ “TLS or SSH Session Key Encrypted” corresponds to the following KTS entries listed in the Approved Algorithms table:
+
+       ●     AES Cert. #A2137, HMAC Cert. #A2137
+       ●     AES-GCM Cert. #A2137
+
+ “IPSec/IKE, KAS SP 800-56A Rev. 3” corresponds to the following KAS entries listed in the Approved Algorithms table:
+
+       ●     KAS-ECC-SSC Cert. #A2137, KDF IKEv2 Cert. #A2137
+       ●     KAS-FFC-SSC Cert. #A2137, KDF IKEv2 Cert. #A2137
+
+ “SSH, KAS SP 800-56A Rev. 3” corresponds to the following KAS entries listed in the Approved Algorithms table:
+
+       ●     KAS-ECC-SSC Cert. #A2137, KDF SSH Cert. #A2137
+       ●     KAS-FFC-SSC Cert. #A2137, KDF SSH Cert. #A2137
+
+ “TLS, KAS SP 800-56A Rev. 3” corresponds to the following KAS entries listed in the Approved Algorithms table:
+
+       ●     KAS-ECC-SSC Cert. #A2137, KDF TLS Cert. #A2137
+       ●     KAS-FFC-SSC Cert. #A2137, KDF TLS Cert. #A2137
+
+                                                                  Table 11 – SSPs
+
+Key/SSP/Name/T     Strength     Security     Generatio    Import/Export   Establishment     Storage          Zeroization      Use & Related Keys
+      ype                     Function and      n
+                              Cert. Number
+                                                                                                                            ECDSA/RSA Public key
+                                                                                                                            - Used to trust a root
+                              RSA SigVer
+                              (FIPS 186-4)                                                               HDD – Zeroize      CA intermediate CA
+                              ECDSA                       TLS or SSH                                     Service            and leaf /end entity
+                  112 bits                   DRBG,                                        HDD/RAM –
+CA Certificates               SigVer (FIPS                Session Key     N/A                            RAM - Zeroize at   certificates
+                  minimum     186-4)
+                                             FIPS 186-4                                   plaintext
+                                                          Encrypted                                      session            (RSA 2048, 3072, and
+                                                                                                         termination        4096 bits)
+                              Cert. #A2137
+                                                                                                                            (ECDSA P-256, P-384,
+                                                                                                                            and P-521)
+                                                                                                                            RSA public keys
+                                                                                                                            managed as
+                                                                                                                            certificates for the
+                                                          TLS or SSH
+                                                                                                                            verification of
+                                                          Session Key
+                              RSA SigVer                                                                                    signatures,
+                  112 bits                   DRBG,        Encrypted or                    HDD/RAM –
+RSA Public Keys               (FIPS 186-4)                                N/A                            Zeroize Service    establishment of TLS,
+                  minimum     Cert. #A2137
+                                             FIPS 186-4   Plaintext                       plaintext
+                                                                                                                            operator
+                                                          TLS
+                                                                                                                            authentication and
+                                                          handshake
+                                                                                                                            peer authentication.
+                                                                                                                            (RSA 2048, 3072, or
+                                                                                                                            4096-bit)
+
+
+
+
+  © 2025 Palo Alto Networks, Inc.                                                                     WildFire 10.1 WF-500 Security Policy 24
+                                                                                                                                RSA Private keys for
+                                                                                                           HDD – Zeroize        generation of
+                              RSA SigGen                   TLS or SSH                                      Service              signatures,
+                   112 bits                   DRBG,                                         HDD/RAM –
+RSA Private Keys              (FIPS 186-4)                 Session Key       N/A                           RAM - Zeroize at     authentication or key
+                   minimum    Cert. #A2137
+                                              FIPS 186-4                                    plaintext
+                                                           Encrypted                                       session              establishment.
+                                                                                                           termination          (RSA 2048, 3072, or
+                                                                                                                                4096-bit)
+                                                                                                                                ECDSA public keys
+                                                                                                                                managed as
+                                                                                                                                certificates for the
+                                                           TLS or SSH
+                                                                                                                                verification of
+                              ECDSA                        Session Key
+                                                                                                                                signatures,
+ECDSA Public       128 bits   SigVer (FIPS    DRBG,        Encrypted or                     HDD/RAM –
+                                                                             N/A                           Zeroize Service      establishment of TLS,
+Keys               minimum    186-4)          FIPS 186-4   Plaintext                        plaintext
+                              Cert. #A2137                                                                                      operator
+                                                           TLS
+                                                                                                                                authentication and
+                                                           handshake
+                                                                                                                                peer authentication.
+                                                                                                                                (ECDSA P-256, P-384,
+                                                                                                                                or P-521)
+                                                                                                                                ECDSA Private key for
+                                                                                                           HDD – Zeroize
+                              ECDSA                                                                                             generation of
+                                                           TLS or SSH                                      Service
+ECDSA Private      128 bits   SigGen          DRBG,                                         HDD/RAM –                           signatures and
+                                                           Session Key       N/A                           RAM - Zeroize at
+Keys               minimum    (FIPS 186-4)    FIPS 186-4                                    plaintext                           authentication
+                              Cert. #A2137                 Encrypted                                       session
+                                                                                                                                (P-256, P-384, or P-
+                                                                                                           termination
+                                                                                                                                521)
+                                                                                                                                Ephemeral Diffie-
+                              KAS-ECC-                                                                                          Hellman private FFC or
+TLS DHE/ECDHE                                 DRBG, SP
+                   112 bits   SSC                                                           RAM -          Zeroize at session   EC component used in
+Private                                       800-56A      N/A               N/A
+                   minimum    KAS-FFC-SSC                                                   plaintext      termination          TLS
+Components                    Cert. #A2137    Rev. 3
+                                                                                                                                (DHE 2048, ECDHE P-
+                                                                                                                                256, P-384, P-521)
+                                                                                                                                Diffie_Hellman or EC
+                              KAS-ECC-                                                                                          Diffie-Hellman
+TLS DHE/ECDHE                                 DRBG, SP
+                   112 bits   SSC                          Plaintext - TLS                                 Zeroize at session   Ephemeral values used
+Public                                        800-56A                        N/A            N/A
+                   minimum    KAS-FFC-SSC                  handshake                                       termination          in key agreement
+Components                    Cert. #A2137    Rev. 3
+                                                                                                                                (DHE 2048, ECDHE P-
+                                                                                                                                256, P-384, P-521)
+                                              KAS-ECC-                                                                          Secret value used to
+                              KDF TLS
+                                              SSC or                                                                            derive the TLS Master
+                              Cert. #A2137,                                  TLS, KAS SP
+TLS Pre-Master                                KAS-FFC-                                      RAM –          Zeroize at session
+                   N/A        MD5 (No                      N/A               800-56A Rev.                                       Secret along with
+Secret                        Security
+                                              SSC, SP
+                                                                             3
+                                                                                            plaintext      termination
+                                              800-56A                                                                           client and server
+                              Claimed                                                                                           random nonces
+                                              Rev. 3
+                              KDF TLS
+                              Cert. #A2137,                                  TLS, KAS SP                                        Secret value used to
+TLS Master                                                                                  RAM –          Zeroize at session
+                   N/A        MD5 (No         KDF TLS      N/A               800-56A Rev.                                       derive the TLS session
+Secret                        Security                                       3
+                                                                                            plaintext      termination
+                                                                                                                                keys
+                              Claimed
+                                                                                                                                AES (128 or 256 bit)
+                              AES-CBC or                                     TLS, KAS SP
+TLS Encryption     128 bits                                                                 RAM -          Zeroize at session   keys used in TLS
+                              AES-GCM         KDF TLS      N/A               800-56A Rev.
+Keys               minimum    Cert. #A2137                                   3
+                                                                                            plaintext      termination          connections (GCM;
+                                                                                                                                CBC)
+                              HMAC-                                                                                             HMAC keys used in TLS
+                              SHA2-256                                       TLS, KAS SP
+                   160 bits                   TLS KDF                                       RAM -          Zeroize at session   connections (SHA-1,
+TLS HMAC Keys                 HMAC-                        N/A               800-56A Rev.
+                   minimum    SHA2-384
+                                              (CVL)                          3
+                                                                                            plaintext      termination          256, 384)
+                              Cert. #A2137                                                                                      (160, 256, 384 bits)
+                                                                                                                                Diffie Hellman or EC
+SSH DHE/ECDHE                 KAS-ECC-        DRBG, SP                                                                          Diffie-Hellman private
+                   112 bits   SSC                                                           RAM -          Zeroize at session
+Private                                       800-56A      N/A               N/A                                                (DH Group 14, ECDH P-
+                   minimum    KAS-FFC-SSC                                                   plaintext      termination
+Components                    Cert. #A2137    Rev. 3                                                                            256, ECDH P-384,
+                                                                                                                                ECDH P-521)
+SSH DHE/ECDHE                 KAS-ECC-        DRBG, SP     Plaintext SSH                                                        Diffie Hellman or EC
+                   112 bits   SSC                          handshake                        RAM -          Zeroize at session
+Public                                        800-56A                        N/A                                                Diffie-Hellman public
+                   minimum    KAS-FFC-SSC                                                   plaintext      termination
+Components                    Cert. #A2137    Rev. 3                                                                            component (DH Group
+
+
+
+ © 2025 Palo Alto Networks, Inc.                                                                        WildFire 10.1 WF-500 Security Policy 25
+                                                                                                                              14, ECDH P-256, ECDH
+                                                                                                                              P-384, ECDH P-521)
+                               RSA SigVer
+                               (FIPS 186-4)                                                                                   SSH Host Public Key
+SSH Host Public     112 bits   ECDSA          DRBG,                                       HDD/RAM –                           (RSA 2048, RSA 3072,
+                               SigVer (FIPS                N/A           N/A                             Zeroize Service
+Key                 minimum    186-4)
+                                              FIPS 186-4                                  plaintext                           RSA 4096, ECDSA P-
+                                                                                                                              256, P-384, or P-521)
+                               Cert. #A2137
+                                                                                                                              Public RSA key used to
+SSH Client Public   112 bits   RSA SigVer                  TLS or SSH                     HDD/RAM –                           authenticate client.
+                               (FIPS 186-4)   N/A          Session Key   N/A                             Zeroize Service
+Key                 minimum    Cert. #A2137                Encrypted
+                                                                                          plaintext                           (RSA 2048, 3072, and
+                                                                                                                              4096 bits)
+                                                                                                                              Used in all SSH
+                                                                                                                              connections to the
+                               AES-CBC,                                                                                       security module’s
+                                                                         SSH, KAS SP
+SSH Session         128 bits   AES-CTR, or                                                RAM -          Zeroize at session   command line
+                                              N/A          N/A           800-56A Rev.
+Encryption Keys     minimum    AES-GCM
+                                                                         3
+                                                                                          plaintext      termination          interface.
+                               Cert. #A2137                                                                                   (128, 192, or 256 bits:
+                                                                                                                              CBC or CTR)
+                                                                                                                              (128 or 256 bits: GCM)
+                                                                                                                              Authentication keys
+                                                                                                                              used in all SSH
+                               HMAC-SHA-
+                               1                                                                                              connections to the
+SSH Session                    HMAC-                                     SSH, KAS SP                                          security module’s
+                    160 bits                                                              RAM -          Zeroize at session
+Authentication                 SHA2-256       N/A          N/A           800-56A Rev.                                         command line
+                    minimum    HMAC-                                     3
+                                                                                          plaintext      termination
+Keys                                                                                                                          interface (HMAC-SHA-
+                               SHA2-512                                                                                       1, HMAC-SHA2-256,
+                               Cert. #A2137
+                                                                                                                              HMAC-SHA2-512)
+                                                                                                                              (160, 256, 512 bits)
+                                                                                                                              Diffie-Hellman or EC
+IPSec/IKE                      KAS-ECC-                                                                                       Diffie-Hellman private
+                                              DBRG, SP
+DHE/ECDHE           112 bits   SSC                                                        RAM -                               component used in
+                                              800-56A      N/A           N/A                             Power cycle
+Private             minimum    KAS-FFC-SSC                                                plaintext                           key establishment
+                               Cert. #A2137   Rev. 3
+Components                                                                                                                    (DHE 2048, ECDHE P-
+                                                                                                                              256, P-384)
+                                                                                                                              Diffie-Hellman or EC
+IPSec/IKE                      KAS-ECC-                                                                                       Diffie-Hellman public
+                                              DRBG, SP
+DHE/ECDHE           112 bits   SSC                                                        RAM -                               component used in
+                                              800-56A      N/A           N/A                             Power cycle
+Public              minimum    KAS-FFC-SSC                                                plaintext                           key agreement
+                               Cert. #A2137   Rev. 3
+Components                                                                                                                    (DHE 2048, ECDHE P-
+                                                                                                                              256, P-384)
+                                                                                                                              Used to encrypt
+                               AES-CBC,                                  IPSec/IKE, KAS
+IPSec/IKE Session   128 bits                                                              RAM -          Zeroize at session   IKE/IPSec data. These
+                               AES-GCM        N/A          N/A           SP 800-56A
+Keys                minimum    Cert. #A2137                              Rev. 3           plaintext      termination          are AES CBC or GCM
+                                                                                                                              (128 or 256 bits).
+                               HMAC-                                                                                          (HMAC-SHA-256, SHA-
+                               SHA2-256                                                                                       384 or SHA-512) Used
+IPSec/IKE                      HMAC-                                     IPSec/IKE, KAS
+                    256 bits                                                              RAM -          Zeroize at session   to authenticate the
+Authentication                 SHA2-384       N/A          N/A           SP 800-56A
+                    minimum    HMAC-                                     Rev. 3           plaintext      termination          peer in an IKE/IPSec
+Keys
+                               SHA2-512                                                                                       tunnel connection.
+                               Cert. #A2137                                                                                   (256, 384, 512 bits)
+                                                                                                                              Authentication string
+                                                           TLS or SSH                     HDD - a
+CO, User                                                                                                                      with a minimum
+                    N/A        N/A            External     Session Key   N/A              password       Zeroize Service
+Password                                                   Encrypted                                                          length of eight (8)
+                                                                                          hash
+                                                                                                                              characters.
+                                                                                          HDD–
+                                                           TLS or SSH                                                         Secrets used by
+                                                                                          Plaintext
+Protocol Secrets    N/A        N/A            External     Session Key   N/A                             Zeroize Service      RADIUS or TACACS+ (8
+                                                           Encrypted                      RAM –
+                                                                                                                              characters minimum)
+                                                                                          Plaintext
+                               CKG (vendor                                                                                    DRBG input string
+Entropy Input                                 Entropy                                     RAM -
+                    194 bits   affirmed),                  N/A           N/A                             Power cycle          coming from the
+String                                        as per                                      plaintext
+                               Counter                                                                                        entropy source
+
+
+
+  © 2025 Palo Alto Networks, Inc.                                                                     WildFire 10.1 WF-500 Security Policy 26
+                                   DRBG Cert.       SP 800-
+                                   #A2137           90B                                                                                    Input length = 384 bits
+                                   CKG (vendor
+                                                                                                                                           DRBG seed coming
+                                   affirmed),       Entropy
+                                                                                                                                           from the entropy
+                                   Counter          as per                                             RAM -
+DRBG Seed           194 bits                                      N/A               N/A                                  Power cycle       source
+                                   DRBG Cert.       SP 800-                                            Plaintext
+                                   #A2137           90B
+                                                                                                                                           Seed length = 384 bits
+
+                                   CKG (vendor
+                                   affirmed),       Entropy                                                                                AES 256 CTR DRBG
+                                   Counter          as per                                             RAM -                               State (V) used in the
+DRBG V              128 bits                                      N/A               N/A                                  Power cycle
+                                   DRBG Cert.       SP 800-                                            plaintext                           generation of random
+                                   #A2137           90B                                                                                    values
+
+                                   CKG (vendor
+                                   affirmed),       Entropy                                                                                AES 256 CTR DRBG
+                                   Counter          as per                                             RAM -                               State (Key) used in the
+DRBG Key            256 bits                                      N/A               N/A                                  Power cycle
+                                   DRBG Cert.       SP 800-                                            plaintext                           generation of random
+                                   #A2137           90B                                                                                    values
+
+                                                                                                                                           Used to support
+SNMPv3                             KDF SNMP                       TLS or SSH
+                                                                                                       HDD/RAM –                           SNMPv3 services
+Authentication      N/A            (CVL) Cert.      N/A           Session Key       N/A                                  Zeroize Service
+                                                                  Encrypted                            plaintext                           (Minimum 8
+Secret                             #A2137
+                                                                                                                                           characters)
+                                                                                                                                           Used to support
+                                   KDF SNMP                       TLS or SSH
+SNMPv3 Privacy                                                                                         HDD/RAM –                           SNMPv3 services
+                    N/A            (CVL) Cert.      N/A           Session Key       N/A                                  Zeroize Service
+Secret                                                            Encrypted                            plaintext                           (Minimum 8
+                                   #A2137
+                                                                                                                                           characters)
+                                   HMAC-SHA-
+                                   1
+                                   HMAC-
+                                   SHA2-224                                                                                                HMAC–SHA-
+                                   HMAC-
+Authentication      160 bits                        SNMPv3                                             HDD/RAM -                           1/224/256/384/512
+                                   SHA2-256                       N/A               N/A                                  Zeroize Service
+Key                 minimum        HMAC-            KDF (CVL)                                          Plaintext                           Authentication
+                                   SHA2-384                                                                                                protocol key (160 bits)
+                                   HMAC-
+                                   SHA2-512
+                                   Cert. #A2137
+                                                                                                                                           Privacy protocol
+                    128 bits       AES-CFB128       SNMPv3                                             HDD/RAM -                           encryption key
+Session Key                                                       N/A               N/A                                  Zeroize Service
+                    minimum        Cert. #A2137     KDF (CVL)                                          Plaintext                           (AES 128/192/256
+                                                                                                                                           CFB128)
+                                                                                                       HDD –                               Used to authenticate
+Public key for      112                                           Import only,                         Plaintext as                        firmware and content to
+                                   RSA SIgVer       Factory       TLS or SSH
+firmware content    bits2048                                                        N/A                part of           N/A               be installed on the
+                                   Cert. #A2137     preload       Session Key
+load test           bits                                                                               firmware                            appliance (RSA 2048
+                                                                  Encrypted
+                                                                                                       image                               with SHA-256)
+
+                                                                                                                                           Used to check the
+                                   ECDSA SigVer                                                                                            integrity of all
+                                                                                                       HDD –
+                                   Cert.                          Import only,                                                             software code (HMAC-
+Firmware                                                                                               Plaintext as
+                                   #A2137,          Factory       TLS or SSH                                                               SHA-256* and ECDSA
+Integrity Check     256 bits                                                        N/A                part of           N/A
+                                   HMAC-SHA2-       preload       Session Key                                                              P-256)
+Key                                                               Encrypted                            firmware
+                                   256 Cert.                                                                                               *Keys used to perform
+                                                                                                       image
+                                   #A2137                                                                                                  power-up self-tests are
+                                                                                                                                           not CSPs
+
+
+
+ Note: SSPs are implicitly zeroized when power cycling and explicitly zeroized when using the zeroize service.
+
+
+
+
+ © 2025 Palo Alto Networks, Inc.                                                                                      WildFire 10.1 WF-500 Security Policy 27
+                             Table 12 - Non-Deterministic Random Number Generation Specification
+
+           Entropy Source          Minimum number                                     Details
+                                   of bits of entropy
+                                                           ESV Cert. #E130
+
+                                                           The entropy source provides at least 0.506 bits of
+                                                           entropy per bit of output. The DRBG is seeded with 384-
+                                                           bits of output from the entropy source. Therefore the
+       Palo Alto Networks RTC                              DRBG is seeded with at least 194 bits of entropy before
+                                        194 bits
+           Entropy Source                                  generating keys.
+
+                                                           The module generates SSPs (e.g., keys) whose strengths
+                                                           are modified by available entropy
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                        WildFire 10.1 WF-500 Security Policy 28
+10. Self-Tests
+The module design corresponds to the module security rules. This section documents the security rules enforced by the
+cryptographic module to implement the security requirements of a FIPS 140-3 Level 2 module.
+
+            1. The cryptographic module shall provide distinct operator roles. When the module has not been placed in a
+               valid role, the operator shall not have access to any cryptographic services.
+            2. The cryptographic module shall clear previous authentications on power cycle.
+            3. The cryptographic module performs the following tests
+                    A. Pre-operational Self-Tests
+                             1. Firmware Integrity Test –verified with HMAC-SHA-256 and ECDSA P-256*
+                                 *Note: the ECDSA and HMAC-SHA-256 KATs are performed prior to the Firmware
+                                 integrity test
+                    B. Conditional self-tests
+                             1. Cryptographic algorithm self-tests
+                                     a. AES 128-bit ECB Encrypt Known Answer Test*
+                                     b. AES 128-bit ECB Decrypt Known Answer Test*
+                                     c. AES 128-bit CMAC Known Answer Test*
+                                     d. AES 256-bit GCM Encrypt Known Answer Test
+                                     e. AES 256-bit GCM Decrypt Known Answer Test
+                                     f. AES 192-bit CCM Encrypt Known Answer Test*
+                                     g. AES 192-bit CCM Decrypt Known Answer Test*
+                                     h. RSA 2048-bit PKCS#1 v1.5 with SHA-256 Sign Known Answer Test
+                                     i. RSA 2048-bit PKCS#1 v1.5 with SHA-256 Verify Known Answer Test
+                                     j. RSA 2048-bit Encrypt Known Answer Test*
+                                     k. RSA 2048-bit Decrypt Known Answer Test*
+                                     l. ECDSA P-256 with SHA-512 Sign Known Answer Test
+                                     m. ECDSA P-256 with SHA-512 Verify Known Answer Test
+                                     n. HMAC-SHA-1 Known Answer Test
+                                     o. HMAC-SHA-256 Known Answer Test
+                                     p. HMAC-SHA-384 Known Answer Test
+                                     q. HMAC-SHA-512 Known Answer Test
+                                     r. SHA-1 Known Answer Test
+                                     s. SHA-256 Known Answer Test
+                                     t. SHA-384 Known Answer Test
+                                     u. SHA-512 Known Answer Test
+                                     v. DRBG Instantiate/Generate/Reseed SP800-90A Known Answer Tests
+                                     w. SP 800-90A Instantiate/Generate/Reseed Section 11.3 Health Tests
+                                     x. KAS-FFC-SSC 2048-bit Known Answer Test
+                                     y. KAS-ECC-SSC P-256 Known Answer Test
+                                     z. SP 800-135 TLS 1.0/1.1 KDF KAT
+                                     aa. SP 800-135 TLS 1.2 with SHA-256 KDF KAT
+                                     bb. SP 800-135 SSH KDF KAT
+                                     cc. SP 800-135 IKE KDF KAT
+                                     dd. Continuous Random Number Generator (RNG) test – performed on DRBG
+                                     ee. SP 800-90B RCT/APT Health Tests on Entropy Source
+                                 *Note: Supported by the module cryptographic implementation, but only utilized for CAST
+                             2. Pairwise Consistency Self-Tests
+                                     a. RSA Pairwise Consistency Test
+                                     b. ECDSA/KAS-ECC Pairwise Consistency Test
+                                     c. KAS-FFC Pairwise Consistency Test
+                             3. Software/firmware Load test
+                                     a. Firmware Load Test – Verify RSA 2048 with SHA-256 signature on firmware at
+                                          time of load
+
+© 2025 Palo Alto Networks, Inc.                                                    WildFire 10.1 WF-500 Security Policy 29
+                               4. Critical Functions Tests
+                                       a. SP 800-56A Rev. 3 Assurance Tests (Based on Sections 5.5.2, 5.6.2, and 5.6.3)
+
+If any self-tests or conditional tests fail, the module will output ‘FIPS-CC failure’ and the specific test that failed.
+
+             1. Power-up self-tests shall not require any operator action.
+             2. The operator shall be capable of commanding the module to perform the power-up self-test by power
+                 cycling the module.
+             3. Data output shall be inhibited during power-up self-tests and error states.
+             4. Processes performing key generation and zeroization processes shall be logically isolated from the logical
+                 data output paths.
+             5. The module does not output intermediate key generation values.
+             6. Status information output from the module shall not contain CSPs or sensitive data that if misused could
+                 lead to a compromise of the module.
+             7. There are no restrictions on which keys or CSPs are zeroized by the zeroization service.
+             8. The module maintains separation between concurrent operators.
+             9. The module does not support a maintenance interface or role.
+             10. The module does not have any external input/output devices used for entry/output of data.
+             11. The module does not allow the input or output of plaintext CSPs.
+             12. The module provides a warning, “Your device is still configured with the default admin account credentials.
+                 Please change your password prior to deployment.” to inform the operator to change their default
+                 authentication data.
+
+
+
+
+11. Life-cycle Assurance
+The vendor provided life-cycle assurance documentation that describes configuration management, design, finite state
+model, development, testing, delivery + operation, end of life procedures, and guidance. For details regarding the secure
+installation, initialization, startup, and operation of the module, see section “Approved Mode of Operation” in Section 2.
+
+Palo Alto Network provides an Administrator Guide for additional information noted in the “References” section of this
+Security Policy
+
+Vendor imposed security rules
+In FIPS-CC mode, the following rules shall apply:
+
+             1. If the cryptographic module remains inactive in any valid role for the administrator specified time interval,
+                the module automatically logs out the operator.
+             2.
+             3. The module enforces a timed access protection mechanism that supports at most ten authentication
+                attempts per minute. After the administrator-specified number of consecutive unsuccessful password
+                validation attempts have occurred, the cryptographic module shall enforce a wait period of at least one (1)
+                minute before any more login attempts can be attempted.
+             4. In FIPS-CC mode, the following rules shall apply:
+                     A. The operator should not enable TLSv1.0 or use RSA for key wrapping; it is disabled by default.
+                               ■ Checked via CLI using “show shared” command
+
+                      B. If using RADIUS, it must be configured using TLS.
+
+
+© 2025 Palo Alto Networks, Inc.                                                            WildFire 10.1 WF-500 Security Policy 30
+                                   ■ Checked via CLI using “show shared” command
+
+
+Failure to follow these Security Rules will cause the module to operate in a non-compliant state.
+
+
+
+
+12. Mitigation of Other Attacks
+The module is not designed to mitigate any specific attacks outside the scope of FIPS 140-3. These requirements are not
+applicable.
+
+
+
+13. References
+[FIPS 140-3] FIPS Publication 140-3 Security Requirements for Cryptographic Modules
+
+[AGD] WildFire Administrator’s Guide https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/pdf/wildfire/10-
+1/wildfire-admin/wildfire-admin.pdf
+
+
+
+14. Definitions and Acronyms
+AES – Advanced Encryption Standard
+CA – Certificate Authority
+CLI – Command Line Interface
+CO – Crypto-Officer
+CSP – Critical Security Parameter
+CVL – Component Validation List
+DB9 – D-sub series, E size, 9 pins
+DES – Data Encryption Standard
+DH – Diffie-Hellman
+DRBG – Deterministic Random Bit Generator
+EDC – Error Detection Code
+ECDH – Elliptical Curve Diffie-Hellman
+ECDSA – Elliptical Curve Digital Signature Algorithm
+FIPS – Federal Information Processing Standard
+HMAC – (Keyed) Hashed Message Authentication Code
+KDF – Key Derivation Function
+LED – Light Emitting Diode
+RJ45 – Networking Connector
+RNG –Random number generator
+RSA – Algorithm developed by Rivest, Shamir and Adleman
+SHA – Secure Hash Algorithm
+SNMP – Simple Network Management Protocol
+SSH – Secure Shell
+TLS – Transport Layer Security
+USB – Universal Serial Bus
+VGA – Video Graphics Array
+WF – WildFire
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                      WildFire 10.1 WF-500 Security Policy 31
+Appendix A – WF-500 Physical Kit Installation Guide (12 Tamper-Evident
+Seals)
+This section provides steps on how to install the Physical Kit on the WF-500 module.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                    WildFire 10.1 WF-500 Security Policy 32
+   Step 1:
+   Remove the two pull handles and front modules on the left and right side of the appliance by removing the three (3)
+   screws located behind each handle/module. There is no need to disconnect the LED circuit board attached to the
+   end of the ribbon cable. Retain these screws for Step 2.
+
+
+
+
+                                         Figure 8 – Remove Front Handles and Modules
+
+
+
+
+   Step 2:
+   Attach the left and right front cover brackets to the appliance using the six (6) screws that were removed in Step 1.
+   First attach the brackets using the bottom screws (one (1) on each side) as shown in Figure 9, ensuring that you feed
+   the ribbon cable and LED circuit board through the left bracket. Replace the front modules and secure them using
+   the middle and top screws on each side as shown in Figure 10.
+
+
+
+
+                                             Figure 9 – Secure the Front Brackets
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                        WildFire 10.1 WF-500 Security Policy 33
+                                        Figure 10 - Attach Pull Handles and Front Modules
+
+
+
+   Step 3:
+   Secure the front opacity shield to the right and left front brackets that you installed in Step 2. Use two (2) screws
+   (provided) on each side.
+
+
+
+
+                                             Figure 11 – Install Front Opacity Shield
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                             WildFire 10.1 WF-500 Security Policy 34
+                                            Figure 12 – Front Opacity Shield Installed
+
+
+
+
+   Step 4:
+   Attach the rear opacity shield tray to the appliance. First, remove the two (2) screws (shown in Figure 13) from the
+   appliance and use these screws to secure the rear opacity shield tray.
+   Note: Install the back cables (power cords and network/management cables) because you will not be able to access
+   these ports after the next step.
+
+
+
+
+                                           Figure 13 – Install Rear Opacity Shield Tray
+
+
+
+   Step 5:
+   Place the rear opacity shield on top of the rear opacity shield tray ensuring that you run the cables through the
+   opening at the bottom. Secure the opacity shields with two (2) screws (provided) on each side.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                           WildFire 10.1 WF-500 Security Policy 35
+                                             Figure 14 – Install Rear Opacity Shield
+
+
+
+   Step 6:
+   Cover the vent openings as shown in Figure 15 by applying one (1) overlay tamper-evident seal over the left side
+   vent and one overlay tamper-evident seal over the right side vent. Each overlay requires two (2) tamper-evident
+   seals as shown in Figure 16. Also apply one (1) additional tamper-evident seal as shown in Figure 16, #5.
+
+
+
+
+                                    Figure 15 – Apply Tamper-Evident Seals on Vent Overlays
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                         WildFire 10.1 WF-500 Security Policy 36
+                            Figure 16 – Apply Tamper-Evident Seals on Vent Overlays and Side Opening
+
+
+
+   Step 7:
+   Attach the rail kit to the appliance as shown in Figure 17 and then add three (3) tamper-evident seals to the bottom
+   of the appliance as shown in Figure 18. One (1) tamper-evident seal prevents tampering of the front opacity shield
+   connected to the bottom of the appliance and two (2) tamper-evident seals wrap around the upper and lower rear
+   opacity shields to prevent tampering of the rear opacity shields.
+
+
+
+
+                                                   Figure 17 – Install Rail Kit
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                         WildFire 10.1 WF-500 Security Policy 37
+                              Figure 18 – Apply Tamper-Evident Seals on the Bottom of the Appliance
+
+
+
+
+   Step 8:
+   Place four (4) tamper seals on the top of the appliance. Two (2) tamper seals (#9 and #11) prevent tampering of the
+   top front and rear opacity shields and two (2) tamper seals (#10 and #12) prevents someone from attempting to
+   access the vent overlays by sliding the rail kit. This completes the physical kit installation.
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                          WildFire 10.1 WF-500 Security Policy 38
+                                  Figure 19 – Apply Tamper-Evident Seals on the Top of the Appliance
+
+
+
+
+© 2025 Palo Alto Networks, Inc.                                                            WildFire 10.1 WF-500 Security Policy 39
+

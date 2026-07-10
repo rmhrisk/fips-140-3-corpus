@@ -23,6 +23,11 @@ def kpi(label, value, sub=""):
 def main():
     d = json.load(open(sys.argv[1] if len(sys.argv)>1 else "corpus_analysis.json"))
     s = d["summary"]; recs = d["records"]
+    # Modules with full pdfplumber SP extraction. Metrics that read the SP structure
+    # (TCB surfaces, document quality, review-priority) are computed over this subset;
+    # lifecycle / archetype / algorithm / drift metrics use the whole corpus.
+    frecs = [r for r in recs if r.get("full_extraction")]
+    NF = s.get("n_full_extraction", len(frecs))
     lc, rc, ex, q, ve = s["lifecycle"], s["recertification"], s["exposure"], s["quality"], s["vuln_exposure"]
     al, pq, cov, labs = s["algorithms"], s["pqc"], s["coverage"], s["labs"]
     asr = s["assurance"]
@@ -48,8 +53,8 @@ def main():
         "<div class='eyebrow'>CMVP · FIPS 140-3 validated-module corpus</div>"
         "<h1>What a FIPS 140 certificate actually tells you</h1>"
         "<p class='dek'>Read across the public corpus, FIPS certificates and their Security Policies reveal far more than a pass/fail stamp. They show the trusted-computing-base surfaces around each module, how far its components have drifted since validation, and where a security review should look first.</p>"
-        f"<div class='meta'><span>{s['n']} modules</span><span>ref {esc(cov['reference_date'])}</span>"
-        f"<span>{esc(cov['cert_number_span'])}</span><span>source: CMVP + NVD</span><span>deterministic extraction</span></div>"
+        f"<div class='meta'><span>{s['n']} modules</span><span>{NF} with full SP extraction</span><span>ref {esc(cov['reference_date'])}</span>"
+        f"<span>{esc(cov['cert_number_span'])}</span><span>source: CMVP + NVD</span></div>"
         f"<div class='kpis'>{kpi_strip}</div>"
         "</div></header>"
     )
@@ -57,6 +62,11 @@ def main():
         "<p class='lead'><b>Executive finding.</b> A FIPS certificate and its Security Policy are a structured, corpus-wide security record, and this report reads them for what they reliably deliver: a map of the <b>trusted-computing-base surfaces</b> around each module (§6), a measure of how far its named components have <b>drifted</b> since validation (§5), and a ranked view of <b>where a review should look first</b> (§9). A certificate attests one module <b>version</b>, in one approved-mode configuration, at one moment, so it is best read as a map of what to verify in a deployment, which is exactly what makes these artifacts a fast way to aim that verification.</p>"
         "<p class='fine'><b>Terminology.</b> Throughout, “certificate” / “validation” / “update” refer to the "
         "<b>CMVP FIPS 140-3 validation certificate</b> and its validation-history events — <b>not</b> an X.509/TLS certificate.</p>"
+        f"<p class='fine'><b>Corpus composition.</b> The corpus is a near-census of the {s['n']} FIPS 140-3 modules "
+        f"validated in cert window {esc(cov['cert_number_span'])}. Lifecycle, archetype, algorithm and component-drift "
+        f"findings use all {s['n']}. The Security-Policy-structure findings, TCB surfaces (§6), review-priority (§9, §10) "
+        f"and document quality (§11), require the full pdfplumber SP extraction and are computed over the <b>{NF}</b> "
+        f"modules that carry it; the rest are metadata-and-text records fetched from CMVP.</p>"
     )
     P = []
 
@@ -197,8 +207,8 @@ def main():
         HW_ARCH = ("HSM/accelerator", "Secure element/SoC", "Network appliance")
         _mf = s.get("motifs", {}).get("freq", {})
         boot = [m for m in drift if m.get("kind") in ("bootloader", "firmware")]
-        boot_any = [r for r in recs if any(mm in (r.get("motifs") or []) for mm in BOOT_MOTIFS)]
-        hw = [r for r in recs if r.get("archetype") in HW_ARCH]
+        boot_any = [r for r in frecs if any(mm in (r.get("motifs") or []) for mm in BOOT_MOTIFS)]
+        hw = [r for r in frecs if r.get("archetype") in HW_ARCH]
         hw_boot = [r for r in hw if any(mm in (r.get("motifs") or []) for mm in BOOT_MOTIFS)]
         boot_by_arch = _Ct(r["archetype"] for r in boot_any)
         table_block = ""

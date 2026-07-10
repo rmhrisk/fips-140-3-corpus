@@ -363,6 +363,11 @@ def analyze_record(path):
     labs = sorted({(v.get("lab") or "").strip() for v in (c.get("validationHistory") or []) if v.get("lab")})
     return {
         "cert": r.get("certNumber"), "std": std,
+        # full pdfplumber SP extraction (tables/services/etc.) vs metadata+text only.
+        # Extraction-dependent metrics (TCB motifs, doc quality, review-priority) are
+        # scoped to the full-extraction subset; lifecycle/archetype/algorithms/drift
+        # are metadata-derivable and use the whole corpus.
+        "full_extraction": (r.get("extraction") or {}).get("level") != "metadata+text",
         "vendor": (c.get("vendor") or {}).get("name"),
         "module": c.get("moduleName"),
         "level": c.get("overallLevel"), "type": c.get("moduleType"),
@@ -408,7 +413,12 @@ def summarize(rows):
     def nums(key): return [r[key] for r in rows if isinstance(r.get(key),(int,float))]
     def med(xs): return round(st.median(xs),1) if xs else None
     def mean(xs): return round(st.mean(xs),1) if xs else None
-    out = {"n": len(rows)}
+    # Modules with full pdfplumber SP extraction. Metrics that depend on the SP
+    # structure (interfaces, TCB motifs, document quality, and the reachability that
+    # drives review-priority) are computed over this subset; lifecycle, archetype,
+    # algorithm and drift metrics use the whole corpus.
+    frows = [r for r in rows if r.get("full_extraction")]
+    out = {"n": len(rows), "n_full_extraction": len(frows)}
     out["lifecycle"] = {
         "submission_months (SP first->initial validation)": {"n":len(nums("submission_months")),"median":med(nums("submission_months")),"mean":mean(nums("submission_months")),"max":max(nums("submission_months")or[0])},
         "sp_authoring_months": {"n":len(nums("sp_authoring_months")),"median":med(nums("sp_authoring_months")),"mean":mean(nums("sp_authoring_months"))},
@@ -428,7 +438,7 @@ def summarize(rows):
         "update_count_dist": dict(Counter(r["n_updates"] for r in rows)),
     }
     out["exposure"] = {
-        "interface_freq": dict(Counter(i for r in rows for i in r["interfaces"]).most_common()),
+        "interface_freq": dict(Counter(i for r in frows for i in r["interfaces"]).most_common()),
         "algo_family_freq": dict(Counter(f for r in rows for f in r["families"]).most_common()),
         "pqc_adoption_pct": round(100*sum(1 for r in rows if r["pqc"])/max(1,len(rows)),1),
         "level_dist": dict(Counter(r["level"] for r in rows)),
@@ -448,7 +458,7 @@ def summarize(rows):
             "pct_never_updated": round(100*sum(1 for r in rows if r["archetype"]==a and r["n_updates"]==0)/max(1,sum(1 for r in rows if r["archetype"]==a)),0),
             "median_months_stale": med([r["months_since_last_validation"] for r in rows
                                         if r["archetype"]==a and r["months_since_last_validation"] is not None]),
-            "reachability_mix": dict(Counter(r["reachability"] for r in rows if r["archetype"]==a)),
+            "reachability_mix": dict(Counter(r["reachability"] for r in frows if r["archetype"]==a)),
         } for a in archs},
     }
     prio_rank = {"Critical":3,"High":2,"Medium":1,"Low":0}
@@ -461,9 +471,9 @@ def summarize(rows):
         if (r["months_since_last_validation"] or 0)>=18: bits.append(f"{r['months_since_last_validation']}mo stale")
         if r["cve_pressure"]: bits.append(f"{r['cve_pressure']} CVEs in named component/version since cert")
         return "; ".join(bits)
-    top = sorted(rows, key=lambda r:(-prio_rank[r["review_priority"]], -(r["cve_pressure"] or 0), -(r["months_since_last_validation"] or 0)))
+    top = sorted(frows, key=lambda r:(-prio_rank[r["review_priority"]], -(r["cve_pressure"] or 0), -(r["months_since_last_validation"] or 0)))
     out["review_priority"] = {
-        "dist": dict(Counter(r["review_priority"] for r in rows).most_common()),
+        "dist": dict(Counter(r["review_priority"] for r in frows).most_common()),
         "model": "Review priority = Likelihood × Impact (ordinal). Likelihood = archetype-weighted reachability (service-conditional) + no-CMVP-validation-update + ≥18mo stale + measured CVE drift. Impact = expert prior per archetype. No weighted coefficients; every input explicit and evidence-graded. These are attack-path REVIEW CANDIDATES requiring confirmation, NOT confirmed reachable vulnerabilities.",
         "top": [{"cert":r["cert"],"module":(r["module"] or "")[:44],"archetype":r["archetype"],
                  "priority":r["review_priority"],"likelihood":r["likelihood"],"impact":r["impact"],
@@ -521,7 +531,7 @@ def summarize(rows):
     }
     # vulnerability-manifestation MOTIFS — architectural patterns where a known vuln
     # class matters. A match = the pattern is present, NOT that the module is vulnerable.
-    motif_ct = Counter(mo for r in rows for mo in r.get("motifs", []))
+    motif_ct = Counter(mo for r in frows for mo in r.get("motifs", []))
     out["motifs"] = {
         "note": ("A motif is an architectural pattern where a known vulnerability CLASS would matter, "
                  "matched from public signals (identified components, interfaces, services, archetype, SP keywords). "
@@ -580,12 +590,12 @@ def summarize(rows):
         "median_algos": med([r["n_algos"] for r in rows if r["device_class"]==c]),
     } for c in classes}
     out["quality"] = {
-        "grade_dist": dict(Counter(r["grade"] for r in rows)),
+        "grade_dist": dict(Counter(r["grade"] for r in frows)),
         "mean_clean": mean(nums("clean")), "mean_fill": mean(nums("fill")),
         "mean_grade_score": mean(nums("grade_score")),
-        "by_level": {lvl: mean([r["grade_score"] for r in rows if r["level"]==lvl])
-                     for lvl in sorted({r["level"] for r in rows if r["level"]})},
-        "by_type": {t: mean([r["grade_score"] for r in rows if r["type"]==t])
+        "by_level": {lvl: mean([r["grade_score"] for r in frows if r["level"]==lvl])
+                     for lvl in sorted({r["level"] for r in frows if r["level"]})},
+        "by_type": {t: mean([r["grade_score"] for r in frows if r["type"]==t])
                     for t in sorted({r["type"] for r in rows if r["type"]})},
     }
     # vuln-exposure lens: an active module whose last validation is old and which

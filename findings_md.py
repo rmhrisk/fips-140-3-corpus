@@ -26,8 +26,10 @@ else:
 L=[]; w=L.append
 
 w("# FIPS 140-3 Validated-Module Corpus — Findings\n")
-w(f"*n = {N} FIPS 140-3 modules, swept from the recent CMVP certificate range and normalized "
-  f"deterministically from the certificate page + Security Policy PDF. Reference date {cov['reference_date']}.*\n")
+w(f"*n = {N} FIPS 140-3 modules (a near-census of cert window {cov['cert_number_span']}), normalized "
+  f"deterministically from the certificate page + Security Policy PDF. Reference date {cov['reference_date']}. "
+  f"Lifecycle / archetype / algorithm / drift figures use all {N}; Security-Policy-structure figures (TCB motifs, "
+  f"review-priority, document quality) use the {s.get('n_full_extraction', N)} modules with full SP extraction.*\n")
 
 w("## Executive finding\n")
 w("**A FIPS 140-3 certificate proves that a specific module *version*, in a specific configuration and approved mode, was "

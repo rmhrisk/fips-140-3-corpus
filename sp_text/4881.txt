@@ -1,0 +1,757 @@
+VMware’s VPN Crypto Module
+Firmware version: 21.11
+ISO/IEC 19790 and FIPS 140-3 Non-Proprietary Security Policy
+Document version: 2.3
+VMware’s VPN Crypto Module                                                                                                                                            Security Policy Document
+
+
+
+
+Contents
+
+List of tables ............................................................................................................................................................................................................... 3
+
+List of figures .............................................................................................................................................................................................................. 3
+
+1.             General ......................................................................................................................................................................................................... 4
+
+       Security Levels                                                                                                                                                                                                          4
+
+2. Cryptographic Module Specification......................................................................................................................................................................... 5
+
+       Overall security design and the rules of operation                                                                                                                                                                       7
+
+3. Cryptographic Module Interfaces ............................................................................................................................................................................. 7
+
+4. Roles, Services, and Authentication.......................................................................................................................................................................... 7
+
+5. Software/Firmware Security ................................................................................................................................................................................... 10
+
+6. Operational Environment ....................................................................................................................................................................................... 10
+
+7. Physical Security ..................................................................................................................................................................................................... 11
+
+8. Non-invasive Security ............................................................................................................................................................................................. 11
+
+9. Sensitive Security Parameter Management ........................................................................................................................................................... 11
+
+10. Self-tests ............................................................................................................................................................................................................... 12
+
+       Pre-Operational Self-Tests                                                                                                                                                                                             12
+
+       Conditional Cryptographic Algorithm Tests                                                                                                                                                                              12
+
+11. Life-cycle Assurance.............................................................................................................................................................................................. 13
+
+       Distribution and Installation                                                                                                                                                                                          13
+
+       Configuration                                                                                                                                                                                                          13
+
+       Initialization and Setup                                                                                                                                                                                               13
+
+       Verification of the Module                                                                                                                                                                                             13
+
+       Crypto Officer Guidance                                                                                                                                                                                                13
+
+       Destruction and Zeroization                                                                                                                                                                                            14
+
+12. Mitigation of other attacks ................................................................................................................................................................................... 14
+
+Acronyms .................................................................................................................................................................................................................... 15
+
+                                                                                                                                                                                                                                     2
+
+                                                         © 2024 Broadcom Inc.
+                  This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                                                                       Security Policy Document
+
+
+
+
+List of tables
+Table 1 - ISO/IEC 24759 Section 6 Security Levels for Module Validation ........................................................................................................................ 4
+Table 2 - Tested Operational Environments ..................................................................................................................................................................... 5
+Table 3 - Approved Algorithms ......................................................................................................................................................................................... 5
+Table 4 - Ports and Interfaces ........................................................................................................................................................................................... 7
+Table 5 – Roles, Services and Command Input and Output .............................................................................................................................................. 7
+Table 6 – Approved Services for Crypto Officer ................................................................................................................................................................ 8
+Table 7 – Sensitive Security Parameters ......................................................................................................................................................................... 11
+Table 8 - Acronyms ......................................................................................................................................................................................................... 15
+
+
+
+
+List of figures
+Figure 1 – Cryptographic boundary and physical perimeter ............................................................................................................................................ 6
+
+
+
+
+                                                                                                                                                                                                                            3
+
+                                                         © 2024 Broadcom Inc.
+                  This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                  Security Policy Document
+
+
+
+
+1. General
+This is a non-proprietary Cryptographic Module Security Policy for VMware's VPN Cryptographic Module from Broadcom Inc. This Security Policy
+describes how VMware's VPN Cryptographic Module meets the security requirements of Federal Information Processing Standards (FIPS)
+Publication 140-3, which details the U.S. and Canadian Government requirements for cryptographic modules.
+
+More information about the FIPS 140-3 standard and validation program is available on the National Institute of Standards and Technology (NIST)
+and the Canadian Centre for Cyber Security (CCCS), a branch of the Communications Security Establishment (CSE), Cryptographic Module Validation
+Program (CMVP) website at https://csrc.nist.gov/projects/cryptographic-module-validation-program.
+
+This document has been written for the following audiences:
+
+ • The FIPS testing laboratory.
+
+ • The Cryptographic Module Validation Program (CMVP).
+
+ • Anyone wishing to deploy this Module in a FIPS compliant manner.
+
+
+
+Security Levels
+The module has been validated at the FIPS 140-3 section levels shown in the table below.
+
+                                        Table 1 - ISO/IEC 24759 Section 6 Security Levels for Module Validation
+
+
+      ISO/IEC 24759               FIPS 140-3 Section Title                                      Security Level
+      Section 6
+
+      1                           General                                                       1
+
+
+      2                           Cryptographic Module Specification                            1
+
+
+      3                           Cryptographic Module Interfaces                               1
+
+
+      4                           Roles, Services, and Authentication                           1
+
+
+      5                           Software/Firmware Security                                    1
+
+
+      6                           Operational Environment                                       1
+
+
+      7                           Physical Security                                             1
+
+
+      8                           Non-invasive Security                                         N/A
+
+
+      9                           Sensitive Security Parameters                                 1
+
+
+
+                                                                                                                                                  4
+
+                                                  © 2024 Broadcom Inc.
+           This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                      Security Policy Document
+
+
+
+
+      10                          Self-Tests                                                      1
+
+
+      11                          Life-Cycle Assurance                                            1
+
+
+      12                          Mitigation of Other Attacks                                     N/A
+
+
+                                  Overall Module validation level                                 1
+
+
+
+
+2. Cryptographic Module Specification
+VMware's VPN Crypto Module is a firmware cryptographic module whose purpose is to provide FIPS 140-3 validated cryptographic functions to
+various applications utilizing VPN capabilities. The module was tested and found to be compliant with FIPS 140-3 security level 1 requirements on
+the operational environments (OE) listed in Table 2.
+
+                                                         Table 2 - Tested Operational Environments
+
+
+      #    Operating System                         Hardware Platform                    Processor                             PAA/Acceleration
+
+      1    Ubuntu 20.04 running on ESXi 8.0         Dell PowerEdge R650                  Intel(R) Xeon(R) Gold 6330            Yes
+
+
+
+      2    Ubuntu 20.04 running on ESXi 8.0         Dell PowerEdge R650                  Intel(R) Xeon(R) Gold 6330            No
+
+
+
+
+Validation certificates for each Approved security function are listed in Table 3.
+
+                                                                Table 3 - Approved Algorithms
+
+
+      CAVP Cert                     Algorithm and                    Mode/Method                 Description/Key              Use / Function
+                                    Standard                                                     Size/Strengths
+
+      A4384                         AES (FIPS PUB 197)               CBC                         Key Size: 128, 192, 256      Symmetric key operation
+                                                                                                 bits
+
+      A4384                         AES (SP800-38B)                  CMAC                        Key Size: 128 bits           Symmetric key operation
+
+      A4384                         AES (SP800-38C)                  CCM                         Key Size: 128 bits           Symmetric key operation
+
+      A4384                         AES (SP800-38D)                  GCM, GMAC                   Key Size: 128,192,256 bits   Symmetric key operation
+
+      A4385                         HMAC (FIPS PUB 198-1)            SHA2-256                    Strength:256 bits            Integrity test
+
+
+
+
+                                                                                                                                                        5
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                              Security Policy Document
+
+
+
+
+      A4384                      HMAC (FIPS PUB 198-1)       HMAC-SHA-1, HMAC-SHA2-       Strength:128 to 256 bits   Authentication, Integrity
+                                                             224, HMAC-SHA2-256,                                     checks
+                                                             HMAC-SHA2-384, HMAC-
+                                                             SHA2-512
+
+      A4384                      SHS (FIPS 180-4)            SHA-1, SHA2-224, SHA2-256,   N/A                        Hashing
+                                                             SHA2-384, SHA2-512
+
+      A4385                      SHS (FIPS 180-4)            SHA2-256                     N/A                        Hashing
+
+
+
+
+The module does not use any allowed or non-approved algorithms and operates only in the Approved mode of operation.
+
+                                           Figure 1 – Cryptographic boundary and physical perimeter
+
+
+
+                              Calling Application
+
+                                               FIPS API Interface
+
+                          Librte_cryptodev.so.22.0                         Librte_crypto_post.so.22.0
+
+
+                          Librte_crypto_ipsec_mb.so.22.0                              LibIPsec_mb.so.1.3.0
+
+
+
+                    User Space
+                    Kernel Space                             Ubuntu OS
+                                                           VMware ESXi
+
+                                                          Hardware (GRPC)
+
+                                        Cryptographic Boundary                               FIPS Interface calls
+                                        Internal API calls                                Physical Perimeter
+
+
+
+                                                                                                                                                 6
+
+                                                  © 2024 Broadcom Inc.
+           This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                                    Security Policy Document
+
+
+
+
+Overall security design and the rules of operation
+When the operating system boots, the module is initialized by calling librte_crypto_post, which runs the firmware integrity test and the KATs. Once
+librte_crypto_post finishes the POST tests the module is loaded as a device driver in the operating system. Calling applications can access the
+application once it is loaded as a device driver.
+
+
+3. Cryptographic Module Interfaces
+                                                                        Table 4 - Ports and Interfaces
+
+
+      Physical Port                                   Logical Interface                                      Data that Passes over port/interface
+
+      Host computer Network Port, USB                 Data Input                                             The module accepts data input through the input
+      port, serial port                                                                                      arguments of the API functions.
+
+      Host computer Network Port, USB                 Data Output                                            The module produces data output through the
+      port, serial port                                                                                      parameters of the API functions.
+
+      Host computer Network Port, USB                 Control Input                                          The module accepts control input through the input
+      port, serial port, Power button                                                                        arguments of the API functions used to control the
+                                                                                                             module.
+
+      Host computer Network Port, USB                 Status Output                                          The module produces status output through the
+      port, serial port, LED status light                                                                    return values for function calls and error messages.
+
+      Host computer Power Port                        Power interface                                        N/A
+
+
+
+
+     The module does not implement a control output interface.
+
+
+4. Roles, Services, and Authentication
+                                                      Table 5 – Roles, Services and Command Input and Output
+
+
+      Role                                  Services                                    Input                                     Output
+
+
+
+      Crypto Officer                        Initialization of the module                None                                      None
+
+      Crypto Officer                        Run self-tests                              The self-tests may be run on demand       Results of each self-test
+                                                                                        by rebooting the OS or cycling host
+                                                                                        power.
+
+
+
+
+                                                                                                                                                                    7
+
+                                                    © 2024 Broadcom Inc.
+             This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                          Security Policy Document
+
+
+
+
+      Crypto Officer                 Show version                                API command                            The module version will be
+                                                                                                                        output to the log (“DPDK
+                                                                                                                        v21.11.2")
+
+      Crypto Officer                 Encryption                                  Key and plaintext input via API        Encrypted data
+
+      Crypto Officer                 Decryption                                  Key and ciphertext input via API       Plaintext data
+
+      Crypto Officer                 Hashing                                     Data input via API                     Hash of the input data
+
+      Crypto Officer                 Message Authentication Code (MAC)           Key input via API                      MAC of the input data
+                                                                                 Data input via API
+                                     Generation
+
+      Crypto Officer                 Zeroize                                     None                                   None
+
+      Crypto Officer                 Show Status                                 None                                   Success: “Finished Self-test
+                                                                                                                        successfully”
+
+                                                                                                                        Error State: “Failed dpdk_init”
+
+
+
+
+The module is a Level 1 firmware module and does not implement any authentication. The calling application implicitly assumes the Crypto Officer
+role when accessing the module.
+
+
+
+    G = Generate: The module generates or derives the SSP.
+
+    R = Read: The SSP is read from the module (e.g., the SSP is output).
+
+    W = Write: The SSP is updated, imported, or written to the module.
+
+    E = Execute: The module uses the SSP in performing a cryptographic operation.
+
+    Z = Zeroise: The module zeroizes the SSP.
+
+                                                        Table 6 – Approved Services for Crypto Officer
+
+
+      Service                 Description           Approved            Keys /       Access             Indicator
+                                                    Security            SSPs         Rights and
+                                                    Functions                        Keys/SSPs
+
+      Initialization of the   Initialization of     -                   -            N/A                The module is running
+      module                  the module
+
+
+
+
+                                                                                                                                                          8
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                    Security Policy Document
+
+
+
+
+    Run self-tests     The self-tests    -             -          -              The self-test results are output
+                       may be run on                                             in the log
+                       demand by
+                       rebooting the
+                       OS or cycling
+                       host power.
+
+    Show version       Show the          -             -          -              The module name and version
+                       module name                                               are output in the log
+                       and version
+
+    Show Status        Show the          -             -          -              In log messages:
+                       module is                                                 Success: “Finished Self-test
+                       either                                                    successfully”
+                       operational or                                            Error State: “Failed dpdk_init”
+                       in an error
+                       state
+
+    Zeroization        Zeroize           -             All SSPs   All SSPs: Z    The module reboot and startup
+                       unprotected                                               will be shown in the log.
+                       SSPs and key
+                       components
+
+    Encryption         Encrypt           AES modes:    AES keys   All SSPs: WE   Return values indicate success.
+                                                       and IVs:
+                       plaintext using   CBC, CCM,     128-bit,                  Null values or void pointers
+                       supplied key      CMAC,         192-bit,                  together with error logs
+                                                       256-bit
+                       and algorithm     GCM/GMAC                                indicate failures.
+                       specification
+
+    Decryption         Decrypt           AES modes:    AES keys   All SSPs: WE   Return values indicate success.
+                                                       and IVs:
+                       ciphertext        CBC, CCM,     128-bit,                  Null values or void pointers
+                       using supplied    CMAC,         192-bit,                  together with error logs
+                                                       256-bit
+                       key and           GCM/GMAC                                indicate failures.
+                       algorithm
+                       specification
+
+
+
+
+                                                                                                                         9
+
+                                                © 2024 Broadcom Inc.
+         This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                      Security Policy Document
+
+
+
+
+      Hashing                  Compute and        SHA-1, SHA2-        N/A          N/A              Return values indicate success.
+                               return a           224, SHA2-256,                                    Null values or void pointers
+                               message digest     SHA2-384,                                         together with error logs
+                               using SHA          SHA2-512                                          indicate failures.
+                               algorithm
+
+      Message                  Compute and        HMAC-SHA-1,         HMAC         All SSPs: WE     Return values indicate success.
+      Authentication           return a           HMAC-SHA2-          key, 128                      Null values or void pointers
+      Code (MAC)               hashed             224, HMAC-          to 256-                       together with error logs
+      Generation               message            SHA2-256,           bits                          indicate failures.
+                               authentication     HMAC-SHA2-
+                               code               384, HMAC-
+                                                  SHA2-512
+
+
+
+There are no non-approved services for the Crypto Officer.
+
+
+5. Software/Firmware Security
+For the purposes of a FIPS 140-3 level 1 validation, the cryptographic module is a set of files, listed here:
+
+  • librte_crypto_post.so.22.0
+
+  • librte_cryptodev.so.22.0
+
+  • libipsec_MB.so.1.3.0
+
+  • librte_crypto_ipsec_mb.so.22.0
+
+The object code in the object module file is incorporated into the runtime executable application at the time the binary executable is generated.
+The module performs no communications other than with the consuming host application (the process that invokes the module services via the
+module’s API), which can be considered as the host for the module.
+
+The module runs a HMAC SHA2-256 integrity verification during initialization by the host application. The module also runs the self-test for HMAC
+SHA2-256 prior to running the integrity test. The temporary values generated during the integrity test of the module are zeroized upon the
+completion of the integrity test. The CO can reboot the OS or cycle host power to run the integrity test on demand.
+
+
+6. Operational Environment
+The operational environment is non-modifiable. The control plane Operating System (OS) is Linux, a multi-threaded operating system that supports
+memory protection between processes. Access to the underlying Linux implementation is not provided directly.
+
+
+                                                                                                                                                    10
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                  Security Policy Document
+
+
+
+
+7. Physical Security
+The module is a firmware module with a multi-chip standalone cryptographic embodiment. The module's host platform provides production-grade
+components and chassis using standard passivation.
+
+
+8. Non-invasive Security
+The module does not implement any non-invasive security measures, so this section is not applicable.
+
+
+9. Sensitive Security Parameter Management
+                                                     Table 7 – Sensitive Security Parameters
+
+
+      SSPs          Mode and       Generation        Import/      Establishment        Storage         Zeroisation   Use and
+                    Strength                         Export                                                          Related
+                                                                                                                     Keys
+
+      AES Key       128, 192,      N/A, the key is   Imported     N/A                  Random          Reboot OS;    Encryption,
+                                                     only.
+                    256-bit keys   imported.                                           Access          Cycle host
+                                                     The key is                                                      Decryption
+                                                                                       Memory          power
+                                                     not
+                                                                                       (RAM) in
+                                                     exported
+                                                                                       plaintext
+                                                     from the
+                                                     module.
+
+      AES           128, 192,      N/A, the key is   Imported     N/A                  Random          Reboot OS;    Encryption,
+                                                     only.
+      GCM/GMAC      256-bit keys   imported.         The key is                        Access          Cycle host
+      Key                                            not                               Memory          power         Decryption
+                                                     exported
+                                                                                       (RAM) in
+                                                     from the
+                                                     module.                           plaintext
+
+      AES           96-bit IV      N/A, the key is   Imported     N/A                  Random          Reboot OS;    Encryption,
+      GCM/GMAC                     imported.         only.                             Access          Cycle host
+      IV                                             The key is                        Memory          power         Decryption
+                                                     not                               (RAM) in
+                                                     exported
+                                                     from the                          plaintext
+                                                     module.
+
+      AES CCM       128-bit key    N/A, the key is   Imported     N/A                  Random          Reboot OS;    Encryption,
+      Key                          imported.         only.                             Access          Cycle host
+
+                                                     The key is                        Memory          power         Decryption
+                                                     not                               (RAM) in
+                                                     exported
+                                                     from the                          plaintext
+                                                     module.
+
+                                                                                                                                        11
+
+                                                    © 2024 Broadcom Inc.
+             This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                     Security Policy Document
+
+
+
+
+      AES CMAC        128-bit key    N/A, the key is    Imported        N/A                 Random        Reboot OS;         Authenticat
+      key                            imported.          only.                               Access        Cycle host         ion
+
+                                                        The key is                          Memory        power
+                                                        not                                 (RAM) in
+
+                                                        exported                            plaintext
+
+                                                        from the
+                                                        module.
+
+      HMAC Key        128-256 bits   N/A, the key is    Imported        N/A                 RAM in        Reboot OS;         Message
+                                                        only.
+                                     imported.                                              plaintext     Cycle host         Authenticat
+                                                        The key is
+                                                                                                          power              ion
+                                                        not
+                                                        exported
+                                                        from the
+                                                        module.
+
+      Firmware        256-bit key    N/A                Does not        N/A                 Hardcoded     No zeroization     Verifies
+      Integrity Key                                     enter or exit                       in the                           integrity of
+      – HMAC key                                        the module                          module                           the module
+      (not an SSP)                                                                                                           upon
+                                                                                                                             initializatio
+                                                                                                                             n
+
+
+
+
+Symmetric keys are provided to the module by the calling process and are destroyed when released by the appropriate API function calls. The
+module does not perform persistent storage of keys.
+
+
+10. Self-tests
+The self-tests are run automatically when the module powers on. The module does not allow any data output before the self-tests are completed
+successfully. If a KAT encryption or decryption result does not match the known answer, the test will fail. If the firmware Integrity test produces a
+result which does not match the Integrity MAC value, the test will fail. If a self-test fails, the module will enter an error state and the name of the
+failing self-test will be shown in the log. While in an error state, the module cannot perform cryptographic operations. To clear an error state,
+restart the module.
+
+The self-tests may be run on demand by rebooting the OS or cycling host power.
+
+Pre-Operational Self-Tests
+  • HMAC-SHA2-256 Integrity Test
+
+Conditional Cryptographic Algorithm Tests
+  • AES CBC Encryption KAT (128, 192, and 256-bit)
+                                                                                                                                                      12
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                                  Security Policy Document
+
+
+
+
+ • AES CBC Decryption KAT (128, 192, and 256-bit)
+
+ • AES GCM Encryption KAT (128, 192, and 256-bit)
+
+ • AES GCM Decryption KAT (128, 192, and 256-bit)
+
+ • AES CCM Encryption KAT (128-bit)
+
+ • AES CCM Decryption KAT (128-bit)
+
+ • AES-CMAC Encryption KAT (128-bit)
+
+ • AES-CMAC Decryption KAT (128-bit)
+
+ • HMAC-SHA-1, HMAC-SHA2-224, HMAC-SHA2-256, HMAC-SHA2-384 and HMAC-SHA2-512 KAT (note that the HMAC-SHA2-256 KAT is executed
+   prior to the integrity test).
+
+
+11. Life-cycle Assurance
+Distribution and Installation
+The module is distributed internally to Broadcom. It is not available to customers of Broadcom.
+
+The operator does not install the module, it will be installed by Broadcom.
+
+Configuration
+The module does not require configuration and only Implements an approved mode of operation.
+
+Initialization and Setup
+When the OS starts, the module will be automatically loaded and initialized.
+
+Verification of the Module
+The module name and version will be printed in the log upon successful initialization.
+
+Crypto Officer Guidance
+Per IG C.H Scenario 1.b implementation ii), the AES GCM IV is constructed in compliance with the IPsecv3 protocol per RFC 4106 and is to be used in
+the context of the AES GCM mode within the IPsec-v3 protocol alone. The module uses RFC 7296-compliant IKEv2 to establish the shared secret
+SKEYSEED from which the AES GCM encryption keys are derived. Per requirements of IPSec-v3, the IV is constituted of 32-bits of salt followed by
+64-bits of the deterministic nonce. The last 64 bits of the IV are deterministically constructed using an incremental counter. When the nonce
+portion of the IV exhausts the maximum number of possible values for a given security association, either party to the security association that
+encounters this condition triggers a rekeying with IKEv2 to establish a new encryption key for the security association per RFC 7296. In the event
+that the module’s power is lost and then restored, a new key for use with the AES GCM encryption/decryption is established.
+
+
+
+
+                                                                                                                                                     13
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                               Security Policy Document
+
+
+
+
+Destruction and Zeroization
+The module will remain installed for the lifetime of the operating system. When the operating system is removed, the module will be erased. Any
+SSPs in the module will be erased at that time.
+
+
+12. Mitigation of other attacks
+The module does not implement mitigation of other attacks.
+
+
+
+
+                                                                                                                                              14
+
+                                                   © 2024 Broadcom Inc.
+            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                                                                  Security Policy Document
+
+
+
+
+Acronyms
+                                                     Table 8 - Acronyms
+
+AES                                        Advanced Encryption Standard
+
+API                                        Application Program Interface
+
+CAST                                       Cryptographic Algorithm Self-Test
+
+CBC                                        Cipher Block Chaining
+
+CFB                                        Cipher Feedback
+
+CO                                         Crypto-Officer
+
+CSP                                        Critical Security Parameter
+
+CTR                                        Counter
+
+CVL                                        Component Validation List
+
+DRBG                                       Deterministic Random Bit Generation
+
+FIPS                                       Federal Information Processing Standard
+
+HMAC                                       (Keyed-)Hash Messages Authentication Code
+
+KAT                                        Known Answer Test
+
+MAC                                        Message Authentication Code
+
+NIST                                       National Institute of Standards and Technology
+
+OE                                         Operational Environment
+
+OS                                         Operation System
+
+POST                                       Power-On Self-Test
+
+SHA                                        Secure hash Standard
+
+SSP                                        Sensitive Security Parameter
+
+SP                                         Special Publication
+
+
+                                                                                                                       15
+
+                                               © 2024 Broadcom Inc.
+        This document may be freely reproduced and distributed whole and intact including this copyright notice.
+VMware’s VPN Crypto Module                          Security Policy Document
+
+
+
+
+                                                                               16
+
+                             © 2024 Broadcom Inc.
+

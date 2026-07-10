@@ -1,0 +1,759 @@
+          HP Poly Cryptographic Module
+FIPS 140-3 Non-Proprietary Security Policy
+                                                    Document Version 1.3
+
+                                                              May 7, 2026
+
+
+
+
+                      Prepared for:                         Prepared by:
+
+
+
+
+               Hewlett Packard, Inc.                 Corsec Security, Inc.
+                  345 Encinal Street   12600 Fair Lakes Circle, Suite #210
+               Santa Cruz, CA 95060                     Fairfax, VA 22033
+                            hp.com                             corsec.com
+                   +1 831.426.5858                      +1 703.267.6050
+FIPS 140-3 Security Policy                                                                                                      HP Poly Cryptographic Module
+
+                                                                  Table of Contents
+1   General .................................................................................................................................................. 4
+2   Cryptographic Module Specification ........................................................................................................ 5
+  2.1 Overall Security Design and Rules of Operation .......................................................................................... 8
+    2.1.1 Usage of AES-GCM ........................................................................................................................................ 8
+    2.1.2 RSA and ECDSA Keys...................................................................................................................................... 9
+    2.1.3 CSP Sharing ................................................................................................................................................... 9
+    2.1.4 Modes of Operation ...................................................................................................................................... 9
+3 Cryptographic Module Interfaces .......................................................................................................... 10
+4 Roles, Services, and Authentication ....................................................................................................... 11
+  4.1 Roles ........................................................................................................................................................... 11
+  4.2 Authentication............................................................................................................................................ 11
+  4.3 Services ...................................................................................................................................................... 11
+5 Software/Firmware Security ................................................................................................................. 14
+  5.1 Module Format .......................................................................................................................................... 14
+6 Operational Environment ...................................................................................................................... 14
+7 Physical Security ................................................................................................................................... 14
+8 Non-Invasive Security ........................................................................................................................... 14
+9 Sensitive Security Parameter Management ............................................................................................ 15
+10 Self-Tests .............................................................................................................................................. 18
+  10.1 Pre-Operational Self-Tests .......................................................................................................................... 18
+  10.2 Conditional Self-Tests ................................................................................................................................. 18
+11 Life-Cycle Assurance.............................................................................................................................. 19
+  11.1 Installation Instructions.............................................................................................................................. 19
+    11.1.1 Retrieving Module Name and Version ........................................................................................................ 19
+12 Mitigation of Other Attacks ................................................................................................................... 19
+References and Standards ............................................................................................................................ 20
+Acronyms .................................................................................................................................................... 21
+
+
+                                                                       List of Tables
+Table 1. Security Levels ............................................................................................................................................... 4
+Table 2. Tested Operational Environments ................................................................................................................. 5
+Table 3. Vendor Affirmed Operational Environments ................................................................................................ 5
+Table 4. Approved Algorithms .................................................................................................................................... 6
+Table 5. Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed .......... 7
+Table 6. Non-Approved Algorithms Not Allowed in the Approved Mode of Operation............................................. 7
+Table 7. Ports and Interfaces .................................................................................................................................... 10
+Table 8. Roles, Service Commands, Input and Output ............................................................................................. 11
+Table 9. Approved Services ....................................................................................................................................... 12
+Table 10. Non-Approved Services ............................................................................................................................. 13
+Table 11. SSPs ........................................................................................................................................................... 15
+Table 12. Non-Deterministic Random Number Generation Specification ................................................................ 17
+
+
+
+Hewlett Packard, Inc.                                                                                     Page 2 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                               HP Poly Cryptographic Module
+
+                                                                   List of Figures
+Figure 1. Module Boundary ........................................................................................................................................ 8
+
+
+
+
+Hewlett Packard, Inc.                                                                                     Page 3 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+1    General
+This document describes the cryptographic module Security Policy (SP) for the HP Poly Cryptographic Module
+(Software version: 2022061300) (also referred to as the “module” hereafter). It contains specification of the
+security rules under which the cryptographic module operates, including the security rules derived from the
+requirements of the FIPS 140-3 standard. The module is a software module and has a Multi-Chip Stand Alone
+embodiment.
+The module meets the overall Level 1 security requirements of FIPS 140-3. The following table lists the level of
+validation for each area in FIPS 140-3:
+                                                 Table 1. Security Levels
+                       ISO/IEC 24759   FIPS 140-3 Section Title                      Security
+                       Section 6.                                                     Level
+                       1               General                                          1
+                       2               Cryptographic Module Specification               1
+                       3               Cryptographic Module Interfaces                  1
+                       4               Roles, Services, and Authentication              1
+                       5               Software/Firmware Security                       1
+                       6               Operational Environment                          1
+                       7               Physical Security                               N/A
+                       8               Non-Invasive Security                           N/A
+                       9               Sensitive Security Parameter Management          1
+                       10              Self-Tests                                       1
+                       11              Life-Cycle Assurance                             1
+                       12              Mitigation of Other Attacks                     N/A
+
+
+
+
+Hewlett Packard, Inc.                                                                                     Page 4 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                               HP Poly Cryptographic Module
+
+2    Cryptographic Module Specification
+The module is an open-source, general-purpose cryptographic library which provides approved cryptographic
+algorithms to serve BoringSSL and other user-space applications. The module is intended for use in environments
+specified in Table 2 below and any general-purpose environment that requires cryptographic primitives. The Tested
+Operational Environment’s Physical Perimeter (TOEPP) of the module is the physical perimeter of the tested
+environment, which is listed in Table 2 below. The module is a software module and has a Multi-Chip Stand Alone
+embodiment. The installation instructions are provided in Section 11 of this document.
+The boundary of the module is defined as a single object file, bcm.o. The module version is: 2022061300. The
+module was tested on the following operational environments:
+                                          Table 2. Tested Operational Environments
+#     Operating System       Hardware Platform     Processor                                           PAA/Acceleration
+1     Android 12             CCX 400               Rockchip PX30 ARMv8-A                               With PAA
+2     Android 12             CCX 600               NXP i.MX 8M ARMv8-A                                 With PAA
+3     Android 13             Google Pixel 7 Pro    Google Tensor G2 64-bit and 32-bit                  With PAA
+4     Android 13             Google Pixel 7 Pro    Google Tensor G2 64-bit and 32-bit                  Without PAA
+5     Android 13             Google Pixel 6 Pro    Google Tensor 64-bit and 32-bit                     With PAA
+6     Android 13             Google Pixel 6 Pro    Google Tensor 64-bit and 32-bit                     Without PAA
+7     Android 13             Google Pixel 5a       Qualcomm Snapdragon 765 64-bit and 32-bit           With PAA
+8     Android 13             Google Pixel 5a       Qualcomm Snapdragon 765 64-bit and 32-bit           Without PAA
+9     Android 13             Google Pixel 4a       Qualcomm Snapdragon 730 64-bit and 32-bit           With PAA
+10    Android 13             Google Pixel 4a       Qualcomm Snapdragon 730 64-bit and 32-bit           Without PAA
+11    Android 13             Google Pixel 4XL      Qualcomm Snapdragon 855 64-bit and 32-bit           With PAA
+12    Android 13             Google Pixel 4XL      Qualcomm Snapdragon 855 64-bit and 32-bit           Without PAA
+
+The cryptographic module is also supported on the following operational environments for which operational
+testing and algorithm testing was not performed. The CMVP makes no statement as to the correct operation of
+the module on the operational environments for which operational testing was not performed.
+                                     Table 3. Vendor Affirmed Operational Environments
+#     Operating System                   Hardware Platform
+1     Linux 4.X                          x86_64 architecture; ARMv7 architecture; ARMv8 architecture
+2     Linux 5.X                          X86_64 architecture; ARMv7 architecture; ARMv8 architecture
+3     Linux 6.X                          x86_64 architecture; ARMv7 architecture; ARMv8 architecture
+4     Android 12                         CCX 350; ARMv8-A
+5     Android 12                         CCX 500; ARMv8-A
+6     Android 12                         CCX 505; ARMv8-A
+7     Android 12                         CCX 700; ARMv8-A
+8     Android 12                         Trio C60; ARMv8-A
+9     Android 10                         Poly G7500; ARMv8-A (32-bit)
+10    Android 10                         Poly Studio X30; ARMv8-A (32-bit)
+11    Android 10                         Poly Studio X50; ARMv8-A (32-bit)
+12    Android 10                         Poly Studio X70; ARMv8-A (32-bit)
+
+Hewlett Packard, Inc.                                                                                     Page 5 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                          HP Poly Cryptographic Module
+
+ #     Operating System                     Hardware Platform
+ 13    Android 10                           Poly G62; ARMv8-A (64-bit)
+ 14    Android 10                           Poly Studio X32; ARMv8-A (64-bit)
+ 15    Android 10                           Poly Studio X52; ARMv8-A (64-bit)
+ 16    Android 10                           Poly Studio X72; ARMv8-A (64-bit)
+ 17    Android 10                           Poly Studio TC8; ARMv8-A (64-bit)
+ 18    Android 11                           Poly Studio TC10; ARMv8-A (64-bit)
+
+Table 4 below lists all the approved algorithms implemented in the module:
+                                                   Table 4. Approved Algorithms
+ CAVP        Algorithm and      Mode/Method                Description / Key Sizes(s) /             Use / Function
+ Cert1       Standard                                      Key Strength(s)
+ A2811,      AES                CBC, ECB, CTR              Key sizes: 128, 192, 256 bits;           Encryption, Decryption
+ A6962       FIPS 197                                      Strength: 128, 192, 256 bits
+             SP800-38A
+ A2811,      AES                GCM                        Key sizes: 128, 192, 256 bits;           Authenticated Encryption,
+ A6962       FIPS 197                                      Strength: 128, 192, 256 bits             Authenticated Decryption
+             SP800-38D
+ A2811,      AES FIPS 197       CCM                        Key size: 128 bits;                      Authenticated Encryption,
+ A6962       SP800-38C                                     Strength: 128 bits                       Authenticated Decryption
+ A2811,      AES, KTS           KW, KWP                    Key sizes: 128, 192, 256 bits;           Key Transport per IG D.G
+ A6962       FIPS 197                                      Strength: 128, 192, 256 bits             Key establishment
+             SP800-38F                                                                              methodology provides
+                                                                                                    between 128 and 256 bits of
+                                                                                                    encryption strength
+ CVL         TLS v1.0/1.1       N/A                        SHA2-256, SHA2-384, SHA2-512;            Key Derivation
+ A2811,      and v1.2 KDF2                                 Strength: 256, 384, 512 bits
+ A6962       SP800-135rev1
+ Vendor      CKG                SP800-133rev2              Cryptographic Key Generation:            Key Generation
+ Affirmed                                                  Section 5: Generation of Key Pairs       Symmetric keys and seeds are
+                                                           for Asymmetric-Key Algorithms,           generated as the direct
+                                                           Section 6.1: The “Direct                 output of the DRBG
+                                                           Generation” of Symmetric Keys
+ A2811,      DRBG               CTR_DRBG                   AES-256;                                 Random Bit Generation
+ A6962       SP800-90Arev1                                 Key size: 256 bits;
+                                                           Strength: 256 bits
+ A2811,      ECDSA              Key Pair Generation,       P-224, P-256, P-384, P-521;              Digital Signature Services
+ A6962       FIPS 186-4         Signature Generation,      Strength: 112, 128, 192, 256 bits
+                                Signature Verification,
+                                Public Key Validation
+ A2811,      HMAC               Generate, Verify           HMAC-SHA-1, HMAC-SHA2-224,               Generation, Authentication
+ A6962       FIPS 198-1                                    HMAC-SHA2-256, HMAC-SHA2-384,
+                                                           HMAC-SHA2-512;
+                                                           Strength: 128, 192, 256, 384, 512
+                                                           bits
+
+
+1 There are algorithms that have been CAVP-tested on the same certificate but are not used by any approved service of the module. Only
+
+the algorithms, modes/methods, and key lengths/curves/moduli shown in this table are used by an approved service of the module.
+2 No parts of this protocol, other than the approved cryptographic algorithms and the KDFs, have been tested by the CAVP and CMVP.
+
+
+Hewlett Packard, Inc.                                                                                     Page 6 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                              HP Poly Cryptographic Module
+
+ CAVP         Algorithm and        Mode/Method                  Description / Key Sizes(s) /             Use / Function
+ Cert1        Standard                                          Key Strength(s)
+ A2811,       RSA                  Key Generation,              1024, 2048, 3072, 4096;                  Digital Signature Services
+ A6962        FIPS 186-4           Signature Generation,        Strength: 80, 112, 128, 152 bits;
+                                   Signature Verification       Note: Key size 1024 should be only
+                                   PKCS 1.5 and PSS             used for Signature Verification
+ A2811,       SHA                  Hashing                      SHA-13, SHA2-224, SHA2-256,              Digital Signature Generation,
+ A6962        FIPS 180-4                                        SHA2-384, SHA2-512,                      Digital Signature Verification,
+                                                                SHA2-512/256;                            Non-Digital Signature
+                                                                Strength: 80, 112, 128, 192, 256,        Applications
+                                                                128 bits
+ A2811,       KAS-SSC              KAS-ECC-SSC                  ECC: P-224, P-256, P-384 and P-521;      Key Agreement Scheme
+ A6962        SP800-56Arev3        ephemeralUnified             Strength: 112, 128, 192, 256 bits        Shared Secret Computation
+                                                                                                         per SP800-56Arev3; Key
+                                                                                                         establishment methodology
+                                                                                                         provides between 112 and
+                                                                                                         256 bits of security strength
+
+           Table 5. Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed
+ Algorithm       Caveat                                                            Use / Function
+ MD5             As allowed per SP800-135rev1 (No security claimed)                When used with the TLS protocol version 1.0 and 1.1
+
+                        Table 6. Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+ Algorithm/Function                        Use/Function
+ MD5, MD4                                  Non-Approved hashing
+ POLYVAL                                   Non-Approved authenticated encryption
+ DES, Triple-DES (non-compliant)           Non-Approved encryption/decryption
+ AES-GCM-SIV (non-compliant)               Non-Approved encryption/decryption
+ DH (non-compliant)                        Non-Approved key agreement
+
+
+
+
+3 Used for non-digital signature applications or to verify existing digital signatures only.
+
+
+Hewlett Packard, Inc.                                                                                     Page 7 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+
+
+
+                                              Figure 1. Module Boundary
+
+2.1   Overall Security Design and Rules of Operation
+2.1.1 Usage of AES-GCM
+AES GCM encryption and decryption are used in the context of the TLS protocol version 1.2 (compliant to Scenario
+1a in FIPS 140-3 IG C.H). The module is compliant with NIST SP 800-52 and the mechanism for IV generation is
+compliant with RFC 5288. The module ensures that it is strictly increasing and thus cannot repeat. When the IV
+exhausts the maximum number of possible values for a given session key, the first party (client or server) to
+encounter this condition may either trigger a handshake to establish a new encryption key in accordance with RFC
+5246 or fail. In either case, the module prevents any IV duplication and thus enforces the security property.
+The module’s IV is generated internally by the module’s Approved DRBG, which is internal to the module’s
+boundary. The IV is 96 bits in length per NIST SP 800-38D, Section 8.2.2 and FIPS 140-3 IG C.H scenario 2.
+The selection of the IV construction method is the responsibility of the user of this cryptographic module. In
+approved mode, users of the module must not utilize GCM with an externally generated IV. Per IG C.H, in the event
+module power is lost and restored, the consuming application must ensure that any of its AES-GCM keys used for
+encryption or decryption are re-distributed.
+The module implements the KDF TLS 1.2, and other cryptographic primitives used in TLS 1.2, but does not
+implement the TLS 1.2 protocol itself.
+
+
+
+
+Hewlett Packard, Inc.                                                                                     Page 8 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+2.1.2 RSA and ECDSA Keys
+The module allows the use of 1024-bit RSA keys for legacy purposes including signature generation, which is
+disallowed in Approved mode as per NIST SP800-131Arev2. Therefore, cryptographic operations with the Non-
+Approved key sizes will result in the module operating in Non-Approved mode.
+The elliptic curves utilized shall be the validated NIST-recommended curves and shall provide a minimum of 112
+bits of encryption strength.
+
+2.1.3 CSP Sharing
+Non-Approved cryptographic algorithms shall not share the same key or CSP as an approved algorithm. As such,
+Approved algorithms shall not use the keys generated by the module’s Non-Approved key generation methods or
+the converse.
+
+2.1.4 Modes of Operation
+The module supports two modes of operation: Approved and Non-approved. The module will be in approved
+mode when all self-tests have completed successfully, and only Approved algorithms are invoked. See Table 4
+above for a list of the supported Approved algorithms. The non-Approved mode is entered when a non-Approved
+algorithm is invoked. See Table 6 for a list of non-Approved algorithms.
+
+
+
+
+Hewlett Packard, Inc.                                                                                     Page 9 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+3    Cryptographic Module Interfaces
+The Data Input interface consists of the input parameters of the API functions. The Data Output interface consists
+of the output parameters of the API functions. The Control Input interface consists of the actual API input
+parameters. The Status Output interface includes the return values of the API functions.
+
+                                                Table 7. Ports and Interfaces
+Logical Interface        Data that passes over port/interface
+Data Input               API input parameters
+Data Output              API output parameters and return values
+Control Input            API input parameters
+Status Output            API return values
+
+The module does not implement a power input interface or a control output interface. As a software module,
+control of the physical ports is outside the module scope. However, when the module is performing self-tests, or
+is in an error state, all output on the module’s logical data output interfaces is inhibited.
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 10 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                              HP Poly Cryptographic Module
+
+4     Roles, Services, and Authentication
+4.1    Roles
+The cryptographic module only implements a Crypto Officer (CO) role. The CO role is implicitly assumed by the
+entity accessing services implemented by the module. An operator is considered the owner of the thread that
+instantiates the module and, therefore, only one operator is allowed, and no concurrent operators are allowed.
+
+4.2    Authentication
+The module does not support operator authentication.
+
+4.3    Services
+The Approved services supported by the module and access rights within services accessible over the module’s
+public interface are listed in the table below:
+                                  Table 8. Roles, Service Commands, Input and Output
+Role     Service                    Input                                     Output
+CO       Symmetric Encryption       Plaintext, encryption key                 Return code, ciphertext
+CO       Symmetric Decryption       Ciphertext, decryption key                Return code, plaintext
+CO       Keyed Hashing              Message, key                              Return code, Message Authentication
+                                                                              Code
+CO       Hashing                    Message                                   Return code, hash
+CO       Random Bit Generation      API call parameters                       Return code, random bits
+CO       Signature Generation       Message, signing key                      Return code, signature
+CO       Signature Verification     Signature, verification key               Return code
+CO       Key Transport              API call parameters, wrapping key         Return code, wrapped key
+CO       Key Agreement              API call parameters                       Return code, shared secret
+CO       TLS Key Derivation         API call parameters, TLS pre-master secret Return code, TLS Key
+CO       Key Generation             API call parameters                       Return code, key pair
+CO       Key Verification           API call parameters, key pair             Return code
+CO       On-Demand Self-Test        N/A                                       Return code
+CO       Zeroization                N/A                                       N/A
+CO       Show Status                API call parameters                       Return code, status
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 11 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                                            HP Poly Cryptographic Module
+
+Approved services are listed in Table 9. The SSPs listed in the table indicate the access required using below notation:
+   G = Generate: The module generates or derives the SSP.
+   R = Read: The SSP is read from the module (e.g., the SSP is output).
+   W = Write: The SSP is updated, imported, or written to the module.
+   E = Execute: The module uses the SSP in performing a cryptographic operation.
+   Z = Zeroize: The module zeroizes the SSP.
+
+                                                                   Table 9. Approved Services
+Service         Description                     Approved Security Functions                     Keys and/or SSPs                      Roles   Access Rights Indicator
+                                                                                                                                              to Keys
+                                                                                                                                              and/or SSPs
+Symmetric       Perform symmetric encryption    AES CBC, ECB, CTR, CCM (Certs. #A2811 and       AES Key, AES-GCM Key                  CO      W, E          1
+Encryption      operations                      #A6962)
+                                                CKG
+Symmetric       Perform symmetric decryption    AES CBC, ECB, CTR, GCM, CCM (Certs. #A2811      AES Key, AES-GCM Key,                 CO      W, E           1
+Decryption      operations                      and #A6962)                                     AES-GCM IV
+                                                CKG
+Keyed           Perform keyed hashing           HMAC-SHA-1, HMAC-SHA2-224,                      HMAC Key                              CO      W, E           1
+Hashing         operations                      HMAC-SHA2-256, HMAC-SHA2-384,
+                                                HMAC-SHA2-512 (Certs. #A2811 and #A6962)
+Hashing         Perform hashing operations      SHA-1, SHA2-224, SHA2-256, SHA2-384,            N/A                                   CO      N/A            1
+                                                SHA2-512, SHA2-512/256 (Certs. #A2811 and
+                                                #A6962)
+Random Bit      Generate random numbers         CTR_DRBG (Certs. #A2811 and #A6962)             DRBG Seed, CTR_DRBG V,                CO      G, E           1
+Generation                                      CKG                                             CTR_DRBG Key
+                                                                                                DRBG output                           CO      G, R
+                                                                                                CTR_DRBG Entropy Input                CO      W, E
+Signature     Perform signing operations        CTR_DRBG, RSA SigGen, ECDSA SigGen              RSA Signature Generation Key,         CO      G, W, E        1
+Generation                                      (Certs. #A2811 and #A6962)                      ECDSA Signing Key
+Signature     Perform verification operations   RSA SigVer, ECDSA SigVer (Certs. #A2811 and     RSA Signature Verification Key,       CO      G, W, E        1
+Verification                                    #A6962)                                         ECDSA Verification Key
+Key Transport Perform key encryption            AES KW, KWP (Certs. #A2811 and #A6962)          AES Wrapping Key                      CO      W, E           1
+              operations; KTS using AES-KW,     CKG
+              AES-KWP per IG D.G
+Key           Perform key agreement             KAS-ECC-SSC (Certs. #A2811 and #A6962)          EC DH Private Key, EC DH Public Key   CO      G, W, E        1
+Agreement     operations                                                                        Shared Secret                         CO      G
+
+Hewlett Packard, Inc.                                                                                                                                   Page 12 of 22
+                                Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                                              HP Poly Cryptographic Module
+
+Service          Description                      Approved Security Functions                      Keys and/or SSPs                     Roles   Access Rights Indicator
+                                                                                                                                                to Keys
+                                                                                                                                                and/or SSPs
+TLS Key          Perform key derivation           TLS KDF (Certs. #A2811 and #A6962)               TLS Pre-Master Secret                CO      W, E          1
+Derivation       operations                                                                        TLS Master Secret                    CO      G, E
+Key              Perform generation operations    CTR_DRBG, RSA KeyGen, ECDSA KeyGen               RSA Signature Generation Key,        CO      G, W, E       1
+Generation                                        (Certs. #A2811 and #A6962)                       ECDSA Signing Key
+                                                  CKG
+Key              Perform key pair verification    ECDSA KeyVer (Certs. #A2811 and #A6962)          ECDSA Signing Key,                   CO      G, W, E         1
+Verification     operations                                                                        ECDSA Verification Key
+On-Demand        Execute self-tests on demand     N/A                                              N/A                                  CO      N/A             1
+Self-Test
+Zeroization      Zeroize all SSPs                 N/A                                              All SSPs                             CO      Z               N/A
+Show Status      Obtain the module status and     N/A                                              N/A                                  CO      N/A             N/A
+                 versioning information
+
+Non-Approved Services are listed in Table 10 below:
+                                                                    Table 10. Non-Approved Services
+Service                                    Description                                                                        Algorithms Accessed     Role     Indicator
+Hashing (as allowed per SP800-135rev1) Perform hashing operations when used with the TLS protocol version 1.0 and 1.1         MD5                     CO       0
+Hashing                                    Perform hashing operations                                                         MD4                     CO       0
+Hashing                                    Used as part of AES-GCM-SIV                                                        POLYVAL                 CO       0
+Symmetric encryption/decryption            Perform symmetric encryption and/or decryption operations                          DES                     CO       0
+                                                                                                                              Triple-DES
+                                                                                                                              AES
+Key Generation                             Perform generation operations                                                      DH                      CO       0
+RSA Primitives (RSADP, RSAEP, RSASP,       Perform RSA related primitive operations (decrypt, encrypt, sign, verify)          RSA                     CO       0
+RSAVP)
+
+
+
+
+Hewlett Packard, Inc.                                                                                                                                      Page 13 of 22
+                                  Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+
+5     Software/Firmware Security
+The pre-operational integrity test is performed using HMAC-SHA2-256. The integrity test can be executed on
+demand by power-cycling the host platform and reloading the module. The module does not support software
+loading. Please refer to Section 11.1 for instructions on compiling the source code into executable.
+
+5.1    Module Format
+The form of the module is a single object file, bcm.o.
+
+6     Operational Environment
+The module runs on a GPC, which is a modifiable operational environment, running one of the operating systems
+specified in Table 2. Each approved operating system manages processes and threads in a logically separated
+manner. The module’s user is considered the owner of the calling application that instantiates the module.
+No specific security rules, settings or restrictions to the configuration of the operational environment applies to
+the module. The module is designed to ensure that all the self-tests are initiated automatically when the module
+is loaded.
+
+7     Physical Security
+As a software module, the physical security requirements are not applicable.
+
+8     Non-Invasive Security
+The module does not claim any non-invasive security measures.
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 14 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                                                              HP Poly Cryptographic Module
+
+
+9    Sensitive Security Parameter Management
+All the SSPs are zeroized implicitly when the host platform is restarted. The various SSPs used by the module are listed in Table 11 below:
+                                                                                     Table 11. SSPs
+ Key/SSP Name/          Strength            Security Function      Generation             Import/                         Establishment       Storage     Zeroisation Use & Related
+ Type                                       and Cert. Number                              Export                                                                      Keys
+ AES Key                128/192/256         AES-CBC, ECB,          External               Input via API in plaintext      N/A                 Plaintext   Power-cycle AES encrypt /
+ (CSP)                  bits                CTR, CCM                                      (Electronic Entry)                                  in RAM      host        decrypt
+                                            A2811, A6962
+ AES-GCM Key            128/192/256         AES-GCM                External               Input via API in plaintext      N/A                 Plaintext   Power-cycle   AES decrypt /
+ (CSP)                  bits                A2811, A6962                                  (Electronic Entry)                                  in RAM      host          verify
+ AES-GCM IV4            96 bits             AES-GCM                External               Input via API in plaintext      N/A                 Plaintext   Power-cycle   AES decrypt /
+ (CSP)                                      A2811, A6962                                  (Electronic Entry)                                  in RAM      host          verify
+ AES Wrapping Key       128/192/256         AES-KW, AES-KWP        External               Input via API in plaintext      N/A                 Plaintext   Power-cycle   AES key
+ (CSP)                  bits                A2811, A6962                                  (Electronic Entry)                                  in RAM      host          wrapping
+ ECDSA Signing Key      112/128/192/        ECDSA SigGen           Internally             Input via API in plaintext      N/A                 Plaintext   Power-cycle   ECDSA
+ (CSP)                  256 bits            A2811, A6962           Generated              (Electronic Entry);                                 in RAM      host          signature
+                                                                                          Output via API in plaintext                                                   generation
+                                                                                          (Electronic Entry)
+ ECDSA Verification     112/128/192/        ECDSA SigVer           Internally             Input via API in plaintext      N/A                 Plaintext   Power-cycle ECDSA
+ Key                    256 bits            A2811, A6962           Generated              (Electronic Entry);                                 in RAM      host        signature
+ (PSP)                                                                                    Output via API in plaintext                                                 verification
+                                                                                          (Electronic Entry)
+ EC DH Private Key      112/128/192/        ECDSA KeyGen           Internally             Input via API in plaintext      N/A                 Plaintext   Power-cycle Key Agreement
+ (CSP)                  256 bits            A2811, A6962           Generated              (Electronic Entry);                                 in RAM      host
+                                                                                          Output via API in plaintext
+                                                                                          (Electronic Entry)
+ EC DH Public Key       112/128/192/        ECDSA KeyGen           Internally             Input via API in plaintext      N/A                 Plaintext   Power-cycle Key Agreement
+ (PSP)                  256 bits            A2811, A6962           Generated              (Electronic Entry);                                 in RAM      host
+                                                                                          Output via API in plaintext
+                                                                                          (Electronic Entry)
+
+
+
+
+4 As specified in Section 2.1.1, usage of externally generated IV is only allowed for AES-GCM decryption in the approved mode of operation.
+
+
+Hewlett Packard, Inc.                                                                                                                                                   Page 15 of 22
+                                      Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                                               HP Poly Cryptographic Module
+
+Key/SSP Name/           Strength         Security Function   Generation           Import/                      Establishment   Storage     Zeroisation Use & Related
+Type                                     and Cert. Number                         Export                                                               Keys
+HMAC Key                128/192/256/     HMAC-SHA-1,         External             Input via API in plaintext   N/A             Plaintext   Power-cycle Keyed hashing
+(CSP)                   384/512 bits     HMAC-SHA2-224,                           (Electronic Entry)                           in RAM      host
+                                         HMAC-SHA2-256,
+                                         HMAC-SHA2-384,
+                                         HMAC-SHA2-512
+                                         A2811, A6962
+Shared Secret           112/128/192/     KAS-ECC-SSC         Internally           N/A                          SP800-56Arev3   Plaintext   Power-cycle Key Agreement
+(CSP)                   256 bits         A2811, A6962        Generated                                                         in RAM      host
+RSA Signature           112, 128, 152    RSA SigGen          Internally           Input via API in plaintext  N/A              Plaintext   Power-cycle RSA signature
+Generation Key          bits             A2811, A6962        Generated            (Electronic Entry);                          in RAM      host        generation
+(CSP)                                                                             Output via API in plaintext
+                                                                                  (Electronic Entry)
+RSA Signature           80, 112, 128,    RSA SigVer          Internally           Input via API in plaintext  N/A              Plaintext   Power-cycle RSA signature
+Verification Key        152 bits         A2811, A6962        Generated            (Electronic Entry);                          in RAM      host        verification
+(PSP)                                                                             Output via API in plaintext
+                                                                                  (Electronic Entry)
+TLS Master Secret       384 bits         TLS KDF             Internally Derived   N/A                         N/A              Plaintext   Power-cycle TLS key
+(CSP)                                    A2811, A6962        via key derivation                                                in RAM      host        derivation
+                                                             function defined in
+                                                             SP800-135rev1
+                                                             KDF (TLS)
+TLS Pre-Master          112-256 bits     TLS KDF             External            Input via API in plaintext    N/A             Plaintext   Power-cycle TLS key
+Secret                                   A2811, A6962                            (Electronic Entry)                            in RAM      host        derivation
+(CSP)
+DRBG Seed               384 bits         CTR_DRBG            Internally           N/A                          N/A             Plaintext   Power-cycle   DRBG Seeding
+(CSP)                                    A2811, A6962        Generated                                                         in RAM      host          material
+CTR_DRBG V              128 bits         CTR_DRBG            Internally           N/A                          N/A             Plaintext   Power-cycle   DRBG internal
+(CSP)                                    A2811, A6962        Generated                                                         in RAM      host          state
+CTR_DRBG Key            256 bits         CTR_DRBG            Internally           N/A                          N/A             Plaintext   Power-cycle   DRBG internal
+(CSP)                                    A2811, A6962        Generated                                                         in RAM      host          state
+CTR_DRBG                384 bits used    CTR_DRBG            External             Input via API in plaintext   N/A             Plaintext   Power-cycle   DRBG entropy
+Entropy Input           as seed, quality A2811, A6962                             (Electronic Entry)                           in RAM      host
+(CSP)                   of entropy at
+                        least 112 bits
+
+
+
+Hewlett Packard, Inc.                                                                                                                                    Page 16 of 22
+                                    Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                                                                 HP Poly Cryptographic Module
+
+Key/SSP Name/           Strength         Security Function Generation             Import/                      Establishment     Storage     Zeroisation Use & Related
+Type                                     and Cert. Number                         Export                                                                 Keys
+DRBG output             2048 bits        CTR_DRBG          Internally             N/A                          N/A               Plaintext   Power-cycle Random bits
+                                         A2811, A6962      Generated                                                             in RAM      host        provided for
+                                                                                                                                                         the calling
+                                                                                                                                                         application
+
+
+                                                  Table 12. Non-Deterministic Random Number Generation Specification
+Entropy sources    Minimum number of          Details
+                   bits of entropy
+Passive Entropy    112 bits and above         Use of a [SP800-90B] compliant entropy source with at least 256 bits of security strength.
+                                              Entropy is supplied to the Module via callback functions. The callback functions shall return an error if the minimum entropy
+                                              strength cannot be met.
+                                              The caveat “No assurance of the minimum strength of generated SSPs (e.g., keys)” is applicable.
+
+
+
+
+Hewlett Packard, Inc.                                                                                                                                      Page 17 of 22
+                                    Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                               HP Poly Cryptographic Module
+
+10 Self-Tests
+ISO/IEC 19790 requires the module to perform self-tests to ensure the integrity of the module and the correctness
+of the cryptographic functionality. Some functions also require conditional tests during normal operation of the
+module. The self-tests can be requested on demand by power cycling the host platform. The module has a single
+error state, which is called the error state. This state is entered upon failure of a self-test. The module indicates
+this error state by providing the output status “*** KAT failed” where *** is the algorithm name (example: ECDSA-
+sign KAT failed). The module can be recovered by terminating execution of the host program and reclamation by
+the host operating system. The supported tests are listed and described in this section.
+
+10.1 Pre-Operational Self-Tests
+Pre-operational self-tests are run upon the initialization of the module and further reboots of the host platform.
+The CAST (Cryptographic Algorithm Self-Test) for HMAC-SHA2-256 is performed before the integrity test. Self-tests
+do not require operator intervention to run. If any of the tests fail, the module will not initialize and enter an error
+state where no services can be accessed.
+The module implements the following pre-operational self-tests:
+    • Software Integrity Test (HMAC-SHA2-256)
+
+10.2 Conditional Self-Tests
+Conditional Cryptographic Algorithm Self-Tests (CAST) are run prior to the first use of the cryptographic algorithm.
+CASTs do not require operator intervention to run. If any of the tests fail, the module will enter an error state and
+no services can be accessed.
+The module implements the following CASTs:
+    • ECDSA Signature Generation KAT (P-256)
+    • ECSDA Signature Verification KAT (P-256)
+    • RSA Signature Generation KAT (2048 bits, PKCSv1.5)
+    • RSA Signature Verification KAT (2048 bits, PKCSv1.5)
+    • SP800-56Arev3 KAS-ECC KAT (P-256)
+    • AES CBC Encryption KAT (128 bits)
+    • AES CBC Decryption KAT (128 bits)
+    • AES-GCM Encryption KAT (128 bits)
+    • AES-GCM Decryption KAT (128 bits)
+    • CAST, performed on DRBG, per SP800-90Arev1 Section 11.3 (Instantiate, Generate, Reseed)
+    • TLS v1.2 KDF KAT
+    • SHA-1 KAT
+    • SHA2-256 KAT
+    • SHA2-512 KAT
+    • HMAC-SHA2-256 KAT
+Conditional self-tests are run during the module’s operation. If any of these tests fail, the module will enter an
+error state, where no services can be accessed by the operators. The module can be reinitialized to clear the error
+and resume approved mode of operation.
+The module implements the following conditional pairwise consistency tests. The below PCTs are executed
+whenever a new key pair is generated:
+   • ECDSA Pairwise Consistency Test
+   • EC DH Pairwise Consistency Test
+   • RSA Pairwise Consistency Test
+
+Hewlett Packard, Inc.                                                                                    Page 18 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+11 Life-Cycle Assurance
+The cryptographic module is initialized by loading the module before any cryptographic functionality is available.
+In User Space, the operating system is responsible for the initialization process and loading of the library. There
+are no maintenance requirements applicable.
+General guidance about the module can be found at https://boringssl.googlesource.com/boringssl. This includes
+information about the APIs, building and specific information related to FIPS can be found at
+https://boringssl.googlesource.com/boringssl.git/+/refs/heads/fips20220613/crypto/fipsmodule/FIPS.md    (note
+this still mentions 140-2, but the information there is the same).
+
+11.1 Installation Instructions
+During the manufacturing process, Hewlett Packard, Inc. (HP) executes the build and installation instructions for
+the module. The module is pre-installed and configured on HP’s Poly CCX series phones. There are no additional
+installation, configuration, or usage instructions for operators intending to use the module.
+
+11.1.1 Retrieving Module Name and Version
+The following methods will provide the module name and versions:
+    • FIPS_module_name() – BoringCrypto
+    • FIPS_version() – 2022061300
+“BoringCrypto” correlates to the validated HP Poly Cryptographic Module (Software Version 2022061300).
+
+12 Mitigation of Other Attacks
+The module is not designed to mitigate attacks which are outside of the scope of FIPS 140-3.
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 19 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                                  HP Poly Cryptographic Module
+
+References and Standards
+The following Standards are referenced in this Security Policy:
+Abbreviation    Full Specification Name
+FIPS 140-3      Security Requirements for Cryptographic modules
+FIPS 180-4      Secure Hash Standard (SHS)
+FIPS 186-4      Digital Signature Standard (DSS)
+FIPS 197        Advanced Encryption Standard
+FIPS 198-1      The Keyed-Hash Message Authentication Code (HMAC)
+IG              Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module Validation Program
+SP 800-38A      Recommendation for Block Cipher Modes of Operation: Three Variants of Ciphertext Stealing for CBC
+                Mode
+SP 800-38C      Recommendation for Block Cipher Modes of Operation: The CCM Mode for Authentication and
+                Confidentiality
+SP 800-38D      Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC
+SP 800-38F      Recommendation for Block Cipher Modes of Operation: Methods for Key Wrapping
+SP 800-52       Guidelines for the Selection, Configuration, and Use of Transport Layer Security (TLS) Implementations
+SP 800-56A      Recommendation for Pair-Wise Key Establishment Schemes Using Discrete Logarithm Cryptography
+SP 800-90A      Recommendation for Random Number Generation Using Deterministic Random Bit Generators
+SP 800-131A     Transitioning the Use of Cryptographic Algorithms and Key Lengths
+SP 800-133      Recommendation for Cryptographic Key Generation
+SP 800-135      Recommendation for Existing Application-Specific Key Derivation Functions
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 20 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+Acronyms
+Acronym         Definition
+AES             Advanced Encryption Standard
+API             Application Programming Interface
+CAVP            Cryptographic Algorithm Validation Program
+CBC             Cipher-Block Chaining
+CCCS            Canadian Centre for Cyber Security
+CFB             Cipher Feedback
+CKG             Cryptographic Key Generation
+CMVP            Crypto Module Validation Program
+CO              Cryptographic Officer
+CRNGT           Continuous Random Number Generator Test
+CSP             Critical Security Parameter
+CTR             Counter-mode
+DES             Data Encryption Standard
+DH              Diffie-Hellman
+DRBG            Deterministic Random Bit Generator
+DSS             Digital Signature Standard
+EC              Elliptic Curve
+ECB             Electronic Code Book
+ECC             Elliptic Curve Cryptography
+EC DH           Elliptic Curve Diffie-Hellman
+ECDSA           Elliptic Curve Digital Signature Algorithm
+FIPS            Federal Information Processing Standards
+GCM             Galois/Counter Mode
+GMAC            Galois Message Authentication Code
+GPC             General Purpose Computer
+HMAC            key-Hashed Message Authentication Code
+IG              See References
+IV              Initialization Vector
+KAS             Key Agreement Scheme
+KAT             Known Answer Test
+KDF             Key Derivation Function
+KW              Key Wrap
+KWP             Key Wrap with Padding
+MAC             Message Authentication Code
+MD4             Message Digest algorithm MD4
+MD5             Message Digest algorithm MD5
+N/A             Non Applicable
+NIST            National Institute of Standards and Technology
+NVLAP           National Voluntary Lab Accreditation Program
+OFB             Output Feedback
+
+Hewlett Packard, Inc.                                                                                    Page 21 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+FIPS 140-3 Security Policy                                                             HP Poly Cryptographic Module
+
+Acronym         Definition
+PAA             Processor Algorithm Accelerator
+RAM             Random Access Memory
+RFC             Request For Comment
+RSA             Rivest Shamir Adleman
+SHA             Secure Hash Algorithm
+SHS             Secure Hash Standard
+SP              Special Publication
+SSL             Secure Socket Layer
+TLS             Transport Layer Security
+Triple-DES      Triple Data Encryption Standard
+
+
+
+
+Hewlett Packard, Inc.                                                                                    Page 22 of 22
+           Public Material – May be freely reproduced and distributed in its entirety without modification.
+

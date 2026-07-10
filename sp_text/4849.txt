@@ -1,0 +1,1032 @@
+Brocade Fabric OS FIPS Cryptographic Module
+          Firmware Version 9.1.1
+ FIPS 140-3 Non-Proprietary Security Policy
+
+
+                                       Document Revision 1.3
+
+                                Last Update: October 21, 2024
+
+
+
+
+   Brocade Communications Systems LLC
+   1320 Ridder Park Drive
+   San Jose, CA 95131
+   USA
+
+
+
+
+                    © Copyright 2024 Brocade Communications Systems LLC
+Brocade Communications Systems LLC grants permission to freely reproduce in entirety without revision
+Table of contents
+1.     General ..................................................................................................................................................................4
+2.     Cryptographic module specification ......................................................................................................................5
+3.     Cryptographic module interfaces ........................................................................................................................10
+4.     Roles, services, and authentication .....................................................................................................................11
+5.     Software/Firmware security ................................................................................................................................15
+6.     Operational environment ....................................................................................................................................16
+7.     Physical security...................................................................................................................................................17
+8.     Non-invasive security...........................................................................................................................................18
+9.     Sensitive security parameter management .........................................................................................................19
+10. Self-tests ..............................................................................................................................................................24
+11. Life-cycle assurance .............................................................................................................................................27
+12. Mitigation of other attacks ..................................................................................................................................28
+
+
+
+
+                                  Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy                                                            Page 2 of 28
+                               Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+List of tables
+Table 1 - Security levels .................................................................................................................................................4
+Table 2 - Tested operational environments ..................................................................................................................5
+Table 3 - Vendor affirmed operational environments ...................................................................................................5
+Table 4 - Approved algorithms ......................................................................................................................................8
+Table 5 - Non-approved algorithms not allowed in approved mode ............................................................................8
+Table 6 - Cryptographic module interfaces .................................................................................................................10
+Table 7 - Roles, service commands, input and output.................................................................................................11
+Table 8 - Approved services .........................................................................................................................................13
+Table 9 - Non-approved services .................................................................................................................................14
+Table 10 - Sensitive security parameters .....................................................................................................................22
+Table 11 - Non-deterministic random number generation specification ....................................................................23
+Table 12 - Error state ...................................................................................................................................................26
+
+
+
+
+Table of figures
+Figure 1 - Cryptographic boundary ................................................................................................................................9
+
+
+
+
+                                  Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy                                                      Page 3 of 28
+                               Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+1. General
+This non-proprietary FIPS 140-3 security policy for the Brocade Fabric OS FIPS Cryptographic Module
+with firmware version 9.1.1 (hereinafter referred to the module) details the secure operation of the
+Brocade Communications Systems LLC Brocade Fabric OS FIPS Cryptographic Module as required in
+Federal Information Processing Standards Publication 140-3 (FIPS 140-3) as published by the National
+Institute of Standards and Technology (NIST) of the United State Department of Commerce. This
+document, the Cryptographic Module Security Policy, also referred to as the Security Policy, specifies
+the security rules under which the module must operate.
+
+The Brocade Fabric OS FIPS Cryptographic Module underpins Brocade’s Fabric Operating System
+equipment and is used as a shared library object by applications in Brocade’s Fabric Operating System,
+for its various cryptographic requirements. The calling applications leverage the module’s well-defined
+APIs to initialize the module and call cryptographic algorithms for encryption/decryption, key
+generation, signature generation/verification, and hashing. The Brocade Fabric OS is the firmware
+foundation for Brocade’s purpose-built network infrastructure for mission-critical storage. The Brocade
+Fabric OS family of supported products includes Fiber Channel directors, switches, embedded switches
+and network extension switches. In addition to supporting the switching functionality of these product
+lines, Fabric OS supports Fabric Vision Technology features for network monitoring, management, and
+diagnostics, as well as advanced features that help ensure the highest level of reliability, availability, and
+serviceability.
+
+        ISO/IEC
+      24759:2017                            FIPS 140-3 Section Title                     Security Level
+       Section 6
+           1                General                                                               1
+           2                Cryptographic module specification                                    1
+           3                Cryptographic module interfaces                                       1
+           4                Roles, services, and authentication                                   1
+           5                Software/Firmware security                                            1
+           6                Operational environment                                               1
+           7                Physical security                                                     1
+           8                Non-invasive security                                                N/A
+           9                Sensitive security parameter management                               1
+          10                Self-tests                                                            1
+          11                Life-cycle assurance                                                  1
+          12                Mitigation of other attacks                                          N/A
+Table 1 - Security levels
+
+The module is designed to meet an overall security level of 1.
+
+
+
+
+                           Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy           Page 4 of 28
+                        Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+2. Cryptographic module specification
+The module is a single binary object file (libfipscrypto.so) running on the tested platform defined in
+Table 2, and is classified as a multi-chip standalone firmware module.
+         Operating
+  #                        Hardware Platform                     Processor                PAA/Acceleration
+          System
+ 1     Fabric OS 9.1.1   Brocade G630 Switch         NXP Semiconductors T1042             Not applicable
+                                                     (e5500 core)
+ 2     Fabric OS 9.1.1   Brocade X7-8 Director       NXP Semiconductors P4080             Not applicable
+                                                     (e500mc core)
+ 3     Fabric OS 9.1.1   Brocade G730 Switch         Intel(R) Atom(TM) CPU C3338R         With PAA
+                                                     (2 cores)
+ 4     Fabric OS 9.1.1   Brocade G730 Switch         Intel(R) Atom(TM) CPU C3338R         Without PAA
+                                                     (2 cores)
+Table 2 - Tested operational environments
+
+The following platforms have not been tested as part of the FIPS 140-3 Level 1 certification however
+Brocade affirms that these platforms are compliance to the tested and validated platforms. Additionally,
+Brocade also affirms that the Module will function the same way and provide the same security services
+on any of the operating systems listed below.
+
+         Operating
+  #                                              Hardware Platform
+          System
+ 1     Fabric OS 9.1.1   Brocade X7-4 Director
+ 2     Fabric OS 9.1.1   Brocade X6-8 Switch
+ 3     Fabric OS 9.1.1   Brocade X6-4 Switch
+ 4     Fabric OS 9.1.1   Brocade G610 Switch
+ 5     Fabric OS 9.1.1   Brocade G620 Switch
+ 6     Fabric OS 9.1.1   Brocade G720 Switch
+ 7     Fabric OS 9.1.1   Brocade 7810 Extension Switch
+Table 3 - Vendor affirmed operational environments
+
+Please note that the CMVP makes no statement as to the correct operation of the module or the
+security strengths of the generated keys when ported to an operational environment which is not listed
+on the validation certificate.
+
+Modes of operation
+The module supports both approved and non-approved mode of operation. The module will be in
+approved mode when all pre-operational self-tests have completed successfully and only approved
+algorithms/services are invoked. See Table 4 and Table 8 below for a list of the supported
+approved/allowed algorithms/services. The non-approved mode is entered when a non-approved
+algorithm/non-approved service is invoked. See Table 5 and Table 9 below for a list of non-approved
+algorithms/non-approved services. The Approved mode of operation can only be transitioned into the
+non-Approved mode by calling one of the non-Approved services listed in Table 9.
+Table 4 below lists all Approved or Vendor-affirmed security functions of the module, including specific
+key size(s) -in bits otherwise noted- employed for approved services, and implemented modes of
+operation.
+
+                        Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy            Page 5 of 28
+                     Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+CAVP /                                                          Description / Key
+               Algorithm and
+ ACVP                                  Mode / Method              Size(s) / Key             Use / Function
+                  Standard
+ Cert                                                             Strength(s)
+A2604    AES                         ECB                     128, 192, 256 bits         Encryption/decryption
+               •   FIPS 197
+               •   SP800-38D
+A2604    AES                         CBC                     128, 192, 256 bits         Encryption/decryption
+               •   FIPS 197
+               •   SP800-38D
+A2604    AES                         CTR                     128, 192, 256 bits         Encryption/decryption
+             • FIPS 197
+             • SP800-38D
+A2604    AES-CCM                     AES-CCM                 128, 192, 256 bits         Authenticated
+             • SP800-38B                                                                encryption/decryption
+A2604    AES-CMAC                    AES-CMAC                128 or 256 bits            MAC
+             • SP800-38B                                                                generation/verification
+A2604    Counter DRBG                Counter DRBG (AES-      N/A                        Deterministic random
+             • SP800-90Arev1         256) with Derivation                               bit generation
+                                     Function (df)
+A2604    ECDSA                       ECDSA KeyGen            Curves: P-256, P-384, P-   ECDSA key generation
+             • FIPS186-4                                     521
+A2604    ECDSA                       ECDSA KeyVer            Curves: P-256, P-384, P-   ECDSA key verification
+             • FIPS186-4                                     521
+A2604    ECDSA                       ECDSA SigGen            Curves: P-256, P-384, P-   ECDSA signature
+             • FIPS186-4                                     521                        generation
+A2604    ECDSA                       ECDSA SigVer            Curves: P-256, P-384, P-   ECDSA signature
+             • FIPS186-4                                     521                        verification
+N/A      ENT (NP)                    N/A                     N/A                        Non-physical entropy
+             • SP800-90B                                                                source used for seeding
+                                                                                        DRBG
+A2604    HMAC                        HMAC-SHA1               112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA2-256           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA2-384           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA2-512           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA3-224           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA3-256           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA3-384           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+A2604    HMAC                        HMAC-SHA3-512           112 bits (minimum)         Message
+            •      FIPS198-1                                                            authentication code
+
+
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy           Page 6 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+CAVP /                                                          Description / Key
+               Algorithm and
+ ACVP                                  Mode / Method              Size(s) / Key             Use / Function
+                  Standard
+ Cert                                                             Strength(s)
+A2604    KAS-ECC-SSC                 KAS-ECC-SSC             Curve: P-256, P-384      SP800-56Arev3
+             • SP800-56Arev3                                 and P-521                compliant KAS-ECC
+                                     ephemeralUnified:                                shared secret
+                                     KAS Role: initiator,    Key establishment        computation
+                                     responder               methodology provides
+                                                             between 128 and 256
+                                                             bits of encryption
+                                                             strength
+A2604    KAS-FFC-SSC                 KAS-FFC-SSC             MODP-2048, MODP-         SP800-56Arev3
+             • SP800-56Arev3                                 3072 and MODP-4096       compliant KAS-FFC
+                                     Scheme:                                          shared secret
+                                     dhEphem:                Key establishment        computation
+                                     KAS Role: initiator,    methodology provides
+                                     responder               between 112 and 152
+                                                             bits of encryption
+                                                             strength
+A2604    RSA                         RSA KeyGen              Modulus: 2048, 3072,     RSA key generation
+               •   FIPS186-4                                 4096 bits
+A2604    RSA                         RSA SigGen              Modulus: 2048, 3072,     RSA digital signature
+               •   FIPS186-4                                 4096 bits                generation
+A2604    RSA                         RSA SigVer              Modulus: 2048, 3072,     RSA digital signature
+              • FIPS186-4                                    4096 bits                verification
+A2604    Safe Primes Key             Safe Primes KeyGen      MODP-2048,               Keys generation with
+         Generation                                          MODP-3072, MODP-         SafePrimes groups
+              • SP800-56Arev3                                4096, and MODP-8192
+A2604    Safe Primes Key             Safe Primes KeyVer      MODP-2048,               Keys verification with
+         Verification                                        MODP-3072, MODP-         SafePrimes groups
+              • SP800-56Arev3                                4096, and MODP-8192
+A2604    SHS                         SHA-1                   Message Length: 0-       Hashing
+              • FIPS180-4                                    65024 Increment 32
+                                                                                      Note: SHA-1 is not used
+                                                                                      for digital signature
+                                                                                      generation
+A2604    SHS                         SHA2-224                Message Length:          Hashing
+               •   FIPS180-4                                 0-65024 Increment 32
+A2604    SHS                         SHA2-256                Message Length:          Hashing
+               •   FIPS180-4                                 0-65024 Increment 32
+A2604    SHS                         SHA2-384                Message Length:          Hashing
+               •   FIPS180-4                                 0-65024 Increment 32
+A2604    SHS                         SHA2-512                Message Length:          Hashing
+            •      FIPS180-4                                 0-65024 Increment 32
+A2604    SHA-3                       SHA3-224                Message Length:          Hashing
+            •      FIPS202                                   0-65536 Increment 8
+A2604    SHA-3                       SHA3-256                Message Length:          Hashing
+            •      FIPS202                                   0-65536 Increment 8
+A2604    SHA-3                       SHA3-384                Message Length:          Hashing
+            •      FIPS202                                   0-65536 Increment 8
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 7 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+ CAVP /                                                            Description / Key
+                 Algorithm and
+  ACVP                                     Mode / Method             Size(s) / Key            Use / Function
+                    Standard
+  Cert                                                               Strength(s)
+ A2604      SHA-3                       SHA3-512                 Message Length:        Hashing
+                 • FIPS202                                       0-65536 Increment 8
+ N/A        CKG (vendor affirmed)       N/A                      N/A                    Cryptographic Key
+            [SP 800-133rev2]                                                            Generation (CKG)
+                                                                                        compliant with SP800-
+                                                                                        133rev2 and IG D.H
+
+                                                                                        The cryptographic
+                                                                                        module performs
+                                                                                        Cryptographic Key
+                                                                                        Generation (CKG) for
+                                                                                        asymmetric keys as per
+                                                                                        sections 4 and 5 in
+                                                                                        SP800-133rev2 (vendor
+                                                                                        affirmed). A seed (i.e.,
+                                                                                        the random value) used
+                                                                                        in asymmetric key
+                                                                                        generation is a direct
+                                                                                        output from SP800-
+                                                                                        90Arev1 CTR_DRBG
+Table 4 - Approved algorithms
+
+Notes:
+    •    There are some algorithm modes that were tested but not implemented by the module. Only the
+         algorithms, modes, and key sizes that are implemented by the module are shown in this table.
+
+         Algorithm/Function                                         Use / Function
+ RSA key wrapping                       RSA key wrapping
+ HMAC-MD5                               Authentication
+ MD5                                    Hashing
+ AES-GCM                                Authenticated encryption/decryption
+ DSA                                    DSA signature sign/verify
+ Triple-DES                             Encryption/decryption
+ Camellia                               Encryption/decryption
+ SEED                                   Encryption/decryption
+ RC4                                    Encryption/decryption
+ ARIAGCM                                Encryption/decryption
+ CHACHA20/POLY1305                      Encryption/decryption
+Table 5 - Non-approved algorithms not allowed in approved mode
+
+The module does not implement non-approved algorithms allowed in approved mode of operation and
+non-approved algorithms allowed in approved mode of operation with No security claimed.
+
+In addition, the module’s entropy source implements SHA3-256 algorithm with SHA-3 Cert. #A2610 as a
+vetted conditioning component in ENT (NP).
+
+
+
+
+                        Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 8 of 28
+                     Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+Cryptographic boundary
+Figure 1 below depicts the cryptographic boundary (red dashed line) and physical perimeter (solid red
+line). The cryptographic boundary is defined as the cryptographic library. The physical perimeter is the
+Tested Operational Environment’s Physical Perimeter (TOEPP) on which the module runs.
+
+
+
+
+Figure 1 - Cryptographic boundary
+
+
+
+
+                         Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy     Page 9 of 28
+                      Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+3. Cryptographic module interfaces
+The module’s physical perimeter encompasses the peripheral’s devices (USB devices, network devices
+[Ethernet and Wireless adapters], and power adapter) on the tested platform running Brocade’s Fabric
+Operating System.
+
+However, the module provides only a logical interface via Application Programming Interface (API) calls
+and does not interface or communicate with or across any of the physical ports of the GPC. This logical
+interface exposes service that calling applications may use directly.
+
+The logical interfaces (APIs) provided by the module are mapped onto the FIPS 140-3 defined logical
+interfaces (data input, data output, control input, control output and status output). It is through this
+logical API that the module logically separates them into distinct and separate interfaces. Please note
+that the module does not implement Control Output Interface. The mapping of the module’s API to the
+FIPS 140-3 interfaces is as follows.
+
+  Physical Port        Logical Interface Type              Data that passes over port/interface
+ N/A                 Data Input Interface         Arguments for an API call that provide the data to be
+                                                  used or processed by the module (input arguments to all
+                                                  functions specifying input parameters).
+ N/A                 Data Output Interface        Arguments output from an API call (includes modified
+                                                  input arguments (those passed by reference) and return
+                                                  values for all functions modifying input arguments and
+                                                  returning values).
+ N/A                 Control Input Interface      Arguments for an API call used to control and configure
+                                                  module operation.
+ N/A                 Control Output Interface     N/A
+ N/A                 Status Output Interface      Return values from firmware API commands used to
+                                                  obtain information on the status of the module. The
+                                                  Status Output Interface also includes the log file where
+                                                  the module messages are output.
+Table 6 - Cryptographic module interfaces
+
+
+
+
+                         Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy         Page 10 of 28
+                      Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+4. Roles, services, and authentication
+The module supports both Crypto Officer (CO) role and User role. No authentication is required at
+security level 1 and the assumption of the role is implicit by the service being performed. The module
+provides the following services to the User and Crypto Officer.
+
+      Role                 Service                          Input                           Output
+ Crypto Officer    Module initialization       Command to initialize the       Module initialization status
+ (CO)                                          module
+ User              Show status                 API command                     Module’s current status
+ User              Show version                API command                     Displays the module’s name/ID
+                                                                               and versioning information
+ User              Zeroization                 Module reboot or power down     SSPs Zeroization status
+                                               the tested platform
+ User              Firmware integrity test     Command to enable the           Firmware Integrity Test
+                                               firmware integrity test         completion status
+ User              Self-tests                  Command to enable self-test     Self-Tests or conditional tests
+                                               (bootup / on-demand)            completion status
+ User              Encryption and              Command to conduct the          Encrypted or decrypted
+                   decryption                  encryption and decryption       completion status
+                                               operation
+ User              Keyed hash                  Command to conduct the          Keyed Hash completion status
+                                               HMAC/CMAC operation
+ User              Message digest              Command to conduct the          Hashed completion status
+                                               Message Digest operation
+ User              Random number               Command to conduct the          Random value generation status
+                   generation                  Counter DRBG generation
+ User              Key agreement shared        Command to run key agreement    Key agreement shared secret
+                   secret computation          shared secret computation       computation status
+ User              Signature generation        Command to conduct the          Signature generation or
+                   and verification            signature generation and        verification completion status
+                                               verification
+ User              Asymmetric key              Command to generate/verify      Keypair generation/verification
+                   generation and              asymmetric cryptographic        status
+                   verification                keypair
+Table 7 - Roles, service commands, input and output
+
+Table 8 below defines the relationship between access to CSPs and the different module services. The
+modes of access shown in the table are defined as:
+
+    G = Generate: The module generates or derives the SSP.
+    R = Read: The SSP is read from the module (e.g., the SSP is output).
+    W = Write: The SSP is updated, imported, or written to the module.
+    E = Execute: The module uses the SSP in performing a cryptographic operation.
+    Z = Zeroize: The module zeroizes the SSP.
+
+
+
+
+                         Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy           Page 11 of 28
+                      Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+                                                                                    Access
+                                       Approved                                    Rights to
+                                                        Keys and/or
+    Service        Description          Security                         Roles       Keys         Indicator
+                                                           SSPs
+                                       Functions                                    and/or
+                                                                                     SSPs
+Module           Initialize the     N/A                N/A               Crypto    E            N/A
+initialization   module                                                  Officer
+Show status      Display            N/A                None              User      N/A          N/A
+                 running status
+                 of the module
+Show version     Provide            N/A                None              CO        N/A          N/A
+                 module’s
+                 name and
+                 version
+                 information
+Zeroization      Zeroize all SSPs   N/A                All SSPs          User      Z            N/A
+Firmware         Check signature    HMAC-SHA-1         Firmware          User      E            Success or
+integrity test   during the                            integrity test                           error code
+                 firmware                              key (non-SSP)
+                 integrity test
+Self-tests       Run pre-           N/A                N/A               User      E            Pass/fail status
+                 operational and                                                                output
+                 conditional
+                 Algorithm Self-
+                 Tests
+Encryption and   Conduct            AES-ECB;           AES Key           User      E            Service
+decryption       symmetric          AES-CBC;                                                    Indicator log
+                 encryption and     AES-CTR;                                                    (per every use
+                 decryption         AES-CCM                                                     of approved
+                                                                                                algorithm)
+Keyed hash       Authentication/i   AES-CMAC;          HMAC Key;         User      E            Service
+                 ntegrity checks    HMAC               CMAC Key                                 Indicator log
+                                                                                                (per every use
+                                                                                                of approved
+                                                                                                algorithm)
+Message digest   Conduct            SHA-1;             N/A               User      E            Service
+                 message digest     SHA2-256;                                                   Indicator log
+                 operation          SHA2-384;                                                   (per every use
+                                    SHA2-512;                                                   of approved
+                                    SHA3-224;                                                   algorithm)
+                                    SHA3-256;
+                                    SHA3-384;
+                                    SHA3-512
+Random           Generate           Counter DRBG;      DRBG entropy      User      E            Service
+number           random             ENT (NP)           inputs;                                  Indicator log
+generation       numbers for use                       DRBG seed;                               (per every use
+                 by crypto                             DRBG internal                            of approved
+                 module                                state v;                                 algorithm)
+                                                       DRBG key
+
+
+
+                     Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy         Page 12 of 28
+                  Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+                                                                                            Access
+                                             Approved                                      Rights to
+                                                              Keys and/or
+      Service           Description           Security                          Roles        Keys         Indicator
+                                                                 SSPs
+                                             Functions                                      and/or
+                                                                                             SSPs
+  Key agreement      Conduct key         KAS-ECC-SSC;        DH private key;    User      E             Service
+  shared secret      agreement           KAS-FFC-SSC;        DH public key;                             Indicator log
+  computation        shared secret       Safe Prime Key      DH shared                                  (per every use
+                     computation         Generation (for     secret;                                    of approved
+                                         KAS-FFC-SSC only)   ECDH private                               algorithm)
+                                                             key;
+                                                             ECDH public
+                                                             key;
+                                                             ECDH shared
+                                                             secret
+  Signature          Generate and        RSA SigGen;         RSA private        User      E             Service
+  generation and     verify signatures   RSA SigVer;         key;                                       Indicator log
+  verification                           ECDSA SigGen;       RSA public key;                            (per every use
+                                         ECDSA SigVer        ECDSA private                              of approved
+                                                             key;                                       algorithm)
+                                                             ECDSA public
+                                                             key
+  Asymmetric         Generate/verify     CKG;                DH private key;    User      G; E          Service
+  key generation     asymmetric key      Counter DRBG;       DH public key;                             Indicator log
+  and                pair                KAS-ECC-SSC;        ECDH private                               (per every use
+  verification                           KAS-FFC-SSC;        key;                                       of approved
+                                         Safe Primes         ECDH public                                algorithm)
+                                         KeyGen;             key;
+                                         Safe Primes         RSA private
+                                         KeyVer;             Key;
+                                         RSA KeyGen;         RSA public key;
+                                         ECDSA KeyGen;       ECDSA private
+                                         ECDSA KeyVer        key;
+                                                             ECDSA public
+                                                             key
+
+ Table 8 - Approved services
+
+                                                                   Algorithms
+        Service                          Description                                    Roles          Indicator
+                                                                   Accessed
+RSA key wrapping           RSA key wrapping                        RSA                  User
+Authentication             Authentication by using HMAC-MD5        HMAC-MD5             User              N/A
+Hashing                    Hashing by using MD5                    MD5                  User              N/A
+Authenticated              Authenticated encryption/decryption     AES-GCM              User              N/A
+encryption/decryption      by using AES-GCM
+DSA signature              DSA Signature sign/verify               DSA                  User              N/A
+sign/verify
+Encryption/decryption      Encryption/decryption by using          Triple-DES           User              N/A
+                           Triple-DES
+
+
+
+                          Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy            Page 13 of 28
+                       Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+                                                                 Algorithms
+       Service                         Description                                 Roles       Indicator
+                                                                 Accessed
+Encryption/decryption      Encryption/decryption by using        Camellia           User          N/A
+                           Camellia
+Encryption/decryption      Encryption/decryption by using SEED   SEED               User          N/A
+Encryption/decryption      Encryption/decryption by using RC4    RC4                User          N/A
+Encryption/decryption      Encryption/decryption by using        ARIAGCM            User          N/A
+                           ARIAGCM
+Encryption/decryption      Encryption/decryption by using        CHACHA20/P         User          N/A
+                           CHACHA20/POLY1305                     OLY1305
+ Table 9 - Non-approved services
+
+
+
+
+                         Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy     Page 14 of 28
+                      Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+5. Software/Firmware security
+Integrity techniques
+The cryptographic module is a binary file (libfipscrypto.so) dynamically linked within the application in
+FOS (Fabric Operating System). To ensure firmware security, the module is protected by an
+HMAC-SHA-1 (HMAC Cert. #A2604) algorithm. The firmware integrity test key was preloaded to the
+module’s binary at the factory and used only for the pre-operational firmware integrity self-test. During
+initialization of the module, the integrity of the runtime executable is verified using an
+HMAC-SHA-1 which is compared to a value computed at build time. If at load time the MAC does not
+match the stored, known MAC value, the module enters a critical error state where all crypto
+functionality inhibited. The module must be reloaded to attempt the integrity test again.
+Integrity test on-demand
+The integrity test is performed as part of the pre-operational self-tests. It is automatically executed at
+power-on. The operator can power-cycle or reboot the tested platform to initiate the integrity test on-
+demand.
+
+
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy      Page 15 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+6. Operational environment
+The module will operate in a non-modifiable operational environment per the definition in FIPS 140-3
+level 1 specifications. The module runs on the operating system executing on the tested platforms listed
+in Table 2.
+The operational environment shall be restricted to a single operator mode of operation (i.e., concurrent
+operators are explicitly excluded). The application that requests cryptographic services is the single user
+of the module.
+All cryptographic keys and CSPs are under the control of the OS, which protects its SSPs against
+unauthorized disclosure, modification, and substitution. Additionally, the OS provides dedicated process
+space to each executing process, and the module operates entirely within the process space.
+
+
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy        Page 16 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+7. Physical security
+The module is running on the multi-chip standalone production grade platform to meet physical security
+requirements from FIPS 140-3 level 1. The module’s Tested Operational Environment’s Physical
+Perimeter (TEOPP) is drawn at the casing of the tested platforms in Table 2. The module’s tested
+platforms consist of production-grade components. All ICs are coated with industry standard
+passivation.
+
+
+
+
+                     Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy     Page 17 of 28
+                  Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+8. Non-invasive security
+The module does not claim to implement non-invasive security beyond the FIPS 140-3 Level 1
+requirements for validation.
+
+
+
+
+                     Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy     Page 18 of 28
+                  Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+       9. Sensitive security parameter management
+       The module possesses firmware integrity test HMAC key (non-SSP). Beyond that key, the module does
+       not store any other keys persistently, and it is the calling applications responsibility to appropriately
+       manage keys.
+
+Key/SSP/                 Security
+                                                           Import /     Establish                                   Use &
+ Name       Strength   Function and       Generation                                  Storage      Zeroization
+                                                            Export        ment                                   related keys
+  Type                     Cert.
+AES key     128-256    AES-CBC;        N/A                Import:       MD/EE       N/A: The       Module        Data
+            bits       AES-ECB;                           Module’s                  module         reboot or     protection
+                       AES-CTR;                           API                       does not       power down
+                       AES-CCM                                                      provide        the tested
+                                                          Export:                   persistent     platform
+                       Cert. #A2604                       No                        keys/SSPs
+                                                                                    storage
+DRBG        384 bits   ENT (NP)        Obtained from      Import:       MD/EE       N/A: The       Module        Used for
+entropy                                the entropy        From the                  module         reboot or     DRBG
+inputs                                 source ENT (NP)    entropy                   does not       power         generation
+                                                          source                    provide        down the
+                                                          ENT (NP)                  persistent
+                                                                                                   tested
+                                                          via the API               keys/SSPs
+                                                                                    storage
+                                                                                                   platform
+                                                          Export:
+                                                          No
+DRBG        256 bits   Counter         Derived from       Import:       N/A         N/A: The       Module        Used for
+seed                   DRBG            entropy input      No                        module         reboot or     DRBG
+                                       string as                                    does not       power         generation
+                       Cert. #A2604    defined by         Export:                   provide        down the
+                                       SP800-90Arev1      No                        persistent
+                                                                                                   tested
+                                                                                    keys/SSPs
+                                                                                    storage
+                                                                                                   platform
+DRBG        256 bits   Counter         Derived from       Import:       N/A         N/A: The       Module        Used for
+internal               DRBG            entropy input      No                        module         reboot or     DRBG
+state v                                string as                                    does not       power         generation
+                       Cert. #A2604    defined by         Export:                   provide        down the
+                                       SP800-90Arev1      No                        persistent
+                                                                                                   tested
+                                                                                    keys/SSPs
+                                                                                    storage
+                                                                                                   platform
+DRBG        256 bits   Counter         Derived from       Import:       N/A         N/A: The       Module        Used for
+key                    DRBG            entropy input      No                        module         reboot or     DRBG
+                                       string as                                    does not       power         generation
+                       Cert. #A2604    defined by         Export:                   provide        down the
+                                       SP800-90Arev1      No                        persistent
+                                                                                                   tested
+                                                                                    keys/SSPs
+                                                                                    storage
+                                                                                                   platform
+
+
+
+
+                             Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 19 of 28
+                          Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+Key/SSP/                  Security
+                                                          Import /    Establish                                    Use &
+ Name      Strength    Function and     Generation                                  Storage       Zeroization
+                                                           Export       ment                                    related keys
+  Type                      Cert.
+DH         112-152     CKG;           Internally         Import:     N/A          N/A: The        Module        Used for DH
+private    bits        Counter        generated          No                       module          reboot or     key
+key                    DRBG;          conformant to                               does not        power         agreement
+           (MODP-      Safe Primes    SP800-133r2        Export:                  provide         down the
+           2048,       KeyGen;        (CKG) using        No                       persistent
+                                                                                                  tested
+           MODP-       Safe Primes    SP800-56Arev3                               keys/SSPs
+           3072,       KeyVer;        Diffie-Hellman                              storage
+                                                                                                  platform
+           MODP-       KAS-FFC-SSC    key generation
+           4096)                      method, and the
+                       Cert. #A2604   random value
+                                      used in key
+                                      generation is
+                                      generated using
+                                      SP800-90Arev1
+                                      DRBG
+DH         112-152     Safe Primes    Internally         Import:     N/A          N/A: The        Module        Used for DH
+public     bits        KeyGen;        derived per        No                       module          reboot or     key
+key                    Safe Primes    Diffie-Hellman                              does not        power         agreement
+           (MODP-      KeyVer;        key agreement      Export:                  provide         down the
+           2048,       KAS-FFC-SSC    (SP800-56Arev3)    No                       persistent
+                                                                                                  tested
+           MODP-                                                                  keys/SSPs
+           3072,       Cert. #A2604                                               storage
+                                                                                                  platform
+           MODP-
+           4096)
+DH         112-152     KAS-FFC-SSC    Internally         Import:     N/A          N/A: The        Module        Used for DH
+shared     bits                       derived per        No                       module          reboot or     key
+secret                 Cert. #A2604   SP800-56Arev3                               does not        power         agreement
+           (MODP-                     Diffie-Hellman     Export:                  provide         down the
+           2048,                      shared secret      No                       persistent
+                                                                                                  tested
+           MODP-                      computation                                 keys/SSPs
+           3072,                      method                                      storage
+                                                                                                  platform
+           MODP-
+           4096)
+ECDH       128-256     CKG;           Internally         Import:     N/A          N/A: The        Module        Used for
+private    bits        Counter        generated          No                       module          reboot or     ECDH key
+key                    DRBG;          conformant to                               does not        power         agreement
+           (Curves:    KAS-ECC-SSC    SP800-133r2        Export:                  provide         down the
+           P-256, P-                  (CKG) using        No                       persistent
+                                                                                                  tested
+           384, P-     Cert. #A2604   SP800-56Arev3                               keys/SSPs
+           521)                       EC Diffie-                                  storage
+                                                                                                  platform
+                                      Hellman key
+                                      generation
+                                      method, and the
+                                      random value
+                                      used in key
+                                      generation is
+                                      generated using
+                                      SP800-90Arev1
+                                      DRBG
+
+                            Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 20 of 28
+                         Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+Key/SSP/                 Security
+                                                          Import /    Establish                                    Use &
+ Name      Strength    Function and     Generation                                  Storage       Zeroization
+                                                           Export       ment                                    related keys
+  Type                     Cert.
+ECDH       128-256     KAS-ECC-SSC    Internally         Import:     N/A          N/A: The        Module        Used for
+public     bits                       derived per EC     No                       module          reboot or     ECDH key
+key                    Cert. #A2604   Diffie-Hellman                              does not        power         agreement
+           (Curves:                   key agreement      Export:                  provide         down the
+           P-256, P-                  (SP800-56Arev3)    No                       persistent
+                                                                                                  tested
+           384, P-                                                                keys/SSPs
+           521)                                                                   storage
+                                                                                                  platform
+ECDH       128-256     KAS-ECC-SSC    Internally         Import:     N/A          N/A: The        Module        Used for
+shared     bits                       derived per        No                       module          reboot or     ECDH key
+secret                 Cert. #A2604   SP800-56Arev3                               does not        power         agreement
+           (Curves:                   EC Diffie-         Export:                  provide         down the
+           P-256, P-                  Hellman shared     No
+                                                                                  persistent      tested
+           384, P-                    secret
+           521)                       computation
+                                                                                  keys/SSPs       platform
+                                      method                                      storage
+RSA        112-152     CKG;           Internally         Import:     N/A          N/A: The        Module        Digital
+private    bits        Counter        generated          No                       module          reboot or     signature
+key                    DRBG;          conformant to                               does not        power         generation
+           (Modulus    RSA KeyGen;    SP800-133r2        Export:                  provide         down the
+           : 2048,     RSA SigGen     (CKG) using FIPS   No
+                                                                                  persistent      tested
+           3072,                      186-4 RSA key
+           4096        Cert. #A2604   generation
+                                                                                  keys/SSPs       platform
+           bits)                      method, and the                             storage
+                                      random value
+                                      used in key
+                                      generation is
+                                      generated using
+                                      SP800-90Arev1
+                                      DRBG
+RSA        112-152     RSA SigVer     Internally         Import:     N/A          N/A: The        Module        Digital
+public     bits                       derived per        No                       module          reboot or     signature
+key                    Cert. #A2604   FIPS186-4 RSA                               does not        power         verification
+           (Modulus                   Keypair            Export:                  provide         down the
+           : 2048,                    generation         No
+                                                                                  persistent      tested
+           3072,                      method
+           4096
+                                                                                  keys/SSPs       platform
+           bits)                                                                  storage
+
+
+
+
+                            Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 21 of 28
+                         Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+Key/SSP/                     Security
+                                                                Import /    Establish                                  Use &
+ Name        Strength     Function and            Generation                             Storage      Zeroization
+                                                                 Export       ment                                  related keys
+  Type                        Cert.
+ECDSA        128-256      CKG;              Internally         Import:      N/A         N/A: The      Module        Digital
+private      bits         Counter           generated          No                       module        reboot or     signature
+key                       DRBG;             conformant to                               does not      power         generation
+             (Curves:     ECDSA             SP800-133r2        Export:                  provide       down the
+             P-256, P-    KeyGen;           (CKG) using FIPS   No
+                                                                                        persistent    tested
+             384, P-      ECDSA             186-4 ECDSA key
+             521)         SigGen            generation
+                                                                                        keys/SSPs     platform
+                                            method, and the                             storage
+                          Cert. #A2604      random value
+                                            used in key
+                                            generation is
+                                            generated using
+                                            SP800-90Arev1
+                                            DRBG
+ECDSA        128-256      ECDSA SigVer      Internally         Import:      N/A         N/A: The      Module        Digital
+public       bits                           derived per        No                       module        reboot or     signature
+key                       Cert. #A2604      FIPS186-4 ECDSA                             does not      power         verification
+             (Curves:                       Keypair            Export:                  provide       down the
+             P-256, P-                      generation         No                       persistent    tested
+             384, P-                        method
+             521)
+                                                                                        keys/SSPs     platform
+                                                                                        storage
+HMAC         112 bits     HMAC-SHA-1;       N/A                Import:      MD/EE       N/A: The      Module        Used for
+key          (minimu      HMAC-SHA2-                           Module’s                 module        reboot or     keyed hash
+             m)           256;                                 API                      does not      power
+                          HMAC-SHA2-                                                    provide       down the
+                          384;                                 Export:
+                                                                                        persistent    tested
+                          HMAC-SHA2-                           No
+                          512;
+                                                                                        keys/SSPs     platform
+                          HMAC-SHA3-                                                    storage
+                          224;
+                          HMAC-SHA3-
+                          256;
+                          HMAC-SHA3-
+                          384;
+                          HMAC-SHA3-
+                          512
+
+                          Cert. #A2604
+CMAC         128 or       AES-CMAC          N/A                Import:      MD/EE       N/A: The      Module        Used for
+key          256 bits                                          Module’s                 module        reboot or     keyed hash
+                          Cert. #A2604                         API                      does not      power
+                                                                                        provide       down the
+                                                               Export: No
+                                                                                        persistent    tested
+                                                                                        keys/SSPs     platform
+                                                                                        storage
+       Table 10 - Sensitive security parameters
+
+
+
+
+                                Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy          Page 22 of 28
+                             Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+Note: All SSPs will be zeroized by all “0”s and cannot be retrievable or reusable after zeroization
+operation.
+
+RBG entropy source
+
+                           Minimum number of
+  Entropy sources                                                                    Details
+                             bits of entropy
+ ENT (NP): CPU Jitter    0.9075 bits per bit            CPU Jitter Random Number Generator (Jitter Entropy Library
+ (libjitterentropy                                      v3.0.1) from Stephen Muller provides at least 256 bits entropy.
+ v3.0.1)                                                Please see https://www.chronox.de/jent/doc/CPU-Jitter-
+                                                        NPTRNG.pdf for more information. The SHA3-256 algorithm as a
+                                                        vetted conditioner used in Jitter Entropy Library has been ACVP
+                                                        tested with the SHS Cert. #A2610
+Table 11 - Non-deterministic random number generation specification
+
+
+
+
+                        Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy             Page 23 of 28
+                     Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+10. Self-tests
+The module automatically performs both Pre-Operational Self-Tests and Cryptographic Algorithm Self-
+Tests (CASTs) after the power is on. Prior to providing any data output via the data output interface, the
+module would perform and pass the pre-operational self-tests. Following the successful pre-operational
+self-tests, the module would execute the Conditional Cryptographic Algorithm Self-tests (CASTs). The
+remaining self-tests for all approved algorithms are performed right before first instance of use of the
+respective algorithm. In the event a self-test fails, the module enters the critical error state and an error
+message is logged. In this state, cryptographic operations are halted and the module inhibits all data
+output from the module as the API interface is disabled. In order to attempt to exit the error state, the
+module must be rebooted. If the error persists, the module must be reinitialized.
+
+Pre-operational self-tests:
+    • HMAC-SHA-1 KAT
+    • Firmware integrity test by using HMAC-SHA-1
+
+Conditional self-tests
+Cryptographic algorithm self-tests (CASTs):
+   • AES-ECB Encryption KAT (128 bits)
+   • AES-ECB Decryption KAT (128 bits)
+   • AES-CBC Encryption KAT (128 bits)
+   • AES-CBC Decryption KAT (128 bits)
+   • AES-CCM Encryption KAT (128 bits)
+   • AES-CCM Decryption KAT (128 bits)
+   • DRBG Instantiate KAT
+   • DRBG Generate KAT
+   • DRBG Reseed KAT
+   Note: DRBG Health Tests as specified in SP800-90A Section 11.3 are performed
+   • ECDSA SigGen KAT (Curve P-256 with SHA2-256)
+   • ECDSA SigVer KAT (Curve P-256 with SHA2-256)
+   • HMAC-SHA-1 KAT
+   • HMAC-SHA2-256 KAT
+   • HMAC-SHA2-512 KAT
+   • HMAC-SHA3-256 KAT
+   • HMAC-SHA3-512 KAT
+   • KAS-ECC-SSC primitive Z value KAT
+   • KAS-FFC-SSC primitive Z value KAT
+   • RSA SigGen KAT (Modulus: 2048 with SHA2-256)
+   • RSA SigVer KAT (Modulus: 2048 with SHA2-256)
+    •   SHA-1 KAT
+    •   SHA2-256 KAT
+    •   SHA2-512 KAT
+
+
+                       Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy        Page 24 of 28
+                    Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+    •   SHA3-256 KAT
+    •   SHA3-512 KAT
+
+In addition, below is a list of module’s entropy source health tests.
+
+    •   ENT (NP) SP800-90B Start-Up Health Tests.
+            o Repetition Count Test (RCT)
+            o Adaptive Proportion Test (APT)
+Note: Please refer to SP800-90B, sections 4.4.1 and 4.4.2 for more information about the RCT and APT.
+
+    •   ENT (NP) SP800-90B Continuous Health Tests:
+           o Repetition Count Test (RCT)
+           o Adaptive Proportion Test (APT)
+
+Conditional pair-wise consistency tests (PCT)
+   • RSA PCT
+   • ECDSA PCT
+   • KAS-ECC-SSC PCT
+   • KAS-FFC-SSC PCT
+
+An operator has no access to cryptographic functionality unless the library initialization succeeds and
+the cryptographic module self-tests pass. The module performs the firmware integrity check of the
+module’s firmware using verification of an HMAC-SHA-1 signature calculated over the module’s file
+image. Please note that the module performs the CASTs prior to Firmware Integrity Test. Should the
+module fail a self-test, the module will return an error and inhibit all cryptographic operations. Finally,
+an operator may invoke all CASTs at any time by power-cycling the GPC and then reloading the module
+or invoke self-test(s) on demand.
+
+Periodic self-test
+The module performs on-demand self-tests initiated by the operator, by power cycling or rebooting the
+tested platform. The full suite of self-tests is then executed. The same procedure may be employed by
+the operator to perform periodic self-tests.
+
+It is recommended that the User perform periodic testing of the module’s on-demand self-tests every 60
+days to ensure all components are functioning correctly.
+
+Error handling
+If any of the above-mentioned self-tests fail, the module reports the cause of the error and enters an
+error state (there is only one error state). In the Error State, no cryptographic services are provided, and
+data output is prohibited. The only method to recover from the error state is to reboot the module and
+perform the self-tests, including the pre-operational firmware integrity test and the conditional CASTs.
+The module will only enter into the operational state after successfully passing the pre-operational
+firmware integrity test and the conditional CASTs. Table 12 below shows the different causes that lead
+to the Error State and the status indicators reported.
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy         Page 25 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+                  Cause of Error                                       Error State Indicator
+ Failed Pre-Operational Firmware Integrity Test              ERROR: Libfipscrypto Critical Failure!
+                                                             Integrity check failed... System going
+                                                             for reboot!
+ Failed Conditional CAST                                     Selftest of <algorithm name> failed.
+                                                             System going for reboot!
+ Failed Conditional PCT                                      <Algorithm> pairwise consistency test
+                                                             failed
+ SP 800-90B Entropy Source (Start-up/Continuous              Entropy request is not serviced and
+ health tests)                                               error is returned to crypto module.
+Table 12 - Error state
+
+
+
+
+                            Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy         Page 26 of 28
+                         Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+11. Life-cycle assurance
+The module design corresponds to the module security rules. This section documents the security rules
+enforced by the cryptographic module to implement the security requirements of this FIPS 140-3 Level 1
+module.
+
+General guidance
+The module meets all the Level 1 requirements for FIPS 140-3. The module functions entirely within the
+process space of the process that invokes it, and thus satisfies the FIPS 140-3 requirement for a single
+user mode of operation.
+
+During system start-up the OS will call the fipscrypto_init_func() function. The fipscrypto_init_func()
+function is the default entry point for the module. The function initiates all self-tests and does not return
+to the OS until all self-tests are completed successfully and the module is in an approved mode of
+operation. No other tasks are executed while the self-tests are performed so no data is passed and all
+cryptographic operations are prohibited. If a self-test fails, the module enters a critical error state and
+must be reloaded to clear the error state and retry the self-tests.
+
+End of life
+In addition, the module is not distributed as a standalone library and is only used in conjunction with the
+solution. The end user of the operating system is also responsible for SSPs zeroization based on the
+methods listed in Table 12.
+
+
+
+
+                      Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy         Page 27 of 28
+                   Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+12. Mitigation of other attacks
+The module does not claim to mitigate any attacks beyond the FIPS 140-3 Level 1 requirements for
+validation.
+
+
+
+
+                     Brocade Fabric OS FIPS Cryptographic Module 9.1.1 Security Policy     Page 28 of 28
+                  Copyright 2024 Brocade Communications Systems LLC All rights reserved.
+

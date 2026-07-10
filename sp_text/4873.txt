@@ -1,0 +1,1839 @@
+Symantec, A Division of Broadcom
+Edge SWG
+Version 7.4
+FIPS 140-3 Non-Proprietary Security Policy
+FIPS 140-3 Security Level: 1
+Document Version 1.2
+Date: November 2024
+
+
+
+
+Prepared by:
+
+
+
+
+      www.acumensecurity.net
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 1 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Introduction
+Federal Information Processing Standards Publication 140-3 — Security Requirements for Cryptographic
+Modules specifies requirements for cryptographic modules to be deployed in a Sensitive but Unclassified
+environment. The National Institute of Standards and Technology (NIST) and Canadian Centre for Cyber
+Security (CCCS) run the Cryptographic Module Validation Program (CMVP). The NVLAP accredits
+independent testing labs to perform FIPS 140-3 testing; the CMVP validates modules meeting FIPS 140-3
+validation. Validated is the term given to a module that is documented and tested against the FIPS 140-3
+criteria.
+
+More information is available on the CMVP website at:
+https://csrc.nist.gov/projects/cryptographic-module-validation-program.
+
+
+About this Document
+This non-proprietary Cryptographic Module Security Policy for the Edge Secure Web Gateway (SWG);
+running the Secure Gateway Operating System (SGOS) version 7.4, provides an overview of the product
+and a high-level description of how it meets the overall Security Level 1 security requirements Federal
+Information Processing Standards (FIPS) Publication 140-3.
+
+The Edge SWG may also be referred to as the “module” in this document.
+
+
+Disclaimer
+The contents of this document are subject to revision without notice due to continued progress in
+methodology, design, and manufacturing. Broadcom shall have no liability for any error or damages of
+any kind resulting from the use of this document.
+
+Copyright © 2024 Broadcom. All Rights Reserved. The term “Broadcom” refers to Broadcom Inc. and/or
+its subsidiaries. For more information, go to www.broadcom.com. All trademarks, trade names, service
+marks, and logos referenced herein belong to their respective companies.
+
+Broadcom reserves the right to make changes without further notice to any products or data herein to
+improve reliability, function, or design. Information furnished by Broadcom is believed to be accurate
+and reliable. However, Broadcom does not assume any liability arising out of the application or use of
+this information, nor the application or use of any product or circuit described herein, neither does it
+convey any license under its patent rights nor the rights of others.
+
+Notices
+This document may be freely reproduced and distributed whole and intact including this copyright
+notice.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 2 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Contact Information
+ Symantec, A Division of Broadcom
+ 1320 Ridder Park Dr,
+ San Jose, CA 95131
+ www.broadcom.com
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 3 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Table of Contents
+Introduction .................................................................................................................................................. 2
+Disclaimer ..................................................................................................................................................... 2
+Contact Information ..................................................................................................................................... 3
+1. General ................................................................................................................................................. 6
+   1.1     Scope ............................................................................................................................................. 6
+   1.2     Overview ....................................................................................................................................... 6
+2. Cryptographic Module Specification ................................................................................................... 9
+   2.1     Module Description ...................................................................................................................... 9
+      2.1.1 Cryptographic Boundary ........................................................................................................... 10
+     2.2 Modes of Operation ......................................................................................................................... 11
+     2.3 Cryptographic Algorithms ................................................................................................................ 11
+     2.4 Security Rules ................................................................................................................................... 14
+        2.4.1 Crypto-Officer Guidance ........................................................................................................... 14
+        2.4.2 User Guidance ........................................................................................................................... 14
+        2.4.3 Module Correlation ................................................................................................................... 14
+        2.4.4 Additional Security Rules .......................................................................................................... 14
+3.     Cryptographic Module Interfaces ...................................................................................................... 17
+4.     Roles, Services, and Authentication .................................................................................................. 18
+     4.1 Assumption of Roles......................................................................................................................... 18
+     4.2 Authentication Methods .................................................................................................................. 19
+     4.3 Services ............................................................................................................................................. 24
+        4.3.1 Crypto Officer Services .............................................................................................................. 24
+        4.3.2 User Role Services ..................................................................................................................... 24
+  4.4 Self-initiated Cryptographic Output Capability ............................................................................... 32
+5. Software/Firmware Security .............................................................................................................. 32
+6. Operational Environment .................................................................................................................. 32
+7. Physical Security ................................................................................................................................. 32
+8. Non-Invasive Security......................................................................................................................... 32
+9. Sensitive Security Parameter Management ...................................................................................... 33
+10. Self-Tests............................................................................................................................................. 41
+  10.1 Pre-operational Self-Tests.............................................................................................................. 41
+  10.2 Conditional Self-Tests..................................................................................................................... 41
+11. Life-Cycle Assurance ........................................................................................................................... 43
+     11.1 Secure Operation/Management ............................................................................................... 43
+      11.1.1 Initialization ......................................................................................................................... 43
+12. Mitigation of Other Attacks ............................................................................................................... 45
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 4 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+List of Tables
+Table 1 - Security Levels ................................................................................................................................ 8
+Table 2 - Tested Operational Environments ................................................................................................. 9
+Table 3 - Vendor Affirmed Operational Environments ................................................................................. 9
+Table 4 - Approved Algorithms ................................................................................................................... 13
+Table 5 - Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security
+Claimed ....................................................................................................................................................... 14
+Table 6 - Non-Approved Algorithms Not Allowed in the Approved Mode of Operation ........................... 14
+Table 7 - Ports and Interfaces ..................................................................................................................... 17
+Table 8 - Roles, Service Commands, Input and Output .............................................................................. 19
+Table 9 - Roles and Authentication ............................................................................................................. 23
+Table 10 - Approved Services ...................................................................................................................... 30
+Table 11 - Non-Approved Services .............................................................................................................. 31
+Table 12 - SSPs ............................................................................................................................................ 40
+Table 13 - Non-Deterministic Random Number Generation Specification ................................................ 41
+
+
+List of Figures
+Figure 1 - Typical Deployment of a Secure Web Gateway Virtual Appliance ............................................... 7
+Figure 2 - Cryptographic Boundary Block Diagram for SSP S410 ................................................................ 10
+Figure 3 - Cryptographic Boundary Block Diagram for Dell PowerEdge R440 ............................................ 10
+Figure 4 - Intel Xeon Silver 4210 ................................................................................................................. 11
+Figure 5 - Intel Xeon Silver 4216 ................................................................................................................. 11
+Figure 6 - no-show command ..................................................................................................................... 45
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 5 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+1.       General
+ 1.1     Scope
+This document describes the security policy for the Edge SWG (SW version: SGOS 7.4) cryptographic
+module. It contains specification of the security rules, under which the cryptographic module operates,
+including the security rules derived from the requirements of the FIPS 140-3 standard. The module type
+is software-hybrid and has a multi-chip standalone embodiment.
+
+ 1.2     Overview
+The Edge SWG appliances from Symantec provide companies with the ability to deploy a scalable proxy-
+based security solution to protect their organization against advanced threats. The Edge SWG acts as
+gateway between web users and the Internet: a single point where all web traffic can be monitored and
+corporate policies for web use can be enforced. This strategic position makes the Edge SWG a natural
+place to build additional network security technologies that defend against a very wide range of
+cybercrimes, malware, and phishing.
+
+The Edge SWG offers the following features.
+
+     •   High-speed decryption and re-encryption of SSL/TLS traffic, so attackers cannot use encryption
+         to conceal malware or command and control traffic into and out of the corporate network
+     •   Universal Policy Enforcement (UPE) from Symantec allows organizations to enforce acceptable
+         web use policies for employees who connect through the Edge SWG. Symantec allows you to
+         centralize your policy creation, maintenance, and installation for simplified, unified
+         administration.
+     •   Out of the box protection – Recommended, strong, and maximum policies crafted by security
+         experts.
+     •   Immediate protection with the broadest advanced threat integrations
+     •   Direct cloud application visibility and real-time controls
+     •   Unmatched performance and reliability
+     •   Logs and reports on how users connect to websites.
+     •   Strong user authentication can be incorporated into the policies, supporting a wide variety of
+         identity sources, including NTLM, LDAP, RADIUS, one-time passwords, and certificates
+     •   When paired with other Symantec technologies, it can provide:
+             o Malware detection using multiple anti-malware engines and detection methods
+             o Multi-layered deep content inspection and analysis to detect spam and application-level
+                  threats in the payloads of network traffic
+             o Data Loss Prevention (DLP) to identify confidential information and block it from leaving
+                  the corporate network
+             o Cloud Access Security Broker (CASB) features to monitor and control what applications
+                  users can access and how documents and files are sent to the cloud
+             o Web (browser) isolation to create a safe browsing experience, prevent malware from
+                  moving from browsers onto employees’ systems, and block sharing of credentials on
+                  suspicious websites
+     •   Integration the world’s largest civilian threat intelligence dataset with the Symantec Global
+         Intelligence Network (GIN)
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 6 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+The Symantec Global Intelligence Network (GIN), which
+monitors more than 175 million endpoints and Edge
+SWGs protects 80 million users. It uses artificial
+intelligence to analyze over 3.7 billion lines of telemetry
+to identify and categorize emerging threats and
+suspicious and malicious URLs and websites. Key data is
+continually forwarded to hardware and virtual Edge
+SWGs in data centers and in cloud deployments and to
+hosted SaaS platforms.
+
+
+
+
+    See Figure 1 below for a typical deployment scenario for the Edge SWGs.
+
+
+
+
+                      Figure 1 - Typical Deployment of a Secure Web Gateway Virtual Appliance
+
+    The security provided by the Edge SWG can be used to control, protect, and monitor the Internal
+    Network’s use of controlled protocols on the External Network. The controlled protocols 1
+    implemented are:
+
+        •   Windows Media Optimization (Microsoft Media Streaming (MMS))
+
+1
+    These protocols are not executed by the cryptographic module.
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 7 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+        •   Microsoft Smooth Streaming Optimization
+        •   Real Media Optimization
+        •   Real-Time Streaming Protocol (RTSP) Optimization
+        •   Real-Time Messaging Protocol (RTMP) Optimization
+        •   QuickTime Optimization (Apple HTTP Live Streaming)
+        •   Adobe Flash Optimization (Adobe HTTP Dynamic Streaming)
+        •   Bandwidth Management
+        •   DNS proxy
+        •   Advanced DNS Access Policy
+        •   Hypertext Transfer Protocol (HTTP)/Secure Hypertext Transfer Protocol (HTTPS) Acceleration
+        •   File Transfer Protocol (FTP) Optimization
+        •   Secure Sockets Layer (SSL) Termination/Protocol Optimization
+        •   TCP 2 tunneling protocols (Secure Shell (SSH))
+        •   Secure Shell
+        •   Telnet Proxy
+        •   ICAP Services
+        •   Netegrity SiteMinder
+        •   Oblix COREid
+        •   Peer-To-Peer
+        •   User Authentication
+        •   Onbox Content Filtering (3rd Party or BCWF2)
+        •   Offbox Content Filtering (via ICAP)
+        •   SOCKS
+
+Access control is achieved by enforcing configurable policies on controlled protocol traffic to and from
+the Internal Network users. The policy may include authentication, authorization, content filtering, and
+auditing.
+
+The module is validated at the overall security level 1 and the following FIPS 140-3 Section levels in Table
+1.
+
+               ISO/IEC 24759          FIPS 140-3 Section Title                             Security Level
+               Section 6.
+               1                      General                                                      1
+               2                      Cryptographic Module Specification                           1
+               3                      Cryptographic Module Interfaces                              1
+               4                      Roles, Services, and Authentication                          2
+               5                      Software/Firmware Security                                   1
+               6                      Operational Environment                                      1
+               7                      Physical Security                                            1
+               8                      Non-Invasive Security                                       N/A
+               9                      Sensitive Security Parameter                                 1
+                                      Management
+               10                     Self-Tests                                                   1
+               11                     Life-Cycle Assurance                                         1
+               12                     Mitigation of Other Attacks                                 N/A
+                                                  Table 1 - Security Levels
+
+
+
+
+2
+    Transmission Control Protocol
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 8 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+2.        Cryptographic Module Specification
+For the FIPS 140-3 validation, the module was tested on the following operational environments listed in
+Table 2.
+ # Operating System                                 Hardware                 Processor               PAA/Acceleration
+                                                    Platform
+ 1 SGOS v7.4 (with KVM v2.3                         Symantec SSP-            Intel Xeon Silver       With PAA
+   hypervisor)                                      S410                     4210
+ 2 SGOS v7.4 (with VMware ESXi v6.5                 Dell PowerEdge           Intel Xeon Silver       With PAA
+   hypervisor)                                      R440                     4216
+                                         Table 2 - Tested Operational Environments
+
+Additionally, the vendor affirms that the cryptographic module is also fully supported on the following
+platforms and operational environments:
+
+#        Operating System                              Hardware Platform
+1        SGOS v7.4                                     Microsoft Azure Hypervisor running on Intel
+                                                       Xeon Platinum 8272CL processor
+2        SGOS v7.4                                     AWS Xen Hypervisor running on Intel Xeon E5-2686 v4
+                                                       processor
+3        SGOS v7.4                                     Google Cloud Platform running on Intel Xeon® E5-2689
+                                                       processor
+4        SGOS v7.4                                     Microsoft Hyper-V hypervisor running on Intel Xeon
+                                                       Platinum 8260L processor running on Dell PowerEdge
+                                                       R840 server
+                                    Table 3 - Vendor Affirmed Operational Environments
+
+No claim can be made as to the correct operation of the module or the security strengths of the
+generated keys when ported to an operational environment, which is not listed on the validation
+certificate.
+
+
+
+           2.1     Module Description
+The module is a software-hybrid module and has a Multi-Chip Standalone embodiment, that meets
+overall Level 1 FIPS 140-3 requirements. The module was tested and found complaint on a Dell
+PowerEdge R440 Server using VMware ESXi v6.5 hypervisor and Symantec SSP-S410 using KVM v2.3.
+
+The module software consists of Symantec’s proprietary operating system, SGOS v7.4. Acting as the guest
+OS in the respective hypervisors, this full-featured operating system includes both OS-level functions as
+well as the application-level functionality that provides the appliance’s optimization and proxying services.
+The module software version 7.4 contains the following cryptographic libraries:
+
+     •    SGOS Cryptographic Library v5.1.1
+     •    VA Blue Coat Boot Loader v5.31
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                               Page 9 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+2.1.1 Cryptographic Boundary
+The cryptographic boundary of the module (shown by the yellow line in Figures 2 & 3) consists of the SGOS
+v7.4 (which contains the VA Blue Coat Boot Loader v5.31, and the SGOS Cryptographic Library v5.1.1) and
+the processors for cryptographic acceleration as listed in Table 2. The Tested Operational Environment’s
+Physical Perimeter (TOEPP) of the module is the SSP S410 and Dell PowerEdge R440 platforms, in which
+the module executes.
+
+
+
+
+                                                                     Intel Xeon 4210
+
+                               Figure 2 - Cryptographic Boundary Block Diagram for SSP S410
+
+
+
+
+                                                                     Intel Xeon 4216
+
+                         Figure 3 - Cryptographic Boundary Block Diagram for Dell PowerEdge R440
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 10 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                              Figure 4 - Intel Xeon Silver 4210
+
+
+
+
+                                              Figure 5 - Intel Xeon Silver 4216
+
+
+
+
+2.2 Modes of Operation
+The module supports two modes of operation: Approved and Non-Approved. The module will be in
+Approved mode once the initialization steps mentioned in Section 11.1.1 are completed. See Tables 4
+and 5 for a list of Approved or Allowed algorithms. To transition from Approved mode to Non-Approved
+mode, the operator should execute “fips-mode-disable” which will trigger zeroization via module
+reboot. To transition from Non-Approved mode of operation to Approved mode, the operator must run
+the command “fips-mode enable” along with the initialization instructions as specified in Section 11.1.1.
+If the initialization steps are not followed as specified in Section 11.1.1, then the module may be
+operational, in a non-compliant state.
+
+
+
+2.3 Cryptographic Algorithms
+
+The module implements the Approved algorithms 3 listed in the table below:
+
+
+
+
+3
+  There are algorithms, modes, and key/moduli sizes that have been CAVP-tested but are not used by any
+Approved service of the module. Only the algorithms, modes/methods, and key lengths/curves/moduli shown in
+this table are used by an Approved service of the module.
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 11 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+CAVP Cert               Algorithm and           Mode/               Description / Key                  Use/Function
+                        Standard                Method              Size(s) / Key
+                                                                    Strength(s)
+                                                SGOS Cryptographic Library v5.1.1
+ A2936                    AES                     CBC, CTR                 128, 192, 256                Data Encryption /
+                          FIPS 197                                                                      Decryption
+                          SP800-38A
+ A2936                    AES                     GCM                      128, 192, 256                Authenticated Encryption,
+                          FIPS 197                                                                      Authenticated Decryption
+                          SP800-38D
+ Vendor Affirmed          CKG                     N/A                      N/A                          Symmetric and Asymmetric
+                          SP800-133rev2                                                                 Key Generation
+                          Sections 4, 5 and
+                          6.1
+ CVL                      CVL                     KDF SNMP                 SNMP (Password               Key Derivation
+ A2936                    SP800-135rev1                                    Length: 64, 128)
+ CVL                      CVL                     KDF SSH                  SSH (Cipher: AES-128,        Key Derivation
+ A2936                    SP800-135rev1                                    AES-192, AES-256)
+
+ CVL                      CVL                     KDF TLS v1.2             TLS v1.2 (SHA2-256,          Key Derivation
+ A2936                    SP800-135rev1                                    SHA2-384, SHA2-512)
+ A2936                    DRBG                    CTR_DRBG                 AES 128, 192, 256            Random Bit Generation
+                          SP800-90Arev1 4
+ A2936                    HMAC                    HMAC                     HMAC-SHA-1,                  Message Authentication
+                          FIPS 198-1                                       HMAC-SHA2-224,
+                                                                           HMAC-SHA2-256,
+                                                                           HMAC-SHA2-384,
+                                                                           HMAC-SHA2-512
+ A2936                    KAS-FFC-SSC             KAS-FFC-SSC              ffdhe2048,                   Shared Secret Computation
+                          SP800-56Arev3           dhEphem                  ffdhe3072,                   per SP800-56Arev3
+                                                                           ffdhe4096,
+                                                                           ffdhe6144,
+                                                                           ffdhe8192
+ A2936                    KAS                     KAS-FFC-SSC,             KAS-FFC-SSC:                 Key Agreement Scheme per
+                          SP800-56Arev3           KDF SSH,                 ffdhe2048,                   SP800-56Arev3;
+                          SP800-135rev1           KDF TLS v1.2,            ffdhe3072,                   Scenario 2 path 2 of FIPS
+                                                  TLS v1.3 KDF             ffdhe4096,                   140-3 IG D.F. Key
+                                                                           ffdhe6144,                   establishment
+                                                                           ffdhe8192                    methodology providing
+                                                                                                        between 112 and 200 bits
+                                                                                                        of encryption strength.
+ A2936                    PBKDF                   PBKDF                    SHA-1, SHA2-224,             Key Derivation
+                          SP800-132                                        SHA2-256, SHA2-
+                                                                           384, SHA2-512
+
+
+
+     4
+         If CTR_DRBG is used, then the caller shall ensure that the derivation function is enabled.
+
+     Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 12 of 45
+               This document may be freely reproduced and distributed whole and intact including this copyright notice.
+CAVP Cert              Algorithm and            Mode/                     Description / Key            Use/Function
+                       Standard                 Method                    Size(s) / Key
+                                                                          Strength(s)
+ A2936                  RSA                       KeyGen                   1024 5, 2048, 3072,          Key Pair Generation
+                        (FIPS 186-4)              SigGen                   4096 modulo                  Digital Signature
+                                                  SigVer                                                Generation, Digital
+                                                                           SHA-1 6, SHA2-224,           Signature Verification
+                                                                           SHA2-256, SHA2-384,
+                                                                           SHA2-512;        Per IG C.F, supported RSA
+                                                                                            modulus sizes specified by
+                                                                           PKCS1 v1.5, PKCSPSS,
+                                                                           ANSI X9.31       ACVP have been CAVP
+                                                                                            tested. For SigGen, the
+                                                                                            supported modulus are
+                                                                                            2048, 3072 and 4096. For
+                                                                                            SigVer, the supported key
+                                                                                            sizes are 1024, 2048, 3072
+                                                                                            and 4096.
+ A2936                  SafePrimes                KeyGen              ffdhe2048, ffdhe3072, Key Generation, Key
+                        SP800-56Arev3             KeyVer              ffdhe4096, ffdhe6144, Verification
+                                                                      ffdhe8192
+ A2936                  SHS                       SHA-1 7, SHA2-224, N/A                    Message Digest
+                        (FIPS 180-4)              SHA2-256, SHA2-
+                                                  384, SHA2-512
+ CVL                    CVL                       TLS v1.3 KDF        SHA2-256, SHA2-384 Key Derivation
+ A2936                  RFC8446
+ N/A                    ENT (P)                   N/A                 Seeding for the                   Random Number
+                        (SP800-90B)                                   Approved DRBG (SP                 Generation
+                                                                      800-90Arev1
+                                                                      CTR_DRBG)
+                                                 VA Blue Coat Boot Loader v5.31
+ A3192                  SHS                      SHA-1, SHA2-256     N/A                                Message Digest as part of
+                        (FIPS 180-4)                                                                    Integrity Check
+ A3192                  RSA                       SigVer                   2048 modulo                  Digital Signature
+                        (FIPS 186-4)                                       SHA2-256;                    Verification as part of
+                                                                           PKCS1 v1.5                   Integrity Check
+ A3192                  HMAC                      HMAC-SHA-1               Key Length: 256-1024         Integrity Check
+                        (FIPS 198-1)
+                                                    Table 4 - Approved Algorithms
+
+
+
+
+                   Algorithm                                  Caveat                               Use / Function
+         AES CBC mode (non-                     All backups are transmitted via          Configuration backup
+         conformant)                            SSH (encrypted by the session            encryption
+                                                key), so any non-conformant
+
+     5
+       Only for RSA Signature Verification.
+     6
+       Not applicable to RSA Signature Generation.
+     7
+       Only for Non-digital signature and legacy use, all other SHAs acceptable for hash functions applications.
+
+     Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 13 of 45
+               This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                                           encryption is redundant/not
+                                           required for security (No
+                                           security claimed)
+         Table 5 - Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed
+
+                      Algorithm                                                   Use / Function
+ TLS v1.0/1.1 with MD5                                      TLS 1.0/1.1 sessions
+ EC Diffie-Hellman (non-compliant)                          Remote management session via SSH and syslog
+                    Table 6 - Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+NOTE:
+No parts of the TLS, SSH, and SNMP protocols, other than the KDF, have been reviewed or tested by the
+CAVP and CMVP.
+
+Per IG D.H, the vendor affirms symmetric keys and seeds for asymmetric keys are generated per SP800-
+133rev2 (unmodified output from a DRBG).
+
+2.4 Security Rules
+2.4.1 Crypto-Officer Guidance
+The Crypto-Officer can monitor and configure the module via the CLI (serial port or SSH).
+
+The Crypto-Officer should monitor the module’s status regularly. If any irregular activity is noticed or the
+module is consistently reporting errors, customers should consult Symantec’s Documentation portal and
+the administrative guidance documents to resolve the issues. If the problems cannot be resolved
+through these resources, Symantec customer support should be contacted.
+
+Key sizes less than what is specified shall not be used. The Crypto Officer password, “enabled” mode
+password, “Setup” password and “User” password must be at least 8 characters in length.
+
+2.4.2 User Guidance
+The User is only able to access the module remotely via SSH (CLI). The User must change his or her
+password at the initial login. The User must be diligent to pick strong passwords (alphanumeric with
+minimum 8 characters) that will not be easily guessed and must not reveal their password to anyone.
+Additionally, the User should be careful to protect any secret/private keys in their possession, such as TLS
+or SSH session keys. The User should report to the Crypto-Officer if any irregular activity is noticed. Please
+refer to Section 11.1.1 for initialization procedures.
+
+2.4.3 Module Correlation
+The Crypto-Officer may issue the “show-version” command to view the module identifier and version
+(SGOS 7.4.0.0 SWG Edition). The module identifier “SWG” denotes the module name “Edge SWG”. The
+version of Edge SWG listed in this Security Policy, 7.4, can be verified by the version of SGOS printed out
+as part of the “show version” command.
+
+2.4.4 Additional Security Rules
+
+
+AES GCM IV Generation
+The module’s AES-GCM implementation conforms to IG C.H scenarios 1a, 1d, 2 and 5.
+
+         Scenario 1a TLS 1.2
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 14 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+         The module is compliant with TLS 1.2 protocol per SP800-52rev2. The AES-GCM IV generation is
+         compliant with RFC5288. The module supports acceptable AES-GCM ciphersuites from Section
+         3.3.1 of SP800-52rev2.
+
+         The module explicitly checks that the nonce_explicit part of the IV (i.e., counter) has not
+         reached the maximum number of potential values (264-1) for a given session key. Upon detecting
+         exhaustion of the counter, the module returns an error indication, prompting either connection
+         abortion or initiation of a handshake to establish a new encryption key.
+
+         If the module experiences power loss and subsequently the power is restored, the calling
+         application must ensure that any AES-GCM keys used for encryption or decryption are re-
+         distributed.
+
+         Scenario 1d SSHv2
+
+         The IV generation is in compliance with SSHv2 and used for AES-GCM encryption. The module is
+         compliant with RFC4252, 4253 and 5647.
+
+
+
+         Scenario 2 Random internal IV generation
+
+         The module also supports an internal IV generation using the module’s Approved DRBG, which is
+         complaint with IG C.H and SP800-38D Section 8.2.2. The AES-GCM IV is generated randomly
+         internal to the module using module’s Approved DRBG. The DRBG seeds itself from the entropy
+         source. The GCM IV is 96 bits in length. Per Section 9, this 96-bit IV contains 96 bits of entropy.
+
+         Scenario 5 TLS 1.3
+
+         The module supports a compliant TLS 1.3 as defined in RFC8446. The module uses the
+         ciphersuites found in Appendix B.4 of RFC8446 and the acceptable AES-GCM ciphersuites from
+         Section 3.3.1 of SP800-52rev2. The ciphersuites explicitly select AES-GCM as the
+         encryption/decryption ciphers. The module implements, within its boundary, an IV generation
+         unit for TLS 1.3 that keeps control of the 64-bit counter value within the AES-GCM IV.
+
+         If the module experiences power loss and subsequently the power is restored, the calling
+         application must ensure that any AES-GCM keys used for encryption or decryption are re-
+         distributed.
+
+         Upon detecting exhaustion of the counter, the module returns an error indication, prompting
+         either connection abortion or initiation of a handshake to establish a new encryption key.
+
+PBKDF
+Per IG D.N, keys generated using PBKDF shall only be used in data storage applications. The minimum
+password length allowed is 8 characters and the maximum password length is 64. The worst-case
+probability of guessing the value is 62^8 assuming all characters are digits, upper-case letters and/or
+lower-case letters. The operator shall choose the password length and the iteration count in such a way
+that the combination will make the key derivation computationally intensive. PBKDF is implemented to
+support option 1a specified in section 5.4 of SP800-132. The keys derived from SP800-132 map to
+section 3.1 of SP800-133rev2 as indirect generation from DRBG. The minimum iteration count enforced
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 15 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+is 10000 and the value is chosen considering both the security that it provides and the performance of
+the process. The derived keys may only be used in storage applications.
+
+Key Agreement
+
+ECDH (Elliptic Curve Diffie-Helman) cipher suites or ECDH keypair generated by the module cannot be
+used in any configuration in the Approved mode of operation. Only DH (Diffie-Hellman) can be used in
+Approved mode.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 16 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+3.       Cryptographic Module Interfaces
+ The module’s physical ports can be categorized into the following logical interfaces defined by
+ FIPS 140- 3:
+      • Data input
+      • Data output
+      • Control input
+      • Status output
+
+As a software-hybrid module, the virtual appliance has no physical characteristics. The module’s physical
+and electrical characteristics, manual controls, and physical indicators are those of the host system (Dell
+PowerEdge R440 and S410 Server) and out of scope of this validation. The hypervisor provides virtualized
+ports and interfaces for the module. Interaction with the virtual ports created by the hypervisor occurs
+through the host system’s Ethernet port. Management, data, and status traffic must all flow through the
+Ethernet port. Direct interaction with the module via the host system is possible over the serial port;
+however, the Crypto Officer must first map the physical serial port to the module using vSphere Client. The
+mapping of the module’s logical interfaces in the software to FIPS 140-3 logical interfaces is described in
+Table 7 below.
+
+             Physical port                          Logical interface                    Data that passes over
+                                                                                             port/interface
+ Input Registers                           Data Input                               Input packets
+ Output Registers                          Data Output                              Output packets
+ Control Registers                         Control Input                            Input packets (Configuration or
+                                                                                    Administrative data)
+ Status Registers                          Status Output                            Status
+                                               Table 7 - Ports and Interfaces
+
+Data input and output are the packets utilizing the services provided by the modules. These packets enter
+and exit the module through the Virtual Ethernet ports. Control input consists of Configuration or
+Administrative data entered into the modules. Control input enters the module via the Virtual Ethernet
+and Virtual Serial Port interfaces (SSH CLI, and Serial CLI). Status output consists of the status provided or
+displayed via the user interfaces (such as SSH CLI, and Serial CLI) or available log information. Status output
+exits the module via the user interfaces (such as SSH CLI, and Serial CLI) over the Virtual Ethernet or Virtual
+Serial Ports. The module does not implement a control output interface.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 17 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+4.        Roles, Services, and Authentication
+4.1 Assumption of Roles
+ The module supports both Crypto-Officer(CO) and User role. Before accessing the modules for
+ any administrative services, COs and Users must authenticate to the module according to the
+ methods specified in Table 9. The module offers Command Line Interface:
+
+      •    Command Line Interface (CLI): Accessible locally via the serial port (provides access to the
+           Setup Console portion of the CLI which requires the additional “Setup” password to gain
+           access) or remotely using SSH. This interface is used for management of the modules. This
+           interface must be accessed locally via the serial port to perform the initial module
+           configurations (IP address, DNS server, gateway, and subnet mask) and placing the
+           modules into the Approved mode. When the module has been properly configured, this
+           interface can be accessed via SSH. Management of the module may take place via SSH or
+           locally via the serial port. Authentication is required before any functionality will be
+           available through the CLI.
+
+
+When managing the module over the CLI, COs and Users both log into the modules with administrator
+accounts entering the “standard”, or “unprivileged” mode on the module. Unlike Users, COs can enter
+the “enabled” or “privileged” mode after initial authentication to the CLI by supplying the “enabled”
+mode password. Additionally, COs can only enter the “configuration” mode from the “enabled” mode
+via the CLI, which grants privileges to make configuration level changes. Going from the “enabled” mode
+to the “configuration” mode does not require additional credentials. The details of these modes of
+operation are found below:
+
+Crypto-Officer role and privileges:
+
+      •    The CO is an administrator of the module that has “enabled” mode access while using the
+           CLI.
+      •    When the CO is using the CLI, and while in the “enabled” mode of operation, COs may put the
+           module in its Approved mode, reset to the factory state (local serial port only) and query if the
+           module is in Approved mode. In addition, COs may do all the services available to Users while
+           not in “enabled” mode.
+      •    Once the CO has entered the “enabled” mode, the CO may then enter the “configuration” mode
+           via the CLI. The “configuration” mode provides the CO management capabilities to perform tasks
+           such as account management and key management.
+
+User role and privileges:
+
+      •    The User is an administrator of the module that operates only in the “standard” or
+           “unprivileged” mode and has not been granted access to the “enabled” mode in the CLI.
+      •    The User may access the CLI for management of the module.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 18 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+          Role                         Service                            Input                         Output
+ Crypto-Officer (CO)            Module initialization          See section 11.1.1              N/A
+                                                               Initialization for input
+                                                               commands
+ Crypto-Officer (CO)            Enable mode                    ”enable”                        Command response
+ Crypto-Officer (CO)            Configuration mode             ”conf”                          Command response
+ Crypto-Officer (CO)            Disable Approved               ”fips-mode disable”             Command response
+                                mode
+ Crypto-Officer (CO)            Software load                  ”load upgrade”                  Command response
+ Crypto-Officer (CO) and        Create remote                  N/A                             Command response
+ User                           management session
+                                (SSH CLI)
+ Crypto-Officer (CO)            Create, edit, and delete       “user                           Command response
+                                operators                      create/delete/edit
+                                                               <string>”
+ Crypto-Officer (CO)            Create, edit, and delete       “group                          Command response
+                                operator groups                create/delete/clear
+                                                               <name>”
+ Crypto-Officer (CO) and        Create SNMPv3 session          “snmp                           Command response
+ User                                                          create/delete/edit
+                                                               <community string |
+                                                               user string>”
+ Crypto-Officer (CO)            Create filter rules (CLI)      ”content filter”                Command response
+ Crypto-Officer (CO) and        Show Approved status           ”show version”                  Command response
+ User                           (CLI)
+ Crypto-Officer (CO)            Syslog                         “syslog add tls”                Command response
+ Crypto-Officer (CO)            Manage module                  ”configure”                     Command response
+                                configuration
+ Crypto-Officer (CO)            Import, replace, and           N/A                             Command response
+                                delete SNMP keys
+ Crypto-Officer (CO)            Zeroize keys (serial           ”fips-mode disable”             Command response
+                                port only)
+ Crypto-Officer (CO)            Change password                ”security password”             Command response
+                                hash local user
+                                password
+ Crypto-Officer (CO)            Reboot the module              ”restart regular”               Command response
+                                (and perform self-tests)
+ Crypto-Officer (CO) and        Utility                        Command                         Command response
+ User
+                                   Table 8 - Roles, Service Commands, Input and Output
+
+4.2 Authentication Methods
+ The module supports role-based authentication. COs and Users must authenticate using a user ID
+ and password, or a Client RSA Public Key (SSH only). Secure sessions that authenticate Users have
+ no interface available to access other services (such as Crypto Officer services). Each CO or User
+ SSH session remains active (logged in) and secured until the operator logs out. The authenticated
+ user never leaves the Approved mode, the only services they may call are “Approved” or “Allowed
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 19 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+ in the Approved mode” (Tables 4 and 5). Services in Table 6 would require the module to not be in
+ Approved mode and would require a re-initialization of the module.
+ There is no default password, and passwords are configured while creating the operators
+ (CO/User) during initialization (Section 11.1.1).
+ The authentication mechanisms used in the module are listed in Table 9.
+
+
+               Role                          Authentication Method          Authentication Strength
+ Crypto-Officer                            Password                  The module supports password
+                                                                     authentication internally. For
+                                                                     password authentication done by
+                                                                     the module, passwords are required
+                                                                     to be at minimum 8 characters in
+                                                                     length, and at maximum 64 bytes
+                                                                     (number of characters is dependent
+                                                                     on the character set used by
+                                                                     system). An 8-character password
+                                                                     allowing all printable American
+                                                                     Standard Code for Information
+                                                                     Interchange (ASCII) characters (95)
+                                                                     with repetition equates to a 1: (958),
+                                                                     or 1:6,634,204,312,890,625 chance
+                                                                     of false acceptance. The Crypto-
+                                                                     Officer may connect locally using
+                                                                     the serial port or remotely after
+                                                                     establishing a SSH session. The
+                                                                     fastest network connection
+                                                                     supported by the module is 1000
+                                                                     Mbps. Hence at most (1000 ×10^6 ×
+                                                                     60 = 6 × 10^10 =) 60,000,000,000
+                                                                     bits of data can be transmitted in
+                                                                     one minute. Therefore, the
+                                                                     probability that a random attempt
+                                                                     will succeed or a false acceptance
+                                                                     will occur in one minute is: 1 :
+                                                                     [95^8 possible passwords / ((6
+                                                                     ×10^10 bits per minute) / 64 bits per
+                                                                     password)] 1: (95^8 possible
+                                                                     passwords / 937,500,000 passwords
+                                                                     per minute) This equals 1: 7,076,484
+                                                                     or 1 in 7.0 million; this is less than
+                                                                     1:100,000 as required by FIPS 140-3.
+                                           Password (“Enabled” Mode) The module supports password
+                                                                     authentication internally. For
+                                                                     password authentication done by
+                                                                     the module, passwords are required
+                                                                     to be at least 8 characters in length
+                                                                     and maximum of 64 bytes (number
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 20 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                  Role                       Authentication Method                    Authentication Strength
+                                                                               of characters is dependent on the
+                                                                               character set used by system). An 8-
+                                                                               character password allowing all
+                                                                               printable American Standard Code
+                                                                               for Information Interchange (ASCII)
+                                                                               characters (95) with repetition
+                                                                               equates to a 1: (958), or
+                                                                               1:6,634,204,312,890,625 chance of
+                                                                               false acceptance. This password is
+                                                                               entered by the Crypto-Officer to
+                                                                               enter the “enabled” mode; this is
+                                                                               entered locally through the serial
+                                                                               port or remotely after establishing
+                                                                               an SSH session. The fastest network
+                                                                               connection supported by the
+                                                                               module is 1000 Mbps. Hence at
+                                                                               most (1000 ×10^6 × 60 = 6 × 10^10
+                                                                               =) 60,000,000,000 bits of data can
+                                                                               be transmitted in one minute.
+                                                                               Therefore, the probability that a
+                                                                               random attempt will succeed or a
+                                                                               false acceptance will occur in one
+                                                                               minute is: 1 : [95^8 possible
+                                                                               passwords / ((6 ×10^10 bits per
+                                                                               minute) / 64 bits per password)] 1:
+                                                                               (95^8 possible passwords /
+                                                                               937,500,000 passwords per minute)
+                                                                               This equals 1: 7,076,484 or 1 in 7.0
+                                                                               million; this is less than 1:100,000 as
+                                                                               required by FIPS 140-3.
+                                           Password (“Setup”)                  The module supports password
+                                                                               authentication internally. For
+                                                                               password authentication done by
+                                                                               the module, passwords are required
+                                                                               to be at least 8 characters in length
+                                                                               and maximum of 64 bytes (number
+                                                                               of characters is dependent on the
+                                                                               character set used by system). An 8-
+                                                                               character password allowing all
+                                                                               printable American Standard Code
+                                                                               for Information Interchange (ASCII)
+                                                                               characters (95) with repetition
+                                                                               equates to a 1:(958), or
+                                                                               1:6,634,204,312,890,625 chance of
+                                                                               false acceptance. This password is
+                                                                               entered by the Crypto-Officer and is
+                                                                               required when using the serial port
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 21 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                  Role                       Authentication Method                    Authentication Strength
+                                                                               to access the Setup Console portion
+                                                                               of the CLI. The fastest network
+                                                                               connection supported by the
+                                                                               module is 1000 Mbps. Hence at
+                                                                               most (1000 ×10^6 × 60 = 6 × 10^10
+                                                                               =) 60,000,000,000 bits of data can
+                                                                               be transmitted in one minute.
+                                                                               Therefore, the probability that a
+                                                                               random attempt will succeed or a
+                                                                               false acceptance will occur in one
+                                                                               minute is: 1 : [95^8 possible
+                                                                               passwords / ((6 ×10^10 bits per
+                                                                               minute) / 64 bits per password)] 1:
+                                                                               (95^8 possible passwords /
+                                                                               937,500,000 passwords per minute)
+                                                                               This equals 1: 7,076,484 or 1 in 7.0
+                                                                               million; this is less than 1:100,000 as
+                                                                               required by FIPS 140-3.
+                                           Public keys                         The module supports using RSA keys
+                                                                               for authentication of Crypto-Officers
+                                                                               during SSH. Using conservative
+                                                                               estimates and equating a 2048-bit
+                                                                               RSA key to a 112-bit symmetric key,
+                                                                               the probability for a random
+                                                                               attempt to succeed is 1:2112 or 1:
+                                                                               5.19 x 1033. The fastest network
+                                                                               connection supported by the
+                                                                               module is 1000 Mbps. Hence at
+                                                                               most (1000 ×10^6 × 60 = 6 × 10^10
+                                                                               =) 60,000,000,000 bits of data can
+                                                                               be transmitted in one minute.
+                                                                               Therefore, the probability that a
+                                                                               random attempt will succeed or a
+                                                                               false acceptance will occur in one
+                                                                               minute is less than 1: (2^112 /
+                                                                               6×10^10), or 1:
+                                                                               86,538,280,975,580,460,475,508,
+                                                                               which is less than 1:100,000 as
+                                                                               required by FIPS 140-3.
+ User                                      Password                            The module supports password
+                                                                               authentication internally. For
+                                                                               password authentication done by
+                                                                               the module, passwords are required
+                                                                               to be at least 8 characters in length
+                                                                               and maximum of 64 bytes (number
+                                                                               of characters is dependent on the
+                                                                               character set used by system). An 8-
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 22 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+                  Role                       Authentication Method                    Authentication Strength
+                                                                               character password allowing all
+                                                                               printable American Standard Code
+                                                                               for Information Interchange (ASCII)
+                                                                               characters (95) with repetition
+                                                                               equates to a 1:(958), or 1:
+                                                                               6,634,204,312,890,625 chances of
+                                                                               false acceptance. The User may
+                                                                               connect remotely after establishing
+                                                                               a SSH session. The fastest network
+                                                                               connection supported by the
+                                                                               module is 1000 Mbps. Hence at
+                                                                               most (1000 ×10^6 × 60 = 6 × 10^10
+                                                                               =) 60,000,000,000 bits of data can
+                                                                               be transmitted in one minute.
+                                                                               Therefore, the probability that a
+                                                                               random attempt will succeed or a
+                                                                               false acceptance will occur in one
+                                                                               minute is: 1 : [95^8 possible
+                                                                               passwords / ((6 ×10^10 bits per
+                                                                               minute) / 64 bits per password)] 1:
+                                                                               (95^8 possible passwords /
+                                                                               937,500,000 passwords per minute)
+                                                                               This equals 1: 7,076,484 or 1 in 7.0
+                                                                               million; this is less than 1:100,000 as
+                                                                               required by FIPS 140-3.
+                                           Public Keys                         The module supports using RSA keys
+                                                                               for authentication of Users during
+                                                                               SSH. Using conservative estimates
+                                                                               and equating a 2048-bit RSA key to a
+                                                                               112-bit symmetric key, the
+                                                                               probability for a random attempt to
+                                                                               succeed is 1:2112 or 1: 5.19 x 1033.
+                                                                               The fastest network connection
+                                                                               supported by the module is 1000
+                                                                               Mbps. Hence at most (1000 ×10^6 ×
+                                                                               60 = 6 × 10^10 =) 60,000,000,000
+                                                                               bits of data can be transmitted in
+                                                                               one minute. Therefore, the
+                                                                               probability that a random attempt
+                                                                               will succeed or a false acceptance
+                                                                               will occur in one minute is less than
+                                                                               1: (2^112 / 6×10^10), or 1:
+                                                                               86,538,280,975,580,460,475,508,
+                                                                               which is less than 1:100,000 as
+                                                                               required by FIPS 140-3.
+                                             Table 9 - Roles and Authentication
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 23 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+4.3 Services
+ Descriptions of the services available to a Crypto Officer (CO) and Users are described below in
+ Table 10. For each service listed below, COs and Users are assumed to already have authenticated
+ prior to attempting to execute the service. Please note that the keys and CSPs listed in the table
+ indicate the type of access required using the following notation:
+      •    G = Generate: The module generates or derives the SSP
+      •    R = Read: The SSP is read from the module (e.g. the SSP is output)
+      •    W = Write: The SSP is updated, imported, or written to the module
+      •    E = Execute: The module uses the SSP in performing a cryptographic operation
+      •    Z = Zeroise: The module zeroizes the SSP.
+
+4.3.1 Crypto Officer Services
+ Descriptions of the FIPS 140-3 relevant services available to the Crypto-Officer role are provided
+ in Table 10 below. Additional services that do not access SSPs can be found in the following
+ documents:
+     • ProxySG Content Policy Language Reference, Version 7.4
+     • ProxySG Command Line Interface Reference, Version 7.4
+
+ The link for all documentation can be found here:
+ https://techdocs.broadcom.com/us/en/symantec-security-software/web-and-network-
+ security/proxysg/7-4.html
+
+4.3.2 User Role Services
+ Descriptions of the FIPS 140-3 relevant services available to the User role are provided in Table
+ 10 below. Additional services that do not access SSPs can be found in the following documents:
+      •    ProxySG Command Line Interface Reference, Version 7.4
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 24 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service            Description                         Approved Security         Keys and/or SSPs              Roles        Access Rights to Keys   Indicator
+                                                       Functions                                                            and/or SSPs
+Module             Set up the first-time               N/A                       Crypto Officer                CO           Crypto Officer          “FIPS mode
+initialization     network configuration, CO                                     Password                                   Password: W             enabled” will
+                   username and password,                                        “Enabled” mode                             “Enabled” mode          be visible on
+                   and enable the module in                                      password                                   password: W             the serial
+                   the Approved mode                                             “Setup” Password                           “Setup” Password: W     console upon
+                                                                                                                                                    the successful
+                                                                                                                                                    completion of
+                                                                                                                                                    the
+                                                                                                                                                    cryptographic
+                                                                                                                                                    algorithm self-
+                                                                                                                                                    tests
+Enable mode        Manage the module in the            N/A                       “Enabled” mode                CO           W                       Successful
+                   “enabled” mode of                                             password                                                           completion of
+                   operation, granting access                                                                                                       the service and
+                   to higher privileged                                                                                                             enable mode
+                   commands                                                                                                                         prompt
+Configuration      Manage the module in the            N/A                       N/A                           CO           N/A                     Successful
+mode               “configuration” mode of                                                                                                          completion of
+                   operation, allowing                                                                                                              the service and
+                   permanent system                                                                                                                 configure
+                   modification to be made                                                                                                          mode prompt
+Disable Approved   Take the module out of the          N/A                       “Enabled” mode                CO           “Enabled” mode          N/A
+mode               Approved mode of                                              password                                   Password: W
+                   operation and restore it to                                   MEK                                        MEK: Z
+                   factory state                                                 SSH Session Key                            SSH Session Key: Z
+                                                                                 SSH Session                                SSH Session
+                                                                                 Authentication Key                         Authentication Key: Z
+                                                                                 SP800-90Arev1
+                                                                                 CTR_DRBG                                  SP800-90Arev1
+                                                                                 Seed                                      CTR_DRBG Seed
+
+
+
+                   Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 25 of 45
+                             This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service             Description                         Approved Security         Keys and/or SSPs              Roles       Access Rights to Keys     Indicator
+                                                        Functions                                                           and/or SSPs
+                                                                                  SP800-90Arev1                             :Z
+                                                                                  CTR_DRBG Key                              SP800-90Arev1
+                                                                                  Value                                     CTR_DRBG Key
+                                                                                  SP800-90Arev1                             Value: Z
+                                                                                  CTR_DRBG                                  SP800-90Arev1
+                                                                                  V Value                                   CTR_DRBG
+                                                                                                                            V Value: Z
+
+Software load       Loads new external                  RSA Signature             Integrity Test Public         CO           WE                       Image loaded
+                    software and performs an            Verification,             Key (not an SSP)                                                    successfully
+                    integrity test using an RSA         SHA2-256                                                                                      (for verified
+                    digital signature                                                                                                                 image).
+                                                        Cert. #A3192
+                                                                                                                                                      Image loading
+                                                                                                                                                      fails (when
+                                                                                                                                                      image
+                                                                                                                                                      verification
+                                                                                                                                                      fails)
+Create remote       Manage the module                   RSA Signature             RSA Public Key                CO,          RSA Public Key: RE       Successful
+management          through the CLI (SSH)               verification, KAS-        RSA Private Key               User         RSA Private Key: RE      connection to
+session (SSH CLI)   remotely                            FFC-SSC, AES CTR,         Client RSA Public Key                      Client RSA Public Key:   the module via
+                                                        GCM, CBC,                 DH public key                              RE                       SSH and
+                                                        CTR_DRBG,                 DH private key                             DH public key: GWRE      “System is in
+                                                        HMAC, SSH KDF,            SSH Session Key                            DH private key: GWRE     FIPS mode” is
+                                                        SHA-1, SHA2-224,          SSH Session                                SSH Session Key:         displayed after
+                                                        SHA2-256, SHA2-           Authentication Key                         GWRE                     executing
+                                                        384, SHA2-512,            SP800-90Arev1                              SSH Session              “show version”
+                                                        SafePrimes, RSA           CTR_DRBG                                   Authentication Key:      command and
+                                                        KeyGen, RSA               Seed                                       GWRE                     “Diffie-
+                                                        SigGen, ENT (P),          SP800-90Arev1                             SP800-90Arev1             hellman”
+                                                        CKG                       CTR_DRBG                                  CTR_DRBG Seed             groups
+                                                                                  Key Value                                 : GE                      displayed after
+
+
+
+                    Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 26 of 45
+                              This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service               Description                         Approved Security Keys and/or SSPs                      Roles       Access Rights to Keys   Indicator
+                                                          Functions                                                           and/or SSPs
+                                                          Cert. #A2936      SP800-90Arev1                                     SP800-90Arev1           executing “kex-
+                                                                            CTR_DRBG                                          CTR_DRBG                algs view”
+                                                                            V Value                                           Key Value: GE           command
+                                                                            MEK                                               SP800-90Arev1
+                                                                                                                              CTR_DRBG
+                                                                                                                              V Value: GE
+                                                                                                                              MEK: RE
+Create, edit, and     Create, edit, and delete    N/A                               Crypto Officer                CO          Crypto Officer          N/A
+delete operators      operators (these may be                                       Password                                  Password: WREZ
+                      Cos or Users); define                                         User Password                             User Password: WREZ
+                      operator’s accounts, change
+                      password, and assign
+                      permissions
+Create, edit, and     Create, edit, and delete    N/A                               N/A                           CO           N/A                    N/A
+delete operator       operator groups; define
+groups                common sets of operator
+                      permissions
+
+Create filter rules   Create filters that are             N/A                       N/A                           CO           N/A                    N/A
+(CLI)                 applied to user data
+                      streams
+Show Approved         The command “show                   N/A                       N/A                           CO,          N/A                    Successful
+status (CLI)          version” will display if the                                                                User                                completion of
+                      module is configured in                                                                                                         the service and
+                      Approved mode                                                                                                                   “System is in
+                                                                                                                                                      FIPS mode” is
+                                                                                                                                                      displayed after
+                                                                                                                                                      executing
+                                                                                                                                                      “show version”
+                                                                                                                                                      command
+
+
+
+
+                      Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 27 of 45
+                                This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service            Description                         Approved Security         Keys and/or SSPs              Roles        Access Rights to Keys    Indicator
+                                                       Functions                                                            and/or SSPs
+Syslog             Setup syslog for logging            RSA Signature             RSA Public Key                CO           RSA Public Key: RE       Connection
+                                                       verification, KAS-        RSA Private Key                            RSA Private Key: RE      established to
+                                                       FFC-SSC, AES CTR,         Client RSA Public Key                      Client RSA Public Key:   syslog server
+                                                       GCM, CBC,                 DH public key                              RE                       successfully
+                                                       CTR_DRBG,                 DH private key                             DH public key: GWRE      and “tls 1.2, tls
+                                                       HMAC, TLS v1.2            TLS Session Key                            DH private key: GWRE     1.3” versions
+                                                       KDF, TLS v1.3 KDF,        TLS Session                                TLS Session Key:         and “dhe”
+                                                       SHA-1, SHA2-224,          Authentication Key                         GWRE                     cipher suites
+                                                       SHA2-256, SHA2-           SP800-90Arev1                              TLS Session              displayed after
+                                                       384, SHA2-512,            CTR_DRBG                                   Authentication Key:      executing
+                                                       SafePrimes, RSA           Seed                                       GWRE                     “view ssl-
+                                                       KeyGen, RSA               SP800-90Arev1                             SP800-90Arev1             device-profile
+                                                       SigGen, ENT (P),          CTR_DRBG                                  CTR_DRBG Seed             ” command
+                                                       CKG                       Key Value                                 : GE
+                                                                                 SP800-90Arev1                             SP800-90Arev1
+                                                       Cert. #A2936              CTR_DRBG                                  CTR_DRBG
+                                                                                 V Value                                    Key Value: GE
+                                                                                 MEK                                       SP800-90Arev1
+                                                                                                                           CTR_DRBG
+                                                                                                                            V Value: GE
+                                                                                                                            MEK: RE
+Import, replace,   Create, edit, and delete    N/A                               SNMPv3 Privacy Key            CO           SNMPv3 Privacy Key:      N/A
+and delete SNMP    operators (these may be                                       SNMPv3 Session                             W
+keys               COs or Users); define                                         Authentication Key                         SNMPv3 Session
+                   operator’s accounts, change                                   SNMPv3 Password                            Authentication Key:
+                   password, and assign                                          MEK                                        W
+                   permissions                                                                                              SNMPv3 Password: W
+                                                                                                                            MEK: RE
+Create SNMPv3      Monitor the module using            SNMPv3 KDF                SNMPv3 Privacy Key            CO,          SNMPv3 Privacy Key:      Successful
+session            SNMPv3                                                        SNMPv3 Session                User         RE                       completion of
+                                                       Cert. #A2936              Authentication Key                                                  the service and
+                                                                                 SNMPv3 Password                                                     “System is in
+
+
+
+                   Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 28 of 45
+                             This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service                Description                         Approved Security         Keys and/or SSPs              Roles        Access Rights to Keys   Indicator
+                                                           Functions                                                            and/or SSPs
+                                                                                     MEK                                        SNMPv3 Session          FIPS mode” is
+                                                                                                                                Authentication Key:     displayed after
+                                                                                                                                RE                      executing
+                                                                                                                                SNMPv3 Password: RE     “show version”
+                                                                                                                                MEK: RE                 command
+
+Manage module          Backup or restore the               SSH KDF                   RSA Public Key                CO           RSA Public Key: WRE     Successful
+configuration          module configuration                AES-CBC (non-             RSA Private Key                            RSA Private Key: WRE    completion of
+                                                           conformant)               SSH Session Key                            SSH Session Key:        the service and
+                                                                                     SSH Session                                GWRE                    “System is in
+                                                           Cert. #A2936              Authentication Key                         SSH Session             FIPS mode” is
+                                                                                     Crypto Officer                             Authentication Key:     displayed after
+                                                                                     Password                                   GWRE                    executing
+                                                                                     User Password                              Crypto Officer          “show version”
+                                                                                     “Enabled” mode                             Password: WRE           command and
+                                                                                     password                                   User Password: WRE      “Diffie-
+                                                                                     MEK                                        “Enabled” mode          hellman”
+                                                                                                                                password: WRE           groups
+                                                                                                                                MEK: RE                 displayed after
+                                                                                                                                                        executing “kex-
+                                                                                                                                                        algs view”
+                                                                                                                                                        command
+
+Zeroize keys (serial   Zeroize keys by taking the          N/A                       MEK                           CO           MEK: Z                  Successful
+port only)             module out of the                                             SSH Session Key                            SSH Session Key: Z      reboot after
+                       Approved mode and                                             SSH Session                                SSH Session             executing “fips-
+                       restoring it to a factory                                     Authentication Key                         Authentication Key: Z   mode disable”
+                       state. This will zeroize all                                  TLS Session Key                            TLS Session Key: Z
+                       CSPs. The zeroization occurs                                  TLS Session                                TLS Session
+                       while the module is still in                                  Authentication Key                         Authentication Key: Z
+                       Approved-mode                                                 DH private key                             DH private key: Z
+
+
+
+
+                       Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 29 of 45
+                                 This document may be freely reproduced and distributed whole and intact including this copyright notice.
+Service              Description                         Approved Security         Keys and/or SSPs              Roles        Access Rights to Keys   Indicator
+                                                         Functions                                                            and/or SSPs
+Change password      Change Crypto Officer               PBKDFv2                   Crypto Officer                CO           Crypto Officer          Successful
+hash local user      password                                                      Password                                   Password: GW            completion of
+password                                                 Cert. #A2936              MEK                                        MEK: RE                 the service and
+                                                                                                                                                      “System is in
+                                                                                                                                                      FIPS mode” is
+                                                                                                                                                      displayed after
+                                                                                                                                                      executing
+                                                                                                                                                      “show version”
+                                                                                                                                                      command
+Reboot the module    Perform periodic self-test          N/A                       DH public key                 CO          DH public key: Z         “FIPS mode
+(and perform self-   on demand by power                                            DH private key                            DH private key: Z        enabled” will
+tests)               cycling the host platform                                     SSH Session Key                           SSH Session Key: Z       be visible on
+                                                                                   SSH Session                               SSH Session              the serial
+                                                                                   Authentication Key                        Authentication Key: Z    console upon
+                                                                                   TLS Session Key                           TLS Session Key: Z       the successful
+                                                                                   TLS Session                               TLS Session              completion of
+                                                                                   Authentication Key                        Authentication Key: Z    the
+                                                                                   SP800-90Arev1                             SP800-90Arev1            cryptographic
+                                                                                   CTR_DRBG                                  CTR_DRBG                 algorithm self-
+                                                                                   Seed                                      Seed: Z                  tests
+                                                                                   SP800-90Arev1                             SP800-90Arev1
+                                                                                   CTR_DRBG                                  CTR_DRBG
+                                                                                   Key Value                                 Key Value: Z
+                                                                                   SP800-90Arev1                             SP800-90Arev1
+                                                                                   CTR_DRBG                                  CTR_DRBG
+                                                                                   V Value                                   V Value: Z
+                                                                                   MEK                                       MEK: RE
+Utility              Services that do not use any        N/A                       N/A                           CO,         N/A                      N/A
+                     SSPs                                                                                        User
+                                                                     Table 10 - Approved Services
+
+
+
+
+                     Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 30 of 45
+                               This document may be freely reproduced and distributed whole and intact including this copyright notice.
+              Service                                Description                             Algorithms Accessed                  Role                  Indicator
+      Proxy Traffic                Proxy Traffic involves the use of TLS               MD5, TLS v1.0/1.1 KDF                  CO, User        Successful
+                                   v1.0/1.1 sessions, which leverage MD5                                                                      completion of the
+                                                                                                                                              service and “tls 1, tls
+                                                                                                                                              1.1” versions
+                                                                                                                                              displayed after
+                                                                                                                                              executing “view ssl-
+                                                                                                                                              device-profile
+                                                                                                                                              ” command
+      Create remote                Manage the module through the CLI                   KAS-ECC-SSC                            CO, User        Successful
+      management session           (SSH) remotely                                                                                             completion of the
+      (CLI)                                                                                                                                   service and “ecdhe”
+                                                                                                                                              cipher suites
+                                                                                                                                              displayed after
+                                                                                                                                              executing “kex-algs
+                                                                                                                                              view” command
+                                                                     Table 11 - Non-Approved Services
+
+The CO and User roles may monitor the health and status of the modules using SNMPv3. SNMPv3 privacy and authentication keys must be generated
+by an external application as the module is not capable of generating the keys internally. The keys are not tied to the CO’s CLI credentials
+
+
+
+
+                        Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 31 of 45
+                                  This document may be freely reproduced and distributed whole and intact including this copyright notice.
+4.4 Self-initiated Cryptographic Output Capability
+The module supports self-initiated cryptographic capability to establish secure connections to external
+services for licensing and subscription downloads. To prevent inadvertent output due to a single error,
+this capability is turned on only after obtaining confirmation from the CO:
+
+To properly function, this appliance will need to initiate cryptographically secure connections to external
+services such as licensing and subscription downloads.
+Do you wish to proceed? (y/n)[n]: y
+Please enter‘ ’y' again to confirm? (y/n)[n]:
+
+5.       Software/Firmware Security
+The module performs pre-operational integrity test using HMAC-SHA-1 and RSA 2048 Signature
+Verification with SHA2-256. The integrity test can be executed on demand by power-cycling the host
+platform.
+
+The form of the module is a single image file "7.4.0.0_build_279954_system_gdb.bcsi". The module
+performs software loading and software load test but does not support complete image replacement.
+
+6.       Operational Environment
+Per FIPS 140-3 specifications the module operates in a modifiable operational environment. The module
+runs on general purpose computers listed in Table 2. Additionally, the module only allows the loading of
+software through the software load test, which ensures the image is appropriately signed by Broadcom,
+Inc. As such, the applicable modifiable operational environment requirements do apply.
+
+Please refer to Table 2 of this document regarding the Cryptographic Module Tested Configurations.
+
+Except guidelines and installation instructions specified in Sections 2 and 11 of this Security Policy, no
+other security rules or restrictions to the configuration of the operational environment are required.
+
+Note: The platforms listed in Table 3 are vendor-affirmed per FIPS 140-3. Broadcom, Inc. has verified the
+module's functionality in the operational environments specified in Table 3 and confirmed that it
+operates in the same manner as the operational environments listed in Table 2.
+
+7.       Physical Security
+The module type is software-hybrid and has a multi-chip standalone embodiment running on a production
+grade chassis.
+
+8.       Non-Invasive Security
+This section is not applicable. The module does not implement non-invasive security measures.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 32 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+9.          Sensitive Security Parameter Management
+       Key/SSP             Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation      Use & Related keys
+      Name/Type                           Function and
+                                          Cert. Number
+
+    MEK 8                 256 bits       AES CBC               Internally          Never imported          N/A                  Stored in         By disabling the   Encrypting Crypto
+    (CSP)                                CKG                   generated via                                                    plaintext on      Approved mode      Officer Password,
+                                         A2936                 Approved            Never exits the                              non-volatile      of operation       User Password, RSA
+                                                               DRBG                module                                       memory                               Private Key
+    Integrity Test        112 bits       RSA                   Externally          Imported in             N/A                  Stored in         Overwritten        Verifying the integrity
+    Public Key (not                      HMAC-SHA-1            generated           encrypted form                               plaintext on      after upgrade by   of the system image
+    an SSP)                              SHA2-256                                  via a secure SSH                             non-volatile      the key in the     during upgrade or
+                                         A3192                                     session (new key                             memory            newly signed       downgrade
+                                                                                   is imported only                                               image
+                                                                                   with a new
+                                                                                   image)
+
+                                                                                   Never exits the
+                                                                                   module
+    RSA Public Key        112, 128,      RSA                   Modules’            Modules’ public         N/A                  Stored in         Module’s public Negotiating TLS or SSH
+    (PSP)                 and 152                              public key is       key can be                                   encrypted         key is deleted by sessions
+                          bits           KDF TLS 1.2,          internally          imported from a                              form on           command
+                                         1.3                   generated via       back-up                                      non- volatile
+                                         KDF SSH               Approved            configuration                                memory
+                                         SHA-1                 DRBG
+                                         SHA2                                      Output during
+                                         CKG                                       TLS/SSH 9
+                                         A2936                                     negotiation in
+                                                                                   plaintext
+
+
+8
+    Master Encryption Key
+9
+    SSH session negotiation only uses RSA key pairs of 2048-bits. RSA key pairs of 3072-bits and 4096-bits are only used for TLS session negotiation.
+
+
+                            Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 33 of 45
+                                      This document may be freely reproduced and distributed whole and intact including this copyright notice.
+   Key/SSP          Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+  Name/Type                        Function and
+                                   Cert. Number
+
+                                                                            Output during
+                                                                            TLS negotiation
+                                                                            for CAC
+                                                                            authentication
+
+                                                                            Exits in
+                                                                            encrypted format
+                                                                            when performing
+                                                                            a module
+                                                                            configuration
+                                                                            backup
+Client RSA Public   80, 112,      RSA                   N/A                 Imported in             N/A                  Other             Other entities’   Negotiating TLS or SSH
+Key                 128,          KDF TLS                                   plaintext                                    entities’         public keys are   sessions
+(PSP)               and 152       KDF SSH                                                                                public keys       cleared by
+                    bits          SHA-1                                     Never output                                 reside on         power cycle
+                                  SHA2                                                                                   volatile
+                                  A2936                                                                                  memory
+RSA Private Key     112, 128,     RSA                   Internally          Imported in             N/A                  Stored in         Inaccessible by   Negotiating TLS or SSH
+(CSP)               and 152                             generated via       encrypted form                               encrypted         zeroizing         sessions
+                    bits          KDF TLS 1.2,          Approved            via a secure SSH                             form on           encrypting MEK
+                                  1.3                   DRBG                session                                      non- volatile
+                                  KDF SSH                                                                                memory
+                                  SHA-1                                     Imported in
+                                  SHA2                                      plaintext via a
+                                  CKG                                       directly attached
+                                  A2936                                     cable to the
+                                                                            serial port
+
+                                                                            Exported
+                                                                            encrypted format
+
+
+
+                     Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 34 of 45
+                               This document may be freely reproduced and distributed whole and intact including this copyright notice.
+   Key/SSP        Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation    Use & Related keys
+  Name/Type                      Function and
+                                 Cert. Number
+
+                                                                          when performing
+                                                                          a module
+                                                                          configuration
+                                                                          backup
+DH public key     112 bits      KAS-FFC-SSC           Module’s            Imported in             N/A                  Stored in         Rebooting the    Negotiating TLS or SSH
+(PSP)                           SP800-56Arev3         public key is       plaintext                                    plaintext on      module/          sessions
+                                SafePrimes            internally                                                       volatile          Removing
+                                CKG                   generated via       Exported in                                  memory            power
+                                A2936                 Approved            plaintext
+                                                      DRBG
+DH private key    112 bits      KAS-FFC-SSC           Internally          Never exits the         N/A                  Stored in         Rebooting the    Negotiating TLS or SSH
+(CSP)                           SP800-56Arev3         generated via       module                                       plaintext on      module/          sessions
+                                SafePrimes            Approved                                                         volatile          Removing
+                                CKG                   DRBG                                                             memory            power
+                                A2936
+TLS Session key   128, 192,     AES CBC,              Internally          Output in               The keys are         Stored in         Rebooting the    Encrypting TLS data
+(CSP)             and 256       CTR, or GCM           generated via       encrypted form          established in       plaintext on      module/
+                  bits          CKG                   Approved            during TLS              accordance           volatile          Removing
+                                A2936                 DRBG                protocol                with SP800-          memory            power
+                                                                          handshake               56Arev3
+
+
+SSH Session key   128, 192,     AES CBC,              Internally          Output in               The keys are         Stored in         Rebooting the    Encrypting SSH data
+(CSP)             and 256       CTR, or GCM           generated via       encrypted form          established in       plaintext on      module/
+                  bits          CKG                   Approved            during SSH              accordance           volatile          Removing
+                                A2936                 DRBG                protocol                with SP800-          memory            power
+                                                                          handshake               56Arev3
+
+
+
+
+                   Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 35 of 45
+                             This document may be freely reproduced and distributed whole and intact including this copyright notice.
+   Key/SSP       Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+  Name/Type                     Function and
+                                Cert. Number
+
+TLS Session      128, 256,     HMAC                  Internally          Never exits the         The keys are         Resides in        Rebooting the     Data authentication
+Authentication   384 and       SHA2                  generated           module                  established in       volatile          module/           for TLS sessions
+key              512 bits      A2936                                                             accordance           memory in         Removing
+(CSP)                                                                                            with SP800-          plaintext         power
+                                                                                                 56Arev3
+
+SSH Session      128, 256,     HMAC                  Internally          Never exits the         The keys are         Resides in        Rebooting the     Data authentication
+Authentication   384 and       SHA2                  generated           module                  established in       volatile          module/           for SSH sessions
+key (CSP)        512 bits      A2936                                                             accordance           memory in         Removing
+                                                                                                 with SP800-          plaintext         power
+                                                                                                 56Arev3
+
+Crypto Officer   Minimum       PBKDFv2               Externally          Enters the              N/A                  Stored in         Inaccessible by   Locally
+Password (CSP)   of            A2936                 generated           module in                                    encrypted         zeroizing the     authenticating a CO
+                 eight (8)                                               encrypted form                               form on           encrypting MEK    for CLI
+                 and                                                     via a secure SSH                             non- volatile
+                 maximum                                                 session                                      memory
+                 of 64
+                 bytes long                                              Enters the
+                 printable                                               module in
+                 character                                               plaintext via a
+                 string                                                  directly attached
+
+
+
+
+                  Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 36 of 45
+                            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+   Key/SSP       Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+  Name/Type                     Function and
+                                Cert. Number
+
+User Password                                                            cable to the                                                                     Locally
+(CSP)                                                                    serial port                                                                      authenticating a User
+                                                                                                                                                          for CLI
+                                                                         Exits in
+                                                                         encrypted form
+                                                                         via a secure TLS
+                                                                         session for
+                                                                         external
+                                                                         authentication
+
+                                                                         Exits in
+                                                                         encrypted format
+                                                                         when performing
+                                                                         a module
+                                                                         configuration
+                                                                         backup
+“Enabled” mode   Minimum       N/A                   Externally          Enters the              N/A                  Stored in         Inaccessible by   Used by the CO to
+password         of eight                            generated           module in                                    encrypted         zeroizing the     enter the “privileged”
+(CSP)            (8) and                                                 encrypted form                               form on           encrypting MEK    or “enabled” mode
+                 maximum                                                 via a secure SSH                             non- volatile                       when using the CLI
+                 of 64                                                   session                                      memory
+                 bytes long
+                 printable                                               Enters the
+                 character                                               module in
+                 string                                                  plaintext via a
+                                                                         directly attached
+                                                                         cable to the
+                                                                         serial port
+
+
+
+
+                  Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 37 of 45
+                            This document may be freely reproduced and distributed whole and intact including this copyright notice.
+        Key/SSP           Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+       Name/Type                         Function and
+                                         Cert. Number
+
+                                                                                  Exits in
+                                                                                  encrypted form
+                                                                                  via a secure TLS
+                                                                                  session for
+                                                                                  external
+                                                                                  authentication
+
+                                                                                  Exits in
+                                                                                  encrypted format
+                                                                                  when performing
+                                                                                  a module
+                                                                                  configuration
+                                                                                  backup
+ “Setup” Password         Minimum       N/A                   Externally          Enters the              N/A                  Stored in         Inaccessible by   Used by the CO to
+ (CSP)                    of eight                            generated           module in                                    encrypted         zeroizing the     secure access to the
+                          (8) and                                                 plaintext via a                              form on           encrypting MEK    CLI when accessed
+                          maximum                                                 directly attached                            non- volatile                       over the serial port
+                          of 64                                                   cable to the                                 memory
+                          bytes long                                              serial port
+                          printable
+                          character                                               Never exits the
+                          string                                                  module
+ SP800-                   384 bits      DRBG                  Internally          Never exits the         N/A                  Plaintext in      Rebooting the     Seeding material for
+ 90Arev1                                A2936                 generated           module                                       volatile          module/           the SP800-90Arev1
+ CTR_DRBG                                                                                                                      memory            Removing          CTR_DRBG
+ Seed                                                                                                                                            power
+ (CSP) 10
+
+
+10
+     (Added per IG D.L)
+
+
+                           Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 38 of 45
+                                     This document may be freely reproduced and distributed whole and intact including this copyright notice.
+       Key/SSP            Strength        Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+      Name/Type                         Function and
+                                        Cert. Number
+
+ SP800-90Arev1           256 bits      ENT (P)               Internally          Never exits the         N/A                  Plaintext in      Rebooting the     Entropy material for
+ CTR_DRBG                                                    generated           module                                       volatile          module/           the SP800-90Arev1
+ Entropy 11                                                  within the                                                       memory            Removing          CTR_DRBG
+ (CSP)10                                                     module’s                                                                           power
+                                                             TOEPP
+
+
+
+
+ SP800-90Arev1           128, 192      DRBG                  Internally          Never exits the         N/A                  Plaintext in      Rebooting the     Used for the SP 800-
+ CTR_DRBG Key            and 256       A2936                 generated           module                                       volatile          module/           90Arev1 CTR_DRBG
+ Value                   bits                                                                                                 memory            Removing
+ (CSP)10                                                                                                                                        power
+ SP800-                  128, 192      DRBG                  Internally          Never exits the         N/A                  Plaintext in      Rebooting the     Used for the SP 800-
+ 90Arev1                 and 256       A2936                 generated           module                                       volatile          module/           90Arev1 CTR_DRBG
+ CTR_DRBG V              bits                                                                                                 memory            Removing
+ Value                                                                                                                                          power
+ (CSP)10
+ SNMPv3                  128 bits      SNMP KDF              Internally          Never exits the         N/A                  Stored in         Inaccessible by   Used for SNMPv3
+ Privacy Key                           A2936                 generated           module                                       encrypted         zeroizing the     session
+ (CSP)                                                                                                                        form on           encrypting MEK
+                                                                                                                              non-volatile
+                                                                                                                              memory
+
+
+
+
+11
+     The Entropy required by the Approved SP800-90Arev1 CTR_DRBG (with AES-256) is supplied by the ENT (P)
+
+
+                          Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 39 of 45
+                                    This document may be freely reproduced and distributed whole and intact including this copyright notice.
+     Key/SSP          Strength         Security             Generation          Import/Export         Establishment          Storage            Zeroisation     Use & Related keys
+    Name/Type                        Function and
+                                     Cert. Number
+
+ SNMPv3              80 bits        SNMP KDF              Internally          Never exits the         N/A                  Stored in         Inaccessible by   Used for SNMPv3
+ Session             (SHA1)         A2936                 generated           module                                       encrypted         zeroizing the     session
+ Authenticati                                                                                                              form on           encrypting MEK
+ on Key                                                                                                                    non-volatile
+ (CSP)                                                                                                                     memory
+ SNMPv3              8 bytes        SNMP KDF              Externally          Enters the              N/A                  Stored in         Inaccessible by   Used for SNMPv3
+ Password            password       A2936                 generated           module in                                    encrypted         zeroizing the     session
+ (CSP)                                                                        plaintext via a                              form on           encrypting MEK
+                                                                              directly attached                            non-volatile
+                                                                              cable to the                                 memory
+                                                                              serial port
+                                                                              Table 12 - SSPs
+
+Keys and passwords that exit the module during a configuration backup are encrypted using an Approved encryption algorithm via the TLS or SSH
+session key. During the backup process, the CO can additionally use either AES-128 CBC or AES-256 CBC mode to encrypt the archive file; however,
+there is no security claimed on this use of encryption because the key used for encryption is generated using a non-conformant key derivation
+function.
+
+Zeroisation:
+The CO can return the module to its factory state by entering the “enabled” mode on the CLI, followed by the “fips-mode disable” command. This
+command will automatically reboot the module and zeroize the MEK. The RSA Private Key, Crypto Officer password, User password, “Enabled” mode
+password, “Setup” password, SNMP Privacy key, and the SNMP Session Authentication key are stored encrypted by the MEK. Once the MEK is
+zeroized, decryption involving the MEK becomes impossible, making these CSPs unobtainable by an attacker.
+
+In addition, rebooting the module causes all temporary keys stored in volatile memory (SSH Session key, TLS session key, DRBG entropy values, and
+ENT (P) entropy values) to be zeroized. The Crypto-Officer must wait until the module has successfully rebooted to verify that zeroization has
+completed.
+
+
+
+
+                       Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 40 of 45
+                                 This document may be freely reproduced and distributed whole and intact including this copyright notice.
+ Entropy sources                           Minimum number of bits of                Details
+                                           entropy
+ NIST SP800-90B compliant ENT              256-bit                                  The Entropy required by the
+ (P)                                       The estimated amount of                  Approved SP800-90Arev1
+                                           entropy per the source’s output          CTR_DRBG (with AES-256) is
+                                           bit is 0.6.                              supplied by the ENT (P).
+                          Table 13 - Non-Deterministic Random Number Generation Specification
+
+
+ 10. Self-Tests
+If the module fails the Integrity Test (Pre-operational Self-Test), the following error is printed to the
+CLI (when being accessed via the serial port):
+           PKCS7 Signature verification failed, signature does not match.
+
+ If any other self-tests fail, the following error is printed to the CLI (when being accessed via the serial
+ port):
+
+
+           **********************SYSTEMERROR***********************
+           The SG Appliance has failed the FIPS Self test.
+           System startup cannot continue.
+
+
+           ******************SYSTEM STARTUP HALTED****************
+
+           E)xit FIPS mode and reinitialize system
+           R)estart and retry FIPS self-
+           test Selection:
+
+When either of these errors occurs, the module enters hard error state and halts operation and
+provides no functionality. The only way to clear the error and resume normal operation is for the
+Crypto-Officer to reboot the module. The status output provided above is shown only over the CLI
+(when being accessed via the serial port).
+The sections below describe the self-tests performed by the module. All the self-tests specified in
+Section 10.1 are implemented in VA Blue Coat Boot Loader v5.31. All the self-tests specified in Section
+10.2 are implemented in SGOS Cryptographic Library v5.1.1.
+
+10.1 Pre-operational Self-Tests
+     •   Software integrity check using RSA SigVer (2048-bit with SHA2-256) and HMAC-SHA-1 12,13 (A3192)
+
+10.2 Conditional Self-Tests
+Conditional cryptographic algorithm self-tests (CASTs):
+
+
+
+12
+   The preoperational self-tests are performed by VA Blue Coat Boot Loader v5.31 library which covers entire image
+file “7.4.0.0_build_279954_system_gdb.bcsi”.
+13
+   The module executes the RSA SigVer 2048-bit and HMAC-SHA-1 KATs prior to running the pre-operational self-
+test. Both the integrity tests are sequentially performed on the entire image file
+“7.4.0.0_build_279954_system_gdb.bcsi”.
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 41 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+    CAVP Cert. A2936:
+
+    •    AES-ECB Encrypt KAT (128-bit) (covers AES-CBC)
+    •    AES-ECB Decrypt KAT (128-bit) (covers AES-CBC)
+    •    AES-GCM Encrypt KAT (256-bit)
+    •    AES-GCM Decrypt KAT (256-bit)
+    •    SHA-1 KAT
+    •    SHA2-256 KAT (covered by HMAC-SHA2-256 KAT)
+    •    SHA2-512 KAT
+    •    SHA3-256 KAT (additional KAT, not required by any service/algorithm)
+    •    HMAC-SHA2-256 KAT
+    •    SP800-90Arev1 CTR-DRBG KAT using AES-128
+    •    SP800-56Arev3 DH “Primitive Z” KAT (2048)
+    •    PBKDF KAT
+    •    TLS 1.2 KDF KAT
+    •    TLS 1.3 KDF KAT
+    •    SSH KDF KAT
+    •    SNMP KDF KAT
+    •    SP 800-90B Start-up health tests
+    •    Section 11 CTR_DRBG CAST (Instantiate, Reseed, Generate, Uninstantiate)
+    •    RSA Signature KAT (2048-bit with SHA2-256 and PKCS v1.5)
+    •    RSA Verification KAT (2048-bit with SHA2-256 and PKCS v1.5)
+    •    SP 800-90B Continuous health tests
+    •    Software Load Test using RSA Signature Verification (2048-bit)
+
+    CAVP Cert. A3192:
+
+    •    RSA Verification KAT (2048-bit with SHA2-256)
+    •    HMAC-SHA1 KAT
+
+Conditional pair-wise consistency tests (PCTs):
+
+    •    RSA Pairwise consistency check upon generation of a keypair
+    •    DH Pairwise consistency check upon generation of a keypair
+
+No data output occurs via the data output interface until all pre-operational self-tests have been
+completed.
+
+The module also performs a validity check on the installed license. If the license is not valid, the module
+will not operate.
+
+Self-tests can be executed on demand by rebooting the module.
+
+Note the module includes additional self-tests for algorithms that are not callable or used by any service.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 42 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+11. Life-Cycle Assurance
+The module can be delivered pre-installed on the SSP-S410 appliance, or via the Broadcom Secure
+download portal: https://support.broadcom.com/security/download-center
+
+11.1 Secure Operation/Management
+The module meets FIPS-140-3 Level 1 requirements. The section below describes how to place and keep
+the module in Approved mode of operation.
+
+Caveat: This guide assumes that a virtual environment is already set up and ready for accepting a new
+virtual appliance installation.
+
+The Crypto-Officer is responsible for initialization and security-relevant configuration and management
+of the module. Please see the ProxySG Command Line Interface Reference, November 16 2022 for more
+information on configuring and maintaining the module.
+
+Caveat: While the Proxy SG may hold and boot from multiple software images, only the software image
+documented in this Security Policy (SGOS Software Version: 7.4) may be used for booting to remain
+compliant. Booting from any other software image will void the validation.
+
+11.1.1 Initialization
+Physical access to the module’s host hardware shall be limited to the Crypto-Officer, and the CO shall
+be responsible for putting the module into the Approved mode.
+
+Please read the following guide for installation direction for the ESXi operational environment:
+https://techdocs.broadcom.com/us/en/symantec-security-software/web-and-network-
+security/proxysg/7-4/Overview_ISG_SGW_VA.html.
+
+Once the module has been configured based on the above guide, the CO must place the module in the
+Approved mode using the Console Tab which provides access to the virtual serial connection.
+
+ 1. Press Enter three times.
+      When the system displays Welcome to the SG Appliance Setup Console , it is ready for the first-time
+      network configuration.
+ 2. Enter the properties for the following:
+                a. Interface number
+                b. IP address
+                c.   IP subnet mask
+                d. IP gateway
+                e. DNS server parameters
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 43 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+ 3. The module will prompt for the console account authentication information:
+
+      You must configure the console user account now.
+      Enter console username:
+      Enter console password:
+      Enter enable password:
+ 4. The module will prompt to secure serial port, select ‘n’
+ 5. When the system displays Successful Configuration Setup, press Enter to confirm the
+    configuration.
+ 6. Press Enter three times.
+ 7. Select option #1 for the Command Line Interface.
+ 8. Type enable and press Enter.
+ 9. Enter the enable mode password.
+ 10. Enter the following command: fips-mode enable.
+      When prompted for confirmation, select Y to confirm. Once the reinitialization is complete, the
+      module displays the prompt “The system is in FIPS mode”.
+
+      •    NOTE 1: The fips-mode enable command causes the device to power cycle, zeroing the Master
+           Encryption Key and returning the configuration values set in steps 1 and 2 to their factory state.
+
+      •    NOTE 2: This command is only accepted via the CLI when accessed over the serial port.
+
+ 11. After the system has finished rebooting, press Enter three times.
+ 12. Enter the properties for the following:
+                a. Interface number
+                b. IP address
+                c.   IP subnet mask
+                d. IP gateway
+                e. DNS server parameters
+
+ 13. The module will prompt for the console account credentials:
+
+      You must configure the console user
+      account now.
+      Enter console username:
+      Enter console password:
+      Enter enable password:
+
+ 14. Configure the setup password to secure the serial port which must be configured while in Approved
+     mode. The system displays the following:
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 44 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+      The serial port must be secured, and a setup password must be configured. Enter setup
+      password:
+
+ 15. Choose Yes or No to restrict workstation access.
+ 16. The operator should not configure below ciphers to be in approved mode of operation:
+         • TLS v1.0/1.1 for syslog
+         • ECDH cipher-suites for SSH (curve25519-sha256@libssh.org, ecdh-sha2-nistp521, ecdh-
+             sha2-nistp384, ecdh-sha2-nistp256) and syslog (ECDHE-RSA-AES256-GCM-SHA284, ECDHE-
+             RSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-SHA384, ECDHE-RSA-AES128-SHA256,
+             ECDHE-RSA-AES256-SHA, ECDHE-RSA-AES128-SHA)
+ 17. When creating or importing key pairs, such as during the restoration of an archived backup
+     configuration, the CO must ensure the “no-show” argument is passed over the CLI as shown in
+     Figure 6.
+
+
+
+
+                                               Figure 6 - no-show command
+
+
+
+
+Upon completion of these initialization steps, the module is considered to be operating in Approved mode
+of operation. If the steps are not followed exactly as listed here, the module could still be operational but
+in a non-compliant state.
+
+
+
+12. Mitigation of Other Attacks
+This section is not applicable. The module does not claim to mitigate any attacks beyond the FIPS 140-3
+Level 1 requirements for this validation.
+
+
+
+
+Symantec, A Division of Broadcom© 2024               Version (1.2)                                              Page 45 of 45
+          This document may be freely reproduced and distributed whole and intact including this copyright notice.
+

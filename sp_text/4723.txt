@@ -1,0 +1,803 @@
+                     Advanced Micro Devices (AMD)
+
+             AMD ASP Cryptographic CoProcessor ("Phoenix")
+
+        FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                                           Prepared for:
+
+                               Advanced Micro Devices (AMD)
+
+                                     2485 Augustine Drive
+
+                                     Santa Clara, CA 95054
+
+                                         www.amd.com
+
+
+
+
+                                           Prepared by:
+
+                           atsec information security corporation
+
+                           4516 Seton Center Parkway, Suite 250
+
+                                        Austin, TX 78759
+
+
+
+
+                © 2024 Advanced Micro Devices (AMD), atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                          Page 1 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                                        FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Table of Contents
+1 General ................................................................................................................................... 5
+   1.1 Overview .......................................................................................................................... 5
+   1.2 Security Levels ................................................................................................................. 5
+2 Cryptographic Module Specification ........................................................................................ 5
+   2.1 Description ....................................................................................................................... 5
+   2.2 Tested and Vendor Affirmed Module Version and Identification ........................................ 7
+   2.3 Excluded Components...................................................................................................... 8
+   2.4 Modes of Operation .......................................................................................................... 8
+   2.5 Algorithms ........................................................................................................................ 8
+   2.6 Security Function Implementations ................................................................................... 9
+   2.7 Algorithm Specific Information .......................................................................................... 9
+   2.8 RBG and Entropy ............................................................................................................. 9
+   2.9 Key Generation................................................................................................................. 9
+   2.10 Key Establishment .......................................................................................................... 9
+   2.11 Industry Protocols ..........................................................................................................10
+3 Cryptographic Module Interfaces............................................................................................10
+   3.1 Ports and Interfaces ........................................................................................................10
+4 Roles, Services, and Authentication .......................................................................................10
+   4.1 Authentication Methods ...................................................................................................10
+   4.2 Roles ...............................................................................................................................10
+   4.3 Approved Services ..........................................................................................................10
+   4.4 Non-Approved Services ...................................................................................................11
+   4.5 External Software/Firmware Loaded ................................................................................11
+5 Software/Firmware Security ...................................................................................................11
+   5.1 Integrity Techniques ........................................................................................................11
+   5.2 Initiate on Demand ..........................................................................................................11
+6 Operational Environment........................................................................................................12
+   6.1 Operational Environment Type and Requirements ..........................................................12
+   6.2 Configuration Settings and Restrictions ...........................................................................12
+7 Physical Security ....................................................................................................................12
+   7.1 Mechanisms and Actions Required..................................................................................12
+8 Non-Invasive Security ............................................................................................................12
+9 Sensitive Security Parameters Management ..........................................................................12
+   9.1 Storage Areas .................................................................................................................12
+   9.2 SSP Input-Output Methods ..............................................................................................13
+                               © 2024 Advanced Micro Devices (AMD), atsec information security.
+               This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                 Page 2 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                                       FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+   9.3 SSP Zeroization Methods ................................................................................................13
+   9.4 SSPs ...............................................................................................................................13
+   9.5 Transitions .......................................................................................................................13
+10 Self-Tests .............................................................................................................................14
+   10.1 Pre-Operational Self-Tests ............................................................................................14
+   10.2 Conditional Self-Tests....................................................................................................14
+   10.3 Periodic Self-Test Information........................................................................................14
+   10.4 Error States ...................................................................................................................15
+   10.5 Operator Initiation of Self-Tests .....................................................................................15
+11 Life-Cycle Assurance ...........................................................................................................15
+   11.1 Installation, Initialization, and Startup Procedures..........................................................15
+   11.2 Administrator Guidance .................................................................................................17
+   11.3 Non-Administrator Guidance..........................................................................................17
+   11.4 Design and Rules ..........................................................................................................17
+   11.5 Maintenance Requirements ...........................................................................................17
+   11.6 End of Life .....................................................................................................................18
+12 Mitigation of Other Attacks ...................................................................................................18
+
+
+
+
+                               © 2024 Advanced Micro Devices (AMD), atsec information security.
+               This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                               Page 3 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                                         FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+List of Tables
+Table 1: Security Levels ............................................................................................................. 5
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) .... 7
+Table 3: Tested Module Identification – Hybrid Disjoint Hardware .............................................. 7
+Table 4: Tested Operational Environments - Software, Firmware, Hybrid .................................. 8
+Table 5: Modes List and Description .......................................................................................... 8
+Table 6: Approved Algorithms .................................................................................................... 8
+Table 7: Security Function Implementations............................................................................... 9
+Table 8: Ports and Interfaces ....................................................................................................10
+Table 9: Roles ...........................................................................................................................10
+Table 10: Approved Services ....................................................................................................11
+Table 11: Storage Areas ...........................................................................................................12
+Table 12: SSP Input-Output Methods........................................................................................13
+Table 13: SSP Zeroization Methods ..........................................................................................13
+Table 14: SSP Table 1 ..............................................................................................................13
+Table 15: SSP Table 2 ..............................................................................................................13
+Table 16: Pre-Operational Self-Tests ........................................................................................14
+Table 17: Conditional Self-Tests ...............................................................................................14
+Table 18: Pre-Operational Periodic Information.........................................................................14
+Table 19: Conditional Periodic Information ................................................................................15
+Table 20: Error States ...............................................................................................................15
+
+
+List of Figures
+Figure 1: The AMD Ryzen PRO 7000 Series SoC, representing all versions of the tested
+platforms. ................................................................................................................................... 6
+Figure 2: Block Diagram............................................................................................................. 7
+Figure 3: AFF Tool indicates that the module is not installed.....................................................16
+Figure 4: AFF Tool indicating that the module is installed. ........................................................17
+
+
+
+
+                               © 2024 Advanced Micro Devices (AMD), atsec information security.
+               This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                 Page 4 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+1 General
+1.1 Overview
+This section is informative to the reader to reference cryptographic services and other services of
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor (the “module”) from Advanced
+Micro Devices (AMD) (the “vendor”). Only the components listed in Section 2.1 are subject to the
+FIPS 140-3 validation. The CMVP (Cryptographic Module Validation Program) makes no
+statement as to the correct operation of the module or the security strengths of the generated
+keys (when supported) if the specific operational environment is not listed on the validation
+certificate.
+
+The vendor has provided the non-proprietary Security Policy of the cryptographic module, which
+was further consolidated into this document by atsec information security together with other
+vendor-supplied documentation. In preparing the Security Policy document, the laboratory
+formatted the vendor-supplied documentation for consolidation without altering the technical
+statements therein contained. The further refining of the Security Policy document was conducted
+iteratively throughout the conformance testing, wherein the Security Policy was submitted to the
+vendor, who would then edit, modify, and add technical contents. The vendor would also supply
+additional documentation, which the laboratory formatted into the existing Security Policy, and
+resubmitted to the vendor for their final editing.
+
+1.2 Security Levels
+
+ Section               Security Level
+ 1                     1
+ 2                     1
+ 3                     1
+ 4                     1
+ 5                     1
+ 6                     1
+ 7                     1
+ 8                     N/A
+ 9                     1
+ 10                    1
+ 11                    1
+ 12                    N/A
+Table 1: Security Levels
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+
+The AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor (hereafter referred to as “the
+module”) supports the Ryzen PRO 7000 Series SoC (System on a Chip) by providing digital
+signature verification of the key database during secure boot procedures.
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 5 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Module Type: Firmware-hybrid
+
+Module Embodiment: SingleChip
+
+Module Characteristics:
+
+Cryptographic Boundary:
+
+The cryptographic boundary of the module is defined as the fips_module binary, which performs
+self-tests, provides the service indicator, and shows status service, as well as the hardware
+implementations of RSA and SHA2-384 in the CCP, which are used to perform signature
+verification and verify the integrity of the fips_module binary.
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+
+The TOEPP of the module is defined as the Ryzen PRO 7000 Series SoC in which the module
+operates.
+
+
+
+
+Figure 1: The AMD Ryzen PRO 7000 Series SoC, representing all versions of the tested platforms.
+
+
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 6 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Figure 2: Block Diagram
+
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+
+N/A for this module.
+
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+
+ Package or File Software/ Firmware Features                                                      Integrity Test
+ Name            Version
+ fips_module.bin bc0d0443FIPS001                                                                  SHA2-384
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+
+Tested Module Identification – Hybrid Disjoint Hardware:
+
+ Model   and/or      Part Hardware Firmware Processors                                                                Features
+ Number                   Version  Version
+ RSA and SHA2-384 bc0d0346FIPS001           AMD Ryzen                                                    PRO
+ implementations in CCP                     7640HS                                                      (100-
+                                            000000960)
+Table 3: Tested Module Identification – Hybrid Disjoint Hardware
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       Page 7 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+
+ Operating Hardware                      Processors         PAA/PAI Hypervisor Version(s)
+ System    Platform                                                 or Host OS
+ N/A       AMD      Ryzen                AMD          Ryzen No      N/A        bc0d0346FIPS001
+           PRO 7640HS                    PRO         7640HS
+           (100-                         (100-
+           000000960)                    000000960)
+Table 4: Tested Operational Environments - Software, Firmware, Hybrid
+
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+
+N/A for this module.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary that are excluded from the FIPS
+140-3 security requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+
+ Mode Name          Description            Type     Status Indicator
+ Approved           Whenever the module is Approved The module always operates in the
+ mode               operational                     approved mode
+Table 5: Modes List and Description
+
+
+The module implements only one mode of operation, the approved mode, in which the approved
+services are available. No configuration is necessary for the module to operate and remain in the
+approved mode.
+
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed on
+start-up, the module automatically transitions to the approved mode.
+
+2.5 Algorithms
+Approved Algorithms:
+
+ Algorithm              CAVP                    Properties                                                    Reference
+                        Cert
+ RSA             SigVer A4201                   Signature     Type  -    PKCSPSS FIPS 186-4
+ (FIPS186-4)                                    Modulo - 4096
+ SHA2-384                     A4201             Message Length - Message Length: 0- FIPS 180-4
+                                                65536 Increment 8
+Table 6: Approved Algorithms
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 8 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Vendor-Affirmed Algorithms:
+
+N/A for this module.
+
+Non-Approved, Allowed Algorithms:
+
+N/A for this module.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+
+N/A for this module.
+
+2.6 Security Function Implementations
+
+ Name                    Type                      Description                Properties                Algorithms
+ Digital Signature       DigSig-SigVer             Verify a digital                                     RSA SigVer
+ Verification                                      signature                                            (FIPS186-4)
+                                                                                                        Key size: 4096
+                                                                                                        bits
+                                                                                                        SHA2-384
+ Message Digest          SHA                       Compute a                                            SHA2-384
+                                                   message digest
+Table 7: Security Function Implementations
+
+
+2.7 Algorithm Specific Information
+There is no algorithm specific information.
+
+2.8 RBG and Entropy
+N/A for this module.
+
+N/A for this module.
+
+2.9 Key Generation
+The module does not implement any key generation methods.
+
+2.10 Key Establishment
+The module does not implement any automated key establishment methods.
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 9 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2.11 Industry Protocols
+The module does not implement any industry protocols.
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+
+ Physical        Logical               Data That Passes
+ Port            Interface(s)
+ SRAM            Data Input            API input parameters for data
+ SRAM            Data Output           API output parameters for data
+ SRAM            Control Input         API function calls, API input parameters for control
+ SRAM            Status Output         API return codes, status values
+ Power port      Power                 Power
+Table 8: Ports and Interfaces
+
+
+The logical interfaces are logically separated from each other by the API design. The power
+interface is physically separated from any other interface.
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+N/A for this module.
+
+4.2 Roles
+
+ Name                                Type                      Operator Type            Authentication Methods
+ Crypto Officer                      Role                      CO                       None
+Table 9: Roles
+
+
+The module supports the Crypto Officer role only. This sole role is implicitly and always assumed
+by the operator of the module. No support is provided for multiple concurrent operators.
+
+4.3 Approved Services
+
+ Name              Description             Indicator Inputs                   Outputs         Security                SSP
+                                                                                              Functions               Access
+ Digital           Verify a digital        1               Message,           Pass/fail       Digital                 Crypto
+ Signature         signature                               public key,                        Signature               Officer
+ Verification                                              signature                          Verification            - RSA
+                                                                                                                      public
+                                                                                                                      key: W,E
+ Show              Return the              None            None               Module          None                    Crypto
+ Version           module                                                     version                                 Officer
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 10 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name               Description             Indicator Inputs                   Outputs         Security                SSP
+                                                                                               Functions               Access
+                    version
+                    information
+ Show Status        Return the              None            None               Module          None                    Crypto
+                    module status                                              status                                  Officer
+ Self-test          Initiate on-            None            None               Pass/fail       Digital                 Crypto
+                    demand self-                                                               Signature               Officer
+                    tests by reset                                                             Verification
+                                                                                               Message
+                                                                                               Digest
+ Zeroization        Zeroize all             None            None               None            None                    Crypto
+                    SSPs                                                                                               Officer
+                                                                                                                       - RSA
+                                                                                                                       public
+                                                                                                                       key: Z
+Table 10: Approved Services
+
+
+The approved service indicator can be retrieved using Microsoft HSTI and through the UEFI
+interactive shell tool. As the module only offers approved services, the indicator is always set
+when the module is operational. This is shown by the “FIPS mode: 1” output.
+
+4.4 Non-Approved Services
+N/A for this module.
+
+4.5 External Software/Firmware Loaded
+The module does not load external software or firmware.
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The integrity of the firmware component of the module (“fips_module.bin”) is verified by comparing
+a SHA2-384 digest value calculated at run time with the SHA2-384 digest value stored in the
+module that was computed at build time.
+
+5.2 Initiate on Demand
+The integrity test is performed as part of the pre-operational self-tests, which are executed when
+the module is initialized. The integrity tests can be invoked on demand by powering off and
+subsequently re-initializing the module or SoC, which will perform (among others) the firmware
+integrity test.
+
+
+
+
+                             © 2024 Advanced Micro Devices (AMD), atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       Page 11 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Non-Modifiable
+
+How Requirements are Satisfied:
+
+The operational environment provides context separation for the memory and registers utilized
+by the module. When these components are used by the module, no other process or sub-
+component can access the information concurrently.
+
+6.2 Configuration Settings and Restrictions
+No configuration of the operational environment is required for the module to operate in an
+approved mode. Therefore, there are no rules, settings, or restrictions to the configuration of the
+operational environment.
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+N/A for this module.
+
+The embodiment of the module is a single chip consisting of production-grade components. The
+coating is a standard sealing coat applied over the single chip. The module provides no additional
+physical security techniques. No actions are required to maintain the physical security of the
+module.
+
+8 Non-Invasive Security
+This module does not implement any non-invasive security mechanism and therefore this section
+is not applicable.
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+
+ Storage Description                                                      Persistence
+ Area                                                                     Type
+ Name
+ SRAM    Temporary storage for SSPs used by the module as part of service Dynamic
+         execution
+Table 11: Storage Areas
+
+
+SSPs are provided to the module by the calling process and are destroyed when released by the
+respective functions.
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 12 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+9.2 SSP Input-Output Methods
+
+ Name                  From                      To   Format Distribution Entry      SFI or
+                                                      Type      Type      Type       Algorithm
+ API input             Operator                  SRAM Plaintext Manual    Electronic
+ parameters            residing on
+                       TOEPP
+Table 12: SSP Input-Output Methods
+
+
+9.3 SSP Zeroization Methods
+
+ Zeroization            Description                        Rationale                                           Operator
+ Method                                                                                                        Initiation
+ Remove power           De-allocates the                   Volatile memory used by the                         By
+ from the SoC           volatile memory used               module is overwritten within                        removing
+                        to store SSPs                      nanoseconds when power is                           power
+                                                           removed
+Table 13: SSP Zeroization Methods
+
+
+All data output is inhibited during zeroization.
+
+9.4 SSPs
+
+ Name       Description             Size -            Type -           Generated Established Used By
+                                    Strength          Category         By        By
+ RSA        Public key              4096 bits         Public key                             Digital
+ public     used for RSA            - 150 bits        - PSP                                  Signature
+ key        signature                                                                        Verification
+            verification
+Table 14: SSP Table 1
+
+
+ Name          Input -                Storage        Storage                            Zeroization                    Related
+               Output                                Duration                                                          SSPs
+ RSA           API input              SRAM:Plaintext For the duration                   Remove power
+ public        parameters                            of the service                     from the SoC
+ key
+Table 15: SSP Table 2
+
+
+9.5 Transitions
+The RSA algorithm as implemented by the module conforms to FIPS 186-4, which has been
+superseded by FIPS 186-5. FIPS 186-4 was withdrawn on February 3, 2024.
+
+
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 13 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+
+ Algorithm or Test                     Test               Test Type         Indicator              Details
+ Test         Properties               Method
+ SHA2-384     N/A                      Message            SW/FW             Module is              Performed on
+ (A4201)                               digest             Integrity         operational            fips_module.bin
+Table 16: Pre-Operational Self-Tests
+
+
+The pre-operational firmware integrity test is performed automatically when the module is
+powered on before the module transitions into the operational state. While the module is executing
+the self-test, services are not available, and data output (via the data output interface) is inhibited
+until the tests are successfully completed. The module transitions to the operational state only
+after the pre-operational self-test passed successfully.
+
+10.2 Conditional Self-Tests
+
+ Algorithm          Test                  Test   Test Indicator   Details                                  Conditions
+ or Test            Properties            Method Type
+ SHA2-384           32-bit                KAT    CAST Module is Message                                    Module
+ (A4201)            message                           operational digest                                   initialization
+                                                                                                           (before
+                                                                                                           integrity test)
+ RSA SigVer PSS      using KAT                          CAST Module is Signature                           Module
+ (FIPS186-4) 4096-bit key                                    operational verification                      initialization
+ (A4201)     with   SHA2-                                                                                  (before
+             384                                                                                           integrity test)
+Table 17: Conditional Self-Tests
+
+
+The module performs self-tests on all approved cryptographic algorithms as part of the approved
+services supported in the approved mode of operation, using the tests shown in the table above.
+These self-tests are performed automatically before the firmware integrity test. Services are not
+available, and data output (via the data output interface) is inhibited during the self-tests. If any of
+these tests fails, the module transitions to the error state.
+
+10.3 Periodic Self-Test Information
+
+ Algorithm or            Test Method               Test Type                  Period                    Periodic
+ Test                                                                                                   Method
+ SHA2-384                Message digest            SW/FW Integrity            On demand                 By resetting the
+ (A4201)                                                                                                module
+Table 18: Pre-Operational Periodic Information
+
+
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 14 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Algorithm or            Test Method               Test Type                  Period                    Periodic
+ Test                                                                                                   Method
+ SHA2-384                KAT                       CAST                       On demand                 By resetting the
+ (A4201)                                                                                                module
+ RSA SigVer              KAT                       CAST                       On demand                 By resetting the
+ (FIPS186-4)                                                                                            module
+ (A4201)
+Table 19: Conditional Periodic Information
+
+
+The module does not implement any periodic self-tests.
+
+10.4 Error States
+
+ Name Description                          Conditions               Recovery              Indicator
+                                                                    Method
+ Error     Module immediately              SHA2-384                 Resetting the         Error code (AA0000FB,
+           stops executing                 CAST error               module                AA0000FC, or AA0000FD)
+                                           RSA CAST
+                                           error
+                                           Integrity test
+                                           error
+Table 20: Error States
+
+
+In the error state, the output interface is inhibited, and the module accepts no more inputs or
+requests (as the module is no longer running). The error code is output through the FW status
+register, which explains the error that has occurred.
+
+10.5 Operator Initiation of Self-Tests
+All self-tests can be invoked on demand by unloading and subsequently re-initializing the module.
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+The procedures herein described are directed at OEMs for producing and configuring their BIOS
+so that the FIPS module is properly enabled to operate as the validated module in conformance
+with the rules in this Security Policy document.
+
+Once properly installed and enabled, no configuration is necessary for the module to operate and
+remain in the approved mode, as it is the only mode of operation of the module.
+
+To enable the FIPS capability
+
+    1. Reserve 16KiB at least for AMD Secure Processor level 1 directory, as the FIPS module
+       requires additional 8KiB of ROM space for the AMD Secure Processor L1 Bootloader.
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 15 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    2. The Platform BIOS must include the file with “_FIPS” postfix in the file name as AMD
+       Secure         Processor       entry     0x1.        For        example,        the      file
+       PspBootLoader_stage1_prod_AB_RN_FIPS.sbin has “_FIPS” postfix in the file name.
+       This file is thus a FIPS capable AMD Secure Processor boot loader. Conversely, the file
+       PspBootLoader_stage1_prod_AB_RN.sbin does not have “_FIPS” postfix in the file name,
+       making this file a non-FIPS capable AMD Secure Processor boot loader.
+    3. Set BIT 32 of AMD Secure Processor soft fuse chain (AMD Secure Processor entry 0xB)
+       to enable FIPS capability.
+           a. The BIT32 in AMD Secure Processor entry 0xB is defined as FIPS capability
+                enablement. If 0, the FIPS capability is OFF; if 1, the FIPS capability is ON (i.e.,
+                the module is properly installed as the validated module described in this
+                document).
+
+To verify whether FIPS capability is on
+
+    1. Boot the system into UEFI shell with secure boot disabled.
+    2. Use the UEFI shell version of the AFF Tool version 0.3 and beyond. This tool is provided
+       by the vendor. Run the AFF Tool with the command: afftool --fips from the interactive UEFI
+       shell provided by the BIOS.
+           a. If it shows “FIPS mode: on”, this is the FIPS capable module installed.
+           b. If it shows “FIPS mode: off”, the module (described in this document) is not
+               installed.
+
+The screenshot in Figure 3 shows the usage of the AFF Tool. The output indicates that the FIPS
+module is not installed. In this condition, the module does not operate in conformance with this
+Security Policy document.
+
+
+
+
+Figure 3: AFF Tool indicates that the module is not installed.
+
+The screenshot in Figure 4 again shows the usage of the AFF Tool. The output demonstrates that
+the FIPS module is installed and thus will operate as the FIPS validated module according to the
+rules in this Security Policy document.
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 16 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Figure 4: AFF Tool indicating that the module is installed.
+
+
+11.2 Administrator Guidance
+All the functions, ports and logical interfaces described in this document are available to the
+Crypto Officer. The module only provides approved functions, and as such there are no special
+procedures to administer the approved mode of operation.
+
+11.3 Non-Administrator Guidance
+The module implements only the Crypto Officer. There are no requirements for non-administrator
+operators.
+
+11.4 Design and Rules
+The bootloader (which acts as the operator of the module) initializes the fips_module.bin
+component by loading it into memory upon power-on. After the pre-operational self-tests are
+successfully concluded, the module automatically transitions to the operational state. In the
+operational state, the module automatically performs the signature verification of the key database
+using the RSA signature verification service, which is the sole service provided by the module.
+The key database, RSA public key, and signature are provided as input by the operator of the
+module (the bootloader). After the successful signature verification of the key database, the
+module unloads itself from memory, ceasing its operation.
+
+All the procedures described above are conducted without any human assistance. To perform the
+procedures again, the module must be reset, which will trigger a new boot.
+
+11.5 Maintenance Requirements
+There are no maintenance requirements.
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 17 of 18
+AMD Ryzen PRO 7000 Series ASP Cryptographic CoProcessor                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+11.6 End of Life
+The process for performing “End of Life” occurs at the chronological point of 10 years starting
+from manufacturing date of the module.
+
+As stated previously, the module does not possess persistent storage of SSPs. The SSP values
+only exists in volatile memory and those values vanish when the module is powered off. The
+procedure for secure sanitization of the module at the end of life is simply to power it off, which is
+the action of zeroization of the SSPs. As a result of this sanitization via power-off, the SSPs are
+removed from the module, so that the module may either be distributed to other operators or
+disposed.
+
+12 Mitigation of Other Attacks
+The module does not offer mitigation of other attacks and therefore this section is not applicable.
+
+
+
+
+                            © 2024 Advanced Micro Devices (AMD), atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      Page 18 of 18
+

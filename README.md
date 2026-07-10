@@ -14,21 +14,27 @@ with **pure Python standard library** (Python 3.8+). No network and no
 third-party packages are needed to rebuild any artifact; `make all` regenerates
 every output byte-for-byte.
 
-## At a glance (reference date 2026-07, n = 136 modules, certs #4650 to #5159)
+## At a glance (reference date 2026-07, n = 415 modules, a near-census of certs #4650 to #5159)
 
-- **72%** of modules have never been re-validated since their initial certificate.
-- **60 months** median certificate window (validation to sunset).
-- **90%** still carry at least one legacy primitive (SHA-1 / ECB / 3DES).
-- **TCB surfaces** are visible across the corpus even when components are not
-  named: debug/recovery interface (25), network crypto parser (24), HSM/SE
-  firmware trust anchor (20), firmware-update authentication (20), boot-chain
-  verification (9), kernel crypto consumer (9).
-- **Component-level CVE drift** is measurable for **30 of 136** modules (the ones
-  that name a CPE-mappable component); the rest, disproportionately hardware and
-  appliance modules, name nothing the join can reach. That gap is itself a finding.
-- The **boot chain** is treated as a first-class security property: 3 HSMs ship
-  U-Boot inside the validated boundary, the exact surface of Binarly's U-Boot FIT
-  signature-verification bypass (CVE-2026-46728).
+Lifecycle / archetype / algorithm figures use all **415** modules; Security-Policy
+structure figures use the **136** with full SP extraction (see *Corpus scope* below).
+
+- **78%** of modules have never been re-validated since their initial certificate.
+- **60 months** median certificate active window (validation to sunset).
+- **70%** still carry at least one legacy primitive (SHA-1 / ECB / 3DES).
+- **Maintenance tracks with how hard a class is to reship**: Secure element / SoC
+  modules are the least maintained (**98% never updated**, n = 43) and
+  HSM / accelerator modules the most (**30%**, n = 10) — a pattern the every-third
+  sample overstated at small n (it showed 0% at n = 4).
+- **TCB surfaces** (over the 136 full-extraction modules): debug/recovery interface
+  (25), network crypto parser (24), HSM/SE firmware trust anchor (20),
+  firmware-update authentication (20), boot-chain verification (9).
+- **Component-level CVE drift** is measurable for **62** modules that name a
+  CPE-mappable component; the rest, disproportionately hardware and appliance
+  modules, name nothing the join can reach. That gap is itself a finding.
+- The **boot chain** is treated as a first-class security property: several HSMs
+  ship U-Boot inside the validated boundary, the exact surface of Binarly's U-Boot
+  FIT signature-verification bypass (CVE-2026-46728).
 
 ## What a FIPS certificate is good for here
 
@@ -148,14 +154,25 @@ To refresh the joins against a current NVD snapshot, delete the caches
 `NVD_API_KEY` in the environment (or as a repository secret) to lift NVD's
 keyless rate limit. The key only affects live fetches, never the cached results.
 
-## Corpus scope
+## Corpus scope and the two extraction tiers
 
-The analysis runs on the **provided** record snapshot under `corpus140_3/records/`
-(a sampled certificate-number sweep, not the full FIPS 140-3 population). The
-upstream fetch-and-extract toolchain that produced those records from the CMVP
-site and the Security-Policy PDFs is not shipped here, so broadening the set to a
-larger or more representative sample requires re-running that extraction; the
-analysis, joins, and site then regenerate unchanged from the new records.
+The corpus is a **near-census** of the FIPS 140-3 modules validated in the
+certificate-number window it covers, in two tiers:
+
+- **Full extraction** — records with the complete pdfplumber Security-Policy
+  reconstruction (typed tables, services, ports, SSPs). This is the originally
+  provided snapshot.
+- **Metadata + text** — records fetched from the public CMVP site by
+  `fetch_cmvp.py`: full certificate metadata (module, vendor, level, type,
+  embodiment, validation history, approved algorithms) plus the verbatim
+  Security-Policy text via `pdftotext`, but not the structured table extraction.
+
+The analysis is **denominator-honest** about this split. Lifecycle, archetype,
+algorithm and component-drift findings use the whole corpus; the
+Security-Policy-structure findings (TCB surfaces, review-priority, document
+quality) are computed over the full-extraction subset and labelled with that
+count. To broaden further, run `python fetch_cmvp.py --range <lo> <hi>` and
+rebuild — the analysis, joins, and site regenerate from the new records.
 
 ## Data provenance
 

@@ -1,0 +1,1641 @@
+   Qualcomm® Trusted Execution Environment
+         (TEE) Software Cryptographic Library
+
+                           Module version
+bb1535e33256786b753f8632877c9f4e11e267de
+               aa65234d8f3703943d6a6888
+
+
+
+
+       FIPS 140-3 Non-Proprietary Security Policy
+
+                                                                       Document Version 1.1
+
+                                                                   Last update: 11-13-2024
+
+
+
+                                            Prepared by:
+
+                         atsec information security corporation
+
+                           4516 Seton Center Pkwy, Suite 250
+
+                                        Austin, TX 78759
+
+                                         www.atsec.com
+
+                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+  This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     1 Table of Contents
+
+     1 GENERAL........................................................................................................................................4
+       1.1 THIS SECURITY POLICY DOCUMENT.........................................................................................................4
+       1.2 HOW THIS SECURITY POLICY WAS PREPARED............................................................................................ 4
+     2 CRYPTOGRAPHIC MODULE SPECIFICATION.....................................................................................6
+       2.1 MODULE DESCRIPTION......................................................................................................................... 6
+       2.2 MODULE DETAILS................................................................................................................................ 6
+       2.3 TESTED OPERATIONAL ENVIRONMENTS....................................................................................................7
+       2.4 SECURITY FUNCTIONS........................................................................................................................... 7
+       2.5 DESCRIPTION OF MODES OF OPERATION................................................................................................11
+       2.6 CRYPTOGRAPHIC MODULE BOUNDARY..................................................................................................11
+       2.7 RULES OF OPERATION........................................................................................................................ 13
+     3 CRYPTOGRAPHIC MODULE PORTS AND INTERFACES.....................................................................14
+     4 ROLES, SERVICES, AND AUTHENTICATION.....................................................................................15
+       4.1 ROLES............................................................................................................................................. 15
+       4.2 AUTHENTICATION.............................................................................................................................. 15
+       4.3 SERVICES.......................................................................................................................................... 16
+         4.3.1 Approved Services.....................................................................................................................16
+         4.3.2 Non-approved Services.............................................................................................................18
+     5 SOFTWARE/FIRMWARE SECURITY................................................................................................20
+       5.1 INTEGRITY TECHNIQUES...................................................................................................................... 20
+       5.2 ON-DEMAND INTEGRITY TEST..............................................................................................................20
+       5.3 EXECUTABLE CODE.............................................................................................................................20
+     6 OPERATIONAL ENVIRONMENT.....................................................................................................21
+       6.1 APPLICABILITY................................................................................................................................... 21
+       6.2 TESTED OPERATIONAL ENVIRONMENT...................................................................................................21
+       6.3 SPECIFICATIONS FOR THE OPERATIONAL ENVIRONMENT............................................................................21
+     7 PHYSICAL SECURITY......................................................................................................................22
+     8 NON-INVASIVE SECURITY..............................................................................................................23
+     9 SENSITIVE SECURITY PARAMETER MANAGEMENT........................................................................24
+       9.1 SSP ESTABLISHMENT/SSP DERIVATION.................................................................................................25
+       9.2 SSP GENERATION.............................................................................................................................. 25
+       9.3 SSP ENTRY AND OUTPUT....................................................................................................................26
+       9.4 SSP STORAGE................................................................................................................................... 26
+       9.5 SSP ZEROIZATION..............................................................................................................................26
+     10 SELF-TESTS..................................................................................................................................27
+       10.1 PRE-OPERATIONAL SELF-TESTS.......................................................................................................... 28
+         10.1.1 Software Integrity Test..........................................................................................................28
+       10.2 CONDITIONAL SELF-TESTS................................................................................................................. 28
+         10.2.1 Cryptographic Algorithm Self-Tests.......................................................................................28
+         10.2.2 Pair-wise Consistency Tests...................................................................................................28
+         10.2.3 Periodic/On-Demand Self-Tests.............................................................................................28
+       10.3 ERROR STATES................................................................................................................................ 28
+                                         © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                       2 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     11 LIFE-CYCLE ASSURANCE...............................................................................................................30
+       11.1 CONFIGURATION MANAGEMENT........................................................................................................30
+       11.2 DELIVERY AND OPERATION................................................................................................................30
+       11.3 MAINTENANCE REQUIREMENTS..........................................................................................................30
+       11.4 END OF LIFE................................................................................................................................... 30
+       11.5 CRYPTO OFFICER GUIDANCE..............................................................................................................30
+     12 MITIGATION OF OTHER ATTACKS................................................................................................32
+     APPENDIX A. GLOSSARY AND ABBREVIATIONS................................................................................33
+     APPENDIX A. GLOSSARY AND ABBREVIATIONS................................................................................33
+     APPENDIX B. REFERENCES...............................................................................................................34
+     APPENDIX B. REFERENCES...............................................................................................................34
+
+
+
+
+                                        © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                    3 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     1 General
+
+     1.1 This Security Policy Document
+     This Security Policy describes the features and design of the module named Qualcomm® Trusted
+     Execution Environment (TEE) Software Cryptographic Library using the terminology contained in
+     the FIPS 140-3 specification. The FIPS 140-3 Security Requirements for Cryptographic Module
+     specifies the security requirements that will be satisfied by a cryptographic module utilized within
+     a security system protecting sensitive but unclassified information. The NIST/CCCS Cryptographic
+     Module Validation Program (CMVP) validates cryptographic module to FIPS 140-3. Validated prod-
+     ucts are accepted by the Federal agencies of both the USA and Canada for the protection of sensi-
+     tive or designated information.
+     This Non-Proprietary Security Policy may be reproduced and distributed, but only whole and intact
+     and including this notice. Other documentation is proprietary to their authors.
+
+     1.2 How this Security Policy was Prepared
+     In preparing the Security Policy document, the laboratory formatted the vendor-supplied documen-
+     tation for consolidation without altering the technical statements therein contained. The further re-
+     fining of the Security Policy document was conducted iteratively throughout the conformance test-
+     ing, wherein the Security Policy was submitted to the vendor, who would then edit, modify, and
+     add technical contents. The vendor would also supply additional documentation, which the labora-
+     tory formatted into the existing Security Policy, and resubmitted to the vendor for their final edit-
+     ing.
+     This document is the non-proprietary FIPS 140-3 Security Policy for the Qualcomm® Trusted Exe-
+     cution Environment (TEE) Software Cryptographic Library. It has a one-to-one mapping to the
+     [SP800-140B] starting with section B.2.1 named “General” that maps to section 1 in this document
+     and ending with section B.2.12 named “Mitigation of other attacks” that maps to section 12 in this
+     document.
+              ISO/IEC 24759 Sec-                      FIPS 140-3 Section Title                      Security Level
+              tion 6. [Number Be-
+                       low]
+             1                              General                                                           1
+
+             2                              Cryptographic Module Specification                                1
+
+             3                              Cryptographic Module Interfaces                                   1
+
+             4                              Roles, Services, and Authentication                               1
+
+             5                              Software/Firmware Security                                        1
+
+             6                              Operational Environment                                         N/A
+
+             7                              Physical Security                                                 2
+
+             8                              Non-invasive Security                                           N/A
+
+             9                              Sensitive Security Parameter Manage-                              1
+                                            ment
+             10                             Self-tests                                                        1
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                               4 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+             11                             Life-cycle Assurance                                             2
+
+             12                             Mitigation of Other Attacks                                      1
+
+           Table 1 - Security Levels
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              5 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     2 Cryptographic Module Specification
+
+     2.1 Module Description
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library is used by
+     secure applications. It is part of the common library and provides APIs to the secure applications
+     for cryptography and hashing functions.
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library is deter-
+     mined to be a FIPS 140-3 validated module by blowing the TZ_SW_CRYPTO_FIPS_ENABLE fuse and
+     by determining the version number based on its HMAC value combined with the register value of
+     fuse. The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library uses
+     the ARMv8 instruction set architecture for hash operations for SHA-1, SHA-224 and SHA-256.
+
+     2.2 Module Details
+     The software-hybrid cryptographic module consists of the Qualcomm® Trusted Execution Environ-
+     ment (TEE) Software Cryptographic Library, the ARMv8 processor and FIPS enablement fuse. The
+     cryptographic functions are implemented within the library. The Qualcomm® Trusted Execution
+     Environment (TEE) Software Cryptographic Library is bound to the on-chip Pseudo Random Num-
+     ber Generator module with version 3.0.0 validated under FIPS 140-3 certificate #4732. The bound
+     module resides within the same physical perimeter of the binding module.
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library crypto-
+     graphic module (hereafter referred to as “the module”) is a Software-Hybrid Single-Chip crypto-
+     graphic module.
+                 Component                      Type                       Version Number                     Operating Sys-
+                                                                                                                  tem
+         Qualcomm® Trusted Exe-              Software        bb1535e33256786b753f8632877c9f4                  Qualcomm
+         cution Environment (TEE)                            e11e267deaa65234d8f3703943d6a6                   Trusted Execu-
+         Software Cryptographic                              888                                              tion Environ-
+         Library                                                                                              ment (TEE)
+                                                                                                              TZ.XF.5.1x
+         ARMv8 processor1                    Hardware        bb1535e33256786b753f8632877c9f4                  N/A
+         TZ_SW_CRYPTO_FIPS_EN-                               e11e267deaa65234d8f3703943d6a6
+         ABLE fuse                                           888
+
+     Table 2 - Components of the Software-hybrid Cryptographic Module
+
+     Table 3 describes the software component versions that comprise the Qualcomm® Trusted Execu-
+     tion Environment (TEE) Software Cryptographic Library while Table 4 describes the fuse setting
+     that enables the FIPS validated module. The FIPS validated Qualcomm® Trusted Execution Envi-
+     ronment (TEE) Software Cryptographic Library comprises a combination of the software compo-
+     nent versions and fuse setting combined together.
+         Software Component                          HMAC hash value
+
+
+         Qualcomm® Trusted Execution                 bb1535e33256786b753f8632877c9f4e11e267deaa65234d8f
+         Environment (TEE) Software                  3703943d6a6888
+         Cryptographic Library (64 bit)
+     1
+      The ARMv8.5-a is the instruction set version used within the Snapdragon 8 Gen 1 Mobile Platform
+     Snapdragon is a product of Qualcomm Technologies, Inc. and/or its subsidiaries.
+     Arm is a registered trademark of Arm Limited (or its subsidiaries) in the US and/or elsewhere.
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              6 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Table 3 - Software component versions for Qualcomm® Trusted Execution Environment (TEE) Soft-
+     ware Cryptographic Library
+
+       Fuse name                                 1-bit fuse value        Description
+
+       TZ_SW_CRYPTO_FIPS_ENABLE                  1                       Enable FIPS compliance for Qualcomm®
+                                                                         Trusted Execution Environment (TEE) Software
+                                                                         Cryptographic Library. Disabled by default and
+                                                                         blow to enable.
+     Table 4 - Fuse setting
+
+     2.3 Tested Operational Environments
+     The module has been tested on the operational environments indicated in Table 5 with the corre-
+     sponding module variants and configuration options.
+      #     Operating System           Hardware Platform             Processor                    PAA/Acceleration
+
+      1     Qualcomm                   Snapdragon 8 Gen              Snapdragon 8 Gen 1           ARMv8 instruction set
+            Trusted Execution          1 Mobile Platform             Mobile Platform              architecture (SHA-1,
+            Environment (TEE)                                                                     SHA-224 and SHA-256)
+            TZ.XF.5.1x
+     Table 5 - Tested operational environments
+
+     2.4 Security Functions
+     Table 6 lists all approved security functions (cryptographic algorithms) of the module, including
+     specific key lengths employed for approved services, and implemented modes or methods of oper-
+     ation of the algorithms.
+
+     CAVP         Algorithm and             Mode / Method                Description / Key Size(s) / Use / Function
+     Cert         Standard                                               Key Strength(s)
+
+
+      #A2300 AES
+                                             CBC, ECB, CTR,                                             Encryption, De-
+                                                                         128, 192, 256 bits
+                   FIPS 197,                 CFB128, OFB                                                cryption
+                   SP800-38A
+
+      #A2300 AES
+                                                                                                        Encryption, De-
+                                             XTS
+                   FIPS 197,                                             128, 256 bits                  cryption
+                   SP800-38E
+
+      #A2300 AES
+                                                                                                        Encryption, De-
+                                             CCM                         128, 192, 256 bits
+                   FIPS 197,                                                                            cryption
+                   SP800-38C
+
+      #A2300 AES
+                                                                                                        Encryption, De-
+                                             CBC-CS2                     128, 192, 256 bits
+                   SP800-38A Adden-                                                                     cryption
+                   dum
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              7 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     CAVP         Algorithm and             Mode / Method                Description / Key Size(s) / Use / Function
+     Cert         Standard                                               Key Strength(s)
+
+
+      #A2300 SHA-1 (ARMv8)
+                                             N/A                         N/A                            Hash
+                   FIPS 180-4
+
+      #A2300 SHA-224 (ARMv8)
+                                             N/A                         N/A                            Hash
+                   FIPS 180-4
+
+      #A2300 SHA-256 (ARMv8)
+                                             N/A                         N/A                            Hash
+                   FIPS 180-4
+
+      #A2300 SHA-384 (software)
+                                             N/A                         N/A                            Hash
+                   FIPS 180-4
+
+      #A2300 SHA-512 (software)
+                                             N/A                         N/A                            Hash
+                   FIPS 180-4
+
+      #A2300                                                             Key sizes are between          Message Authenti-
+                  HMAC                      SHA-1, SHA-224,              112-4096 bits in length        cation
+                                            SHA-256, SHA-384,
+                  FIPS 198-1                SHA-512                      112-256 bits of key
+                                                                         strength
+
+      #A2300 ECDSA Key Pair                                              112 – 256 bits of security
+             Generation                                                  strength
+                                             B.4.2 (Testing Can-                                        Key Pair Genera-
+                                             didates)                                                   tion
+                  FIPS 186-4                                             P-224, P-256, P-384, P-
+                                                                         521
+
+      #A2300                                                             112 – 256 bits of security
+                  ECDSA Signature
+                                                                         strength
+                  Generation                 SHA-224, SHA-256,                                          Signature Genera-
+                                             SHA-384, SHA-512                                           tion
+                                                                         P-224, P-256, P-384, P-
+                  FIPS 186-4
+                                                                         521
+
+      #A2300                                                             96 – 256 bits of security
+                                                                         strength
+                  ECDSA Signature
+                  Verification               SHA-1, SHA-224,
+                                                                         P-192, P-224, P-256, P-        Signature Verifica-
+                                             SHA-256, SHA-384,
+                                                                         384, P-521                     tion
+                                             SHA-512
+                  FIPS 186-4                                             (ECDSA SigVer with P-
+                                                                         192 is a legacy algo-
+                                                                         rithm)
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              8 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     CAVP         Algorithm and             Mode / Method                Description / Key Size(s) / Use / Function
+     Cert         Standard                                               Key Strength(s)
+
+
+      #A2300 ECDSA Signature                                             112 – 256 bits of security
+             Generation – Com-                                           strength                   Signature Genera-
+             ponent (CVL)      N/A
+                                                                                                    tion – Component or
+                                                                         P-224, P-256, P-384, P-    Primitive
+                  FIPS 186-4                                             521
+
+      #A2300 RSA Key Pair Gen-                                           2048, 3072, 4096 bit
+             eration                                                     modulus
+                                             B.3.3 (Probable             112 – 150 bits of security Key Pair Genera-
+                                             Prime Generation)           strength                   tion
+                  FIPS 186-4
+
+
+      #A2300 RSA Signature                                               2048, 3072, 4096 bit
+             Generation                                                  modulus
+             (PKCS#1 v1.5)                   SHA-224, SHA-256,                                      Signature Genera-
+                                                                         112 – 150 bits of security
+                                             SHA-384- SHA-512                                       tion
+                                                                         strength
+                  FIPS 186-4
+
+      #A2300                                                             1024, 2048, 3072, 4096
+                  RSA Signature Ver-                                     bit modulus
+                  ification (PKCS#1 SHA-1, SHA-224,                       80 - 150 bits of security
+                  v1.5)                                                                             Signature Verifica-
+                                     SHA-256, SHA-384,                    strength
+                                                                                                    tion
+                                             SHA-512                     (RSA SigVer with a modu-
+                  FIPS 186-4                                             lus length of 1024 is a
+                                                                         legacy algorithm)
+
+      #A2300 RSA Signature                                               2048, 3072, 4096 bit
+             Generation (PSS)                                            modulus
+                                             SHA-224, SHA-256,                                      Signature Genera-
+                                                                         112 – 150 bits of security
+                                             SHA-384, SHA-512                                       tion
+                                                                         strength
+                  FIPS 186-4
+
+      #A2300                                                             1024, 2048, 3072, 4096
+                  RSA Signature Ver-                                     bit modulus
+                  ification (PSS)    SHA-1, SHA-224,                      80 - 150 bits of security
+                                                                                                    Signature Verifica-
+                                     SHA-256, SHA-384,                    strength
+                                                                                                    tion
+                                     SHA-512                             (RSA SigVer with a modu-
+                  FIPS 186-4
+                                                                         lus length of 1024 is a
+                                                                         legacy algorithm)
+
+      #A2300 RSA Signature
+             Generation – Primi-                                         2048 bit modulus
+                                                                                                        Signature Genera-
+             tive (CVL)          N/A                                                                    tion – Component or
+                                                                         112 bits of security
+                                                                                                        Primitive
+                                                                         strength
+                  FIPS 186-4
+
+      #A2300 PBKDF
+                                             SHA-1, SHA-256,
+                                                                         128-256 bits                   Key Derivation
+                                             SHA-512
+                   SP800-132
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              9 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     CAVP         Algorithm and             Mode / Method                Description / Key Size(s) / Use / Function
+     Cert         Standard                                               Key Strength(s)
+
+
+      Vendor                                                             2048, 3072, 4096 bit
+      Affirmed CKG                                                       modulus
+               SP800-133rev2                                             P-224, P-256, P-384, P-
+                                  RSA                                    521
+               (section 4, direct                                                                       Key Generation
+                                  ECDSA
+               DRBG output with-
+               out XOR)                                                  112 – 256 bits of security
+                                                                         strength
+
+      Pseudo Random Number Generator bound module
+
+      #A2064 SHA-256
+      and                                    N/A                         N/A                            Hash for DRBG
+      #A2065
+             FIPS 180-4
+
+      #A2065 Hash DRBG
+                                                                                                        Random Number
+                                             SHA-256                     256 bits of entropy
+                                                                                                        Generation
+                   SP800-90Arev1
+     Table 6 - Approved Algorithms
+
+     Table 7 lists all non-approved security functions not allowed in approved services of the module.
+         Algorithm/Functions                                        Use/Function
+
+         DES                                                        Encryption, Decryption
+
+         Triple DES2                                                Encryption, Decryption
+
+         GCM/GMAC3                                                  Encryption, Decryption, Message Authentication
+
+         HMAC (key sizes below 112 bits)                            Message Authentication
+
+         RIPEMD-160                                                 Hash
+
+         MD5                                                        Hash
+
+                                                                    Signature Generation, Signature Verification, Hy-
+         SM2
+                                                                    brid Encryption, Hybrid Decryption
+         SM3                                                        Hash
+
+         SM4                                                        Encryption, Decryption
+
+         SHA-1, SHA-224 and SHA-256 (software)                      Hash
+
+         ECDSA (secp160r1, P-192)                                   Key Pair Generation, Signature Generation
+
+
+
+     2
+       Triple DES is CAVP certified with CAVP Cert. #A2300. However, there are two requirements from FIPS 140-3 IG C.G below
+     that contribute to the non-compliance: 1) FIPS 140-3 requires that only 2^16 encryptions are performed with a given key;
+     2) the aforementioned requirement must be enforced by the module itself, not by policy.
+     3
+      GCM is CAVP certified with CAVP Cert. #A2300. However, there are two requirements from FIPS 140-3 IG C.H below that
+     contribute to the non-compliance: 1) the IV uniqueness must be enforced by the module; 2) FIPS 140-3 requires that only
+     2^32 cipher operations are performed with a given key.
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            10 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+         ECDSA (secp160r1)                                          Signature Verification
+
+         ECDSA (P-192, P-224, P-256, P-384 and P-                   Signature Verification - Component
+         521)
+         Elliptic Curve Integrated Encryption Scheme                Hybrid Encryption, Hybrid Decryption
+         (ECIES)
+         RSA-OAEP                                                   Key Encapsulation
+
+         RSA (1024 bit modulus)                                     Key Pair Generation, Signature Generation
+
+                                                                    Key Pair Generation, Signature Generation, Signa-
+         Ed25519
+                                                                    ture Verification
+         ECDH4                                                      Shared Secret Computation
+
+     Table 7 - Non-Approved Algorithms Not Allowed in Approved Services
+
+     NOTE: There are no non-approved algorithms allowed in approved mode, and no non-approved al-
+     gorithms allowed in the approved mode with no security claimed.
+
+     2.5 Description of Modes of Operation
+     The module implements two modes of operation: (1) the approved mode, in which the approved
+     services are available; and (2) the non-approved mode, in which the non-approved services are
+     available. The current mode of operation of the module can be inferred by the service indicator,
+     which indicates the approved state of the current service being invoked. No configuration is neces-
+     sary for the module to operate and remain in the approved or non-approved modes. All SSPs are
+     kept separate between the two modes. To transition to the non-approved mode, one of the non-
+     approved services in section 4 of this security policy can be requested. To transition to the ap-
+     proved mode, one of the approved services in section 4 of this security policy can be requested.
+     Table 10 and 11 list the services available in approved and non-approved mode of operation, re-
+     spectively.
+
+     2.6 Cryptographic Module Boundary
+     The physical perimeter of the Qualcomm® Trusted Execution Environment (TEE) Software Crypto-
+     graphic Library is the physical perimeter of the device that contains it. Consequently, the embodi-
+     ment of the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library is a
+     single-chip cryptographic module. Figure 1 shows a block diagram of the module, with the crypto-
+     graphic boundary indicated in red, the bound module in the dark green box, and the physical
+     perimeter in black.
+
+
+
+
+     4
+       ECDH shared secret computation is CAVP certified with Cert #A2300. However, the shared secret generation does not
+     check the key assurance requirements from SP800-56A Rev 3 regarding trusted third parties during key import. There is a
+     self-test for ECDH but is not listed since it is non-approved.
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                             11 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+        Figure 1: Block diagram depicting the cryptographic boundary and physical perimeter, and data
+                             flow between the components in the Snapdragon SoC
+
+
+
+
+                                        Figure 2: Snapdragon 8 Gen 1 Mobile Platform
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            12 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     2.7 Rules of Operation
+     The Crypto Officer interacts with the Qualcomm® Trusted Execution Environment (TEE) Software
+     Cryptographic Library in two distinct ways:
+          1. Initializing the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic
+             Library
+          2. The application services (APIs) invoked by users
+     Once Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library initializes
+     and the self-tests complete successfully, all cryptographic functions are made available. If its in-
+     tegrity test or KATs fail, the Qualcomm® Trusted Execution Environment (TEE) Software Crypto-
+     graphic Library goes into error state. To recover from a failure, the Qualcomm® Trusted Execution
+     Environment (TEE) Software Cryptographic Library will need to be re-initialized. When the Qual-
+     comm® Trusted Execution Environment (TEE) Software Cryptographic Library is in the error state,
+     the data output is inhibited. The only way to recover from an integrity test failure is to reset the
+     module.
+     Caller-induced or internal errors do not reveal any sensitive material to callers. The Qualcomm®
+     Trusted Execution Environment (TEE) Software Cryptographic Library ensures that there is no
+     means to obtain data from itself by performing key zeroization. There is no means to obtain sensi-
+     tive information from the Qualcomm® Trusted Execution Environment (TEE) Software Crypto -
+     graphic Library.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            13 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     3 Cryptographic Module Ports and Interfaces
+
+                  Physical port                  Logical Interface             Data that passes over port/interface
+       N/A                                     Data Input                 Input parameters for data
+                                               Data Output                Output parameters for data
+                                               Control Input              Function calls, input parameters for control
+                                               Status Output              Return code, status values
+      Physical power connector                 Power Input                Power port or pin for single-chip
+     Table 8 - Ports and Interfaces
+
+     The module does not implement a control output interface.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            14 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     4 Roles, services, and authentication
+
+     4.1 Roles
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library supports
+     the Crypto Officer role. The role is implicitly assumed based on the services requested.
+     Table 9 lists the roles supported by the module with corresponding services with input and output.
+       Role            Service                                Input                                  Output
+       From module
+                                                                                                     Ciphertext, Success/
+                       Encryption                             Key, Plaintext
+                                                                                                     Fail
+                       Decryption                             Key, Ciphertext                        Plaintext, Success/Fail
+                       Hash                                   Input data                             Hash value
+                       Message Authentication                 HMAC key, Input data                   HMAC value
+                                                                                                     Key pair (public key +
+                       Key Pair Generation                    Key size
+                                                                                                     private key)
+                                                              Private key, Input data, Hash
+                       Signature Generation                                                          Signature
+                                                              algorithm
+                                                              Public key, Input data, Signa-
+                       Signature Verification                                                        Success/Fail
+                                                              ture, Hash algorithm
+                       Signature Generation –
+                                                              Private key, Pre-hashed data           Signature
+                       Component or Primitive
+                                                              PRF algorithm, Salt, Iteration
+                       Key Derivation                                                                Derived key
+                                                              count, Password
+       Crypto                                                                                        Versioning informa-
+       Officer                                                enum value of
+                                                                                                     tion
+                       Get FIPS Info                           MODULE_HMAC
+                                                                                                     Self-test Success/Fail
+                                                                                                     Current status (as re-
+                                                                                                     turn
+                       Show Status                            None
+                                                                                                     codes and/or log
+                                                                                                     messages)
+                       Zeroization                            None                                   None
+                                                                                                     Ciphertext, Success/
+                       Hybrid Encryption                      Key, Plaintext
+                                                                                                     Fail
+                       Hybrid Decryption       Key, Ciphertext                                       Plaintext, Success/Fail
+                       Signature Verification -Public key, Input data, Signa-
+                                                                                                     Success/Fail
+                       Component               ture, pre-hashed data
+                                               Key wrapping key, key to be                           Wrapped key
+                  Key Wrapping
+                                               wrapped
+                                               Private key, public key from                          Shared secret
+                  Shared Secret Computation
+                                               peer
+     Table 9 - Roles, Service Commands, Input and Output
+
+     4.2 Authentication
+     The module does not support authentication for roles.
+
+     4.3 Services
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                             15 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     The module provides services to operators that assume the available role. Services are accessed
+     through documented API interfaces from the calling application.
+     Additional services are provided by the bound Pseudo Random Number Generator module on the
+     Snapdragon 8 Gen 1 Mobile Platform SoC. This Qualcomm® Trusted Execution Environment (TEE)
+     Software Cryptographic Library utilizes the random number generation service from the bound
+     Pseudo Random Number Generator module.
+     The next tables define the services that utilize approved, allowed, and non-approved security func-
+     tions in this module. For the respective tables, the convention below applies when specifying the
+     access permissions (types) that the service has for each SSP.
+              G = Generate: The module generates or derives the SSP.
+              R = Read: The SSP is read from the module (e.g. the SSP is output).
+              W = Write: The SSP is updated, imported, or written to the module.
+              E = Execute: The module uses the SSP in performing a cryptographic operation.
+              Z = Zeroise: The module zeroises the SSP.
+              N/A: The service does not access any SSP or key during its operation.
+     An operator can read the service indicator from a service by invoking the
+     qsee_get_fips_approval_status() function with enum value for QSEE_FIPS_CRYPTO_SVC_TYPE. For
+     details on the enum values please see the product documentation
+
+
+     4.3.1 Approved Services
+     Table 10 lists the approved services in this module, the roles that can request the service, the al-
+     gorithms involved, the Sensitive Security Parameters (SSPs) involved and how they are accessed,
+     and the respective service indicator. In the service tables, CO specifies the Crypto Officer role.
+      Service         Description                  Approved Security Keys and/ Roles Access Indicator
+                                                   Functions         or SSPs         rights
+                 Encrypts data using                                                                         0 return value
+      Encryption symmetric cryptog-                 AES                        AES key   CO       W, E       with enum
+                 raphy                                                                                       QSEE_FIPS_AES_*
+                                                                                                             0 return value
+                 Decrypts data using
+                                                                                                             with enum
+      Decryption symmetric cryptog-                 AES                        AES key   CO       W, E
+                                                                                                             QSEE_FIPS_AES_
+                 raphy
+                                                                                                             *
+                                                   SHA-1 (ARMv8)
+                                                   SHA-224 (ARMv8)
+                                                   SHA-256 (ARMv8)                                           0 return value
+                      Computes the hash
+      Hash                                         SHA-384 (soft-  N/A                   CO       N/A        with enum
+                      value of data
+                                                   ware)                                                     QSEE_FIPS_SHA*
+                                                   SHA-512 (soft-
+                                                   ware)
+                                                                                                             0 return value
+      Message
+                  Computes the HMAC                                                                          with enum
+      Authentica-                   HMAC                                       HMAC key CO        W, E
+                  value of data                                                                              QSEE_FIPS_HMA
+      tion
+                                                                                                             C*
+      Key Pair   Generates asymmet- ECDSA Key Pair                             ECDSA pri- CO      G, R       0 return value
+      Generation ric key pairs using Generation                                vate key,                     with enum
+                 the bound module                                              ECDSA                         QSEE_FIPS_ECDS
+                                                                               public key
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                               16 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+      Service         Description                  Approved Security Keys and/ Roles Access Indicator
+                                                   Functions         or SSPs         rights
+                                                                     Intermedi-
+                                                                     ate key                 A_KEY_PAIR_GEN
+                                                                                     G, E, Z
+                                                                     generation              _*
+                                                                     value
+                                                                     RSA pri-
+                                                                     vate key,
+                                                                                     G, R
+                                                                     RSA public              0 return value
+                                                   RSA Key Pair Gen- key                     with enum
+                                                   eration           Intermedi-              QSEE_FIPS_RSA_
+                                                                     ate key                 KEY_PAIR_GEN_*
+                                                                                     G, E, Z
+                                                                     generation
+                                                                     value
+                                                                                                               0 return value
+                                                                    ECDSA
+                                                    ECDSA Signature                                            with enum
+                                                                    private
+                                                    Generation                                                 QSEE_FIPS_ECDS
+                                                                    key
+                                                                                                               A_SIG_GEN_*
+                 Generates crypto-
+      Signature
+                 graphic signatures of RSA Signature                                        CO      W, E
+      Generation                                                                                               0 return value
+                 data                  Generation                              RSA pri-
+                                       (PKCS#1 v1.5)                           vate key                        with enum
+                                                                                                               QSEE_FIPS_RSA_
+                                                    RSA Signature                                              SIG_GEN_*
+                                                    Generation (PSS)
+                                                                                                               0 return value
+                                                    ECDSA Signature ECDSA                                      with enum
+                                                    Verification    public key                                 QSEE_FIPS_ECDS
+                                                                                                               A_SIG_VER_*
+                   Verifies crypto-
+      Signature
+                   graphic signatures of RSA Signature                                      CO      W, E
+      Verification                                                                                             0 return value
+                   data                  Verification                          RSA public
+                                         (PKCS#1 v1.5)                         key                             with enum
+                                                                                                               QSEE_FIPS_RSA_
+                                                    RSA Signature                                              SIG_VER_*
+                                                    Verification (PSS)
+                                                                                                               0 return value
+                                                    ECDSA Signature ECDSA                                      with enum
+                                                    Generation -    private                                    QSEE_FIPS_ECDS
+      Signature                                     Component       key                                        A_SIG_GEN_COM
+      Generation Generates crypto-                                                                             P_*
+      - Compo-   graphic signatures of                                                      CO      W, E
+      nent or    pre-hashed data                                                                               0 return value
+                                       RSA Signature                           RSA pri-                        with enum
+      Primitive
+                                       Generation -                            vate key                        QSEE_FIPS_RSA_
+                                       Primitive                                                               SIG_GEN_PRIMI-
+                                                                                                               TIVE_*
+                                                                               Password             W, E       0 return value
+      Key Deriva-                                                                                              with enum
+                  Derives a secret key PBKDF                                   Derived      CO
+      tion                                                                                          G, R       QSEE_FIPS_PBKD
+                                                                               key                             F_*
+      Miscellaneous
+      Show Sta-       Show the status of
+                                                    None                       N/A          CO      N/A        N/A
+      tus             the module
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                 17 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+      Service         Description                  Approved Security Keys and/ Roles Access Indicator
+                                                   Functions         or SSPs         rights
+                                                    HMAC
+                                                    AES
+                                                    RSA Signature
+                                                    Generation
+                      Show the versioning           (PKCS#1 v1.5)
+                      information of the
+                                                    RSA Signature
+      Get FIPS        module and execute
+                                                    Verification               N/A        CO      N/A        N/A
+      Info            self-tests on demand
+                                                    (PKCS#1 v1.5)
+                      (pre-operational and
+                      CAST)                         ECDSA Signature
+                                                    Generation
+                                                    ECDSA Signature
+                                                    Verification
+                                                    PBKDF
+                      Zeroizes all SSPs in
+      Zeroization                                   None                       All SSPs   CO      Z          N/A
+                      the module
+     Table 10 - Approved Services
+
+     4.3.2 Non-approved Services
+     Table 11 lists the non-approved services that utilize the non-approved security functions listed in
+     Table 7.
+    Service               Description                    Algorithms Accessed        Role Indicator
+                                Encrypts data using sym-
+     Encryption                                                         DES, Triple DES, GCM, SM4 CO                 N/A
+                                metric cryptography
+                                Decrypts data using sym-
+     Decryption                                                         DES, Triple DES, GCM, SM4 CO                 N/A
+                                metric cryptography
+                                Encrypts data using hybrid
+     Hybrid Encryption                                                  SM2, ECIES                          CO       N/A
+                                cryptography
+                                Decrypts data using hybrid
+     Hybrid Decryption                                                  SM2, ECIES                          CO       N/A
+                                cryptography
+                                                                        RIPEMD-160, MD5, SM3,
+                                Computes the hash value of
+     Hash                                                               SHA-1, SHA-224 and SHA-             CO       N/A
+                                data
+                                                                        256 (software)
+     Message Authenti-          Computes the MAC value of               GMAC, HMAC (key sizes be-
+                                                                                                  CO                 N/A
+     cation                     data                                    low 112 bits)
+                                                                        ECDSA (secp160r1, P-192)
+                                Generates asymmetric key
+     Key Pair Generation                                                RSA (1024-bit modulus)              CO       N/A
+                                pairs
+                                                                        Ed25519
+                                                             ECDSA (secp160r1, P-192)
+     Signature Genera-          Generates cryptographic sig-
+                                                             RSA (1024-bit modulus)                         CO       N/A
+     tion                       natures of data
+                                                             Ed25519, SM2
+     Signature Verifica-        Verifies cryptographic signa- ECDSA (secp160r1)
+                                                                                                            CO       N/A
+     tion                       tures of data                 Ed25519, SM2
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                               18 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+    Service                     Description                            Algorithms Accessed               Role     Indicator
+    Signature Verifica-         Verifies cryptographic signa-
+                                                              ECDSA                                      CO       N/A
+    tion - Component            tures of pre-hashed data
+                                Wraps a key using asymmet-
+     Key Wrapping                                          RSA OAEP                                      CO       N/A
+                                ric cryptography
+    Shared Secret Com-
+                        Computes a shared secret                        ECDH                             CO       N/A
+    putation
+     Table 11 - Non-Approved Services
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            19 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     5 Software/Firmware security
+
+     5.1 Integrity Techniques
+     The integrity of the module is verified by comparing a HMAC-SHA-256 value calculated at run time
+     with the HMAC-SHA-256 value stored in the module that was computed at build time.
+
+     5.2 On-Demand Integrity Test
+     The software integrity test is performed as part of the pre-operational self-tests. The software in-
+     tegrity test can also be invoked on-demand by calling the Get FIPS Info service.
+
+     5.3 Executable Code
+     The module consists of code that will perform algorithmic services for trusted applications. The
+     code is compiled into a shared library.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            20 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     6 Operational Environment
+
+     6.1 Applicability
+     The procurement, build and configuring procedure are controlled. The Qualcomm® Trusted Execu-
+     tion Environment (TEE) Software Cryptographic Library is installed into a commercial off-the-shelf
+     (COTS) mobile device by the customer.
+     The software components of this module are executed in the Qualcomm Trusted Execution Envi-
+     ronment (TEE) TZ.XF.5.1x. Therefore, the operational environment is considered limited.
+
+     6.2 Tested Operational Environment
+     Please see Section 2.3 for the tested operational environment.
+
+     6.3 Specifications for the Operational Environment
+     There are no security rules, settings or restrictions to the configuration of the operational environ-
+     ment.
+              The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library
+               does not have the capability of loading software or firmware from an external source.
+              The module does not support concurrent operators.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            21 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     7 Physical Security
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library is a soft-
+     ware-hybrid module implemented as part of the Snapdragon 8 Gen 1 Mobile Platform SoC, which is
+     the physical perimeter of the single-chip software-hybrid module. The single-chip conforms to the
+     Level 2 requirements for physical security.
+     At the time of manufacturing, the die of the Snapdragon 8 Gen 1 Mobile Platform SoC is embedded
+     within a printed circuit board (PCB), which prevents visibility into the internal circuity of the Qual-
+     comm® Trusted Execution Environment (TEE) Software Cryptographic Library. The layering
+     process which is used to embed the die into the PCB also prevents tampering of the physical com-
+     ponents without leaving tamper evidence.
+     The Snapdragon 8 Gen 1 Mobile Platform SoC is further protected by being enclosed in commercial
+     off the shelf mobile device utilizing production grade, commercially available components and said
+     mobile device enclosure completely surrounds the Snapdragon 8 Gen 1 Mobile Platform SoC.
+
+     There are no steps required to ensure that physical security is maintained.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            22 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     8 Non-invasive Security
+     The module does not support any non-invasive security techniques; therefore, this section is not
+     applicable.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            23 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     9 Sensitive Security Parameter Management
+     Table 12 summarizes the Sensitive Security Parameters (SSPs) that are used by the cryptographic
+     services implemented in the module in the approved services (Table 10).
+      SSP              Strength     Security     Generation     Import         Establish-   Storage     Zeroization     Use and re-
+                                    Function                    /Export        ment                                     lated keys
+                                    and Cert.
+                                    #
+
+
+      AES key          128, 192,    AES          N/A            Input in       N/A          RAM         See 9.5         Use: Encryp-
+                       256 bits     #A2300                      plaintext                                               tion, Decryp-
+                                                                via API in-                                             tion
+                                                                put pa-
+      HMAC key         112-256      HMAC                        rameters.                                               Use: Mes-
+                       bits         #A2300                      No output.                                              sage Au-
+                                                                                                                        thentication
+      ECDSA pri-       112-256      ECDSA        FIPS 186-4     Input in       N/A          RAM                         Use: Signa-
+      vate key         bits         #A2300       compliant      plaintext                                               ture Genera-
+                       (P-224,                   method de-     via API in-                                             tion
+                       P-256,                    scribed in     put pa-
+                       P-384,                    Appendix       rameters.                                               Related
+                       P-521)                    B.4.2. ran-    Output in                                               keys: paired
+                                                 dom values     plaintext                                               with ECDSA
+                                                 obtained       via API                                                 public key,
+                                                 using the      output pa-                                              generated
+                                                 SP800-         rameters.                                               from Inter-
+                                                 90Arev1                                                                mediate key
+                                                 DRBG pro-                                                              generation
+                                                 vided by                                                               value
+      ECDSA pub-       96-256                    the bound                                                              Use: Signa-
+      lic key          bits                      module.                                                                ture Verifi-
+                       (P-192,                                                                                          cation
+                       P-224,
+                       P-256,                                                                                           Related
+                       P-384,                                                                                           keys: paired
+                       P-521)                                                                                           with ECDSA
+                                                                                                                        private key,
+                                                                                                                        generated
+                                                                                                                        from Inter-
+                                                                                                                        mediate key
+                                                                                                                        generation
+                                                                                                                        value
+      RSA private      112-150      RSA          FIPS 186-4     Input in       N/A          RAM                         Use: Signa-
+      key              bits         #A2300       compliant      plaintext                                               ture Genera-
+                       (2048,                    method de-     via API in-                                             tion
+                       3072,                     scribed in     put pa-
+                       4096 bit                  Appendix       rameters.                                               Related
+                       modulus)                  B.3.3. ran-    Output in                                               keys: paired
+                                                 dom values     plaintext                                               with RSA
+                                                 obtained       via API                                                 public key,
+                                                 using the      output pa-                                              generated
+                                                 SP800-         rameters.                                               from Inter-
+                                                 90Arev1                                                                mediate key
+                                                 DRBG pro-                                                              generation
+                                                 vided by                                                               value
+      RSA public       80-150                    the bound                                                              Use: Signa-
+      key              bits                      module.                                                                ture Verifi-
+                       (1024,                                                                                           cation
+                       2048,
+                       3072,                                                                                            Related
+                       4096 bit                                                                                         keys: paired
+                       modulus)                                                                                         with RSA pri-
+                                                                                                                        vate key,
+                                                                                                                        generated
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              24 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+      SSP              Strength     Security     Generation     Import         Establish-   Storage     Zeroization     Use and re-
+                                    Function                    /Export        ment                                     lated keys
+                                    and Cert.
+                                    #
+
+
+                                                                                                                        from Inter-
+                                                                                                                        mediate key
+                                                                                                                        generation
+                                                                                                                        value
+      Password         N/A          PBKDF        N/A            Input in       N/A          RAM         See 9.5         Use:
+                                    #A2300                      plaintext                                               Key Deriva-
+                                                                via API in-                                             tion
+                                                                put pa-
+                                                                rameters.                                               Related
+                                                                No output.                                              keys:
+                                                                                                                        used to de-
+                                                                                                                        rive Derived
+                                                                                                                        key
+      Derived key      128 –                     Generated      No input.      N/A                                      Use: Key
+                       256 bits                  during the     Output in                                               Derivation
+                                                 PBKDF          plaintext
+                                                                via API                                                 Related
+                                                                output pa-                                              SSPs: de-
+                                                                rameters.                                               rived from
+                                                                                                                        Password
+      Intermediate     112-256      CKG          N/A            No input.      N/A          RAM                         Use: Key
+      key genera-      bits         (vendor                     No output.                                              pair genera-
+      tion value                    affirmed)                                                                           tion
+
+                                                                                                                        Related
+                                                                                                                        keys:
+                                                                                                                        used to gen-
+                                                                                                                        erate ECDSA
+                                                                                                                        private key,
+                                                                                                                        ECDSA pub-
+                                                                                                                        lic key, RSA
+                                                                                                                        private key,
+                                                                                                                        RSA public
+                                                                                                                        key
+     Table 12 - SSPs
+
+     9.1 SSP Establishment/SSP Derivation
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library implements
+     Password-Based Key Derivation version 2 (PBKDF) as defined in [SP800-132]. The PBKDF function
+     is provided as a service and returns the key derived from the provided password to the caller. The
+     supported option is 1a from Section 5.4 of SP 800-132, whereby the Master Key (MK) is used di-
+     rectly as the Data Protection Key (DPK). The length of the salt should be at least 128 bits and the
+     length of the password or passphrase should be at least 8 characters, which provides the probabil-
+     ity of guessing this password or passphrase to be (1/10)8 assuming a scenario where all characters
+     are digits. The caller shall observe all requirements and should consider all recommendations
+     specified in SP800-132 with respect to the strength of the generated key, including the quality of
+     the password, the quality of the salt as well as the number of iterations. The keys derived from
+     passwords, as shown in SP 800-132, may only be used for storage applications.
+
+
+     9.2 SSP Generation
+     The SSP generation methods implemented in the Qualcomm® Trusted Execution Environment
+     (TEE) Software Cryptographic Library for approved services are compliant with SP 800-133Rev2.
+     ECDSA key pair generation is done according to FIPS 186-4, Appendix B.4.2 (Testing Candidates).
+     RSA key pair generation is done according to FIPS 186-4, Appendix B.3.3 (Probable Prime Genera-
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                 This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                              25 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     tion). The seeds (i.e., the random values) used in asymmetric key pair generation are directly ob-
+     tained from the SP 800-90Arev1 Hash DRBG provided by the bound Qualcomm® Pseudo Random
+     Number Generator module, compliant with SP 800-133r2 section 4 without the use of V (as speci-
+     fied in additional comment #2 to IG D.H).
+          The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library does
+             not generate symmetric keys.
+          Intermediate key generation values are not output from the module during or after process-
+             ing the service.
+
+     9.3 SSP Entry and Output
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library only sup-
+     ports manual, electronic SSP entry or output. The SSPs are provided to the module via API input
+     parameters in plaintext form and output via API output parameters in plaintext form. During SSP
+     entry, all data output through the data output interface is inhibited.
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library does not
+     enter or output SSPs in plaintext format outside its physical perimeter.
+
+     9.4 SSP Storage
+     All SSPs are output from and entered into the Qualcomm® Trusted Execution Environment (TEE)
+     Software Cryptographic Library to and from the calling process and are destroyed from memory
+     when released. The module does not perform persistent storage of SSPs. The SSPs will be stored
+     temporarily in plaintext in the RAM.
+
+     9.5 SSP Zeroization
+     The module’s functions deallocate and zeroize temporary SSP values in volatile memory used dur-
+     ing the function’s execution. The zeroization consists of writing zeroes to the memory location
+     used by the SSP before deallocating the area. The module does not overwrite SSPs with another
+     SSP.
+     The zeroization service for the SSPs in volatile memory consists of powering off the module, which
+     will remove power from the volatile memory. This action will cause the value of the SSPs in volatile
+     memory to be overwritten by random values the next time the module is powered on. The suc-
+     cessful act of powering off the module serves as the implicit indicator of zeroization.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            26 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     10 Self-tests
+     The module performs pre-operational self-tests and conditional self-tests. While the module is exe-
+     cuting the self-tests, services are not available, and data output (via the data output interface) is
+     inhibited until the tests are successfully completed. The module is not available to be used by the
+     calling application until the pre-operational self-tests and cryptographic algorithm self-tests are
+     completed successfully.
+     All the self-tests are listed in Table 13, with the respective condition under which those tests are
+     performed. The software integrity test is performed after the HMAC cryptographic algorithm self-
+     tests (CASTs) are performed. The self-tests for the DRBG and SHA used from the bound module
+     are implemented by the bound module.
+
+       Algorithm             Parameters             Condition for         Type                           Test
+                                                    test
+
+       HMAC-SHA-             SHA-256                 Power up (af-        Pre-Operational Self-Test      Software integrity
+       256                                           ter HMAC                                            test
+                                                     CASTs)
+
+       AES                   CCM                     Power up             Cryptographic Algorithm        KAT encryption
+       128 and 256                                                        Self-Test
+       key size                                                                                          KAT decryption
+
+                             ECB                                                                         KAT decryption
+
+                             SHA-1, SHA-             Power up             Cryptographic Algorithm        KAT HMAC compu-
+       HMAC                  256, SHA-512                                 Self-Test                      tation
+
+       RSA                   PKCS#1 v1.5             Power up             Cryptographic Algorithm        KAT signature
+                             with SHA-256                                 Self-Test                      generation
+                             and 2048 bit
+                             modulus                                                                     KAT signature ver-
+                                                                                                         ification
+
+       ECDSA                 P-256 with              Power up             Cryptographic Algorithm        KAT signature
+                             SHA-256                                      Self-Test                      generation
+
+                                                                                                         KAT signature ver-
+                                                                                                         ification
+
+       PBKDF                 SHA-1, SHA-             Power up             Cryptographic Algorithm        KAT key derivation
+                             256, SHA-512                                 Self-Test
+
+       RSA                   N/A                     Key pair gen-        Pair-wise Consistency          PCT signature gen-
+                                                     eration              Test                           eration/verification
+
+       ECDSA                 N/A                     Key pair gen-        Pair-wise Consistency          PCT signature gen-
+                                                     eration              Test                           eration/verification
+                                                          Table 13 - Self-tests
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            27 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     10.1 Pre-Operational Self-Tests
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library performs
+     pre-operational self-tests when it is loaded into memory, without operator intervention. Pre-opera-
+     tional self-tests ensure that the module is not corrupted. The module transitions to the operational
+     state only after the pre-operational self-tests are passed successfully.
+     The types of pre-operational self-tests are described in the next sub-sections.
+
+     10.1.1 Software Integrity Test
+     The integrity of the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Li-
+     brary is verified by comparing a HMAC-SHA-256 value calculated at run time with the HMAC-SHA-
+     256 value stored in the module that was computed at build time. If the comparison verification
+     fails, the module transitions to the error state (Section 10.3) The HMAC-SHA-256 algorithm goes
+     through its cryptographic algorithm self-test before the integrity test is performed (Table 13).
+
+     10.2 Conditional Self-Tests
+
+     10.2.1 Cryptographic Algorithm Self-Tests
+     The module performs self-tests on all approved cryptographic algorithms as part of the approved
+     services using the tests shown in Table 13. Data output through the data output interface is inhib-
+     ited during the self-tests. The module transitions to the operational state only after the crypto-
+     graphic algorithm self-tests are passed successfully.
+
+     10.2.2 Pair-wise Consistency Tests
+     Pair-wise consistency tests are run whenever the Qualcomm® Trusted Execution Environment
+     (TEE) Software Cryptographic Library generates an asymmetric (RSA or ECDSA) key pair.
+     If the pair-wise consistency check fails, the Qualcomm® Trusted Execution Environment (TEE) Soft-
+     ware Cryptographic Library enters an error state and returns an error status code.
+
+     10.2.3 Periodic/On-Demand Self-Tests
+     The module performs on-demand self-tests initiated by calling the Get FIPS Info service. All self-
+     tests in Table 13 marked as “Power up” are then executed. An operator can perform the pair-wise
+     consistency tests on demand by requesting the Key Pair Generation service for RSA or ECDSA.
+     The same procedures may be employed by the operator to perform periodic self-tests.
+
+     10.3 Error States
+     If the module fails any of the self-tests, the module enters the error state. In the error state, the
+     module outputs the error type through the status output interface. In the error state, the data out-
+     put interface is inhibited, and the module accepts no more inputs or requests. To recover from the
+     error state, re-initialization is possible by successful execution of the pre-operational self-tests and
+     cryptographic algorithm self-tests, which can be triggered by a power-off/power-on cycle.
+     Table 14 lists the error state and the status indicator (through calling the qsee_get_fips_info() func-
+     tion with the info_type parameter set to QSEE_FIPS_SELFTEST_STATUS) values that explains the er-
+     ror that has occurred.
+
+      Error State Error Condition                                  Status Indicator
+
+       Error           Cryptographic Algorithm Self-                The module has halted and is unable to boot.
+                       Test, or Software Integrity Test
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            28 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+      Error State Error Condition                                  Status Indicator
+
+       Error           Pair-wise Consistency Test                   The module returns ICryptoSelfTest_CRYPTO_SELF-
+                                                                    TEST_FAILED and enters “Error” state and no fur-
+                                                                    ther operations is allowed.
+     Table 14 - Error states
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            29 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     11 Life-cycle assurance
+
+     11.1 Configuration Management
+     Perforce Visual Client (P4V), a version control system from Perforce, is used to manage the revi-
+     sion control of the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Li-
+     brary software code. The Perforce Visual Client provides version control, branching and merging of
+     code lines, and concurrent development.
+     Git, an open-source version control system, is also used to manage the revision control of the
+     Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library unified crypto
+     software code. Git provides version control, branching and merging of code lines, and concurrent
+     development.
+
+     11.2 Delivery and Operation
+
+     The Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library is a soft-
+     ware-hybrid module that runs on the Snapdragon 8 Gen 1 Mobile Platform. This SoC is delivered
+     from the vendor via a trusted delivery courier.
+     On the reception of the SoC, the operator shall first check all sides of the box to verify that it has
+     not been tampered during the shipment. Then, after opening the box the operator shall verify that
+     the moisture barrier bag is still sealed and does not present any trace of tampering. Finally, after
+     retrieving the SoC, the operator shall perform a visual inspection of the external SoC package of
+     the module, it should look similar to the pictures in Figure 2.
+     If one of these verifications fail, the operator shall contact their Qualcomm representative which
+     released the delivery before operating the module.
+     Once the product is received by the customer, configured as defined in section 11.5, and powered
+     up, the test defined in section 10 will be executed.
+
+     11.3 Maintenance Requirements
+
+     There are no maintenance requirements.
+
+     11.4 End of Life
+
+     As stated in Section 9.4 the module does not possess persistent storage of SSPs. The SSP values
+     only exist in volatile memory and these values vanish when the module is powered off. The proce-
+     dure for secure sanitization of the module at the end of life is simply to power it off, which is the
+     action of zeroization of the SSPs (Section 9.5). As a result of this sanitization via power-off, all SSPs
+     are removed from the module, so that the module may either be distributed to other operators or
+     disposed.
+
+     11.5 Crypto Officer Guidance
+
+     To enable FIPS for the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic
+     Library, the fuse must be set according to Table 4. The fuse enablement is mandatory to run as a
+     FIPS validated module. This step needs to be performed only once during initial installation.
+     The information required for the Crypto Officer to verify the Qualcomm® Trusted Execution Envi-
+     ronment (TEE) Software Cryptographic Library is provided by the qsee_get_fips_info() function in
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            30 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     qsee_fips_services.h. To verify that a Qualcomm® Trusted Execution Environment (TEE) Software
+     Cryptographic Library is FIPS certified, the Crypto Officer should verify the following:
+         The HMAC of the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Li-
+          brary is on a list of HMACs of certified crypto modules.
+               o    This can be done by invoking the qsee_get_fips_info() function with the info_type pa-
+                    rameter set to QSEE_FIPS_MODULE_HMAC (0). The buffer parameter should point to a
+                    buffer which is at least 32 bytes long, and the buffer_len parameter should be at least
+                    32.
+               o    The result buffer should contain the HMAC-SHA-256 of the Qualcomm® Trusted Execu-
+                    tion Environment (TEE) Software Cryptographic Library.
+               o    To get the HMAC of the 64-bit Qualcomm® Trusted Execution Environment (TEE) Soft-
+                    ware Cryptographic Library, this should be run from a 64-bit Trusted Application.
+         The FIPS enablement fuse is blown
+               o    This can be done by invoking the qsee_get_fips_info() function with the info_type pa-
+                    rameter set to QSEE_FIPS_FUSE_STATUS (1). The buffer parameter should point to a 4-
+                    byte buffer (sizeof(uint32)) and the buffer_len parameter should equal 4.
+               o    The result buffer should contain the value QSEE_FIPS_FUSE_BLOWN (1).
+         The pre-operational self-tests and cryptographic algorithm self-tests have passed.
+               o    This can be done by calling qsee_get_fips_info() with the info_type parameter set to
+                    QSEE_FIPS_SELFTEST_STATUS (2). The buffer parameter should point to a 4-byte buffer
+                    (sizeof(uint32)) and the buffer_len parameter should equal 4.
+               o    The result buffer should contain the value QSEE_CRYPTO_SELFTEST_PASSED (1).
+               o    If one or more of the self-tests failed, the TZ runtime environment will not be able to
+                    load Trusted Applications.
+     The operation of the Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Li-
+     brary does not need FIPS 140-3 specific guidance. The FIPS 140-3 functional requirements are al-
+     ways invoked. Once operational, if the Qualcomm® Trusted Execution Environment (TEE) Software
+     Cryptographic Library enters the Error state, the Crypto Officer needs to re-initialize the library in-
+     stance in order to recover from the Error state.
+     To use the cryptographic services of the Qualcomm® Trusted Execution Environment (TEE) Soft-
+     ware Cryptographic Library, please refer to 80-NH537-4: Qualcomm Trusted Execution Environ-
+     ment Version 5.0 User Guide.
+     NOTES:
+
+              The AES algorithm in XTS mode can be only used for the cryptographic protection of data
+               on storage devices, as specified in [SP 800-38E]. In addition, the length of a single data unit
+               encrypted with the AES-XTS shall not exceed 2^20 AES blocks. In compliance with IG C.I,
+               the module verifies that the two keys used in AES-XTS are not equal.
+              The keys derived from passwords, as shown in SP 800-132, may only be used in storage ap-
+               plications.
+              In compliance with IG C.F, the module supports RSA signature generation with modulus
+               lengths of 2048, 3072, and 4096 bits, and RSA signature generation has been CAVP tested
+               for all of these modulus lengths. The number of Miller-Rabin tests are consistent with Ap-
+               pendix B of FIPS 186-4. The module performs RSA signature verification according to FIPS
+               186-4 with modulus lengths of 1024, 2048, 3072, and 4096 bits; RSA signature verification
+               has been CAVP tested for all of these modulus lengths.
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            31 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     12 Mitigation of other attacks
+     The elliptic curve implementation uses the Montgomery Ladder, as well as blinding of base points
+     and private key multiplication. The RSA implementation uses base and modulus blinding to miti-
+     gate timing-based side-channel attacks. Blinding countermeasures add randomness to private key
+     operations, making determination of secrets from observations more difficult for the attacker.
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            32 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Appendix A. Glossary and Abbreviations
+               AES                   Advanced Encryption Standard
+               CAVP                  Cryptographic Algorithm Validation Program
+               CBC                   Cipher Block Chaining
+               CCM                   Counter with Cipher Block Chaining-Message Authentication Code
+               CFB                   Cipher Feedback
+               CMT                   Cryptographic Module Testing
+               CMVP                  Cryptographic Module Validation Program
+               CSP                   Critical Security Parameter
+               CTR                   Counter Mode
+               DES                   Data Encryption Standard
+               DF                    Derivation Function
+               DRBG                  Deterministic Random Bit Generator
+               ECB                   Electronic Code Book
+               ECC                   Elliptic Curve Cryptography
+               FIPS                  Federal Information Processing Standards Publication
+               HMAC                  Hash Message Authentication Code
+               KAT                   Known Answer Test
+               MAC                   Message Authentication Code
+               NIST                  National Institute of Science and Technology
+               OFB                   Output Feedback
+               O/S                   Operating System
+               PSS                   Probabilistic Signature Scheme
+               RNG                   Random Number Generator
+               RSA                   Rivest, Shamir, Addleman
+               SHA                   Secure Hash Algorithm
+               SHS                   Secure Hash Standard
+               XTS                   XEX-based Tweaked-codebook mode with cipher text Stealing
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            33 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Appendix B. References
+       FIPS140-3            FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+                            March 2019
+                            https://doi.org/10.6028/NIST.FIPS.140-3
+
+       FIPS140-3_IG          Implementation Guidance for FIPS PUB 140-3 and the Cryptographic
+                             Module Validation Program
+                             March 2024
+                             https://csrc.nist.gov/Projects/cryptographic-module-validation-program/fips-140-
+                             3-ig-announcements
+
+       FIPS180-4             Secure Hash Standard (SHS)
+                             March 2012
+                             http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+       FIPS186-4             Digital Signature Standard (DSS)
+                             July 2013
+                             http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+
+       FIPS197               Advanced Encryption Standard
+                             November 2001
+                             http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+       FIPS198-1             The Keyed Hash Message Authentication Code (HMAC)
+                             July 2008
+                             http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+       PKCS#1                Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                             Specifications Version 2.1
+                             February 2003
+                             http://www.ietf.org/rfc/rfc3447.txt
+
+       SP800-38A             NIST Special Publication 800-38A - Recommendation for Block Cipher
+                             Modes of Operation Methods and Techniques
+                             December 2001
+                             http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+       SP800-38C             NIST Special Publication 800-38C - Recommendation for Block Cipher
+                             Modes of Operation: the CCM Mode for Authentication and Confiden-
+                             tiality
+                             May 2004
+                             http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+       SP800-38E             NIST Special Publication 800-38E - Recommendation for Block Cipher
+                             Modes of Operation: The XTS AES Mode for Confidentiality on Storage
+                             Devices
+                             January 2010
+                             http://csrc.nist.gov/publications/nistpubs/800-38E/nist-sp-800-38E.pdf
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            34 of 35
+Qualcomm® Trusted Execution Environment (TEE) Software Cryptographic Library                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+       SP800-57              NIST Special Publication 800-57 Part 1 Revision 4 - Recommendation
+                             for Key Management Part 1: General
+                             January 2016
+                             http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf
+
+       SP800-90Ar1           NIST Special Publication 800-90A - Revision 1 - Recommendation for
+                             Random Number Generation Using Deterministic Random Bit Genera-
+                             tors
+                             June 2015
+                             http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+       SP800-                NIST Special Publication 800-131A Revision 1- Transitions: Recommen-
+       131Ar1                dation for Transitioning the Use of Cryptographic Algorithms and Key
+                             Lengths
+                             November 2015
+                             http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar1.pdf
+
+       SP800-132             NIST Special Publication 800-132 - Recommendation for Password-
+                             Based Key Derivation - Part 1: Storage Applications
+                             December 2010
+                             http://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
+
+       SP800-133r2           NIST Special Publication 800-133rev2 - Recommendation for Crypto-
+                             graphic
+                             Key Generation
+                             December 2012
+                             https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+       SP800-140B            NIST Special Publication 800-140B - CMVP Security Policy Require-
+                             ments
+                             March 2020
+                             https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140B.pdf
+
+
+
+
+                                    © 2024 Qualcomm Technologies, Inc. / atsec information security.
+                This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                            35 of 35
+

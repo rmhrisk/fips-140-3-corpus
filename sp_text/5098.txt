@@ -1,0 +1,2267 @@
+                                                                     Nuvoton Technology Corporation
+
+                                                  Nuvoton Cryptographic Library 3.0
+
+
+                                           FIPS 140-3 Non-Proprietary Security Policy
+                                                                                     Document Version 1.2
+
+                                                                                   Last update: 2025-11-19
+
+
+
+
+                                            Prepared by:
+
+                               atsec information security corporation
+
+                              4516 Seton Center Parkway, Suite 250
+
+                                          Austin, TX 78759
+
+                                           www.atsec.com
+
+
+
+
+                © 2025 Nuvoton Technology Corporation / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Nuvoton Cryptographic Library 3.0                                                                                        FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Table of Contents
+1 General................................................................................................................................................................................. 5
+   1.1 Overview ....................................................................................................................................................................... 5
+   1.2 Security Levels .............................................................................................................................................................. 5
+2 Cryptographic Module Specification .................................................................................................................................... 6
+   2.1 Description .................................................................................................................................................................... 6
+   2.2 Tested and Vendor Affirmed Module Version and Identification ................................................................................... 7
+   2.3 Excluded Components .................................................................................................................................................. 7
+   2.4 Modes of Operation ....................................................................................................................................................... 7
+   2.5 Algorithms ..................................................................................................................................................................... 7
+   2.6 Security Function Implementations ............................................................................................................................. 12
+   2.7 Algorithm Specific Information .................................................................................................................................... 14
+   2.8 RBG and Entropy ........................................................................................................................................................ 15
+   2.9 Key Generation ........................................................................................................................................................... 15
+   2.10 Key Establishment .................................................................................................................................................... 15
+3 Cryptographic Module Interfaces ....................................................................................................................................... 16
+   3.1 Ports and Interfaces .................................................................................................................................................... 16
+4 Roles, Services, and Authentication .................................................................................................................................. 17
+   4.1 Authentication Methods ............................................................................................................................................... 17
+   4.2 Roles ........................................................................................................................................................................... 17
+   4.3 Approved Services ...................................................................................................................................................... 17
+5 Software/Firmware Security ............................................................................................................................................... 23
+   5.1 Integrity Techniques .................................................................................................................................................... 23
+6 Operational Environment ................................................................................................................................................... 24
+   6.1 Operational Environment Type and Requirements ..................................................................................................... 24
+7 Physical Security ................................................................................................................................................................ 25
+   7.1 Mechanisms and Actions Required ............................................................................................................................ 25
+8 Non-Invasive Security ........................................................................................................................................................ 26
+9 Sensitive Security Parameters Management ..................................................................................................................... 27
+   9.1 Storage Areas ............................................................................................................................................................. 27
+   9.2 SSP Input-Output Methods ......................................................................................................................................... 27
+   9.3 SSP Zeroization Methods ........................................................................................................................................... 27
+   9.4 SSPs ........................................................................................................................................................................... 28
+10 Self-Tests ......................................................................................................................................................................... 34
+   10.1 Pre-Operational Self-Tests........................................................................................................................................ 34
+
+                                        © 2025 Nuvoton Technology Corporation / atsec information security.
+              This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                                                 2 of 47
+Nuvoton Cryptographic Library 3.0                                                                                      FIPS 140-3 Non-Proprietary Security Policy
+
+
+   10.2 Conditional Self-Tests ............................................................................................................................................... 34
+   10.3 Periodic Self-Test Information ................................................................................................................................... 37
+   10.4 Error States ............................................................................................................................................................... 41
+11 Life-Cycle Assurance ....................................................................................................................................................... 42
+   11.1 Installation, Initialization, and Startup Procedures .................................................................................................... 42
+   11.2 Administrator Guidance............................................................................................................................................. 42
+   11.3 Non-Administrator Guidance ..................................................................................................................................... 42
+   11.4 End of Life ................................................................................................................................................................. 42
+12 Mitigation of Other Attacks ............................................................................................................................................... 43
+Glossary and Abbreviations .................................................................................................................................................. 44
+References ............................................................................................................................................................................ 45
+
+
+
+
+                                        © 2025 Nuvoton Technology Corporation / atsec information security.
+              This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                                               3 of 47
+Nuvoton Cryptographic Library 3.0                                                                                     FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+List of Tables
+Table 1: Security Levels .......................................................................................................................................................... 5
+Table 2: Tested Module Identification – Hardware ................................................................................................................. 7
+Table 3: Modes List and Description ....................................................................................................................................... 7
+Table 4: Approved Algorithms ............................................................................................................................................... 11
+Table 5: Vendor-Affirmed Algorithms .................................................................................................................................... 11
+Table 6: Security Function Implementations ......................................................................................................................... 14
+Table 7: Entropy Certificates ................................................................................................................................................. 15
+Table 8: Entropy Sources ...................................................................................................................................................... 15
+Table 9: Ports and Interfaces ................................................................................................................................................ 16
+Table 10: Roles ..................................................................................................................................................................... 17
+Table 11: Approved Services ................................................................................................................................................ 22
+Table 12: Mechanisms and Actions Required ...................................................................................................................... 25
+Table 13: Storage Areas ....................................................................................................................................................... 27
+Table 14: SSP Input-Output Methods ................................................................................................................................... 27
+Table 15: SSP Zeroization Methods ..................................................................................................................................... 28
+Table 16: SSP Table 1 .......................................................................................................................................................... 30
+Table 17: SSP Table 2 .......................................................................................................................................................... 33
+Table 18: Conditional Self-Tests ........................................................................................................................................... 37
+Table 19: Conditional Periodic Information ........................................................................................................................... 41
+Table 20: Error States ........................................................................................................................................................... 41
+
+
+
+
+List of Figures
+Figure 1: Block Diagram .......................................................................................................................................................... 6
+Figure 2: Nuvoton NPCD324HA0DX (SIO) ............................................................................................................................. 7
+Figure 3: Nuvoton NPCX499HA0BX (EC) .............................................................................................................................. 7
+Figure 4: Nuvoton NPCX499HA1BX (EC) .............................................................................................................................. 7
+
+
+
+
+                                       © 2025 Nuvoton Technology Corporation / atsec information security.
+              This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                                                             4 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for Hardware version 3.0.7 / 3.0.8 of the Nuvoton
+Cryptographic Library 3.0. It has a one-to-one mapping to the [SP 800-140Br1] starting with section B.2.1 named
+“General” that maps to section 1 in this document and ending with section B.2.12 named “Mitigation of other attacks” that
+maps to section 12 in this document. This document also contains the security rules under which the module must
+operate and describes how this module meets the requirements as specified in FIPS PUB 140-3 (Federal Information
+Processing Standards Publication 140-3) for a Security Level 1 module.
+
+1.2 Security Levels
+Table 1 describes the individual security areas of FIPS 140-3, as well as the Security Levels of those individual areas:
+
+ Section             Title                                               Security Level
+
+ 1                   General                                             1
+
+ 2                   Cryptographic module specification                  1
+
+ 3                   Cryptographic module interfaces                     1
+
+ 4                   Roles, services, and authentication                 1
+
+ 5                   Software/Firmware security                          N/A
+
+ 6                   Operational environment                             N/A
+
+ 7                   Physical security                                   2
+
+ 8                   Non-invasive security                               N/A
+
+ 9                   Sensitive security parameter management             1
+
+ 10                  Self-tests                                          1
+
+ 11                  Life-cycle assurance                                1
+
+ 12                  Mitigation of other attacks                         N/A
+
+                     Overall Level                                       1
+
+Table 1: Security Levels
+
+
+
+
+                             © 2025 Nuvoton Technology Corporation / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     5 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The Nuvoton Cryptographic Library 3.0 cryptographic module (hereafter referred to as “the module”) is a Hardware Single
+Chip cryptographic module. More specifically, the module is considered a sub-chip cryptographic subsystem as defined in
+IG 2.3.B.
+Module Type: Hardware
+Module Embodiment: SingleChip
+Module Characteristics: SubChip
+
+Cryptographic Boundary:
+The block diagram below shows the cryptographic boundary of the module (shown by the blue dotted outline), and its
+interfaces with the operational environment.
+
+
+
+
+                                                 Figure 1: Block Diagram
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The red outline in Figure 1 above indicates the Tested Operational Environment’s Physical Perimeter (TOEPP).
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   6 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+  Figure 2: Nuvoton NPCD324HA0DX              Figure 3: Nuvoton NPCX499HA0BX         Figure 4: Nuvoton NPCX499HA1BX
+                 (SIO)                                       (EC)                                   (EC)
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+
+ Model and/or Part              Hardware      Firmware   Processors     Features
+ Number                         Version       Version
+
+ Nuvoton NPCX499HA0BX           3.0.7         N/A        N/A            Notebook Embedded Controller (EC)
+
+ Nuvoton NPCD324HA0DX           3.0.8         N/A        N/A            Desktop Super I/O (SIO)
+
+ Nuvoton NPCX499HA1BX           3.0.8         N/A        N/A            Notebook Embedded Controller (EC)
+
+Table 2: Tested Module Identification – Hardware
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary excluded from the FIPS 140-3 requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+The module supports approved services in the approved mode of operation. There are no non-approved services
+supported by the module.
+
+ Mode Name           Description                          Type        Status Indicator
+
+ Approved Mode       Only approved algorithms are used    Approved    NCL_STATUS_OK
+
+Table 3: Modes List and Description
+
+2.5 Algorithms
+Approved Algorithms:
+The table below lists all security functions of the module, including specific key strengths employed for approved services,
+and implemented modes of operation.
+
+
+                            © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     7 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm          CAVP        Properties                                                                Reference
+                    Cert
+
+ AES-CBC            A4659       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-CBC            A5276       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-CCM            A4659       Key Length - 128, 192, 256                                                SP 800-38C
+
+ AES-CCM            A5276       Key Length - 128, 192, 256                                                SP 800-38C
+
+ AES-CFB128         A4659       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-CFB128         A5276       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-CMAC           A4659       Direction - Generation, Verification                                      SP 800-38B
+                                Key Length - 128, 192, 256
+
+ AES-CMAC           A5276       Direction - Generation, Verification                                      SP 800-38B
+                                Key Length - 128, 192, 256
+
+ AES-CTR            A4659       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-CTR            A5276       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-ECB            A4659       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-ECB            A5276       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-GCM            A4659       Direction - Decrypt, Encrypt                                              SP 800-38D
+                                IV Generation - Internal
+                                IV Generation Mode - 8.2.2
+                                Key Length - 128, 192, 256
+
+ AES-GCM            A5276       Direction - Decrypt, Encrypt                                              SP 800-38D
+                                IV Generation - Internal
+                                IV Generation Mode - 8.2.2
+                                Key Length - 128, 192, 256
+
+ AES-GMAC           A4659       Direction - Decrypt, Encrypt                                              SP 800-38D
+                                IV Generation - Internal
+                                IV Generation Mode - 8.2.2
+                                Key Length - 128, 192, 256
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   8 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm          CAVP        Properties                                                                Reference
+                    Cert
+
+ AES-GMAC           A5276       Direction - Decrypt, Encrypt                                              SP 800-38D
+                                IV Generation - Internal
+                                IV Generation Mode - 8.2.2
+                                Key Length - 128, 192, 256
+
+ AES-OFB            A4659       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ AES-OFB            A5276       Direction - Decrypt, Encrypt                                              SP 800-38A
+                                Key Length - 128, 192, 256
+
+ ECDSA KeyGen       A4659       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Secret Generation Mode - testing candidates
+
+ ECDSA KeyGen       A5276       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Secret Generation Mode - testing candidates
+
+ ECDSA KeyVer       A4659       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)
+
+ ECDSA KeyVer       A5276       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)
+
+ ECDSA SigGen       A4659       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+                                Component - No, Yes
+
+ ECDSA SigGen       A5276       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+                                Component - No, Yes
+
+ ECDSA SigVer       A4659       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+
+ ECDSA SigVer       A5276       Curve - P-256, P-384, P-521                                               FIPS 186-5
+ (FIPS186-5)                    Hash Algorithm - SHA2-256, SHA2-384, SHA2-512
+
+ Hash DRBG          A4659       Prediction Resistance - No, Yes                                           SP 800-90A
+                                Mode - SHA2-512                                                           Rev. 1
+
+ Hash DRBG          A5276       Prediction Resistance - No, Yes                                           SP 800-90A
+                                Mode - SHA2-512                                                           Rev. 1
+
+ HMAC-SHA2-         A4659       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 256
+
+ HMAC-SHA2-         A5276       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 256
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   9 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm          CAVP        Properties                                                                Reference
+                    Cert
+
+ HMAC-SHA2-         A4659       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 384
+
+ HMAC-SHA2-         A5276       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 384
+
+ HMAC-SHA2-         A4659       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 512
+
+ HMAC-SHA2-         A5276       Key Length - Key Length: 8-524288 Increment 8                             FIPS 198-1
+ 512
+
+ KAS-ECC-SSC        A4659       Domain Parameter Generation Methods - P-256, P-384, P-521                 SP 800-56A
+ Sp800-56Ar3                    Scheme -                                                                  Rev. 3
+                                ephemeralUnified -
+                                KAS Role - initiator, responder
+
+ KAS-ECC-SSC        A5276       Domain Parameter Generation Methods - P-256, P-384, P-521                 SP 800-56A
+ Sp800-56Ar3                    Scheme -                                                                  Rev. 3
+                                ephemeralUnified -
+                                KAS Role - initiator, responder
+
+ KDF SP800-108      A4659       KDF Mode - Counter, Double Pipeline Iteration, Feedback                   SP 800-108
+                                Supported Lengths - Supported Lengths: 8-4096 Increment 8                 Rev. 1
+
+ KDF SP800-108      A5276       KDF Mode - Counter, Double Pipeline Iteration, Feedback                   SP 800-108
+                                Supported Lengths - Supported Lengths: 8-4096 Increment 8                 Rev. 1
+
+ KTS-IFC            A4659       Modulo - 2048, 3072                                                       SP 800-56B
+                                Key Generation Methods - rsakpg1-basic, rsakpg2-basic                     Rev. 2
+                                Scheme -
+                                KTS-OAEP-basic -
+                                KAS Role - initiator, responder
+                                Key Transport Method -
+                                Key Length - 1024
+
+ KTS-IFC            A5276       Modulo - 2048, 3072                                                       SP 800-56B
+                                Key Generation Methods - rsakpg1-basic, rsakpg2-basic                     Rev. 2
+                                Scheme -
+                                KTS-OAEP-basic -
+                                KAS Role - initiator, responder
+                                Key Transport Method -
+                                Key Length - 1024
+
+ LMS SigVer         A4659       LMS Modes - LMS_SHA256_M32_H10, LMS_SHA256_M32_H15,                       SP 800-208
+                                LMS_SHA256_M32_H20, LMS_SHA256_M32_H25,
+                                LMS_SHA256_M32_H5
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   10 of 47
+Nuvoton Cryptographic Library 3.0                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm             CAVP           Properties                                                             Reference
+                       Cert
+
+ LMS SigVer            A5276          LMS Modes - LMS_SHA256_M32_H10, LMS_SHA256_M32_H15,                    SP 800-208
+                                      LMS_SHA256_M32_H20, LMS_SHA256_M32_H25,
+                                      LMS_SHA256_M32_H5
+
+ RSA SigGen            A4659          Modulo - 2048, 3072                                                    FIPS 186-5
+ (FIPS186-5)                          Signature Type - pkcs1v1.5, pss
+
+ RSA SigGen            A5276          Modulo - 2048, 3072                                                    FIPS 186-5
+ (FIPS186-5)                          Signature Type - pkcs1v1.5, pss
+
+ RSA SigVer            A4659          Modulo - 2048, 3072                                                    FIPS 186-5
+ (FIPS186-5)                          Signature Type - pkcs1v1.5, pss
+
+ RSA SigVer            A5276          Modulo - 2048, 3072                                                    FIPS 186-5
+ (FIPS186-5)                          Signature Type - pkcs1v1.5, pss
+
+ SHA2-256              A4659          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+ SHA2-256              A5276          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+ SHA2-384              A4659          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+ SHA2-384              A5276          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+ SHA2-512              A4659          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+ SHA2-512              A5276          Message Length - Message Length: 0-65536 Increment 8                   FIPS 180-4
+
+Table 4: Approved Algorithms
+
+Vendor-Affirmed Algorithms
+
+ Name                  Properties            Implementation             Reference
+
+ HSS SigVer            Key Size:256          Nuvoton Cryptographic      The LMS operations used by the HSS
+                       bits                  Library 3.0 (NCL)          implementation were CAVP tested in accordance
+                                                                        with IG C.O with Certs A4659 and A5276
+
+ CKG                   Type:Asymmetric       N/A                        CKG for asymmetric keys as per SP 800-133Rev2
+ (ECDSA/ECDH)                                                           section 4 example 1 with no post processing on the
+                                                                        U value
+
+Table 5: Vendor-Affirmed Algorithms
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+
+
+
+                            © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    11 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+N/A for this module.
+
+2.6 Security Function Implementations
+ Name                  Type               Description          Properties                             Algorithms
+
+ AES-CBC               BC-UnAuth          AES Encryption       Key Size:128, 192, 256 bits            AES-CBC:
+                                          and AES              Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Decryption
+
+ AES-CCM               BC-Auth            Authenticated        Key Size:128, 192, 256 bits            AES-CCM:
+                                          AES Encryption       Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          and AES
+                                          Decryption
+
+ AES-CFB128            BC-UnAuth          AES Encryption       Key Size:128, 192, 256 bits            AES-CFB128:
+                                          and AES              Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Decryption
+
+ AES-CMAC              MAC                CMAC Message         Key Size:128, 192, 256 bits            AES-CMAC:
+                                          Authentication                                              (A4659, A5276)
+                                          Code Generation
+                                          and CMAC
+                                          Message
+                                          Authentication
+                                          Code Verification
+
+ AES-CTR               BC-UnAuth          AES Encryption       Key Size:128, 192, 256 bits            AES-CTR:
+                                          and AES              Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Decryption
+
+ AES-ECB               BC-UnAuth          AES Encryption       Key Size:128, 192, 256 bits            AES-ECB:
+                                          and AES              Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Decryption
+
+ AES-GCM               BC-Auth            Authenticated        Key Size:128, 192, 256 bits            AES-GCM:
+                                          AES Encryption       Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          and AES
+                                          Decryption
+
+ AES-GMAC              MAC                GMAC Message         Key Size:128, 192, 256 bits            AES-GMAC:
+                                          Authentication       Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Code Generation
+                                          and GMAC
+                                          Message
+                                          Authentication
+                                          Code Verification
+
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   12 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                Type                 Description          Properties                             Algorithms
+
+ AES-OFB             BC-UnAuth            AES Encryption       Key Size:128, 192, 256 bits            AES-OFB:
+                                          and AES              Key Strength:128, 192, 256 bits        (A4659, A5276)
+                                          Decryption
+
+ HMAC                MAC                  HMAC Message         Key Size:256, 384, 512 bits            HMAC-SHA2-
+                                          Authentication       Key Strength:256, 384, 512 bits        256: (A4659,
+                                          Code Generation                                             A5276)
+                                                                                                      HMAC-SHA2-
+                                                                                                      384: (A4659,
+                                                                                                      A5276)
+                                                                                                      HMAC-SHA2-
+                                                                                                      512: (A4659,
+                                                                                                      A5276)
+
+ RSA SigGen          DigSig-SigGen        RSA Signature        Signature Types:PKCS#1 v1.5,           RSA SigGen
+                                          Generation           RSA-PSS                                (FIPS186-5):
+                                                               Message Digest:SHA2-256, SHA2-         (A4659, A5276)
+                                                               384, SHA2-512
+                                                               Modulus Size:2048, 3072
+
+ RSA SigVer          DigSig-SigVer        RSA Signature        Signature Types:PKCS#1 v1.5,           RSA SigVer
+                                          Verification         RSA-PSS                                (FIPS186-5):
+                                                               Message Digest:SHA2-256, SHA2-         (A4659, A5276)
+                                                               384, SHA2-512
+                                                               Modulus Size:2048, 3072
+
+ RSA                 AsymKeyPair-         RSA                  Scheme:OAEP-basic                      KTS-IFC: (A4659,
+ encapsulation       Encap                encapsulation of     Modulus Size:2048, 3072                A5276)
+                                          arbitrary data       Standard:SP800-56Brev2
+
+ RSA                 AsymKeyPair-         RSA                  Scheme:OAEP-basic                      KTS-IFC: (A4659,
+ decapsulation       Decap                decapsulation of     Modulus Size:2048, 3072                A5276)
+                                          arbitrary data       Standard:SP800-56Brev2
+
+ ECDSA KeyGen        AsymKeyPair-         ECDSA Key            Generation Method:B.4.2 Testing        ECDSA KeyGen
+                     KeyGen               Generation           Candidates                             (FIPS186-5):
+                     CKG                                       Curves:P-256, P-384, P-521             (A4659, A5276)
+                                                                                                      CKG
+                                                                                                      (ECDSA/ECDH):
+                                                                                                      ()
+
+ ECDSA KeyVer        AsymKeyPair-         ECDSA Key            Curves:P-256, P-384, P-521             ECDSA KeyVer
+                     KeyVer               Verification                                                (FIPS186-5):
+                                                                                                      (A4659, A5276)
+
+ ECDSA SigGen        DigSig-SigGen        ECDSA Signature      Message Digest:SHA2-256, SHA2-         ECDSA SigGen
+                                          Generation           384, SHA2-512                          (FIPS186-5):
+                                                               Curves:P-256, P-384, P-521             (A4659, A5276)
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   13 of 47
+Nuvoton Cryptographic Library 3.0                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                  Type                  Description         Properties                            Algorithms
+
+ ECDSA SigVer          DigSig-SigVer         ECDSA Signature     Message Digest:SHA2-256, SHA2-        ECDSA SigVer
+                                             Verification        384, SHA2-512                         (FIPS186-5):
+                                                                 Curves:P-256, P-384, P-521            (A4659, A5276)
+
+ ECDSA SigGen          DigSig-SigGen         ECDSA Signature     Curves:P-256, P-384, P-521            ECDSA SigGen
+ Component                                   Generation                                                (FIPS186-5):
+                                             Component                                                 (A4659, A5276)
+
+ SHS                   SHA                   Message Digest                                            SHA2-256:
+                                             Generation                                                (A4659, A5276)
+                                                                                                       SHA2-384:
+                                                                                                       (A4659, A5276)
+                                                                                                       SHA2-512:
+                                                                                                       (A4659, A5276)
+
+ KAS-ECC-SSC           KAS-SSC               EC Diffie-Hellman   Scheme:ephemeralUnified               KAS-ECC-SSC
+                                             Shared Secret       Curves:P-256, P-384, P-521            Sp800-56Ar3:
+                                             Computation                                               (A4659, A5276)
+
+ Hash_DRBG             DRBG                  Random Number       Mode:SHA2-512                         Hash DRBG:
+                                             Generation                                                (A4659, A5276)
+
+ HSS SigVer            DigSig-SigVer         HSS Signature       Key Size:256 bits                     LMS SigVer:
+                                             Verification        LMS Modes                             (A4659, A5276)
+                                                                 (CAVP):LMS_SHA256_M32_H10,
+                                                                 LMS_SHA256_M32_H15,
+                                                                 LMS_SHA256_M32_H20,
+                                                                 LMS_SHA256_M32_H25,
+                                                                 LMS_SHA256_M32_H5
+                                                                 LMOTS Modes
+                                                                 (CAVP):LMOTS_SHA256_N32_W1,
+                                                                 LMOTS_SHA256_N32_W2,
+                                                                 LMOTS_SHA256_N32_W4,
+                                                                 LMOTS_SHA256_N32_W8
+
+ KBKDF                 KBKDF                 Key Derivation      KDF Modes:Counter, Feedback,          KDF SP800-108:
+                                             Function            Double pipeline iteration             (A4659, A5276)
+                                                                 MAC Modes:HMAC-SHA2- 256,
+                                                                 HMAC-SHA2-384, HMAC-SHA2-
+                                                                 512
+                                                                 Key Sizes:256, 384, 512 bits
+
+Table 6: Security Function Implementations
+
+2.7 Algorithm Specific Information
+The module’s AES-GCM implementation conforms to IG C.H scenario 2. The module uses the approved Hash_DRBG to
+generate the IV with a length of 96-bits. The entropy source producing the DRBG seed is located inside the module’s
+cryptographic boundary.
+Steps to comply with the SP800-56Brev2 assurances can be found in section 11.3 Non-Administrator Guidance.
+
+                            © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    14 of 47
+Nuvoton Cryptographic Library 3.0                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+The module does not establish SSPs using an approved key transport scheme (KTS). However, it does offer approved
+authenticated algorithms that can be used by an external operator/application as part of an approved KTS.
+
+2.8 RBG and Entropy
+The module employs a Hash_DRBG using a SHA-512 PRF. Per section 10.1.1.1 of [SP800-90A], the internal state of the
+Hash_DRBG is the V, C, and reseed counter. The module makes use of the GetEntropy() interface of the entropy source
+to make two independent calls that output 512-bit each of full entropy from the SP 800-90B entropy source then
+concatenating them together to form 1024-bits of entropy input for the DRBG. The Hash_DRBG can generate random
+numbers with up to 256-bits of security strength. The DRBG internal state is not accessible by non-DRBG functions. All
+random values used by approved security functions, SSP generation, or SSP establishment method are provided by the
+Hash_DRBG.
+
+ Cert        Vendor
+ Number      Name
+
+ E161        Nuvoton
+
+Table 7: Entropy Certificates
+
+
+ Name            Type           Operational             Sample     Entropy    Conditioning Component
+                                Environment             Size       per
+                                                                   Sample
+
+ Nuvoton         Physical       NPCX499HA0BX,           512 bits   512 bits   The entropy pool is filled with random bits
+ NTCES03                        NPCX499HA1BX,                                 provided by an SP800-90B compliant entropy
+                                NPCD324HA0DX                                  source whose noise source is from Ring
+                                                                              Oscillators in hardware. SHA2-512 is used as
+                                                                              the conditioning component with CAVP certs#
+                                                                              A4659 and A5276.
+
+Table 8: Entropy Sources
+
+2.9 Key Generation
+The module generates Keys and SSPs in accordance with FIPS 140-3 IG D.H. The cryptographic module performs
+Cryptographic Key Generation (CKG) for asymmetric keys as per [SP800-133rev2] (vendor affirmed), compliant with
+[FIPS186-5] and using DRBG compliant with [SP800-90Arev1]. A seed (i.e., the random value) used in asymmetric key
+generation is obtained from [SP800-90Arev1] DRBG as described in Section 4 example 1 of [SP800-133rev2], where V is
+a string of binary zeroes, meaning B = U (i.e., the output of an approved RBG). The key generation service for ECDSA, as
+well as the [SP 800-90Arev1] DRBG have been ACVT tested with algorithm certificates found in Table 3.
+The module provides key derivation service using SP800-108 KBKDF.
+
+2.10 Key Establishment
+The module implements KAS-ECC-SSC EC Diffie-Hellman Shared Secret Computation compliant to [SP800-56Arev3]
+and IG D.F Scenario (2) path (1).
+    • The shared secret computation provides between 128 and 256 bits of encryption strength.
+
+
+
+
+                                © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    15 of 47
+Nuvoton Cryptographic Library 3.0                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+The underlying logical interfaces of the module are the module’s C language Application Programming Interfaces (APIs).
+All data input and data output, status ports and control ports are directed through the interface of the module’s logical
+component, which are the APIs while the physical interface is considered the I/O ports of the sub-chip module through
+which the data input and data output, status output and control input traverse.
+
+ Physical     Logical            Data That Passes
+ Port         Interface(s)
+
+ I/O Ports    Data Input         Data inputs are provided in the variables passed in the API and callable service invocations,
+                                 generally through caller-supplied buffers.
+
+ I/O Ports    Data Output        Data outputs are provided in the variables passed in the API and callable service
+                                 invocations, generally through caller-supplied buffers.
+
+ I/O Ports    Control            Control inputs which control the operation of the module are provided through dedicated
+              Input              parameters.
+
+ I/O Ports    Status             Status output is provided in return codes and through messages. Documentation for each
+              Output             API lists possible return codes. A complete list of all return codes returned by the C
+                                 language APIs within the module is provided in the header files and the API documentation.
+                                 Messages are documented also in the API documentation.
+
+ Power        Power              Power interface is provided internally by TEOPP in which the cryptographic module is
+ Port                            embedded.
+
+Table 9: Ports and Interfaces
+
+The module does not implement a Control Output Interface.
+
+
+
+
+                                © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                        16 of 47
+Nuvoton Cryptographic Library 3.0                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+FIPS 140-3 does not require authentication mechanism for level 1 modules. Therefore, the module does not implement an
+authentication mechanism.
+N/A for this module.
+
+4.2 Roles
+The module supports two authorized roles: A Crypto Officer Role and a User Role. No support is provided for a
+Maintenance operator. The module does not implement a bypass mode nor concurrent operators.
+
+ Name                        Type               Operator Type      Authentication Methods
+
+ Crypto Officer              Role               CO                 None
+
+ User                        Role               User               None
+
+Table 10: Roles
+
+When a device is delivered, the Crypto Officer is responsible for initializing the module i.e., configure the device by
+properly setting up key registers for storage of keys/CSPs. The Crypto Officer is implicitly assumed. The User can perform
+services from Table 11 only after the Crypto Officer takes possession by initializing the module, thus creating data to be
+protected is generated. The Users of the module are software applications that implicitly assume the User Role when
+requesting any cryptographic services provided by the module.
+
+4.3 Approved Services
+The module only implements Approved security functions in an Approved mode. The Table 5 below lists services
+available. The module provides an approved service indicator by receiving a return code of “NCL_STATUS_OK to
+indicate that the service executed an approved security function.
+NOTE: The module does not implement any non-Approved Algorithms in the Approved Mode of Operation (neither with
+nor without security claim). The module does not implement any non-approved security functions.
+
+The abbreviations of the access rights to keys and SSPs have the following interpretation:
+G = Generate: The module generates or derives the SSP.
+R = Read: The SSP is read from the module (e.g., the SSP is output).
+W = Write: The SSP is updated, imported, or written to the module.
+E = Execute: The module uses the SSP in performing a cryptographic operation.
+Z = Zeroise: The module zeroises the SSP.
+
+ Name              Description         Indicator   Inputs            Outputs             Security        SSP Access
+                                                                                         Functions
+
+ AES               Data Encryption     NCL         AES key,          cipher text         AES-CBC         User
+ Encryption                            STATUS      plain text                            AES-CCM         - AES key:
+                                       OK                                                AES-CFB128      W,E
+                                                                                         AES-CTR
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    17 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description         Indicator   Inputs           Outputs               Security        SSP Access
+                                                                                         Functions
+                                                                                         AES-ECB
+                                                                                         AES-GCM
+                                                                                         AES-OFB
+
+ AES              AES Decryption      NCL         AES key,         plain text            AES-CBC         User
+ Decryption                           STATUS      cipher text                            AES-CCM         - AES key:
+                                      OK                                                 AES-CFB128      W,E
+                                                                                         AES-CTR
+                                                                                         AES-ECB
+                                                                                         AES-GCM
+                                                                                         AES-OFB
+
+ CMAC             Message             NCL         AES key,         MAC                   AES-CMAC        User
+ Message          Authentication      STATUS      message                                                - AES key:
+ Authentication   Code Generation     OK                                                                 W,E
+ Code
+ Generation
+
+ CMAC             Message             NCL         MAC,             "VALID" or            AES-CMAC        User
+ Message          Authentication      STATUS      Message          "INVALID"                             - AES key:
+ Authentication   Code Verification   OK                                                                 W,E
+ Code
+ Verification
+
+ GMAC             Message             NCL         AES key,         authentication tag    AES-GMAC        User
+ Message          Authentication      STATUS      AAD                                                    - AES key:
+ Authentication   Code Generation     OK                                                                 W,E
+ Code
+ Generation
+
+ GMAC             Message             NCL         AES key,         "PASS" or "FAIL"      AES-GMAC        User
+ Message          Authentication      STATUS      AAD, IV, tag                                           - AES key:
+ Authentication   Code Verification   OK                                                                 W,E
+ Code
+ Verification
+
+ HMAC             Message             NCL         HMAC key,        MAC                   HMAC            User
+ Message          Authentication      STATUS      message                                                - HMAC Key:
+ Authentication   Code Generation     OK                                                                 W,E
+ Code
+ Generation
+
+ Message          SHS Message         NCL         message          digest (hash          SHS             User
+ Digest           Digest              STATUS                       value)
+ Generation       Generation          OK
+
+ RSA              RSA                 NCL         RSA public       encapsulated          RSA             User
+ Encapsulation    Encapsulation       STATUS      key, data to     data                  encapsulation   - RSA
+                                      OK
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   18 of 47
+Nuvoton Cryptographic Library 3.0                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description         Indicator   Inputs           Outputs              Security        SSP Access
+                                                                                        Functions
+                  using KTS-                      be                                                    Encapsulation
+                  OAEP-basic                      encapsulated                                          Key: W,E
+
+ RSA              RSA                 NCL         RSA private      decapsulated         RSA             User
+ Decapsulation    Decapsulation       STATUS      key,             data                 decapsulation   - RSA
+                  using KTS-          OK          encapsulated                                          Decapsulation
+                  OAEP-basic                      data                                                  Key: W,E
+
+ RSA Digital      Digital Signature   NCL         RSA public       signature            RSA SigGen      User
+ Signature        Generation          STATUS      key,                                  Hash_DRBG       - RSA Sig
+ Generation                           OK          message,                                              private key:
+                                                  hash                                                  W,E
+                                                  algorithm
+
+ RSA Digital      Digital Signature   NCL         RSA public       True or False        RSA SigVer      User
+ Signature        Verification        STATUS      key,                                                  - RSA Sig
+ Verification                         OK          signature,                                            public key:
+                                                  message,                                              W,E
+                                                  hash
+                                                  algorithm
+
+ ECDSA Digital    Digital Signature   NCL         ECDSA            signature            ECDSA           User
+ Signature        Generation          STATUS      private key,                          SigGen          - ECDSA
+ Generation                           OK          message,                              Hash_DRBG       private key:
+                                                  hash                                                  W,E
+                                                  algorithm                                             - DRBG
+                                                                                                        internal state
+                                                                                                        (i.e.,
+                                                                                                        Hash_DRBG V
+                                                                                                        and C values):
+                                                                                                        W
+
+ ECDSA Digital    Digital Signature   NCL         ECDSA            signature            ECDSA           User
+ Signature        Generation          STATUS      private key,                          SigGen          - ECDSA
+ Generation       Component           OK          message,                              Component       private key:
+ Component                                        message                               Hash_DRBG       W,E
+                                                  digest                                                - DRBG
+                                                                                                        internal state
+                                                                                                        (i.e.,
+                                                                                                        Hash_DRBG V
+                                                                                                        and C values):
+                                                                                                        W
+
+ ECDSA Digital    Digital Signature   NCL         ECDSA public     True or False        ECDSA           User
+ Signature        Verification        STATUS      key,                                  SigVer          - ECDSA
+ Verification                         OK          signature,                                            public key:
+                                                  message,                                              W,E
+                                                  hash
+                                                  algorithm
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   19 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description         Indicator   Inputs           Outputs              Security        SSP Access
+                                                                                        Functions
+
+ ECDSA Key        Asymmetric Key      NCL         Curve size       generated private    ECDSA           User
+ Generation       Pair Generation     STATUS                       and public key       KeyGen          - ECDSA
+                                      OK                           pair                 Hash_DRBG       private key:
+                                                                                                        G,R
+                                                                                                        - ECDSA
+                                                                                                        public key: G,R
+                                                                                                        - ECDH private
+                                                                                                        key: G,R
+                                                                                                        - ECDH public
+                                                                                                        key: G,R
+                                                                                                        - DRBG
+                                                                                                        internal state
+                                                                                                        (i.e.,
+                                                                                                        Hash_DRBG V
+                                                                                                        and C values):
+                                                                                                        W
+                                                                                                        - ECDSA
+                                                                                                        intermediate
+                                                                                                        key generation
+                                                                                                        values: G,Z
+                                                                                                        - ECDH
+                                                                                                        intermediate
+                                                                                                        key generation
+                                                                                                        values: G,Z
+
+ ECDSA Key        Asymmetric          NCL         Public Key       True or False        ECDSA           User
+ Verification     Public Key          STATUS                                            KeyVer          - ECDSA
+                  Verification        OK                                                                public key:
+                                                                                                        W,E
+                                                                                                        - ECDH public
+                                                                                                        key: W,E
+
+ EC Diffie-       Shared Secret       NCL         received         shared secret        KAS-ECC-        User
+ Hellman          Computation         STATUS      public key,                           SSC             - ECDH public
+ Shared Secret    using Elliptic      OK          possessed                                             key: W,E
+ Computation      Curve                           private key                                           - ECDH private
+                  Cryptography                                                                          key: W,E
+                                                                                                        - ECC Shared
+                                                                                                        Secret: G,R
+
+ Random           Deterministic       NCL         Seed             random numbers       Hash_DRBG       User
+ Number           Random Number       STATUS                                                            - Entropy Input
+ Generation       Generation          OK                                                                String: G,E
+                                                                                                        - DRBG Seed:
+                                                                                                        G,E
+                                                                                                        - DRBG
+                                                                                                        internal state
+                                                                                                        (i.e.,
+                                                                                                        Hash_DRBG V
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   20 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name             Description          Indicator   Inputs          Outputs              Security        SSP Access
+                                                                                        Functions
+                                                                                                        and C values):
+                                                                                                        W,E
+
+ Show Module      Outputs Module       N/A         None            Module Name +        None            User
+ Version Info     Name + Version                                   Module Version
+                  Number                                           Number
+
+ SSP              Series of APIs       N/A         handle of       zeroized and         None            User
+ Zeroisation      that can be                      crypto          released memory                      - AES key: Z
+                  invoked by the                   function        space                                - RSA
+                  operator to                      context                                              Encapsulation
+                  zeroize crypto                                                                        Key: Z
+                  function context                                                                      - RSA
+                  and release                                                                           Decapsulation
+                  memory space;                                                                         Key: Z
+                  See the list of                                                                       - RSA Sig
+                  APIs mentioned                                                                        private key: Z
+                  in section 9.3 and                                                                    - RSA Sig
+                  11.4                                                                                  public key: Z
+                                                                                                        - ECDSA
+                                                                                                        private key: Z
+                                                                                                        - ECDSA
+                                                                                                        public key: Z
+                                                                                                        - HMAC Key: Z
+                                                                                                        - ECDH private
+                                                                                                        key: Z
+                                                                                                        - ECDH public
+                                                                                                        key: Z
+                                                                                                        - ECC Shared
+                                                                                                        Secret: Z
+                                                                                                        - Entropy Input
+                                                                                                        String: Z
+                                                                                                        - DRBG Seed:
+                                                                                                        Z
+                                                                                                        - DRBG
+                                                                                                        internal state
+                                                                                                        (i.e.,
+                                                                                                        Hash_DRBG V
+                                                                                                        and C values):
+                                                                                                        Z
+                                                                                                        - HSS public
+                                                                                                        key: Z
+                                                                                                        - Derived key:
+                                                                                                        Z
+                                                                                                        - Key
+                                                                                                        Derivation Key:
+                                                                                                        Z
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   21 of 47
+Nuvoton Cryptographic Library 3.0                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                 Description         Indicator   Inputs           Outputs              Security        SSP Access
+                                                                                            Functions
+
+ Show-Status          Outputs             N/A         None             Operational/Error    None            User
+                      Operational/                                     status
+                      Error status of
+                      the module
+
+ Self-test            Executes on-        NCL         None             Pass/Fail status     AES-CBC         User
+                      demand self-test    STATUS                                            AES-CCM
+                      and outputs         OK                                                HMAC
+                      Pass/Fail status                                                      RSA SigGen
+                                                                                            RSA SigVer
+                                                                                            RSA
+                                                                                            encapsulation
+                                                                                            RSA
+                                                                                            decapsulation
+                                                                                            ECDSA
+                                                                                            SigGen
+                                                                                            ECDSA
+                                                                                            SigVer
+                                                                                            SHS
+                                                                                            KAS-ECC-
+                                                                                            SSC
+                                                                                            Hash_DRBG
+                                                                                            HSS SigVer
+                                                                                            KBKDF
+
+ HSS Signature        Digital Signature   NCL         HSS Public       True or False        HSS SigVer      User
+ Verification         Verification        STATUS      Key, Digital                                          - HSS public
+                                          OK          Signature,                                            key: W,E
+                                                      message
+
+ Key derivation       Perform key         NCL         Key              Derived key          KBKDF           User
+                      derivation          STATUS      Derivation                                            - Derived key:
+                                          OK          Key                                                   G,R
+                                                                                                            - Key
+                                                                                                            Derivation Key:
+                                                                                                            W,E
+
+Table 11: Approved Services
+
+
+
+
+                              © 2025 Nuvoton Technology Corporation / atsec information security.
+             This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       22 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The memory technology is non reconfigurable memory as defined in IG 5.A, which will not have any change or
+degradation of data for a minimum of 10 years after manufactured date. As such, it is considered a hardware only module
+with a non-modifiable operational environment. The requirements of this area are not applicable to the module.
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   23 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+The Nuvoton Cryptographic Library 3.0 operates in a non-modifiable operational environment. The module is programmed
+by the manufacturer during the silicon manufacturing (rather than by the user). It maintains its own memory region which
+can only be accessed by the module. There is no additional application present within the operating environment. The
+module does not spawn any cryptographic processes.
+Type of Operational Environment: Limited
+
+
+
+
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   24 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+The Nuvoton Cryptographic Library 3.0 cryptographic module is a Hardware cryptographic module in a single chip
+embodiment. More specifically, the module is considered a sub-chip cryptographic subsystem.
+The module consists of production-grade components that include standard passivation techniques (e.g., a conformal
+coating applied over the module’s circuitry to protect against environmental or other physical damage). The module does
+not implement a maintenance role and has no maintenance access interface.
+
+ Mechanism                     Inspection Frequency       Inspection Guidance
+
+ Hard tamper-evident           Determined by the          Observe the coating surrounding the chip for any signs of
+ coating                       operator                   damage
+
+Table 12: Mechanisms and Actions Required
+
+
+
+
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   25 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+8 Non-Invasive Security
+Currently, the non-invasive security is not required by FIPS 140-3 (see NIST SP 800-140F). The requirements of this area
+are not applicable to the module.
+
+
+
+
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   26 of 47
+Nuvoton Cryptographic Library 3.0                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+The module does not provide persistent storage for keys/SSPs. Keys/SSPs are stored in memory only and are received
+for use by the module only at the request of the User firmware.
+
+ Storage      Description                  Persistence
+ Area                                      Type
+ Name
+
+ RAM          Stored in volatile memory    Dynamic
+
+Table 13: Storage Areas
+
+9.2 SSP Input-Output Methods
+Keys/SSPs entered or output the module are electronically entered in plaintext form from the invoking User firmware
+running on the same device. No Keys/SSPs are entered into or output from the module from outside of the TOEPP.
+According to IG 2.3.B, transferring SSPs including the entropy input between a sub-chip cryptographic subsystem and an
+intervening functional subsystem for Security Levels 1 and 2 on the same single chip is considered as not having
+Sensitive Security Parameter Establishment crossing the HMI of the sub-chip module per IG 9.5.A. Entropy input remains
+within the module's sub-chip boundary.
+
+ Name           From                 To                   Format      Distribution   Entry        SFI or
+                                                          Type        Type           Type         Algorithm
+
+ API input      Within the TOEPP     RAM                  Plaintext   Automated      Electronic
+
+ API output     RAM                  Within the TOEPP     Plaintext   Automated      Electronic
+
+Table 14: SSP Input-Output Methods
+
+9.3 SSP Zeroization Methods
+Keys and SSPs are explicitly zeroized automatically prior to the structure associated with the cipher being deallocated or
+implicitly when the device is powered down thereby rendering the data irretrievable. Input and output interfaces are
+inhibited while zeroization is being performed. For Keys and SSPs explicitly zeroized automatically the successful
+completion of a requested service suffices as the implicit indicator that zeroisation has completed. Keys and SSPs may be
+zeroized explicitly by calling the respective NCL_<alg>_Clear API listed in the table below which immediately zeroizes all
+sensitive data.
+
+ Zeroization              Description             Rationale                                               Operator
+ Method                                                                                                   Initiation
+
+ Module Reset             Power cycles the        All SSPs in memory are overwritten by zeros             Initiated by
+                          module                                                                          operator
+
+ Automatic                Automatic zeroization   Overwrites the targeted SSP's contents in memory        Automatically by
+ zeroization              when when no longer     with zeros using memset/memset_s for any contents       the module
+                          needed                  in RAM and REG_WRITE for any contents in
+                                                  hardware registers
+
+                             © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                       27 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Zeroization           Description             Rationale                                                Operator
+ Method                                                                                                 Initiation
+
+ NCL_SHA_Clear         Clears existing SHA,    Overwrites the targeted SSP's contents in memory         Initiated by
+                       HMAC, KBKDF             with zeros using memset/memset_s for any contents        operator
+                       contexts                in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+ NCL_DRBG_Clear        Clears existing         Overwrites the targeted SSP's contents in memory         Initiated by
+                       DRBG contexts           with zeros using memset/memset_s for any contents        operator
+                                               in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+ NCL_AES_Clear         Clears existing AES     Overwrites the targeted SSP's contents in memory         Initiated by
+                       contexts                with zeros using memset/memset_s for any contents        operator
+                                               in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+ NCL_RSA_Clear         Clears existing RSA     Overwrites the targeted SSP's contents in memory         Initiated by
+                       contexts                with zeros using memset/memset_s for any contents        operator
+                                               in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+ NCL_ECC_Clear         Clears existing         Overwrites the targeted SSP's contents in memory         Initiated by
+                       ECDSA and ECDH          with zeros using memset/memset_s for any contents        operator
+                       contexts                in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+ NCL_HSS_Clear         Clears existing HSS     Overwrites the targeted SSP's contents in memory         Initiated by
+                       contexts                with zeros using memset/memset_s for any contents        operator
+                                               in RAM and REG_WRITE for any contents in
+                                               hardware registers
+
+Table 15: SSP Zeroization Methods
+
+9.4 SSPs
+The following summarizes the keys and Sensitive Security Parameters (SSPs) that are used by the cryptographic services
+implemented in the module. Modification of PSPs by unauthorized operators is prohibited.
+
+ Name                Description              Size -       Type -         Generated       Established     Used By
+                                              Strength     Category       By              By
+
+ AES key             AES Symmetric key        128, 192,    Symmetric -                                    AES-CBC
+                     used in Data             256 bits -   CSP                                            AES-CCM
+                     Encryption, Data         128, 192,                                                   AES-CFB128
+                     Decryption and           256 bits                                                    AES-CMAC
+                     Message                                                                              AES-CTR
+                     Authentication Code                                                                  AES-ECB
+                     Generation and                                                                       AES-GCM
+                     verification                                                                         AES-GMAC
+
+
+                           © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     28 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name               Description              Size -        Type -         Generated       Established     Used By
+                                             Strength      Category       By              By
+
+ RSA                RSA OAEP private         2048, 3072    Asymmetric -                                   RSA
+ Encapsulation      key                      bits - 112,   CSP                                            encapsulation
+ Key                                         128 bits
+
+ RSA                RSA OAEP public          2048, 3072    Asymmetric -                                   RSA
+ Decapsulation      key                      bits - 112,   PSP                                            decapsulation
+ Key                                         128 bits
+
+ RSA Sig private    Signature Generation     2048, 3072    Asymmetric -                                   RSA SigGen
+ key                                         bits - 112,   CSP
+                                             128 bits
+
+ RSA Sig public     Signature Verification   2048, 3072    Asymmetric -                                   RSA SigVer
+ key                                         bits - 112,   PSP
+                                             128 bits
+
+ ECDSA private      Signature Generation     P-256, P-     Asymmetric -   ECDSA                           ECDSA
+ key                                         384, P-521    CSP            KeyGen                          SigGen
+                                             curves -                     Hash_DRBG
+                                             112 to 256
+                                             bits
+
+ ECDSA              Intermediate values      P-256, P-     Asymmetric -   ECDSA                           ECDSA
+ intermediate key   for ECDSA Signature      384, P-521    CSP            KeyGen                          SigGen
+ generation         Generation               curves -                     Hash_DRBG
+ values                                      112 to 256
+                                             bits
+
+ ECDSA public       Key Verification,        P-256, P-     Asymmetric -   ECDSA                           ECDSA
+ key                Signature Verification   384, P-521    PSP            KeyGen                          KeyVer
+                                             curves -                     Hash_DRBG                       ECDSA
+                                             112 to 256                                                   SigVer
+                                             bits
+
+ HMAC Key           Hashed Message           112 bits or   Symmetric -                                    HMAC
+                    Authentication Code      greater -     CSP
+                    Generation               112 bits or
+                                             greater
+
+ ECDH private       ECDH Shared Secret       P-256, P-     Asymmetric -   ECDSA                           KAS-ECC-
+ key                Computation              384, P-521    CSP            KeyGen                          SSC
+                                             curves -                     Hash_DRBG
+                                             112 to 256-
+                                             bits
+
+ ECDH               Intermediate values      P-256, P-     Asymmetric -   ECDSA
+ intermediate key   for ECDH Shared          384, P-521    CSP            KeyGen
+                    Secret Computation       curves -                     Hash_DRBG
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   29 of 47
+Nuvoton Cryptographic Library 3.0                                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                   Description                Size -        Type -          Generated      Established   Used By
+                                                   Strength      Category        By             By
+ generation                                        112 to 256-
+ values                                            bits
+
+ ECDH public key        ECDH Shared Secret         P-256, P-     Asymmetric -    ECDSA                        ECDSA
+                        Computation                384, P-521    PSP             KeyGen                       KeyVer
+                                                   curves -                      Hash_DRBG                    KAS-ECC-
+                                                   112 to 256-                                                SSC
+                                                   bits
+
+ ECC Shared             ECDH Shared Secret         P-256, P-     Asymmetric                     KAS-ECC-
+ Secret                 Computation                384, P-521    shared                         SSC
+                                                   curves -      secret - CSP
+                                                   112 to 256-
+                                                   bits
+
+ Entropy Input          Seed DRBG                  256-bits -    DRBG - CSP                                   Hash_DRBG
+ String                                            256-bits
+
+ DRBG Seed              Maintaining DRBG           256-bits -    DRBG - CSP                                   Hash_DRBG
+                        internal state             256-bits
+
+ DRBG internal          Maintaining DRBG           256-bits -    DRBG - CSP                                   Hash_DRBG
+ state (i.e.,           internal state             256-bits
+ Hash_DRBG V
+ and C values)
+
+ HSS public key         Used by HSS                256-bits -    Asymmetric                                   HSS SigVer
+                        signature verification     256-bits      key - PSP
+
+ Derived key            Key derived by             256, 384,     Symmetric -     KBKDF
+                        KBKDF                      512 bits -    CSP
+                                                   256, 384,
+                                                   512 bits
+
+ Key Derivation         Key used by KBKDF          256, 384,     Symmetric -                                  KBKDF
+ Key                                               512 bits -    CSP
+                                                   256, 384,
+                                                   512 bits
+
+Table 16: SSP Table 1
+
+
+ Name                        Input -     Storage           Storage             Zeroization         Related SSPs
+                             Output                        Duration
+
+ AES key                     API         RAM:Plaintext     Until               Module Reset
+                             input                         deallocated or      Automatic
+                                                           on module reset     zeroization
+                                                                               NCL_AES_Clear
+
+
+                             © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      30 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                    Input -    Storage         Storage            Zeroization           Related SSPs
+                         Output                     Duration
+
+ RSA Encapsulation       API        RAM:Plaintext   Until              Module Reset          RSA Decapsulation
+ Key                     input                      deallocated or     Automatic             Key:Paired With
+                                                    on module reset    zeroization
+                                                                       NCL_RSA_Clear
+
+ RSA Decapsulation       API        RAM:Plaintext   Until              Module Reset          RSA Encapsulation
+ Key                     input                      deallocated or     Automatic             Key:Paired With
+                                                    on module reset    zeroization
+                                                                       NCL_RSA_Clear
+
+ RSA Sig private key     API        RAM:Plaintext   Until              Module Reset          RSA Sig public key:Paired
+                         input                      deallocated or     Automatic             With
+                                                    on module reset    zeroization
+                                                                       NCL_RSA_Clear
+
+ RSA Sig public key      API        RAM:Plaintext   Until              Module Reset          RSA Sig private
+                         input                      deallocated or     Automatic             key:Paired With
+                                                    on module reset    zeroization
+                                                                       NCL_RSA_Clear
+
+ ECDSA private key       API        RAM:Plaintext   Until              Module Reset          DRBG internal state (i.e.,
+                         input                      deallocated or     Automatic             Hash_DRBG V and C
+                         API                        on module reset    zeroization           values):Derived From
+                         output                                        NCL_ECC_Clear         ECDSA public key:Paired
+                                                                                             With
+                                                                                             ECDSA intermediate key
+                                                                                             generation values:Paired
+                                                                                             With
+
+ ECDSA intermediate                 RAM:Plaintext   Until no longer    Automatic             DRBG internal state (i.e.,
+ key generation values                              needed             zeroization           Hash_DRBG V and C
+                                                                                             values):Derived From
+                                                                                             ECDSA private key:Paired
+                                                                                             With
+                                                                                             ECDSA public key:Paired
+                                                                                             With
+
+ ECDSA public key        API        RAM:Plaintext   Until              Module Reset          DRBG internal state (i.e.,
+                         input                      deallocated or     Automatic             Hash_DRBG V and C
+                         API                        on module reset    zeroization           values):Derived From
+                         output                                        NCL_ECC_Clear         ECDSA private key:Paired
+                                                                                             With
+                                                                                             ECDSA intermediate key
+                                                                                             generation values:Paired
+                                                                                             With
+
+ HMAC Key                API        RAM:Plaintext   Until              Module Reset
+                         input                      deallocated or     Automatic
+                                                    on module reset
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   31 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                    Input -    Storage         Storage            Zeroization           Related SSPs
+                         Output                     Duration
+                                                                       zeroization
+                                                                       NCL_SHA_Clear
+
+ ECDH private key        API        RAM:Plaintext   Until              Module Reset          DRBG internal state (i.e.,
+                         input                      deallocated or     Automatic             Hash_DRBG V and C
+                         API                        on module reset    zeroization           values):Derived From
+                         output                                        NCL_ECC_Clear         ECDH public key:Paired
+                                                                                             With
+                                                                                             ECDH intermediate key
+                                                                                             generation values:Paired
+                                                                                             With
+
+ ECDH intermediate                  RAM:Plaintext   Until no longer    Automatic             DRBG internal state (i.e.,
+ key generation values                              needed             zeroization           Hash_DRBG V and C
+                                                                                             values):Derived From
+                                                                                             ECDH private key:Paired
+                                                                                             With
+                                                                                             ECDH public key:Paired
+                                                                                             With
+
+ ECDH public key         API        RAM:Plaintext   Until              Module Reset          DRBG internal state (i.e.,
+                         input                      deallocated or     Automatic             Hash_DRBG V and C
+                         API                        on module reset    zeroization           values):Derived From
+                         output                                        NCL_ECC_Clear         ECDH private key:Paired
+                                                                                             With
+                                                                                             ECDH intermediate key
+                                                                                             generation values:Paired
+                                                                                             With
+
+ ECC Shared Secret       API        RAM:Plaintext   Until              Module Reset          ECDH private
+                         output                     deallocated or     Automatic             key:Established From
+                                                    on module reset    zeroization           ECDH public
+                                                                       NCL_ECC_Clear         key:Established From
+
+ Entropy Input String               RAM:Plaintext   Until              Module Reset          DRBG Seed:Derives
+                                                    deallocated or     Automatic
+                                                    on module reset    zeroization
+                                                                       NCL_DRBG_Clear
+
+ DRBG Seed                          RAM:Plaintext   Until              Module Reset          Entropy Input
+                                                    deallocated or     Automatic             String:Derived From
+                                                    on module reset    zeroization           DRBG internal state (i.e.,
+                                                                       NCL_DRBG_Clear        Hash_DRBG V and C
+                                                                                             values):Derives
+
+ DRBG internal state                RAM:Plaintext   Until              Module Reset          DRBG Seed:Derived
+ (i.e., Hash_DRBG V                                 deallocated or     Automatic             From
+ and C values)                                      on module reset    zeroization
+                                                                       NCL_DRBG_Clear
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   32 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Name                    Input -    Storage         Storage            Zeroization           Related SSPs
+                         Output                     Duration
+
+ HSS public key          API        RAM:Plaintext   Until              Module Reset
+                         input                      deallocated or     Automatic
+                                                    on module reset    zeroization
+                                                                       NCL_HSS_Clear
+
+ Derived key             API        RAM:Plaintext   Until              Module Reset          Key Derivation
+                         output                     deallocated or     Automatic             Key:Derived From
+                                                    on module reset    zeroization
+                                                                       NCL_SHA_Clear
+
+ Key Derivation Key      API        RAM:Plaintext   Until              Module Reset          Derived key:Derives
+                         input                      deallocated or     Automatic
+                                                    on module reset    zeroization
+                                                                       NCL_SHA_Clear
+
+Table 17: SSP Table 2
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   33 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+The module is solely implemented in hardware (i.e., only contains executable code that is stored in non- reconfigurable
+memory). As such, the module does not perform any pre-operational software/firmware integrity test, but instead performs
+a Cryptographic Algorithm Self-Test on the SHA2-256, HMAC- SHA2-512 and KBKDF-HMAC-SHA2-256 algorithms when
+the module is powered on.
+Self-tests ensure that the module is not corrupted and that the cryptographic algorithms work as expected. While the
+module is executing the above self-tests, no services are available and input and output are inhibited. The module will
+boot only after successfully passing the SHA2-256, HMAC- SHA2-512 and KBKDF-HMAC-SHA2-256 CASTs. If an error
+is detected in any self-test, the module will enter the Error State.
+N/A for this module.
+The module does not implement a pre-operational bypass test nor pre-operational critical functions test.
+
+10.2 Conditional Self-Tests
+The module conducts conditional cryptographic algorithm self-test prior to the first operational use of each cryptographic
+algorithm. The table below describe the conditional tests supported by the module.
+
+ Algorithm or          Test Properties              Test       Test    Indicator    Details                Conditions
+ Test                                               Method     Type
+
+ HMAC-SHA2-            HMAC-SHA2-512 MAC            KAT        CAST    NCL          MAC Generation         Performed
+ 512 (A4659)           Generation KAT                                  STATUS                              when the
+                                                                       OK                                  module is
+                                                                                                           powered on
+
+ HMAC-SHA2-            HMAC-SHA2-512 MAC            KAT        CAST    NCL          MAC Generation         Performed
+ 512 (A5276)           Generation KAT                                  STATUS                              when the
+                                                                       OK                                  module is
+                                                                                                           powered on
+
+ SHA2-256              SHA2-256 Message Digest      KAT        CAST    NCL          Message Digest         Performed
+ (A4659)               KAT                                             STATUS                              when the
+                                                                       OK                                  module is
+                                                                                                           powered on
+
+ SHA2-256              SHA2-256 Message Digest      KAT        CAST    NCL          Message Digest         Performed
+ (A5276)               KAT                                             STATUS                              when the
+                                                                       OK                                  module is
+                                                                                                           powered on
+
+ AES-CCM               AES-CCM Encryption KAT       KAT        CAST    NCL          AES Encryption         Prior to the first
+ (A4659)               using 128-bit key                               STATUS                              operational use
+                                                                       OK                                  of the algorithm
+
+ AES-CCM               AES-CCM Encryption KAT       KAT        CAST    NCL          AES Encryption         Prior to the first
+ (A5276)               using 128-bit key                               STATUS                              operational use
+                                                                       OK                                  of the algorithm
+
+
+                            © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      34 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or      Test Properties                Test       Test    Indicator    Details              Conditions
+ Test                                             Method     Type
+
+ AES-CBC           AES-CBC Decryption KAT         KAT        CAST    NCL          AES Decryption       Prior to the first
+ (A4659)           using 128-bit key                                 STATUS                            operational use
+                                                                     OK                                of the algorithm
+
+ AES-CBC           AES-CBC Decryption KAT         KAT        CAST    NCL          AES Decryption       Prior to the first
+ (A5276)           using 128-bit key                                 STATUS                            operational use
+                                                                     OK                                of the algorithm
+
+ KTS-IFC           KTS-OAEP-basic                 KAT        CAST    NCL          KTS-OAEP-basic       Prior to the first
+ (A4659)           Encryption/Decryption KAT                         STATUS       Encryption and       operational use
+                   with 2048 -bit key and                            OK           Decryption           of the algorithm
+                   SHA2-256
+
+ KTS-IFC           KTS-OAEP-basic                 KAT        CAST    NCL          KTS-OAEP-basic       Prior to the first
+ (A5276)           Encryption/Decryption KAT                         STATUS       Encryption and       operational use
+                   with 2048 -bit key and                            OK           Decryption           of the algorithm
+                   SHA2-256
+
+ RSA SigGen        RSA Signature Generation       KAT        CAST    NCL          RSA Signature        Prior to the first
+ (FIPS186-5)       KAT with 2048-bit key and                         STATUS       Generation           operational use
+ (A4659)           SHA2-256                                          OK                                of the algorithm
+
+ RSA SigGen        RSA Signature Generation       KAT        CAST    NCL          RSA Signature        Prior to the first
+ (FIPS186-5)       KAT with 2048-bit key and                         STATUS       Generation           operational use
+ (A5276)           SHA2-256                                          OK                                of the algorithm
+
+ RSA SigVer        RSA Signature Verification     KAT        CAST    NCL          RSA Signature        Prior to the first
+ (FIPS186-5)       KAT with 2048-bit key and                         STATUS       Verification         operational use
+ (A4659)           SHA2-256                                          OK                                of the algorithm
+
+ RSA SigVer        RSA Signature Verification     KAT        CAST    NCL          RSA Signature        Prior to the first
+ (FIPS186-5)       KAT with 2048-bit key and                         STATUS       Verification         operational use
+ (A5276)           SHA2-256                                          OK                                of the algorithm
+
+ ECDSA SigGen      ECDSA Signature                KAT        CAST    NCL          ECDSA Signature      Prior to the first
+ (FIPS186-5)       Generation KAT with P-256                         STATUS       Generation           operational use
+ (A4659)           curve and SHA2-256                                OK                                of the algorithm
+
+ ECDSA SigGen      ECDSA Signature                KAT        CAST    NCL          ECDSA Signature      Prior to the first
+ (FIPS186-5)       Generation KAT with P-256                         STATUS       Generation           operational use
+ (A5276)           curve and SHA2-256                                OK                                of the algorithm
+
+ ECDSA SigVer      ECDSA Signature                KAT        CAST    NCL          ECDSA Signature      Prior to the first
+ (FIPS186-5)       Verification KAT with P-256                       STATUS       Verification         operational use
+ (A4659)           curve and SHA2-256                                OK                                of the algorithm
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   35 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or      Test Properties                Test       Test    Indicator    Details              Conditions
+ Test                                             Method     Type
+
+ ECDSA SigVer      ECDSA Signature                KAT        CAST    NCL          ECDSA Signature      Prior to the first
+ (FIPS186-5)       Verification KAT with P-256                       STATUS       Verification         operational use
+ (A5276)           curve and SHA2-256                                OK                                of the algorithm
+
+ KAS-ECC-SSC       ECDH shared secret             KAT        CAST    NCL          ECDH shared          Prior to the first
+ Sp800-56Ar3       computation KAT with P-                           STATUS       secret               operational use
+ (A4659)           256 curve                                         OK           computation          of the algorithm
+
+ KAS-ECC-SSC       ECDH shared secret             KAT        CAST    NCL          ECDH shared          Prior to the first
+ Sp800-56Ar3       computation KAT with P-                           STATUS       secret               operational use
+ (A5276)           256 curve                                         OK           computation          of the algorithm
+
+ Hash DRBG         Hash_DRBG random               KAT        CAST    NCL          SP 800-90Ar1         Prior to the first
+ (A4659)           number generation KAT                             STATUS       section 11.3         operational use
+                   using predefined seed.                            OK           (instantiate,        of the algorithm
+                                                                                  reseed, generate)
+                                                                                  health test
+
+ Hash DRBG         Hash_DRBG random               KAT        CAST    NCL          SP 800-90Ar1         Prior to the first
+ (A5276)           number generation KAT                             STATUS       section 11.3         operational use
+                   using predefined seed.                            OK           (instantiate,        of the algorithm
+                                                                                  reseed, generate)
+                                                                                  health test
+
+ KDF SP800-108     Counter mode using HMAC-       KAT        CAST    NCL          KBKDF                Performed
+ (A4659)           SHA2-256 using 160-bit key                        STATUS                            when the
+                                                                     OK                                module is
+                                                                                                       powered on
+
+ KDF SP800-108     Counter mode using HMAC-       KAT        CAST    NCL          KBKDF                Performed
+ (A5276)           SHA2-256 using 160-bit key                        STATUS                            when the
+                                                                     OK                                module is
+                                                                                                       powered on
+
+ ECDSA KeyGen      Pairwise consistency test      PCT        PCT     NCL          Pairwise             Performed upon
+ (FIPS186-5)                                                         STATUS       consistency test     generation of a
+ (A4659)                                                             OK                                new ECDSA
+                                                                                                       key pair
+
+ ECDSA KeyGen      Pairwise consistency test      PCT        PCT     NCL          Pairwise             Performed upon
+ (FIPS186-5)                                                         STATUS       consistency test     generation of a
+ (A5276)                                                             OK                                new ECDSA
+                                                                                                       key pair
+
+ HSS SigVer        HSS KAT SHA2-256               KAT        CAST    NCL          HSS Digital          Prior to the first
+                                                                     STATUS       Signature            operational use
+                                                                     OK           Verification         of the algorithm
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   36 of 47
+Nuvoton Cryptographic Library 3.0                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or          Test Properties                Test       Test   Indicator   Details              Conditions
+ Test                                                 Method     Type
+
+ ESV - Repetition      Startup test with 1024         RCT        CAST   NCL         Entropy Health       Performed
+ Count Test            samples; Cutoff value = 35                       STATUS      Test                 before seeding
+ (Startup)                                                              OK                               the DRBG
+
+ ESV - Repetition      Cutoff value = 35              RCT        CAST   NCL         Entropy Health       Performed
+ Count Test                                                             STATUS      Test                 before seeding
+ (Continuous)                                                           OK                               the DRBG
+
+ ESV - Adaptive        Startup test with 1024         APT        CAST   NCL         Entropy Health       Performed
+ Proportional          samples; Cutoff value = 748                      STATUS      Test                 before seeding
+ Test (Startup)                                                         OK                               the DRBG
+
+ ESV - Adaptive        Cutoff value = 748             APT        CAST   NCL         Entropy Health       Performed
+ Proportional                                                           STATUS      Test                 before seeding
+ Test                                                                   OK                               the DRBG
+ (Continuous)
+
+Table 18: Conditional Self-Tests
+
+The module does not implement a Software/Firmware Load Test, Manual Entry Test, Conditional Bypass Test nor
+Conditional Critical Functions Test.
+
+10.3 Periodic Self-Test Information
+During runtime, operators can initiate the conditional self-tests on demand by calling NCL_MISC_SelfTest and passing
+the algorithm as an argument.
+The module’s entropy source is powered on only momentarily to seed the module’s SP800-90B DRBG. The module
+performs entropy source health tests defined in Section 4 of SP800-90B on the generated output prior to seeding the
+SP800-90B DRBG. After completing its execution, the entropy source powers down.
+N/A for this module.
+
+ Algorithm or Test          Test Method              Test Type             Period                    Periodic Method
+
+ HMAC-SHA2-512              KAT                      CAST                  On demand                 By calling
+ (A4659)                                                                                             NCL_MISC_SelfTest
+                                                                                                     and passing the
+                                                                                                     algorithm as an
+                                                                                                     argument
+
+ HMAC-SHA2-512              KAT                      CAST                  On demand                 By calling
+ (A5276)                                                                                             NCL_MISC_SelfTest
+                                                                                                     and passing the
+                                                                                                     algorithm as an
+                                                                                                     argument
+
+ SHA2-256 (A4659)           KAT                      CAST                  On demand                 By calling
+                                                                                                     NCL_MISC_SelfTest
+                                                                                                     and passing the
+
+                             © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    37 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or Test       Test Method             Test Type                Period                  Periodic Method
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ SHA2-256 (A5276)        KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ AES-CCM (A4659)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ AES-CCM (A5276)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ AES-CBC (A4659)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ AES-CBC (A5276)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ KTS-IFC (A4659)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ KTS-IFC (A5276)         KAT                     CAST                     On demand               By calling
+                                                                                                  NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ RSA SigGen              KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A4659)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   38 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or Test       Test Method             Test Type                Period                  Periodic Method
+
+ RSA SigGen              KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A5276)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ RSA SigVer              KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A4659)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ RSA SigVer              KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A5276)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ ECDSA SigGen            KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A4659)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ ECDSA SigGen            KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A5276)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ ECDSA SigVer            KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A4659)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ ECDSA SigVer            KAT                     CAST                     On demand               By calling
+ (FIPS186-5) (A5276)                                                                              NCL_MISC_SelfTest
+                                                                                                  and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+ KAS-ECC-SSC             KAT                     CAST                     On demand               By calling
+ Sp800-56Ar3                                                                                      NCL_MISC_SelfTest
+ (A4659)                                                                                          and passing the
+                                                                                                  algorithm as an
+                                                                                                  argument
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   39 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or Test       Test Method             Test Type                Period                   Periodic Method
+
+ KAS-ECC-SSC             KAT                     CAST                     On demand                By calling
+ Sp800-56Ar3                                                                                       NCL_MISC_SelfTest
+ (A5276)                                                                                           and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ Hash DRBG (A4659)       KAT                     CAST                     On demand                By calling
+                                                                                                   NCL_MISC_SelfTest
+                                                                                                   and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ Hash DRBG (A5276)       KAT                     CAST                     On demand                By calling
+                                                                                                   NCL_MISC_SelfTest
+                                                                                                   and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ KDF SP800-108           KAT                     CAST                     On demand                By calling
+ (A4659)                                                                                           NCL_MISC_SelfTest
+                                                                                                   and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ KDF SP800-108           KAT                     CAST                     On demand                By calling
+ (A5276)                                                                                           NCL_MISC_SelfTest
+                                                                                                   and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ ECDSA KeyGen            PCT                     PCT                      N/A                      N/A
+ (FIPS186-5) (A4659)
+
+ ECDSA KeyGen            PCT                     PCT                      N/A                      N/A
+ (FIPS186-5) (A5276)
+
+ HSS SigVer              KAT                     CAST                     On demand                By calling
+                                                                                                   NCL_MISC_SelfTest
+                                                                                                   and passing the
+                                                                                                   algorithm as an
+                                                                                                   argument
+
+ ESV - Repetition        RCT                     CAST                     On demand                Powering the chip off
+ Count Test (Startup)                                                                              and on
+
+ ESV - Repetition        RCT                     CAST                     On demand                Powering the chip off
+ Count Test                                                                                        and on
+ (Continuous)
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   40 of 47
+Nuvoton Cryptographic Library 3.0                                                   FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Algorithm or Test          Test Method              Test Type                 Period                   Periodic Method
+
+ ESV - Adaptive             APT                      CAST                      On demand                Powering the chip off
+ Proportional Test                                                                                      and on
+ (Startup)
+
+ ESV - Adaptive             APT                      CAST                      On demand                Powering the chip off
+ Proportional Test                                                                                      and on
+ (Continuous)
+
+Table 19: Conditional Periodic Information
+
+10.4 Error States
+For any of the conditional self-tests, the module enters an error state upon failing the self-test. A failure in the conditional
+CAST or conditional PCT results in “NCL_STATUS_FAIL”. Likewise, a failure of the entropy source health tests will result
+in an “ENTROPY_SRC_ERROR” status returned to the user. When in the error state, no cryptographic services are
+provided, control and data output is prohibited. The only method to clear this error state is to power cycle the device and
+then successfully pass the conditional self-tests.
+
+ Name      Description                  Conditions          Recovery Method                Indicator
+
+ Error     When in this error           Failure in          The only method to             Failure in conditional self-test:
+ State     state, no cryptographic      conditional self-   clear this error state is to   NCL_STATUS_FAIL; Failure of
+           services are provided,       test (conditional   power cycle the device         the ENT health test:
+           control and data output      CAST or             and then successfully          ENTROPY_SRC_ERROR
+           is prohibited.               conditional PCT)    pass the conditional
+                                        Failure of the      self-tests.
+                                        ENT health test
+
+Table 20: Error States
+
+
+
+
+                             © 2025 Nuvoton Technology Corporation / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                        41 of 47
+Nuvoton Cryptographic Library 3.0                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+The module is delivered as part of the Nuvoton NPCX499HA0BX (EC), Nuvoton NPCD324HA0DX (SIO) and Nuvoton
+NPCX499HA1BX (EC) platforms (listed in Table 2). During manufacturing – each chip is tested to ensure the module was
+manufactured correctly.
+During execution – As part of the device boot process, the code is verified by a dedicated hardware inside the chip that
+checks every byte of code compared to a known parity bit. If any byte fails, the parity test then an internal error is
+generated; the error is handled by the application (User) firmware.
+
+11.2 Administrator Guidance
+The module is configured to be operational by default. If the device starts up successfully and has successfully passed the
+SHA2-256, HMAC- SHA2-512 and KBKDF-HMAC-SHA2-256 CASTs, it is operating correctly and can begin servicing
+User requests.
+
+11.3 Non-Administrator Guidance
+The module does not establish any SSPs for itself. Instead, the module provides this functionality as a service for other
+components within the TOEPP. The entity using the IUT must obtain required assurances listed in section 6.4 of SP 800-
+56BRev2 by performing the following steps:
+   1. The entity requesting the RSA key unwrapping (un-encapsulation) service from the module, shall only use an
+      RSA private key that was generated by an active FIPS validated module that implements FIPS 186-5 compliant
+      RSA key generation service and performs the key pair validity and the pairwise consistency as stated in section
+      6.4.1.1 of the SP 800-56BRev2. Additionally, the entity shall renew these assurances over time by using any
+      method described in section 6.4.1.5 of the SP 800-56BRev2.
+   2. For use of an RSA key wrapping (encapsulation) service in the context of key transport per IG D.G, the entity
+      using the module, shall verify the validity of the peer's public key using any method specified in section 6.4.2.1 of
+      the SP 800-56BRev2.
+   3. The entity using the module, shall confirm the peer's possession of private key by using any method specified in
+      section 6.4.2.3 of the SP 800-56BRev2.
+To comply with the assurances found in Section 5.6.2 of SP 800-56Ar3, the operator must use module’s approved key
+pair generation service to generate ephemeral EC Diffie-Hellman key pair, or the key pair must be obtained from another
+FIPS-validated module. As part of this service, the module will internally perform the full public key validation of the
+generated public key. The module’s shared secret computation service will internally perform the full public key validation
+of the peer public key, complying with Sections 5.6.2.2.1 and 5.6.2.2.2 of SP 800-56Ar3.
+
+11.4 End of Life
+Once the module reaches its end-of-life stage (End of Life (EOL) date for the Nuvoton device is 10 years from
+manufacturing date) or sanitation is initiated by the module’s Operator, it is the Operator’s responsibility to clear all
+existing SSPs from the module. This can be achieved by either performing a full device reset, or by explicitly invoking the
+following sequence of APIs to clear the data from all modules:
+    •   NCL_SHA_Clear - For each of existing SHA, HMAC, KBKDF contexts
+    •   NCL_DRBG_Clear - For each of existing DRBG contexts
+    •   NCL_AES_Clear - For each of existing AES contexts
+    •   NCL_RSA_Clear - For each of existing RSA contexts
+    •   NCL_ECC_Clear - For each of existing ECDSA and ECDH contexts
+    •   NCL_HSS_Clear - For each of existing HSS contexts
+
+
+                          © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    42 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+12 Mitigation of Other Attacks
+The module does not implement security mechanisms to mitigate other attacks.
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   43 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Glossary and Abbreviations
+        AES               Advanced Encryption Standard
+        ACVP              Algorithm Certification Validation Program
+        CBC               Cipher Block Chaining
+        CAST              Cryptographic Algorithm Self-Test
+        CCM               Counter with Cipher Block Chaining-Message Authentication Code
+        CFB               Cipher Feedback
+        CMAC              Cipher-based Message Authentication Code
+        CMVP              Cryptographic Module Validation Program
+        CSP               Critical Security Parameter
+        CTR               Counter Mode
+        DRBG              Deterministic Random Bit Generator
+        ECB               Electronic Code Book
+        ECC               Elliptic Curve Cryptography
+        EOL               End Of Life
+        FIPS              Federal Information Processing Standards Publication
+        GCM               Galois Counter Mode
+        HMAC              Hash Message Authentication Code
+        HSS               Hierarchical Signature System
+        KAS               Key Agreement Scheme
+        KAT               Known Answer Test
+        LMS               Leighton-Micali Signature
+        MAC               Message Authentication Code
+        NIST              National Institute of Science and Technology
+        OFB               Output Feedback
+        PSS               Probabilistic Signature Scheme
+        RSA               Rivest, Shamir, Addleman
+        SHA               Secure Hash Algorithm
+        SHS               Secure Hash Standard
+        SSC               Shared Secret Computation
+        TOEPP             Tested Operational Environment’s Physical Perimeter
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   44 of 47
+Nuvoton Cryptographic Library 3.0                                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+References
+FIPS140-3           FIPS PUB 140-3 - Security Requirements for Cryptographic Modules
+                    March 2019
+                    https://doi.org/10.6028/NIST.FIPS.140-3
+
+FIPS140-3_IG         Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module Validation Program
+                     September 2024
+                     https://csrc.nist.gov/CSRC/media/Projects/cryptographic-module-validation-
+                     program/documents/fips 140-3/FIPS 140-3 IG.pdf
+
+FIPS180-4            Secure Hash Standard (SHS)
+                     March 2012
+                     http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS186-5            Digital Signature Standard (DSS)
+                     February 2023
+                     http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
+
+FIPS197              Advanced Encryption Standard
+                     November 2001
+                     http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS198-1            The Keyed Hash Message Authentication Code (HMAC)
+                     July 2008
+                     http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+PKCS#1               Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                     Specifications Version 2.1
+                     February 2003
+                     http://www.ietf.org/rfc/rfc3447.txt
+
+RFC3394              Advanced Encryption Standard (AES) Key Wrap Algorithm
+                     September 2002
+                     http://www.ietf.org/rfc/rfc3394.txt
+
+RFC5649              Advanced Encryption Standard (AES) Key Wrap with Padding Algorithm
+                     September 2009
+                     http://www.ietf.org/rfc/rfc5649.txt
+
+SP800-38A            NIST Special Publication 800-38A - Recommendation for Block Cipher Modes of Operation
+                     Methods and Techniques
+                     December 2001
+                     http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP800-38B            NIST Special Publication 800-38B - Recommendation for Block Cipher Modes of Operation: The
+                     CMAC Mode for Authentication
+                     May 2005
+                     http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     45 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+SP800-38C            NIST Special Publication 800-38C - Recommendation for Block Cipher Modes of Operation: the
+                     CCM Mode for Authentication and Confidentiality
+                     May 2004
+                     http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+SP800-38D            NIST Special Publication 800-38D - Recommendation for Block Cipher Modes of Operation:
+                     Galois/Counter Mode (GCM) and GMAC
+                     November 2007
+                     http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+
+SP800-38F            NIST Special Publication 800-38F - Recommendation for Block Cipher Modes of Operation:
+                     Methods for Key Wrapping
+                     December 2012
+                     http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP800-56Arev3        NIST Special Publication 800-56A Revision 3 - Recommendation for Pair Wise Key Establishment
+                     Schemes Using Discrete Logarithm Cryptography
+                     April 2018
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+SP800-56Brev2        Recommendation for Pair-Wise Key Establishment Schemes Using Integer Factorization
+                     Cryptography
+                     March 2019
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Br2.pdf
+
+SP800-90Ar1          NIST Special Publication 800-90A - Revision 1 - Recommendation for Random Number
+                     Generation Using Deterministic Random Bit Generators
+                     June 2015
+                     http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+SP800-90B            NIST Special Publication 800-90B - Recommendation for the Entropy Sources Used for Random
+                     Bit Generation
+                     January 2018
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+SP800-208            NIST Special Publication 800-208 - Recommendation for Stateful Hash-Based Signature Schemes
+                     October 2022
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-208.pdf
+
+SP800-108rev1        NIST Special Publication 800-108 - Recommendation for Key Derivation Using Pseudorandom
+                     Functions
+                     February 2024
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1-upd1.pdf
+
+SP800-133rev2        NIST Special Publication 800-133 - Recommendation for Cryptographic
+                     Key Generation
+                     December 2012
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   46 of 47
+Nuvoton Cryptographic Library 3.0                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+SP800-140Br1         NIST Special Publication 800-140Br1 - CMVP Security Policy Requirements
+                     November 2023
+                     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140Br1.pdf
+
+
+
+
+                         © 2025 Nuvoton Technology Corporation / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   47 of 47
+

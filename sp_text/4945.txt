@@ -1,0 +1,2444 @@
+               F5, Inc.
+
+
+
+
+                   BIG-IP Tenant Cryptographic Module
+
+                                 Module Version: 17.1.0.1
+
+
+
+
+                                         FIPS Security Level 2
+
+            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                               Last update: January 2025
+
+
+
+
+            Prepared by:
+atsec information security corporation
+4516 Seton Center Parkway, Suite 250
+          Austin, TX 78759
+           www.atsec.com
+BIG-IP Tenant Cryptographic Module                                                             FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Table of Contents
+1   General ............................................................................................................................. 5
+  1.1   Description ........................................................................................................................ 5
+  1.2   Security Levels .................................................................................................................. 5
+2   Cryptographic Module Specification .................................................................................. 6
+  2.1   Description ........................................................................................................................ 6
+  2.2   Operating Environments .................................................................................................... 6
+  2.3   Modes of Operation ........................................................................................................... 6
+  2.4   Algorithms ......................................................................................................................... 7
+      2.4.1    Approved Algorithms and Vendor Affirmed Algorithms ............................................... 7
+      2.4.2    Non-Approved, Allowed Algorithms and Non-Approved, Allowed Algorithms with No
+      Security Claimed ..................................................................................................................... 10
+      2.4.3    Non-Approved, Not Allowed Algorithms ..................................................................... 10
+  2.5   Module Photographs ........................................................................................................ 11
+  2.6   Block Diagram and Cryptographic Boundary Descriptions .............................................. 13
+3   Cryptographic Module Interfaces ......................................................................................14
+  3.1   Ports and Interfaces ......................................................................................................... 14
+4   Roles, Services, and Authentication..................................................................................15
+  4.1   Roles ................................................................................................................................ 15
+  4.2   Authentication ................................................................................................................. 17
+  4.3   Approved Services ........................................................................................................... 18
+  4.4   Non-Approved Services ................................................................................................... 24
+5   Software/Firmware Security ..............................................................................................25
+  5.1   Integrity Techniques ........................................................................................................ 25
+  5.2   Initiate on Demand .......................................................................................................... 25
+  5.3   Executable Code .............................................................................................................. 25
+6   Operational Environment .................................................................................................26
+  6.1   Operational Environment Type and Requirements .......................................................... 26
+7   Physical Security ..............................................................................................................27
+  7.1   Mechanisms and Actions Required .................................................................................. 27
+  7.2   Tamper Label Placement ................................................................................................. 27
+8   Non-Invasive Security ......................................................................................................31
+9   Sensitive Security Parameter Management ......................................................................32
+  9.1   Random Bit Generation - Entropy Source ........................................................................ 37
+  9.2   SSP Generation ................................................................................................................ 37
+  9.3   SSP Establishment ........................................................................................................... 38
+  9.4   SSP Entry / Output ........................................................................................................... 38
+  9.5   SSP Storage ..................................................................................................................... 39
+  9.6   SSP Zeroization................................................................................................................ 39
+10 Self-tests..........................................................................................................................40
+  10.1 Pre-Operational Self-Tests ............................................................................................... 40
+      10.1.1       Pre-operational Software/Firmware Integrity Test ..................................................... 40
+    10.2     Conditional Self-Tests ...................................................................................................... 40
+      10.2.1       Conditional Cryptographic Algorithm Self-Tests ........................................................ 40
+      10.2.2       Conditional Pairwise Consistency Self-Tests .............................................................. 42
+      10.2.3       On Demand Self-Tests ............................................................................................... 42
+  10.3 Error States ..................................................................................................................... 42
+11 Life-Cycle Assurance ........................................................................................................43
+                                              © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                        2 of 51
+BIG-IP Tenant Cryptographic Module                                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+   11.1       Startup Procedures .......................................................................................................... 43
+   11.2       Administrator Guidance ................................................................................................... 43
+      11.2.1       Installing Tamper Evident Labels ............................................................................... 43
+      11.2.2       Installing F5OS .......................................................................................................... 43
+      11.2.3       Tenant image installation and deployment ............................................................... 44
+      11.2.4       Additional Guidance .................................................................................................. 44
+   11.3       Non-Administrator Guidance ........................................................................................... 45
+      11.3.1       AES GCM IV................................................................................................................ 45
+      11.3.2       RSA SigGen/ SigVer ................................................................................................... 45
+      11.3.3       SP800-56Ar3 Assurances: .......................................................................................... 45
+12     Mitigation of Other Attacks ...............................................................................................46
+
+Figure 1 - r4800 .............................................................................................................................. 11
+Figure 2 - r5900 .............................................................................................................................. 12
+Figure 3 - r5920-DF ......................................................................................................................... 12
+Figure 4 –r10900, r10920-DF and r12900-DS ................................................................................. 12
+Figure 5 – VELOS CX410 BX110 ...................................................................................................... 13
+Figure 6 - Block Diagram ................................................................................................................ 13
+Figure 7 - Tamper labels on r4800 (5 of 5 tamper labels)............................................................... 28
+Figure 8 – Tamper labels on r5900 (4 of 4 tamper labels) .............................................................. 29
+Figure 9 - Tamper labels on r5920-DF (5 of 5 tamper labels). ........................................................ 29
+Figure 10 – Tamper labels on r10900, r10920-DF and r12900-DS .................................................. 30
+Figure 11 – Tamper label on VELOS CX410 BX110 (1 of 1 tamper label shown). ........................... 30
+
+
+Table 1 - Security Levels ................................................................................................................... 5
+Table 2 - Tested Operating Environments ........................................................................................ 6
+Table 3 - Approved Algorithms ......................................................................................................... 9
+Table 4 - Non-Approved Not Allowed Algorithms ............................................................................ 11
+Table 5 - Ports and Interfaces ......................................................................................................... 14
+Table 6 - Roles, Service Commands, Input and Output................................................................... 17
+Table 7 - Authentication Methods ................................................................................................... 18
+Table 8 - Approved Services ........................................................................................................... 24
+Table 9 - Non-Approved Services .................................................................................................... 24
+Table 10 - Physical Security Inspection Guidelines ......................................................................... 27
+Table 11 – Number of tamper evident labels and blanks/ filler panels per hardware appliance ..... 27
+Table 12 - SSPs ............................................................................................................................... 37
+Table 13 - Non-Deterministic Random Number Generation Specification....................................... 37
+Table 14 – Conditional Cryptographic Algorithm Self-Tests ............................................................ 42
+Table 15 - Error States .................................................................................................................... 42
+
+
+
+
+                                               © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                         3 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Copyrights and Trademarks
+F5®, BIG-IP®, and TMOS®, are registered trademarks of F5, Inc.
+Intel®, Atom® and Xeon® are registered trademarks of Intel Corporation.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   4 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+1    General
+
+1.1 Description
+This document is the non-proprietary FIPS 140-3 Security Policy for the BIG-IP Tenant
+Cryptographic Module with firmware version 17.1.0.1. The document contains the security rules
+under which the module must operate and describes how this module meets the requirements as
+specified in FIPS PUB 140-3 (Federal Information Processing Standards Publication 140-3) for a
+Security Level 2 module.
+This document provides all tables and diagrams (when applicable) required by NIST SP 800-140B.
+
+1.2 Security Levels
+
+
+      ISO/IEC 24759                  FIPS 140-3 Section Title                                          Security
+      Section 6. [Number                                                                               Level
+      Below]
+      1                              General                                                           2
+
+      2                              Cryptographic Module Specification                                2
+
+      3                              Cryptographic Module Interfaces                                   2
+
+      4                              Roles, Services, and Authentication                               2
+
+      5                              Software/Firmware Security                                        2
+
+      6                              Operational Environment                                           N/A
+
+      7                              Physical Security                                                 2
+
+      8                              Non-Invasive Security                                             N/A
+
+      9                              Sensitive Security Parameter Management                           2
+
+      10                             Self-Tests                                                        2
+
+      11                             Life-Cycle Assurance                                              2
+
+      12                             Mitigation of Other Attacks                                       N/A
+
+Table 1 - Security Levels
+
+
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    5 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+2    Cryptographic Module Specification
+
+2.1 Description
+Purpose and Use: The BIG-IP Tenant Cryptographic Module (hereafter referred to as “the module”)
+is a smart evolution of F5’s market leading Application Delivery Controller (ADC) technology, and
+specifically designed for F5 hardware and the underlying platform layer. Traffic Management
+Operating System (TMOS) is the foundation and architecture for F5’s ADCs running on the BIG-IP
+platform. Together, BIG-IP hardware and the firmware components TMOS is a highly optimized
+system providing control over the acceleration, security, and management through purpose-built
+hardware and software systems. F5OS platform layer is tightly integrated with F5’s TMOS
+firmware. In the following documentation TMOS and BIG-IP are interchangeably used where
+system and feature modules are concerned.
+Module Type: Firmware
+Module Embodiment: Multi Chip Standalone
+
+2.2 Operating Environments
+    Operating system                 Hardware Platform            Processors                           PAA/
+                                                                                                       Acceleration
+    BIG-IP 17.1.0.1 Tenant           r4800                        Intel® Atom® P5342                   N/A
+    on F5OS-A 1.5.1                                               Snow Ridge
+    BIG-IP 17.1.0.1 Tenant           r5900                        Intel® Xeon® Silver 4314             N/A
+    on F5OS-A 1.5.1                                               Ice Lake
+    BIG-IP 17.1.0.1 Tenant           r5920-DF                     Intel® Xeon® Silver 4314             N/A
+    on F5OS-A 1.5.1                                               Ice Lake
+    BIG-IP 17.1.0.1 Tenant           r10900                       Intel® Xeon® Gold 6312U              N/A
+    on F5OS-A 1.5.1                                               Ice Lake
+    BIG-IP 17.1.0.1 Tenant           r10920-DF                    Intel® Xeon® Gold 6312U              N/A
+    on F5OS-A 1.5.1                                               Ice Lake
+    BIG-IP 17.1.0.1 Tenant           r12900-DS                    Intel® Xeon® Platinum                N/A
+    on F5OS-A 1.7.0                                               8351N Ice Lake
+    BIG-IP 17.1.0.1 Tenant           VELOS CX410 BX110            Intel® Xeon® D-2177NT                N/A
+    on F5OS-C 1.6.0                                               Skylake
+
+Table 2 - Tested Operating Environments
+
+2.3 Modes of Operation
+
+The module supports two modes of operation:
+    •   in Approved mode of operation only approved or vendor affirmed security functions can be
+        used.
+   • in non-Approved mode of operation only non-approved security functions can be used.
+The module enters operational mode after pre-operational and conditional algorithms self-tests
+succeed. The module automatically switches between the approved and non-approved modes
+depending on the services requested by the operator. The status indicator of the mode of
+operation is equivalent to the indicator of the service that was requested. SSPs used or stored in
+the Approved mode are not used in the non-Approved mode, and vice versa.
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    6 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+In the Approved Mode, the cryptographic module provides the cryptographic algorithms whose
+CAVP certificates are in Table 3 below. The Control (or Management) Plane refers to the
+connection from an administrator to the BIG-IP for system management. The Data Plane refers to
+the traffic passed between external entities and internal servers.
+Not all the ACVP tested capabilities are used by the module in approved mode of operation.
+
+2.4 Algorithms
+
+2.4.1 Approved Algorithms and Vendor Affirmed Algorithms
+
+CAVP Cert               Algorithm and          Mode / Method                Description / Key        Use / Function
+                        Standard                                            Size(s)/ Key
+                                                                            Strength(s)
+
+Control     Data
+Plane       Plane
+A3729       N/A         AES               ECB, CBC, GCM, CCM, 128 / 192 / 256-bit                    Encryption and
+                        [FIPS 197, SP800- CTR                 keys with key                          decryption
+                        38A, SP800-38C,                       strengths from
+                        SP800 38D]                            128 to 256 bits
+A3729       A3730       KTS (AES)         GCM, CCM                          128 / 256-bit AES        Key wrapping /
+                        [FIPS 197, SP800-                                   keys with key            unwrapping
+                        38D, SP800- 38F]                                    strengths 128 or
+                                                                            256 bits
+A3729       A3730                              AES-CBC key and              128 / 256-bit AES
+                                               HMAC-SHA2-256, or            and HMAC keys
+                                               HMAC-SHA2-384                with key strengths
+                                                                            128 or 256 bits
+A3729       N/A                                AES-CBC/ AES-CTR   128 / 256-bit AES
+                                               keys and HMAC-SHA- and HMAC keys
+                                               1, HMAC-SHA2-256   with key strengths
+                                                                  from 128 or 256
+                                                                  bits
+A3729       N/A         AES               GMAC                              128 / 192 / 256-bit      MAC
+                        [FIPS 197, SP800-                                   AES keys with key        generation and
+                        38B, SP800 38D]                                     strengths from           verification
+                                                                            128 and 256 bits
+N/A         A3730       AES               CBC, GCM, CCM                     128 / 256-bit keys       Encryption and
+                        [FIPS 197, SP800-                                   with key strengths       decryption
+                        38A, SP800-38C,                                     128 and 256 bits
+                        SP800 38D]
+N/A         A3730       AES               GMAC                              128 / 256-bit keys       MAC
+                        [FIPS 197, SP800-                                   with key strengths       generation and
+                        38B, SP800 38D]                                     128 and 256 bits         verification
+
+A3729       N/A         CTR_DRBG               AES 256 in CTR               Entropy input       Random
+                        [SP800-90Ar1]          mode, with / without         (256-bits), V (128- number
+                                               derivation function,         bits) and key (256- generation
+                                               prediction resistance        bits) values
+                                               disabled / enabled
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    7 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+CAVP Cert               Algorithm and          Mode / Method                Description / Key         Use / Function
+                        Standard                                            Size(s)/ Key
+                                                                            Strength(s)
+Control     Data
+Plane       Plane
+N/A         A3730       CTR_DRBG               AES 256 in CTR               Entropy input       Random
+                        [SP800-90A r1]         mode, with                   (256-bits), V (128- Number
+                                               derivation function,         bits) and key (256- Generation
+                                               prediction resistance        bits) values
+                                               disabled
+A3729       N/A         RSA                    B.3.3 Random                 2048 and 4096-bit         Key pair
+                        [FIPS 186-4]           Probable Primes              keys with key             generation
+                                                                            strengths 112 and
+                                                                            150-bits
+A3729       A3730       RSA                    PKCS#1v1.5: SHA2-            2048, 3072 and            Signature
+                        [FIPS 186-4]           256, SHA2-384                4096-bits keys            generation and
+                                                                            with key strengths        verification
+                                                                            112 to 150-bits
+N/A         A3730       RSA                    PKCSPSS: SHA2-256,           2048, 3072 and            Signature
+                        [FIPS 186-4]           SHA2-384                     4096-bits keys            generation and
+                                                                            with key strengths        verification
+                                                                            112 to 150-bits
+A3729       A3730       Safe Primes key        Safe Primes groups           ffdhe2048,                Key pair
+                        generation/                                         ffdhe3072, and            generation and
+                        verification                                        ffdhe4096 with            verification
+                        [SP800-56Ar3]                                       key strengths 112         using Safe
+                                                                            to 150-bits               Primes
+
+A3729       A3730       ECDSA                  B.4.2 Testing                P-256 and P-384           Key pair
+                        [FIPS 186-4]           Candidates                   with key strengths        generation /
+                                                                            128 and 192-bits          verification
+
+A3729       A3730       ECDSA                  SHA2-256, SHA2-384, P-256 and P-384                    Signature
+                        [FIPS 186-4]           SHA2-512            with key strengths                 generation and
+                                                                   128 and 192-bits                   verification
+
+A3729       A3730       SHS                    SHA-1                        N/A                       Message digest
+                        [FIPS180-4]            SHA2-256
+                                               SHA2-384
+                                               SHA2-512
+A3729       A3730       HMAC                   HMAC-SHA-1                   112 bits to 1024-         Message
+                        [FIPS 198-1]           HMAC-SHA2-256                bits with key             authentication
+                                               HMAC-SHA2-384                strengths 112 to
+                                               HMAC-SHA2-512                256-bits
+
+
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     8 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+CAVP Cert               Algorithm and          Mode / Method                Description / Key        Use / Function
+                        Standard                                            Size(s)/ Key
+                                                                            Strength(s)
+Control     Data
+Plane       Plane
+A3729       A3730       KAS-ECC-SSC            Ephemeral Unified:           P-256, P-384 with        Shared Secret
+                        [SP800-56Ar3]          KAS Role: initiator,         key strengths 128        Computation
+                                               responder                    and 192-bits             used in Key
+                                                                                                     Agreement
+                                                                                                     Scheme (KAS)
+                                                                                                     IG D.F scenario
+                                                                                                     2 (path 2)
+
+A3729       A3730       KAS-FFC-SSC            dhEphem                      ffdhe2048,               Shared Secret
+                        [SP800-56Ar3]          KAS Role: initiator,         ffdhe3072,               Computation
+                                               responder                    ffdhe4096 with           used in Key
+                                                                            key strengths 112        Agreement
+                                                                            to 150-bits              Scheme KAS)
+                                                                                                     IG D.F scenario
+                                                                                                     2 (path 2)
+
+A3729       N/A         SSH KDF1               AES-128, AES-256             256-bit keys with        Key derivation
+(CVL)                   [SP800-135r1]          with SHA2-256,               256-bits key             (CVL)
+                                               SHA2-384                     strength
+A3729       A3730       TLS KDF1               TLS v1.2                     256-bits                 Key derivation
+(CVL)                   [SP800-135r1]                                                                (CVL)
+                        RFC7627
+(vendor (vendor CKG                 DRBG produces                           RSA Sizes: 2048          Key generation
+affirmed affirmed) Section 4        random numbers use                      and 4096-bits key
+)                  example 1        for key generation of                   with 112 and 150-
+                   [SP800-133r2]    asymmetric                              bits key strength
+                   CTR_DRBG         algorithms
+                   [SP800-90Ar1]                                            ECDSA, EC Diffie-
+                                                                            Hellman: P-256
+                   Diffie-Hellman
+                                                                            and P-384 with
+                   and EC Diffie-
+                                                                            128 and 192-bits
+                   Hellman [SP800-
+                   56Ar3]                                                   key strength
+                   RSA, ECDSA [FIPS                                         Safe Primes:
+                   186-4]                                                   ffdhe2048,
+                                                                            ffdhe3072,
+                                                                            ffdhe4096 with
+                                                                            112, 128, 150-bits
+                                                                            key strength
+
+Table 3 - Approved Algorithms
+
+
+
+
+1 No parts of the TLS / SSH protocols except the KDF has been reviewed or tested by the CAVP and
+
+CMVP
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    9 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+2.4.2 Non-Approved, Allowed Algorithms and Non-Approved, Allowed Algorithms with No Security
+   Claimed
+There are no non-Approved algorithms allowed in the approved mode along with their usage with
+or without security claimed.
+
+2.4.3 Non-Approved, Not Allowed Algorithms
+The following table lists the non-Approved algorithms along with their usage.
+
+  Algorithm/ Functions           Use/ Function
+
+  AES modes: OFB, CFB,
+  XTS and KW;
+  AES-GCM in IPsec
+  protocol;                      Symmetric encryption and decryption
+  DES, RC4,
+  Triple-DES,
+  SM2, SM4
+
+  RSA                            Asymmetric encryption and decryption
+
+                                 with modulus size other than 2048, and 4096-bit
+  RSA key generation             with ANSI X9.31 standard for all key sizes
+
+                                 domain parameter generation,
+  DSA                            domain parameter verification,
+                                 key pair generation
+
+  DSA digital signature          signature generation and verification using any key size
+
+  EdDSA digital                  signature generation and verification using Ed25519
+  signature
+  ECDSA key generation/          with curves other than P-256 and P-384
+  verification
+                                 - Signature generation and verification: PKCS#1 v1.5 using 2048,
+                                 3072 or 4096-bits modulus with SHA-1, SHA2-224, SHA2-512
+                                 - Signature generation and verification using PKCS #1 v1.5 scheme
+                                 with modulus other than 2048, 3072 or 4096 bits, for all SHA sizes
+  RSA digital signature          - Signature generation and verification PSS using 2048, 3072 or
+                                 4096-bits modulus with SHA-1, SHA2-224, SHA2-512
+                                 - Signature generation and verification using Probabilistic Signature
+                                 Scheme (PSS) specified in ANSI X9.31 standard
+
+                                 - Signature generation and verification using curves other than P-
+  ECDSA digital                  256 and P-384, all SHA sizes
+  signature                      - Signature generation and Signature verification using curves P-256
+                                 and P-384 with SHA-1, SHA2-224
+
+  SHA2-224
+  SM3                            Message digest
+  MD5
+  HMAC-SHA2-224
+  AES-CMAC                       Message authentication
+  Triple-DES
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   10 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+  Algorithm/ Functions           Use/ Function
+
+  AES-GCM in IPsec
+  protocol
+                                 Key Agreement Scheme:
+                                 - Diffie-Hellman using groups other than ffdhe2048, ffdhe3072,
+                                 ffdhe4096
+  Diffie-Hellman                 - Diffie-Hellman using MODP groups in IPsec/IKE protocol
+  EC Diffie-Hellman              - EC Diffie-Hellman ephemeral Unified using curves other than P-256
+                                 and P-384
+                                 - EC Diffie-Hellman static Unified and OnePassDh using P-256, P-384
+                                 - EC Diffie-Hellman in IPsec/IKE protocol using P-384
+
+                                 Key derivation function in the context of:
+  TLS KDF                        - TLS using MD5/ SHA-1/ SHA2-224 / SHA2-512
+  SSH KDF                        - SSH using SHA-1/ SHA2-224/ SHA2-512
+  SNMP KDF                       - SNMP using any SHA variant
+  IKEv1, IKEv2 KDF               - IKE using any SHA variant
+
+  TLS used in SSL                ciphersuites algorithms implemented by f5-rest-node
+  Orchestrator (SSLO)
+Table 4 - Non-Approved Not Allowed Algorithms
+
+2.5 Module Photographs
+Figures below show the platforms on which the module was tested.
+
+
+
+
+Figure 1 - r4800
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   11 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Figure 2 - r5900
+
+
+
+
+Figure 3 - r5920-DF
+
+
+
+
+Figure 4 –r10900, r10920-DF and r12900-DS
+(same chassis for the test platforms)
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   12 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Figure 5 – VELOS CX410 BX110
+with 7 filler panels and one blade. The BX110 tested blade in slot #1 delineated with red rectangle.
+
+2.6 Block Diagram and Cryptographic Boundary Descriptions
+The block diagram below shows the module cryptographic boundary, its interfaces with the host
+operational environment, the host platform, the flow of status output (SO), control input (CI), data
+input (DI) and data output (DO). The module cryptographic boundary is defined by the red dotted
+line in Figure 6. The TOEPP is defined by the tested platforms listed in Table 2 and delineated by
+the black rectangle in Figure 6. The description of the ports and interfaces can be found in Table 5.
+
+
+
+
+Figure 6 - Block Diagram
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   13 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+3    Cryptographic Module Interfaces
+
+3.1 Ports and Interfaces
+
+The logical interfaces are the commands through which users of the module request services.
+There are no external input or output devices to the module can be used for data input, data
+output, status output or control input.
+For the purpose of the FIPS 140-3 validation, the physical ports are interpreted to be the physical
+ports of the hardware platform on which it runs.
+
+ Physical port        Logical Interface2      Data That Passes
+ N/A                  Data Input              TLS/SSH protocol input messages;
+                                              Configuration commands for interface management
+
+ N/A                  Data Output             TLS/SSH protocol output messages;
+                                              Status log
+
+ N/A                  Control Input           API which control system state (e.g. reset system, power-
+                                              off system)
+
+ N/A                  Status Output           API which provides system status information
+
+ Power Interface      Power Input             PSU
+
+Table 5 - Ports and Interfaces
+
+
+
+
+2 The module does not implement Control Output interface.
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   14 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+4    Roles, Services, and Authentication
+
+4.1 Roles
+The module supports one CO role and one User role. Maintenance role is not supported. The FIPS
+140-3 roles are defined below and corresponding service with input and output are described in
+Table 6.
+    •   Crypto Officer (CO) role: The Crypto Officer is represented by the administrator of the
+        module ("administrator" is the CO). This entity performs module installation and
+        initialization. This role has full access to the system and has the ability to create, delete,
+        and manage other User roles on the system. At initialisation of the module, the CO is the
+        only available role and only the CO can create the user roles.
+    •   The FIPS140-3 User role is mapped to multiple module roles: Auditor, Certificate Manager,
+        Firewall Manager, iRule Manager, Operator, Resource Manager and User Manager. Each of
+        the module roles are responsible for different components of the system (e.g. auditing,
+        certificate and key management, user management, etc.).
+The list of services available to the CO and user roles are defined in Table 8 and Table 9.
+ FIPS 140-    Module Role                Service               Input                  Output
+ 3 Role
+ CO           administrator              List users            None                   List of user accounts
+ User         User Manager
+              Resource Manager
+              Auditor
+ CO           administrator              Create                Username,              Confirmation of account
+ User         User Manager               additional User       password               creation
+ CO           administrator              Modify existing       Username               Confirmation of account
+ User         User Manager               Users                                        modification
+ CO           administrator              Delete user           Username               Confirmation of deletion
+ User         User Manager
+ CO           administrator              Unlock user           Username               Confirmation of unlock
+ User         User Manager
+ CO           administrator              Update own            Own                    Confirmation of update of
+ User         User                       password              password               password
+ CO           administrator              Update others         Username,              Confirmation of update
+ User         User Manager               password              password
+ CO           administrator              Configure             New                    Confirmation of
+                                         password              password               configuration change
+                                         policy                policy
+ CO           administrator              Create / delete       Key/                   Confirmation of key/
+ User         Certificate                TLS key /             certificate            certificate creation or
+              Manager                    certificate           identification         deletion
+              Resource Manager                                 information
+ CO           administrator              Display / log         List of                Certificate expiration
+ User         Auditor                    expiration data       certificates           information
+              Certificate                of installed          to display
+              Manager                    certificates
+              Resource Manager
+ CO           administrator              List private          List of                List of key metadata i.e.
+ User         Auditor                    keys                  private keys           creation time, key size and
+              Certificate                                      to display             checksum
+              Manager
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   15 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ FIPS 140-    Module Role                Service               Input                  Output
+ 3 Role
+              Resource Manager
+ CO           administrator              Import TLS            Certificate to         Confirmation of import of
+ User         Certificate                certificate           import                 certificate
+              Manager
+ CO           administrator              Export                Certificate to         Exported Certificate file
+ User         Certificate                certificate file      export
+              Manager
+ CO           administrator              SSH-keyswap           SSH key to             Confirmation of SSH key
+ User         Resource Manager                                 create /               creation / deletion
+                                                               delete
+ CO           administrator              Configure             Policy rules,          Confirmation of policy
+ User         Firewall Manager           firewall              address lists          configuration
+ CO           administrator              Show firewall         N/A                    Display the current system
+ User         Firewall Manager           state                                        wide state of the firewall
+                                                                                      rules.
+ CO           administrator              Show statistics       N/A                    List of statistics of firewall
+ User         Firewall Manager           of firewall rules                            rules
+                                         on the BIG-IP
+                                         system
+ CO           administrator              Configure             Firewall user          Confirmation of
+ User         Firewall Manager           firewall users        and                    configuration
+                                                               configuration
+                                                               information
+ CO           administrator              View system           N/A                    Display of system audit
+ User         Auditor                    audit log                                    logs
+              Resource Manager
+ CO           administrator              Export                N/A                    Display System Analytics
+ User         Auditor                    analytics logs                               Logs
+                                         system
+ CO           administrator              Enable /              N/A                    Confirmation of enabling or
+ User         Resource Manager           disable audit                                disabling of audit
+ CO           administrator              Configure boot        Boot options           Confirmation of
+ User         Resource Manager           options                                      configuration of boot
+                                                                                      options
+ CO           administrator              Configure SSH         SSH access,            Confirmation of
+ User         Resource Manager           access options        IP address             configuration of SSH
+                                                               list                   access options
+ CO           administrator              Configure SSH         ssh/                   Confirmation of
+ User         Resource Manager           user                  authorized_k           configuration of SSH user
+              User Manager               configuration         eys file               configuration
+ CO           administrator              Modify nodes          Which nodes            Confirmation of
+ User         Operator                   and pool              and pool               modification of nodes and
+                                         members               members to             pool members
+                                                               modify
+ CO           administrator              Configure             List of nodes          Confirmation of creation /
+ User         Firewall Manager           nodes                 to create /            modification / display /
+              Resource Manager                                 modify / view          deletion of nodes
+                                                               / delete
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   16 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ FIPS 140-    Module Role                Service               Input                  Output
+ 3 Role
+ CO           administrator              Configure             List of iRules         Confirmation of creation /
+ User         iRule Manager              iRules                to create /            modification / display /
+              Firewall Manager                                 modify/ view/          deletion of iRules
+              Resource Manager                                 delete
+ CO           administrator              Reboot System         N/A                    Confirmation of system
+                                                                                      reboot
+ CO           administrator              Secure Erase          Selected file          Confirmation of full system
+                                                                                      zeroization
+ CO           administrator              SSH session           User,                  Confirmation of SSH
+ User         User                       service               address,               session establishment
+                                                               password,
+                                                               algorithms,
+                                                               key sizes
+ CO           administrator              Closing SSH           N/A                    Confirmation of SSH
+ User         User                       session                                      session closure
+ CO           administrator              TLS session           Address,               Confirmation of
+ User         User                       service               algorithms,            establishment of TLS
+                                                               keys,                  session
+                                                               primary
+                                                               secret
+ CO           administrator              Closing TLS           N/A                    Confirmation of TLS session
+ User         User                       session                                      closure
+ CO           administrator              Show version          None                   Version information, and
+ User         User                                                                    module name
+ CO           administrator              Show license          None                   FIPS license information
+ User         User
+ CO           administrator              Show status           None                   Status of the specific
+ User         User                                                                    service passed in the show
+                                                                                      status command
+ CO           administrator              Self- test            Power                  Pass/ fail results of self-
+ User         User                                                                    tests
+
+Table 6 - Roles, Service Commands, Input and Output
+
+4.2 Authentication
+The module supports role-based authentication. The module supports concurrent operators
+belonging to different roles (one CO role and one User role) which create different authenticated
+sessions, while achieving the separation between the concurrent operators.
+Two interfaces can be used to access the module:
+    •  CLI: The module offers a CLI called traffic management shell (tmsh) which is accessed
+       remotely using the SSHv2 secured session over the Ethernet connection.
+   • Web Interface (WebUI): The Web interface consists of HTTPS over TLS-enabled web browser
+       which provides a graphical interface for system management tools.
+The User role can access the module through CLI or WebUI. However, the CO can restrict User role
+access to have the User accessing through WebUI only.
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    17 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+The module does not maintain authenticated sessions upon power cycling. Power-cycling the
+system requires the authentication credentials to be re-entered. When entering password
+authentication data through the Web interface, any character entered will be obfuscated (i.e.
+replace the character entered with a dot on the entry box). When entering password
+authentication data through the CLI, the module does not display any character entered by the
+operator in stdin (e.g. keyboard).
+Table 7 lists the required role-based authentication method for the Crypto Office role and the User
+role depending upon which interface is being used.
+ Role        Authentication       Authentication Strength
+             Method
+ Crypto      role-based           The password must consist of a minimum of 8 characters with at
+ Officer     authentication       least one from each of the three-character classes. Character
+ User        with Password        classes are defined as: digits (0-9), ASCII lowercase letters (a-z),
+             (CLI or WebUI)       ASCII uppercase letters (A-Z)
+                                  Assuming a worst-case scenario where the password contains six
+                                  numerical digits, one ASCII lowercase letter and one ASCII
+                                  uppercase letter. The probability of guessing every character
+                                  successfully is (1/10)^6 * (1/26)^1 * (1/26)^1 = 1/676,000,000.
+                                  Note: this is less than 1/1,000,000.
+
+                                  The maximum number of login attempts is limited to 3 after which
+                                  the account is locked. This means that, in the worst case, an
+                                  attacker has the probability of guessing the password in one minute
+                                  as 3/676,000,000. Note: This is less than 1/100,000.
+ Crypto      role-based           The ECDSA using P-256 or P-384 curves for key based
+ Officer     authentication       authentication yields a minimum security-strength of 128 bits. The
+ User        with SSH             chance of a random authentication attempt falsely succeeding is at
+             ECDSA key            most 1/(2128) that is less than 1/1,000,000.
+             pair (CLI only)
+                                  The maximum number of login attempts is limited to 1 after which
+                                  the account switch to password authentication. Then the attacker
+                                  probability of succeeding to establish the connection depends on
+                                  the probability of guessing the password and it is, as above,
+                                  3/676,000,000 less than 1/100,000.
+
+Table 7 - Authentication Methods
+
+4.3 Approved Services
+Table 8 lists the Approved services, the service name, description, the Approved security function
+being used by the service, the keys and SSPs accessed by the service, the roles used by the
+service, access rights to keys and SSPs and the FIPS 140-3 service indicator returned by the
+service.
+The environment variable SECURITY_FIPS140_CIPHER_STRICT is exported with the cipher
+restriction status. If the cipher_restricted status is enabled, the status output from the service
+indicator is returned in the high speed login /var/log remote.log file as “'Service Indicator:
+Approved”. If the cipher_restricted status is disabled, there is no service indicator output.
+For SSH service the service indicator is implicit: when the SSH connection is established the
+service with the cipher selected is approved.
+The following variables are used in the Access rights to keys or SSPs column:
+    •   G = Generate: The module generates or derives the SSP.
+
+                                        © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     18 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    •   R = Read: The SSP is read from the module (e.g. the SSP is output).
+    •   W = Write: The SSP is updated, imported, or written to the module.
+    •   E = Execute: The module uses the SSP in performing a cryptographic operation.
+    •   Z = Zeroise: The module zeroises the SSP.
+Service       Description         Approved         Keys and/or SSPs Roles                        Access Indicator
+                                  Security                                                       rights
+                                  Functions                                                      to Keys
+                                                                                                 and/or
+                                                                                                 SSPs
+List users Display list of        N/A              N/A                     CO,                   N/A     None
+           all User                                                        User Manager,
+           accounts                                                        Resource
+                                                                           Manager,
+                                                                           Auditor
+Create      Create          N/A         password                           CO,                   W         None
+additional additional User                                                 User Manager
+User
+Modify      Modify existing N/A         N/A               CO,                                    N/A       None
+existing    Users                                         User Manager
+Users
+Delete      Delete User     N/A         N/A               CO,                                    N/A       None
+User                                                      User Manager
+Unlock      Remove lock     N/A         N/A               CO,                                    N/A       None
+User        from user who                                 User Manager
+            has exceeded
+            login attempts
+Update      Update own      N/A         password          CO,                                    W         None
+own         password                                      User
+password
+Update      Update others N/A           password          CO,                                    W         None
+others      password                                      User Manager
+password
+Configure Set password N/A              N/A               CO                                     N/A       None
+Password policy features
+Policy
+Create      Self-signed     RSA / ECDSA RSA public and    CO,                                    E         Service
+TLS         certificate     SigGen      private keys      Certificate                                      Indicator:
+certificate creation                    2048/ 4096 bit    Manager,                                         Approved
+                                        ECDSA public and Resource
+                                        private keys with Manager
+                                        P-256 and P-384
+Create      Used for the    RSA / ECDSA RSA public and    CO,                                    G         Service
+TLS key     SSL Certificate KeyGen      private keys      Certificate                                      Indicator:
+            key file        CTR_DRBG 2048/ 4096 bit       Manager,                                         Approved
+                                        ECDSA public and Resource
+                                        private keys with Manager
+                                        P-256 and P-384
+                                        DRBG seed                                                E
+                                        DRBG internal                                            E,W
+                                        state (V and key
+                                        values)
+                                        Entropy input                                            E
+
+                                        © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    19 of 51
+BIG-IP Tenant Cryptographic Module                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Service        Description         Approved         Keys and/or SSPs Roles                        Access Indicator
+                                   Security                                                       rights
+                                   Functions                                                      to Keys
+                                                                                                  and/or
+                                                                                                  SSPs
+Delete      Self-signed            N/A              RSA public and    CO,                         Z       None
+TLS         certificate /                           private keys      Certificate
+certificate key deletion                            2048/ 4096 bit    Manager,
+/ key                                               ECDSA public and Resource
+                                                    private keys with Manager
+                                                    P-256 and P-384
+List        Display / log   N/A                     N/A               CO,              N/A                  None
+certificate expiration data                                           Auditor,
+            of installed                                              Certificate
+            certificates                                              Manager,
+                                                                      Resource
+                                                                      Manager
+List           List private        N/A              N/A               CO,              N/A                  None
+private        keys                                                   Auditor,
+keys                                                                  Certificate
+                                                                      Manager,
+                                                                      Resource
+                                                                      Manager
+Import      Import TLS             N/A              TLS ECDSA public CO,               W                    None
+TLS         Certificate                             key with P-256    Certificate
+Certificate                                         and P-384;        Manager
+                                                    TLS RSA public
+                                                    key with 2048,
+                                                    3072 and 4096
+Export      Export           N/A                    TLS ECDSA public CO,               R                    None
+Certificate Certificate File                        key with P-256    Certificate
+File                                                and P-384;        Manager
+                                                    TLS RSA public
+                                                    key with 2048,
+                                                    3072 and 4096
+Create         Utility service     ECDSA            ECDSA public and CO,               G                    Service
+ssh-           create ssh          KeyGen           private keys with Resource                              Indicator:
+keyswap        keys                CTR_DRBG         P-256 and P-384 Manager                                 Approved
+                                                    curves
+Delete         Utility service N/A                  ECDSA public and CO,               Z                    None
+ssh-           delete ssh keys                      private keys      Resource
+keyswap                                                               Manager
+Configure      Set policy        N/A                N/A               CO,              N/A                  None
+Firewall       rules, and                                             Firewall Manager
+               address lists
+               for use by
+               firewall rules.
+Show           Display the       N/A                N/A                     CO,              N/A            None
+firewall       current                                                      Firewall Manager
+state          system-wide
+               state of firewall
+               rules
+
+
+
+                                         © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     20 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Service       Description         Approved         Keys and/or SSPs Roles                       Access Indicator
+                                  Security                                                      rights
+                                  Functions                                                     to Keys
+                                                                                                and/or
+                                                                                                SSPs
+Shows      Shows           N/A                     N/A                    CO,                   N/A     None
+statistics statistics of                                                  Firewall Manager
+           firewall rules
+           on the BIG-IP
+           system
+View       Display         N/A                     N/A                    CO,                   N/A       None
+System     logs/files of                                                  Auditor,
+Audit Log configuration                                                   Resource
+           changes                                                        Manager
+Export     Export          N/A                     N/A                    CO,                   N/A       None
+Analytics Analytics Logs                                                  Auditor
+Logs       System
+System
+Enable/    Enable/ Disable N/A                     N/A                    CO,                   N/A       None
+Disable    Audit                                                          Resource
+Audit                                                                     Manager
+Configure Enable Quiet     N/A                     N/A                    CO,                   N/A       None
+Boot       boot, Manage                                                   Resource
+Options    boot locations                                                 Manager
+Configure Enable /         N/A                     N/A                    CO,                   N/A       None
+SSH        Disable SSH                                                    Resource
+access     access,                                                        Manager
+options    Configure IP
+           address allow
+           list
+Configure Update ssh/      N/A                     SSH ECDSA public CO,                         W         None
+SSH user authorized_key                            key              Resource
+configurat s file for user                                          Manager
+ion        authentication                                           User Manager
+Configure Configure       N/A                      N/A                    CO,              N/A            None
+Firewall  Firewall Users                                                  Firewall Manager
+Users
+Modify    Enable /        N/A                      N/A                    CO                    N/A       None
+nodes and Disable nodes                                                   Operator
+pool      and pool
+members members
+Configure Create, modify, N/A                      N/A                    CO                    N/A       None
+nodes     view, delete                                                    Firewall
+          nodes                                                           Manager,
+                                                                          Resource
+                                                                          Manager
+Configure Create, modify, N/A                      N/A                    CO                    N/A       None
+iRules    view, delete,                                                   iRule Manager,
+          iRules                                                          Firewall
+                                                                          Manager,
+                                                                          Resource
+                                                                          Manager
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    21 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Service       Description         Approved         Keys and/or SSPs Roles                        Access Indicator
+                                  Security                                                       rights
+                                  Functions                                                      to Keys
+                                                                                                 and/or
+                                                                                                 SSPs
+Reboot        Restart        N/A                   SSPs listed in          CO                    Z       None
+System        cryptographic                        Table 12
+              module
+Secure        Full system    N/A                   SSPs listed in   CO                           Z         None
+Erase         zeroization                          Table 12
+Establish     Key            ECDSA                 SSH ECDSA public CO                           W         SSH
+SSH           authentication                       key with P-256   User                                   connection
+session                                            and P-384 curves                                        successful
+              Password       N/A                   Password                CO                    W         SSH
+              authentication                                               User                            connection
+                                                                                                           successful
+              Key exchange   KAS-ECC-    SSH EC Diffie-    CO                                    W         SSH
+                             SSC P-256 / Hellman public    User                                            connection
+                             P-384       key with P-256                                                    successful
+                                         and P-384
+                                         SSH EC Diffie-                                          E
+                                         Hellman private
+                                         key with P-256
+                                         and P-384
+                                         SSH shared                                              G
+                                         secret
+              Key derivation [SP 800-    SSH shared        CO                                    E         SSH
+                             135r1] SSH secret             User                                            connection
+                             KDF         SSH derived                                             G         successful
+                                         session key (AES,
+                                         HMAC)
+Maintain      Data           AES-CBC     SSH derived       CO                                    E         SSH
+SSH           Encryption and AES-CTR     session key (AES) User                                            connection
+Session       Decryption                                                                                   successful
+          Data Integrity          HMAC             SSH derived             CO                    E         SSH
+          (MAC): HMAC-                             session key             User                            connection
+          with SHA-1/                              (HMAC)                                                  successful
+          SHA2-256
+Close SSH Close SSH               N/A         SSH EC Diffie-    CO                               Z         None
+Session   Session                             Hellman public    User
+                                              and private keys;
+                                              SSH shared
+                                              secret; SSH
+                                              derived session
+                                              key
+Establish     SigGen /            ECDSA / RSA TLS ECDSA public CO                                R         Service
+TLS           SigVer                          key with P-256    User                                       Indicator:
+Session                                       and P-384;                                                   Approved
+                                              TLS RSA public
+                                              key with 2048,
+                                              3072 and 4096
+
+
+                                        © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    22 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Service       Description         Approved         Keys and/or SSPs Roles                       Access Indicator
+                                  Security                                                      rights
+                                  Functions                                                     to Keys
+                                                                                                and/or
+                                                                                                SSPs
+          Key Exchange EC Diffie-     TLS Diffie-                         CO                    E       Service
+                         Hellman      Hellman private                     User                          Indicator:
+                         with SP 800- key with                                                          Approved
+                         135r1 TLS    ffdhe2048,
+                         KDF          ffdhe3072,
+                         Diffie-      ffdhe4096
+                         Hellman      or
+                         with SP 800- TLS EC Diffie-
+                         135r1 TLS    Hellman private
+                         KDF          key with P-256
+                                      and P-384
+                                      TLS Diffie-                                               W
+                                      Hellman public
+                                      key with
+                                      ffdhe2048,
+                                      ffdhe3072,
+                                      ffdhe4096
+                                      or
+                                      TLS EC Diffie-
+                                      Hellman public
+                                      key with P-256
+                                      and P-384
+                                      TLS pre-primary                                           E, G
+                                      secret
+                                      TLS primary                                               G
+                                      secret
+Maintain Data            AES-CBC      TLS derived                         CO                    E         Service
+TLS       Encryption,    with HMAC- session key (AES                      User                            Indicator:
+Session   Data           SHA2-256 / and HMAC or                                                           Approved
+          Authentication SHA2-384 or authentication
+                         AES-GCM,     cipher)
+                         AES-CCM
+Close TLS Close TLS      N/A          TLS Diffie-                         CO                    Z         None
+session   session                     Hellman public                      User
+                                      and private keys;
+                                      TLS EC Diffie-
+                                      Hellman public
+                                      and private keys;
+                                      TLS pre-primary
+                                      secret; TLS
+                                      primary secret;
+                                      TSL derived
+                                      session key
+Show      Return the     N/A          N/A                                 CO                    N/A       None
+version   module name                                                     User
+          and version
+Show      Return license N/A          N/A                                 CO                    N/A       None
+license   indication                                                      User
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    23 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Service       Description         Approved         Keys and/or SSPs Roles                        Access Indicator
+                                  Security                                                       rights
+                                  Functions                                                      to Keys
+                                                                                                 and/or
+                                                                                                 SSPs
+Show          Return the          N/A              N/A                     CO                    N/A     None
+status        module status                                                User
+Self- test    Execute             Algorithms       N/A (key for self-      CO                    N/A       None
+              integrity test,     listed in        tests are not           User
+              Execute the         table            SSPs)
+              CASTs               section 10
+Table 8 - Approved Services
+
+4.4 Non-Approved Services
+Service                Description               Algorithms Accessed                               Role Indicator
+Establish TLS          Signature                 algorithms listed in Table 4 rows DSA,            User No
+session                generation and            RSA, ECDSA, EdDSA digital signature               / CO indicator
+                       verification
+                       Key exchange   - TLS KDF using MD5, SHA-1, SHA2-       User No
+                                      224, SHA2-512                           / CO indicator
+                                      - Diffie-Hellman with groups other than
+                                      ffdhe2048, ffdhe3072, ffdhe4096
+                                      - EC Diffie-Hellman ephemeral Unified
+                                      using curves other than P-256 and P-
+                                      384
+                                      - EC Diffie-Hellman Static Unified and
+                                      OnePassDh using P-256 and P-384
+Maintain TLS      Data encryption     HMAC-SHA-1, HMAC-SHA2-224, HMAC- User No
+session           Data authentication SHA2-512                                / CO indicator
+                                      Triple-DES, Camellia, SEED
+                                      DSA with all key and SHA sizes
+IPsec /IKEv2      Protocol            - Authentication: HMAC-SHA2-224,        User FIPS-1403
+                  configuration       AES-CMAC, AES-GCM                       / CO Approved:
+                                      - Encryption: AES-GCM, Triple-DES            No
+                                      - Key exchange: EC Diffie-Hellman with
+                                      P-384, Diffie-Hellman using MODP
+                                      groups
+iControl REST     Access to the       RSA keypair with 2048, 3072 and 4096 User No
+access            system through      (REST API)                              / CO indicator
+                  REST
+SSLO              Management of the TLS used in SSLO ciphersuites             User No
+configuration and module protected implemented by f5-rest-node.               / CO indicator
+usage             by iApplx           java, icrd_child
+                  authentication
+Configuration     Protocol            SNMP KDF using any SHA variant          User No
+using SNMP        configuration                                               / CO indicator
+
+Table 9 - Non-Approved Services
+
+
+
+
+                                        © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    24 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+5    Software/Firmware Security
+
+5.1 Integrity Techniques
+The integrity of the module using the approved integrity technique HMAC-SHA-384 is listed in the
+section 10.1.1. Integrity tests are performed as part of the Pre-Operational Self-Tests.
+
+5.2 Initiate on Demand
+The on demand pre-operational self-tests, including the integrity test on demand, are performed
+by powering the module off and powering it on again.
+
+5.3 Executable Code
+The executable code is defined by the firmware version 17.1.0.1. All code belonging to this
+firmware version is the executable code of the module.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   25 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+6    Operational Environment
+
+6.1 Operational Environment Type and Requirements
+The module operates in a non-modifiable operational environment provided by F5 with a firmware
+version 17.1.01. Once the module is operational, it does not allow the loading of any additional
+firmware.
+The module is a firmware validated at a Security Level 2 in Physical Security then there are no
+further requirements for this security area.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   26 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+7     Physical Security
+
+7.1 Mechanisms and Actions Required
+The module tested in the platforms listed in Table 2 is enclosed in a hard-metallic production
+grade enclosure that provides opacity and prevents visual inspection of internal components. Each
+test platform is fitted with tamper evident labels to provide physical evidence of attempts to gain
+access inside the enclosure. The tamper evident labels shall be installed for the module to operate
+in approved mode of operation.
+    Physical Security        Recommended Frequency               Inspection/Test Guidance Details
+    Mechanism                of Inspection / Test
+    Production grade         N/A                                 N/A
+    enclosure (SL1)
+    Opaque enclosure         N/A                                 N/A
+    (SL2)
+    Tamper Evident           Once per month                      The Crypto Officer checks the quality of the
+    Labels (SL2)                                                 tamper-evident labels for any sign of
+                                                                 removal, replacement, or tearing. If the
+                                                                 tamper-evident labels require replacement,
+                                                                 a kit providing 25 tamper labels is available
+                                                                 for purchase (P/N: F5-ADD-BIG-FIPS140).
+                                                                 The Crypto Officer shall be responsible for
+                                                                 the storage of the label kits.
+
+Table 10 - Physical Security Inspection Guidelines
+
+7.2 Tamper Label Placement
+The pictures below show the location of all tamper-evident labels for each hardware platform.
+Label application instructions are provided in Section 11.2.1 of the Crypto-Officer guidance below.
+
+
+ Hardware Appliance                Number of Tamper Labels                   Number of opacity screen
+
+ r4800                             5                                         1 (blank in PSU slot)
+ r5900                             4                                         1 (blank in PSU slot)
+ r5920-DF                          5                                         1 (blank in PSU slot)
+ r10900                            5                                         0
+ r10920-DF
+ r12900-DS
+ VELOS CX410 BX110                 1                                         7 blanks in blade slot #2-8
+
+Table 11 – Number of tamper evident labels and blanks/ filler panels per hardware appliance
+
+
+The tamper labels are delineated with red circles in the pictures below.
+
+
+
+
+                                       © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   27 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Figure 7 - Tamper labels on r4800 (5 of 5 tamper labels)
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   28 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Figure 8 – Tamper labels on r5900 (4 of 4 tamper labels)
+
+
+
+
+ Figure 9 - Tamper labels on r5920-DF (5 of 5 tamper labels).
+ Labels are located on the lateral sides of the platform -labels 1,2,3 and 4. The tamper label 5 on the
+ chassis / enclosure lid is covering the ventilation fan tray that allows access to SSD.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   29 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Figure 10 – Tamper labels on r10900, r10920-DF and r12900-DS
+ (4 +1 of 5 tamper labels shown). Labels are located on the lateral sides of the platform -labels 1,2,3 and
+ 4. The tamper label 5 on the chassis / enclosure lid is covering the ventilation fan tray that allows access
+ to SSD.
+
+
+
+
+                      Label 1
+
+
+
+
+ Figure 11 – Tamper label on VELOS CX410 BX110 blade mounted on chassis.
+ The tamper label (1 of 1 tamper label shown) marked as “Label 1” affixed between blade and chassis is
+ positioned to provide evidence if the tested blade in slot #1 is removed from the chassis.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   30 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+8    Non-Invasive Security
+This section is N/A until non-Invasive security is defined in NIST SP800-140F that replaces the
+ISO/IEC 19790 Annex F requirements.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   31 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+9    Sensitive Security Parameter Management
+ Key/       Strengt     Securit      Generation      Import          Establis    Stor     Zeroizati     Use and
+ SSP        h           y                            /Export         hment       age      on            related
+ Name/                  Functio                                                                         SSPs
+ Type                   n/
+                        Cert.
+                        Numbe
+                        r
+ TLS        112-        RSA          Generated       Import:         N/A         SSD      Zeroized      Use: Digital
+ RSA        bits        A3729        conforman       During                               when ssl      signature
+ public     and                      t to            protocol                             key file      verification
+ key /      150-                     SP800-          handshak                             is            used in the
+ PSP /      bits                     133r2           e                                    deleted       TLS
+ asym                                (CKG)           Export:                              with          protocol
+ metri                               using           During                               "Secure       Related
+ c                                   [FIPS 186-      protocol                             Erase"        SSPs: TLS
+                                     4] Key          handshak                             service       RSA
+                                     generation      e                                    at boot.      private
+                                     method;                                                            key, DRBG
+                                     random                                                             internal
+                                     values are                                                         states
+                                     obtained
+ TLS                                                 No import                                          Use: Digital
+                                     using [SP
+ RSA                                                 No export                                          signature
+                                     800-
+ privat                                                                                                 generation
+                                     90Ar1]
+ e key                               DRBG                                                               used in the
+ / CSP                                                                                                  TLS
+ /                                                                                                      protocol
+ asym                                                                                                   Related
+ metri                                                                                                  SSPs: TLS
+ c                                                                                                      RSA public
+                                                                                                        key, DRBG
+                                                                                                        internal
+                                                                                                        states
+ TLS        128-        ECDSA        Generated       Import:         N/A         SSD      Zeroized      Use: Digital
+ ECDS       bits        A3729        conforman       During                               when ssl      signature
+ A          and         A3730        t to            protocol                             key file      verification
+ public     192-                     SP800-          handshak                             is            used in the
+ key /      bits                     133r2           e                                    deleted       TLS
+ PSP /                               (CKG)           Export:                              with          protocol
+ asym                                using           During                               "Secure       Related
+ metri                               [FIPS 186-      protocol                             Erase"        SSPs: TLS
+ c                                   4] ECDSA        handshak                             service       ECDSA
+                                     Key             e                                    at boot.      private
+                                     Generatio                                                          key, DRBG
+                                     n method;                                                          internal
+                                     random                                                             states
+                                     values are
+ TLS                                                 No import                                          Use: Digital
+                                     obtained
+ ECDS                                using [SP       No export                                          signature
+ A                                                                                                      generation
+                                     800-
+ privat                              90Ar1]                                                             used in the
+ e key                                                                                                  TLS
+                                     DRBG
+ / CSP                                                                                                  protocol
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    32 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/        Strengt     Securit     Generation       Import          Establis    Stor     Zeroizati     Use and
+ SSP         h           y                            /Export         hment       age      on            related
+ Name/                   Functio                                                                         SSPs
+ Type                    n/
+                         Cert.
+                         Numbe
+                         r
+ /                                                                                                       Related
+ asym                                                                                                    SSPs: TLS
+ metri                                                                                                   ECDSA
+ c                                                                                                       public key,
+                                                                                                         DRBG
+                                                                                                         internal
+                                                                                                         states
+ TLS         128-        EC          Generated        Import:         N/A         RAM      Zeroized      Use: TLS
+ EC          bits        Diffie-     conforman        During                               by            protocol
+ Diffie-     and         Hellma      t to             protocol                             closing       key
+ Hellm       192-        n           SP800-           handshak                             TLS           exchange
+ an          bits        A3729       133r2            e                                    session       Related
+ public                  A3730       (CKG) i.e.       Export:                              or by         SSPs:
+ key /                               key              During                               "Reboot       DRBG
+ PSP /                               generation       protocol                             System"       internal
+ asym                                method           handshak                             service       states, TLS
+ metri                               specified        e                                                  pre-
+ c                                   in [SP 800-                                                         primary
+ TLS                                 56Ar3]           No                                                 secret
+ EC                                  using            import,
+ Diffie-                             [FIPS 186-       No export
+ Hellm                               4] Key
+ an                                  Generatio
+ privat                              n; random
+ e key                               values are
+ / CSP/                              obtained
+ asym                                using [SP
+ metri                               800-
+ c                                   90Ar1]
+                                     DRBG
+ TLS         112,        Diffie-     Generated        Import:         N/A         RAM      Zeroized      Use: Key
+ Diffie-     128,        Hellma      using Safe       During                               by            Generation
+ Hellm       and         n           primes           protocol                             closing       , TLS
+ an          150-        A3729       key              handshak                             TLS           protocol
+ public      bits        A3730       generation       e                                    session       key
+ key /                               method           Export:                              or by         exchange
+ PSP /                               specified        During                               "Reboot       Related
+ asym                                in SP800-        protocol                             System"       SSPs:
+ metri                               56Ar3;           handshak                             service       DRBG
+ c                                   random           e                                                  internal
+ TLS                                 values are       No                                                 states, TLS
+ Diffie-                             obtained         import,                                            pre-
+ Hellm                               using [SP        No export                                          primary
+ an                                  800-                                                                secret
+ privat                              90Ar1]
+ e key                               DRBG
+ / CSP
+
+                                        © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     33 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/       Strengt     Securit      Generation      Import          Establis    Stor     Zeroizati     Use and
+ SSP        h           y                            /Export         hment       age      on            related
+ Name/                  Functio                                                                         SSPs
+ Type                   n/
+                        Cert.
+                        Numbe
+                        r
+ /
+ asym
+ metri
+ c
+ TLS        Diffie-     TLS          N/A             No import       SP800-      RAM      Zeroized      Use: TLS
+ pre-       Hellma      KDF                          No export       56Ar3                by            protocol
+ prima      n: 112,     A3729                                        KAS-                 closing       Related
+ ry         128,        A3730                                        ECC-                 TLS           SSPs: EC
+ secret     150-                                                     SSC                  session       Diffie-
+            bits                                                     and                  or by         Hellman
+            EC                                                       KAS-                 "Reboot       public and
+            Diffie-                                                  FFC-                 System"       private
+            Hellma                                                   SSC                  service       keys; TLS
+            n: 128-                                                                                     primary
+            bits                                                                                        secret
+            and
+            192-
+            bits
+ TLS        256-        TLS          SP 800-         No import       N/A         RAM      Zeroized      Use: TLS
+ prima      bits        KDF          135r1 TLS       No export                            by            protocol
+ ry                     A3730        KDF                                                  closing       Related
+ secret                 A3729                                                             TLS           SSPs: TLS
+                                                                                          session       pre-
+                                                                                          or by         primary
+                                                                                          "Reboot       secret; TLS
+                                                                                          System"       derived
+                                                                                          service       key
+ TLS        128         AES          SP 800-         No import       N/A         RAM      Zeroized      Use: TLS
+ derive     and         HMAC         135r1 TLS       No export                            by            protocol
+ d          256-        A3730        KDF                                                  closing       Related
+ sessio     bits        A3729                                                             TLS           SSPs: TLS
+ n key      (AES)                                                                         session       pre-
+ (AES       112                                                                           or by         primary
+ HMAC       and                                                                           "Reboot       secret, TLS
+ )          256-                                                                          System"       primary
+            bits                                                                          service.      secret
+            (HMAC
+            )
+ SSH        128         ECDSA        Generated       Import:         N.A         SSD      Zeroized      Use: SSH
+ ECDS       and         A3729        conforman       During                               using         key-based
+ A          192-                     t to            SSH                                  SSH           authenticat
+ public     bits                     SP800-          session                              keyswap       ion Related
+ key /                               133r2           using the                            service       SSPs:
+ PSP /                               (CKG) i.e.      "Configur                            or            DRBG
+ asym                                key             e SSH                                Secure        internal
+ metri                               generation      user                                 Erase"        states
+ c                                   method          configura
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    34 of 51
+BIG-IP Tenant Cryptographic Module                                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/        Strengt     Securit     Generation       Import          Establis    Stor     Zeroizati     Use and
+ SSP         h           y                            /Export         hment       age      on            related
+ Name/                   Functio                                                                         SSPs
+ Type                    n/
+                         Cert.
+                         Numbe
+                         r
+                                     specified        tion"                                service
+                                     in [SP 800-      service.                             at boot.
+                                     56Ar3]           Export:
+                                     using            During
+                                     [FIPS 186-       SSH
+                                     4] ECDSA         session
+ SSH                                 Key              No import
+ ECDS                                generation       No export
+ A                                   method;
+ privat                              random
+ e key                               values are
+ / CSP                               obtained
+ /                                   using [SP
+ asym                                800-
+ metri                               90Ar1]
+ c                                   DRBG
+ SSH         128         EC          Generated        Import:         N/A         RAM      Zeroized      Use: SSH
+ EC          and         Diffie-     conforman        During                               by            handshake
+ Diffie-     192-        Hellma      t to             protocol                             closing       Related
+ Hellm       bits        n           SP800-           handshak                             SSH           SSPs: SSH
+ an                      Shared      133r2            e                                    session       shared
+ public                  Secret      (CKG)            Export:                              or            secret,
+ key /                   Compu       using            During                               terminat      DRBG
+ PSP /                   tation      [FIPS 186-       protocol                             ing the       internal
+ asym                    A3729       4] Key           handshak                             SSH           states
+ metri                               generation       e                                    applicati
+ c                                   method;                                               on or
+ SSH                                 random           No import                            "Reboot
+ EC                                  values are       No export                            System"
+ Diffie-                             obtained                                              service
+ Hellm                               using [SP
+ an                                  800-
+ privat                              90Ar1]
+ e key                               DRBG
+ / CSP
+ /
+ asym
+ metri
+ c
+ SSH         128         SSH         N/A              No import       SP800-      RAM      Zeroized      Use: Key
+ share       and         KDF                          No export       56Ar3                by            derivation;
+ d           192-        A3729                                        KAS-                 closing       SSH shared
+ secret      bits                                                     ECC-                 SSH           secret;
+                                                                      SSC                  session       Related
+                                                                                           or            SSPs: EC
+                                                                                           terminat      Diffie-
+                                                                                           ing the       Hellman
+
+                                        © 2025 F5, Inc. / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     35 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/       Strengt     Securit      Generation      Import          Establis    Stor     Zeroizati     Use and
+ SSP        h           y                            /Export         hment       age      on            related
+ Name/                  Functio                                                                         SSPs
+ Type                   n/
+                        Cert.
+                        Numbe
+                        r
+                                                                                          SSH           public and
+                                                                                          applicati     private
+                                                                                          on or         keys; SSH
+                                                                                          "Reboot       derived
+                                                                                          System"       session key
+                                                                                          service
+ SSH        128         AES          SP 800-         No import       N/A         RAM      Zeroized      Use: data
+ derive     and         HMAC         135r1 SSH       No export                            by            encryption
+ d          256-        A3729        KDF                                                  closing       /
+ sessio     bits                                                                          SSH           decryption
+ n key      (AES)                                                                         session       and MAC
+ (AES,      112                                                                           or            calculation
+ HMAC       and                                                                           terminat      s in SSH
+ )          256-                                                                          ing the       protocol
+            bits                                                                          SSH           Related
+            (HMAC                                                                         applicati     SSPs: SSH
+            )                                                                             on or         shared
+                                                                                          "Reboot       secret
+                                                                                          System"
+                                                                                          service
+ Passw      1/676,      N/A          N/A             Input by        N/A         SSD      Zeroized      Use: SSH
+ ord        000,00                                   the User                    as a     by            authenticat
+            0 (see                                   or CO                       has      "Secure       ion, WebUI
+            Table                                    invoking                    hed      Erase"        login
+            7)                                       "create                     valu     service       Related
+                                                     additional                  e        at boot       SSPs: N/A
+                                                     user" or
+                                                     "Update
+                                                     own
+                                                     password
+                                                     " or
+                                                     "Update
+                                                     others
+                                                     password
+                                                     " services
+                                                     No export
+ Entro      256         Entrop       Obtained        No import       N/A         RAM      Zeroized      Use:
+ py         bits        y            from non-       No export                            by            random
+ input                  Source       physical                                             "Reboot       number
+ / CSP                  ESV          Entropy                                              System"       generation
+ (IG                    Cert.        source                                               service       Related
+ D.L)                   #E74                                                                            SSPs:
+                                                                                                        DRBG seed
+ DRBG       256         CTR_D        Derived         No import       N/A         RAM      Zeroized      Use:
+ seed /     bits        RBG          from the        No export                            by            random
+ CSP                    A3729        entropy                                              "Reboot       number
+                        A3730        string as                                                          generation
+
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    36 of 51
+BIG-IP Tenant Cryptographic Module                                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/       Strengt     Securit      Generation      Import          Establis    Stor     Zeroizati     Use and
+ SSP        h           y                            /Export         hment       age      on            related
+ Name/                  Functio                                                                         SSPs
+ Type                   n/
+                        Cert.
+                        Numbe
+                        r
+ (IG                                 defined by                                           System"       Related
+ D.L)                                [SP 800-                                             service       SSPs:
+                                     90Ar1]                                                             Entropy
+                                                                                                        input,
+                                                                                                        DRBG
+                                                                                                        Internal
+                                                                                                        states
+ DRBG       256         CTR_D        Derived         No import       N/A         RAM      Zeroized      Use:
+ intern     bits        RBG          from the        No export                            by            random
+ al                     A3729        seed as                                              "Reboot       number
+ states                 A3730        defined by                                           System"       generation
+ (V                                  [SP 800-                                             service       Related
+ and                                 90Ar1]                                                             SSPs:
+ key                                                                                                    Entropy
+ value                                                                                                  input,
+ s) /                                                                                                   DRBG seed
+ CSP
+ (IG
+ D.L)
+Table 12 - SSPs
+
+9.1 Random Bit Generation - Entropy Source
+The module employs a Deterministic Random Bit Generator (DRBG) based on [SP800-90Ar1] for
+the generation of random value used in asymmetric keys. The Approved DRBG provided by the
+module is the CTR_DRBG with AES-256. The module uses the SP800-90B compliant Entropy source
+specified in Table 13 to seed the DRBG.
+The operator does not have the ability to modify the F5 entropy source (ES) configuration settings
+(see details in Public Use Document referenced in section 11.2). The F5 ES is tested in the OEs
+listed in Table 1.
+ Entropy Source         Minimum number            Details
+                        of bits of entropy
+ ESV #E74 (non-         256-bits                  The CPU Jitter RNG version 3.4.0 entropy source uses
+ physical noise                                   jitter variations caused by executing instructions and
+ source)                                          memory accessed. The entropy source has been
+                                                  shown to provide full 256-bits of entropy at the output
+                                                  of the SHA3-256 vetted conditioning function
+                                                  (#A2621).
+
+Table 13 - Non-Deterministic Random Number Generation Specification
+
+9.2 SSP Generation
+For generating RSA and ECDSA keys, the modules implements asymmetric key generation
+services compliant with [FIPS186-4]. A seed (i.e. the random value) used in asymmetric key
+generation is directly obtained from the SP800-90Ar1] DRBG.
+                                       © 2025 F5, Inc. / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    37 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+The Diffie-Hellman generates keys using safe primes compliant with [SP800-56Arev3].
+The public and private keys used in the EC Diffie-Hellman key agreement schemes are generated
+internally by the module using the ECDSA key generation method compliant with [FIPS186-4] and
+[SP800-56Arev3]
+In accordance with FIPS 140-3 IG D.H, the cryptographic module performs Cryptographic Key
+Generation (CKG) for asymmetric keys as per section 4 example 1 [SP800-133r2] (vendor
+affirmed).
+The module does not implement symmetric key generation as an explicit service. The HMAC and
+AES symmetric keys are derived from shared secrets by applying [SP 800-135r1] as part of the
+TLS/ SSH protocols. The scenario maps to the [SP 800-133r2] section 6.2.1 Symmetric keys
+generated using Key Agreement Scheme.
+
+9.3 SSP Establishment
+The module provides the following key establishment services:
+    •   EC Diffie-Hellman key agreement scheme compliant with SP800-56Ar3 and FIPS 140-3 IG
+        D.F scenario 2 (path 2) is used as part of the TLS and SSH Protocols. The full EC Diffie-
+        Hellman KAS implements a shared secret computation with the key derivation implemented
+        by [SP 800-135r1] TLS KDFs and [SP 800-135r1] SSH KDFs.
+            EC Diffie-Hellman key agreement provides 128 or 192-bits of encryption strength.
+    •   Diffie-Hellman key agreement scheme compliant with SP800-56Ar3 and FIPS 140-3 IG D.F
+        scenario 2 (path 2) is used as part of the TLS Protocols. The full Diffie-Hellman KAS
+        implements a shared secret computation with the key derivation implemented by [SP 800-
+        135r1] TLS KDFs.
+            Diffie-Hellman key agreement provides between 112 and 150-bits of encryption
+                strength.
+    •   [SP 800-38F], IG D.G key wrapping in the context of TLS protocols where a key may be
+        within a packet or message that is encrypted and authenticated using approved
+        authenticated encryption mode or a combination method which includes approved
+        symmetric encryption algorithm together with approved authentication method.
+            [SP 800-38F] key wrapping using approved authenticated encryption mode (i.e. AES-
+                GCM, AES-CCM) provides 128 or 256 bits of encryption strength (AES Certs. #A3729
+                and # A3730).
+            [SP 800-38F] key wrapping using a combination of approved AES encryption and HMAC
+                authentication method provides 128 or 256 bits of encryption strength (AES and
+                HMAC Certs. #A3729 and # A3730).
+    •   [SP 800-38F], IG D.G key wrapping in the context of SSH protocols where a key may be
+        within a packet or message that is encrypted and authenticated using a combination
+        method which includes approved symmetric encryption algorithm together with approved
+        authentication method.
+            [SP 800-38F] key wrapping using a combination of approved AES-CBC or AES-CTR
+                encryption mode and HMAC authentication method provides 128 or 256 bits of
+                encryption strength (AES and HMAC Cert. # A3729).
+
+9.4 SSP Entry / Output
+For TLS with EC Diffie-Hellman / Diffie-Hellman key exchange, the TLS pre-primary secret is
+established during key agreement and is not output from the module. Once the TLS session is
+established, any key or data transfer performed thereafter is protected by authenticated
+encryption mode using AES-GCM/ AES-CCM or by AES encryption and HMAC authentication
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   38 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+through a mutually agreed AES and HMAC session keys derived by applying SP 800-135r1 TLS
+KDF.
+For SSH with EC Diffie-Hellman key exchange, the SSH shared secret is established during key
+agreement and is not output from the module. SSH ECDSA public keys can be imported into the
+module by the CO and User role using the "Configure SSH user configuration" service. Once the
+SSH session is established, any key or data transfer performed thereafter is protected by AES
+encryption and HMAC authentication through a mutually agreed AES and HMAC session keys
+derived by applying SP 800-135r1 SSH KDF.
+There are no encrypted SSPs that are directly entered.
+
+9.5 SSP Storage
+As shown in Table 12 the keys are stored in the volatile memory (RAM) in plaintext form.
+The static SSPs are persistently stored in plaintext in the SSD that is part of the OE. The static
+SSPs will remain on the system across power cycle.
+SSPs are only accessible to the authenticated operator, to which the SSPs are associated.
+
+9.6 SSP Zeroization
+The zeroization methods listed in Table 12, overwrites the memory occupied by keys with “zeros”
+or pre-defined values.
+The zeroization of temporary values are performed when no longer needed.
+The zeroization can be enforced by the Crypto Officer and Resource Manager role with the
+following services:
+The zeroization can be enforced by the Crypto Officer with the following services:
+    •   Calling Reboot System service will clear the SSPs present in volatile memory RAM memory.
+    •   Using Secure Erase service (which can only be triggered by the crypto officer during reboot
+        of the platform) will perform a single pass zeroization erasing the SSPs present in persistent
+        memory.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   39 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+10 Self-tests
+
+10.1 Pre-Operational Self-Tests
+The pre-operational self-tests are performed automatically whenever the module is powered on. At
+initialization the module performed pre-operational self-test (integrity test) and the conditional
+cryptographic algorithm tests (CASTs). The data output interface is inhibited and services are not
+available during the pre-operational self-tests and CASTs. On successful completion of the pre-
+operational and CASTs, the module enters operational mode and cryptographic services are
+available. If the module fails any of the tests, it will return an error code and enter into an error
+state.
+
+10.1.1 Pre-operational Software/Firmware Integrity Test
+The integrity of the module is verified by comparing the HMAC-SHA-384 checksum values of the
+installed binaries calculated at run time with the stored values computed at build time. If the
+values do not match the system enters the error state and the module will not be accessible. In
+order to recover from this state, the module needs to be reinstalled. The HMAC-SHA384 algorithm
+is self-tested prior to the integrity test being run.
+
+10.2 Conditional Self-Tests
+The conditional tests are performed without operator intervention, without any external controls,
+externally provided test vectors, output results and the determination of pass of fail is done by the
+module.
+If one of the conditional self-tests fails, the module transitions to the error state and a
+corresponding error indication is given. The module becomes inoperable, and no services are
+available. Data output and cryptographic operations are inhibited while the module is in the error
+state.
+
+10.2.1 Conditional Cryptographic Algorithm Self-Tests
+The module performs cryptographic algorithm self-tests (CASTs) on all Approved cryptographic
+algorithms.
+
+ Algorithm                 Test
+
+ Control Plane
+
+ non-physical              SP800-90B health test (APT and RCT) classified as CAST:
+ entropy source            • at start-up: performed on 1,024 consecutive samples.
+                           • during runtime.
+
+ CTR_DRBG                  CAST KAT with AES 256 bits with and without derivation function (SP800-
+                           90Ar1 section 11.3 health tests)
+
+ AES                       CAST KAT of AES encryption / decryption separately with AES-GCM mode
+                           and 256-bit key
+                           CAST KAT of AES encryption / decryption separately with ECB mode and
+                           128 bit-key
+
+ RSA                       CAST KAT of RSA PKCS#1 v1.5 signature generation with 2048 bit key
+                           and SHA2-256
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   40 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Algorithm                 Test
+
+                           CAST KAT of RSA PKCS#1 v1.5 signature verification with 2048 bit key
+                           and SHA2-256
+
+ ECDSA                     CAST KAT of ECDSA signature generation using P-256 and SHA2-256
+                           CAST KAT of ECDSA signature verification using P-256 and SHA2-256
+
+ KAS-ECC-SSC               CAST KAT of shared secret computation with P-256 curve
+
+ KAS-FFC-SSC               CAST KAT of shared secret computation with 2048 modulus
+
+ HMAC-SHA-1,               CAST KAT of HMAC-SHA-1,
+ HMAC-SHA2-256,            CAST KAT of HMAC-SHA2-256
+ HMAC-SHA2-384,            CAST KAT of HMAC-SHA2-384 (prior integrity test)
+ HMAC-SHA2-512             CAST KAT of HMAC-SHA2-512
+
+
+ SHA-1, SHA2-256,          CAST KATs for all SHA sizes are covered by the respective HMAC KATs
+ SHA2-384, SHA2-           (allowed per IG 10.3.B)
+ 512
+ [SP800-135r1] KDF         SSH CAST KAT
+                           TLS1.2 CAST KAT
+
+ Data Plane
+
+ AES                       CAST KAT of AES encryption with GCM mode and 128-bit key
+                           CAST KAT of AES encryption /decryption performed separately with CBC
+                           mode and 128-bit key
+
+ RSA                       CAST KAT of RSA PKCS#1 v1.5 signature generation with 2048 bit key
+                           and SHA2-256
+                           CAST KAT of RSA PKCS#1 v1.5 signature verification with 2048 bit key
+                           and SHA2-256
+
+ ECDSA                     CAST KATs of ECDSA signature generation and verification with P-256
+                           curve, SHA2-256
+
+ KAS-ECC-SSC               CAST KAT of shared secret computation with P-256 curve
+
+ KAS-FFC-SSC               CAST KAT of shared secret computation with 2048 modulus
+
+ CTR_DRBG                  Covered by Control Plane Self-Tests. (Data Plane makes use of the same
+                           DRBG implementation provided by Control Plane)
+
+ [SP800-135r1] KDF         TLS1.2 CAST KAT
+
+ HMAC-SHA-1,               CAST KAT of HMAC-SHA-1
+ HMAC-SHA2-256,            CAST KAT of HMAC-SHA2-256
+ HMAC-SHA2-384,            HMAC-SHA2-384 CAST KAT is covered by IG 10.3.A resolution 4.
+ HMAC-SHA2-512             CAST KAT of HMAC-SHA2-512
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   41 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Algorithm                 Test
+
+ SHA-1, SHA2-256,          CAST KATs for all SHA sizes are covered by respective HMAC KATs
+ SHA2-384, SHA2-           (allowed per IG 10.3.B)
+ 512
+Table 14 – Conditional Cryptographic Algorithm Self-Tests
+
+10.2.2 Conditional Pairwise Consistency Self-Tests
+A pairwise consistency test is run whenever asymmetric keys (RSA for Control Plane only, Diffie-
+Hellman, EC Diffie-Hellman, or ECDSA for both planes) are generated. PCT for ECDSA and RSA Key
+Pair Generation used for digital signatures is tested by the calculation and verification of a digital
+signature. PCT for Diffie-Hellman Key Pair Generation is performed following the SP 800-56Ar3
+section 5.6.1 requirements. PCT for EC Diffie-Hellman Key Pair Generation in the Control Plane is
+covered by ECDSA PCT (IG 10.3.A). PCT for EC Diffie-Hellman Key Pair Generation used for key
+agreement in Data Plane is performed following the SP 800-56Ar3 section 5.6.2.1.4 requirements.
+
+10.2.3 On Demand Self-Tests
+On demand self-tests are performed by powering off the module and powering it on again. This
+service performs pre-operational self-tests and CASTs. During the execution of the on demand
+self-tests, crypto services are not available and no output through data output or cryptographic
+operations are possible.
+
+10.3 Error States
+ Error State     Cause of Error                                                  Status Indicator
+ error state     HMAC-SHA2-384 integrity test failure                            Module will not load
+
+                 Failure of any of the Control Plane CAST KATs,                  Module will not load
+                 and Data Plane CAST KATs
+                 Failure of any of the PCTs                                      Module will reboot
+
+                 Failure of the APT, RCT at runtime                              Module will reboot (RCT, APT)
+
+                 Failure of the APT, RCT at restart                              Module will not load
+
+Table 15 - Error States
+In any of the error states, any data output or cryptographic operations are prohibited. The module
+must reboot or re-load with a fresh image to clear the error condition.
+All data output and cryptographic operations are inhibited when the module is in an error state.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   42 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+11 Life-Cycle Assurance
+
+11.1 Startup Procedures
+
+The module is distributed as a part of a BIG-IP product which includes the hardware platform and
+an installed copy of firmware with a platform layer F5OS and the BIG-IP version 17.1.0.1. The
+hardware platforms are shipped directly from the hardware manufacturer/authorized
+subcontractor via trusted carrier and tracked by that carrier. The hardware is shipped in a sealed
+box that includes a packing slip with a list of components inside, and with labels outside printed
+with the product nomenclature, sales order number, and product serial number. Upon receipt of
+the hardware, the customer is required to perform the following verifications:
+    •   Ensure that the shipping label exactly identifies the correct customer's name and address
+        as well as the hardware model.
+    •   Inspect the packaging for tampering or other issues.
+    •   Ensure that the external labels match the expected delivery and the shipped product.
+    •   Ensure that the components in the box match those on the documentation shipped with the
+        product.
+    •   Verify the hardware model with the model number given on the shipping label and marked
+        on the hardware platform itself.
+
+11.2 Administrator Guidance
+
+The Crypto Officer should verify that the following specific configuration rules are followed to
+operate the module in the approved mode validated configuration.
+The ESV Public Use Document (PUD) reference for non-physical entropy source is as follows:
+https://csrc.nist.gov/projects/cryptographic-module-validation-program/entropy-
+validations/certificate/74
+
+11.2.1 Installing Tamper Evident Labels
+Before the module is installed in the production environment, tamper-evident labels must be
+installed in the location identified for each test platforms in Section 7.2. The following steps should
+be taken when installing or replacing the tamper evident labels on the test platforms on which the
+module runs. The instructions are also included in F5 Platforms: FIPS Kit Installation provided with
+each hardware platforms.
+    •   Use the provided alcohol wipes to clean the chassis cover and components of dirt, grease,
+        or oil before you apply the tamper evidence seals.
+    •   After applying the seal, run your finger over the seal multiple times using extra high
+        pressure.
+    •   The seals completely cure within 48 hours.
+
+11.2.2 Installing F5OS
+Follow the instructions in the " Initial Configuration" guide for the initial setup and configuration of
+the module.
+    •   Run the Setup wizard "appliance-setup-wizard" using the CLI with the CO account and
+        default credentials. The system will prompt you to change the password.
+    •   LIcense the system from the WebUI. Guidance on Licensing the F5OS system can be found
+        in https://techdocs.f5.com/en-us/hardware/f5-rseries-systems-getting-started/gs-system-
+        initial-config.html#run-setup-wizard) and summarized as followed: Before you can activate
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   43 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+        the license for the F5OS system, you must obtain a base registration key. The base
+        registration key is pre-installed on new F5OS systems. When you power up the product and
+        connect through the webUI, you can open the SYSTEM SETTINGS > Licensing page to
+        display the registration key. Select "Automatic" for the license Activation Method to
+        communicate with the F5 License Server. The F5 product generates a dossier which is an
+        encrypted list of key characteristics used to identify the platform and activates the license.
+
+11.2.3 Tenant image installation and deployment
+The tenant inherits the license and VLANs of the rSeries VELOS host. The crypto officer must follow
+the following instructions to create a tenant from the Web-based management interface:
+    •   Login with the CO account to the Tenant WebUI and select SYSTEM SETTINGS > Software
+        Management to add image by uploading the qcow2 bundle file of the BIG-IP version
+        17.1.0.1.
+    •   Under TENANT MANAGEMENT' > 'Tenant Deployments' and click 'Add'. Fill out the form and
+        provide tenant Name, tenant Type (ie BIG-IP) and tenant Image (17.1.0.1.) and other
+        information to fully deploy the tenant.
+    • Login to the new tenant via ssh or WebUI and configure as you would any BIG-IP system.
+Tenant creation from CLI is detailed in the publicly available f5,com page
+(https://techdocs.f5.com/en-us/f5os-a-1-0-0/f5-rseries-systems-installation-upgrade/title-install-
+upgrade-software.html).
+    •   Once the module is installed, licensed and configured, the Crypto Officer should confirm
+        that the system is installed and licensed correctly.
+
+11.2.3.1 Version Confirmation
+The Crypto Officer should call the show version service (with commands "tmsh show sys version"
+and "tmsh show sys license"), then confirm that the provided version matches the validated
+version shown in Table 2. Any firmware loaded into the module other than version 17.1.0.1 is out
+of the scope of this validation and will mean that the module is not operating as a FIPS validated
+module.
+
+11.2.3.2 License Confirmation
+The FIPS validated module activation requires installation of the license referred as ‘FIPS license’.
+The Crypto Officer should call the show license service (with command "tmsh show sys license"),
+then verify that the list of license flags includes "FIPS 140-3”.
+
+11.2.4 Additional Guidance
+The Crypto Officer should verify that the following specific configuration rules are followed in order
+to operate the module in the FIPS validated configuration.
+    •   All command shells other than tmsh are not allowed. For example, bash and other user-
+        serviceable shells are excluded.
+    •   Management of the module via the platform's LCD display is not allowed.
+    •   Usage of f5-rest-node and iAppLX and provisioning of iRulesLX is not allowed.
+    •   Only the provisioning of AFM and LTM is included.
+    •   Remote access to the Lights Out / Always On Management capabilities of the system are
+        not allowed.
+    •   Serial port console and USB port should be disabled after the initial power on and
+        communications setup of the module.
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   44 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    •   Use of command run util fips-util -f init is not allowed. Running this command followed by a
+        System Reboot service or restart will mean that the module is not operating as a FIPS
+        validated module.
+    •   The Single Diffie-Hellman use option should be turned ON for the platform GUI.
+
+11.3 Non-Administrator Guidance
+The approved and non-approved algorithms available to users are listed in section 2, the physical
+ports, and logical interfaces available to users are specified in section 3. The Approved and non-
+Approved modes of operation are specified in section 2.3. The algorithm-specific information is
+listed in sub-section below.
+
+11.3.1 AES GCM IV
+AES-GCM IV is constructed in accordance with SP800-38D in compliance with IG C.H scenario 1. e
+module does not support AES-GCM with external IV. The implementation of the nonce_explicit
+management logic inside the module ensures that when the IV exhausts the maximum number of
+possible values for a given session key, the module triggers a new handshake request to establish
+a new key. In case the module’s power is lost and then restored, the key used for the AES GCM
+encryption or decryption shall be re-distributed. The AES GCM IV generation follows [RFC 5288]
+and shall only be used for the TLS protocol version 1.2 to be compliant with [FIPS140-3_IG] IG C.H
+scenario 1; thus, the module is compliant with [SP800-52r2] section 3.3.1.
+
+11.3.2 RSA SigGen/ SigVer
+All the modulus sizes supported by the module have been ACVP tested (per IG C.F).
+
+11.3.3 SP800-56Ar3 Assurances:
+To comply with the assurances found in Section 5.6.2 of SP 800-56Ar3, the keys for KAS-FFC-SSC
+and KAS-ECC-SSC must be generated using the approved key generation services specified in
+section 2.9. The module performs full public key validation on the generated public keys.
+Additionally, the module performs full public key validation on the received public keys.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   45 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+12 Mitigation of Other Attacks
+The module does not implement security mechanisms to mitigate other attacks.
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   46 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Appendix A.              Glossary and Abbreviations
+        ADC                 Application Delivery Controller
+
+        AES                 Advanced Encryption Standard
+
+        API                 Application Programming Interface
+
+        ACVP                Automated Cryptographic Validation Protocol
+
+        CAVP                Cryptographic Algorithm Validation Program
+
+        CBC                 Cipher Block Chaining
+
+        CCM                 Counter with Cipher Block Chaining-Message Authentication Code
+
+        CFB                 Cipher Feedback
+
+        CKG                 Cryptographic Key Generation
+
+        CLI                 Command Line Interface
+
+        CMAC                Cipher-based Message Authentication Code
+
+        CMVP                Cryptographic Module Validation Program
+
+        CSP                 Critical Security Parameter
+
+        CTR                 Counter Mode
+
+        DES                 Data Encryption Standard
+
+        DSA                 Digital Signature Algorithm
+
+        DRBG                Deterministic Random Bit Generator
+
+        ECB                 Electronic Code Book
+
+        ECC                 Elliptic Curve Cryptography
+
+        ECDSA               Elliptic Curve Digital Signature Algorithm
+        ESV                 Entropy Source Validation
+
+        FFC                 Finite Field Cryptography
+
+        FIPS                Federal Information Processing Standards Publication
+
+        GCM                 Galois Counter Mode
+
+        HMAC                Hash Message Authentication Code
+
+        KAS                 Key Agreement Schema
+
+        KAT                 Known Answer Test
+
+        KW                  AES Key Wrap
+
+        KWP                 AES Key Wrap with Padding
+
+        MAC                 Message Authentication Code
+
+        NIST                National Institute of Science and Technology
+
+        OFB                 Output Feedback
+
+        PR                  Prediction Resistance
+
+        PSS                 Probabilistic Signature Scheme
+
+        RNG                 Random Number Generator
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   47 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+        RSA                 Rivest, Shamir, Adleman
+
+        SHA                 Secure Hash Algorithm
+
+        SHS                 Secure Hash Standard
+
+        SSD                 Solid State Drive
+
+        SSH                 Secure Shell
+
+        SSLO                Secure Sockets Layer (SSL) Orchestrator
+
+        TDES                Triple-DES
+
+        TLS                 Transport Layer Security
+
+        XTS                 XEX-based Tweaked-codebook mode with cipher text Stealing
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   48 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Appendix B.              References
+FIPS140-3           FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+                    March 2019
+                    https://doi.org/10.6028/NIST.FIPS.140-3
+
+FIPS140-3_IG        Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module
+                    Validation Program
+                    https://csrc.nist.gov/Projects/cryptographic-module-validation-program/fips-140-
+                    3-ig-announcements
+
+FIPS180-4           Secure Hash Standard (SHS)
+                    March 2012
+                    http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS186-4           Digital Signature Standard (DSS)
+                    July 2013
+                    http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+
+FIPS197             Advanced Encryption Standard
+                    November 2001
+                    http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS198-1           The Keyed Hash Message Authentication Code (HMAC)
+                    July 2008
+                    http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+PKCS#1              Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                    Specifications Version 2.1
+                    March 1998
+                    https://datatracker.ietf.org/doc/html/rfc2313
+
+RFC 5288            AES Galois Counter Mode (GCM) Cipher Suites for TLS
+                    August 2008
+                    https://www.ietf.org/rfc/rfc5288.txt
+
+RFC 7627            Transport Layer Security (TLS) Session Hash and Extended Master Secret
+                    Extension
+                    September 2015
+                    https://www.ietf.org/rfc/rfc7627.txt
+
+SP800-38A           NIST Special Publication 800-38A - Recommendation for Block Cipher Modes of
+                    Operation Methods and Techniques
+                    December 2001
+                    http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP800-38B           NIST Special Publication 800-38B - Recommendation for Block Cipher Modes of
+                    Operation: The CMAC Mode for Authentication
+                    May 2005
+                    http://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   49 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+SP800-38C           NIST Special Publication 800-38C - Recommendation for Block Cipher Modes of
+                    Operation: the CCM Mode for Authentication and Confidentiality
+                    May 2004
+                    http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+SP800-38D           NIST Special Publication 800-38D - Recommendation for Block Cipher Modes of
+                    Operation: Galois/Counter Mode (GCM) and GMAC
+                    November 2007
+                    http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+
+SP800-38F           NIST Special Publication 800-38F - Recommendation for Block Cipher Modes of
+                    Operation: Methods for Key Wrapping
+                    December 2012
+                    http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP800-38G           NIST Special Publication 800-38G - Recommendation for Block Cipher Modes of
+                    Operation: Methods for Format - Preserving Encryption
+                    March 2016
+                    http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38G.pdf
+
+SP800-52r2          Guidelines for the Selection, Configuration, and Use of Transport Layer Security
+                    (TLS) Implementations
+                    August 2019
+                    https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+
+SP800-56Ar3         NIST Special Publication 800-56A Revision 3 - Recommendation for Pair Wise
+                    Key Establishment Schemes Using Discrete Logarithm Cryptography
+                    April 2018
+                    https://doi.org/10.6028/NIST.SP.800-56Ar3
+
+SP800-90Ar1         NIST Special Publication 800-90A - Revision 1 - Recommendation for Random
+                    Number Generation Using Deterministic Random Bit Generators
+                    June 2015
+                    https://doi.org/10.6028/NIST.SP.800-90Ar1
+
+SP800-90B           NIST Special Publication 800-90B - Recommendation for the Entropy Sources
+                    Used for Random Bit Generation
+                    January 2018
+                    https://doi.org/10.6028/NIST.SP.800-90B
+
+SP800-131Ar2        Transitioning the Use of Cryptographic Algorithms and Key Lengths
+                    March 2019
+                    https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar2.pdf
+
+SP800-133r2         NIST Special Publication 800-133 Revision 2 - Recommendation for
+                    Cryptographic Key Generation
+                    June 2020
+                    https://doi.org/10.6028/NIST.SP.800-133r2
+
+SP800-135r1         NIST Special Publication 800-135 Revision 1 - Recommendation for Existing
+                    Application-Specific Key Derivation Functions
+                    December 2011
+                    http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-135r1.pdf
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   50 of 51
+BIG-IP Tenant Cryptographic Module                                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+SP800-140B          NIST Special Publication 800-140B - CMVP Security Policy Requirements
+                    March 2020
+                    https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140B.pdf
+
+
+
+
+                                      © 2025 F5, Inc. / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   51 of 51
+

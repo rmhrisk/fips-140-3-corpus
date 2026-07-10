@@ -1,0 +1,2884 @@
+                                 SUSE Linux Enterprise OpenSSL
+                                          Cryptographic Module
+                                                                                     version 4.4
+
+
+     FIPS 140-3 Non-Proprietary Security Policy
+                                                                                          Version 1.3
+
+                                                                 Last update: 2025-07-29
+
+
+
+                                          Prepared by:
+
+                       atsec information security corporation
+
+                      4516 Seton Center Parkway, Suite 250
+
+                                      Austin, TX 78759
+
+                                       www.atsec.com
+
+
+
+
+                            © 2025 SUSE, LLC / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                                 FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+1 Table of Contents
+
+1      General ............................................................................................................... 4
+2      Cryptographic Module Specification ..................................................................... 5
+    2.1       Module Embodiment .......................................................................................................... 5
+    2.2       Module Design, Components, Versions .............................................................................. 5
+    2.3       Modes of operation ............................................................................................................ 6
+    2.4       Tested Operational Environments ...................................................................................... 6
+    2.5       Vendor-Affirmed Operational Environments ...................................................................... 6
+       2.5.1         OpenSSL 64-bit Vendor Affirmed Operational Environments...................................... 7
+       2.5.2         OpenSSL 32-bit Vendor Affirmed Operational Environments...................................... 8
+    2.6       Approved Algorithms ......................................................................................................... 8
+    2.7       Non-Approved Algorithms Allowed in the Approved Mode of Operation .......................... 14
+    2.8   Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security
+    Claimed ....................................................................................................................................... 15
+    2.9       Non-Approved Algorithms Not Allowed in the Approved Mode of Operation .................... 15
+3      Cryptographic Module Ports and Interfaces ........................................................ 17
+4      Roles, services, and authentication .................................................................... 18
+    4.1       Services ........................................................................................................................... 18
+    4.2       Approved Services ........................................................................................................... 19
+5      Software/Firmware security ............................................................................... 25
+    5.1       Integrity Techniques ........................................................................................................ 25
+    5.2       On-Demand Integrity Test................................................................................................ 25
+    5.3       Executable Code .............................................................................................................. 25
+6      Operational Environment ................................................................................... 26
+    6.1       Applicability ..................................................................................................................... 26
+    6.2       Policy ............................................................................................................................... 26
+    6.3       Requirements .................................................................................................................. 26
+7      Physical Security ............................................................................................... 27
+8      Non-invasive Security ........................................................................................ 28
+9      Sensitive Security Parameter Management......................................................... 29
+    9.1       Random Number Generation ........................................................................................... 36
+    9.2       SSP Generation ................................................................................................................ 37
+    9.3       SSP establishment ........................................................................................................... 37
+    9.4       SSP Entry and Output ...................................................................................................... 38
+    9.5       SSP Storage ..................................................................................................................... 38
+    9.6       SSP Zeroization ................................................................................................................ 38
+                                              © 2025 SUSE, LLC / atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                              2 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                            FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+10 Self-Tests ......................................................................................................... 40
+  10.1     Pre-Operational Tests ...................................................................................................... 41
+  10.2     Conditional Tests ............................................................................................................. 41
+     10.2.1       Cryptographic Algorithm Self-Tests .......................................................................... 41
+     10.2.2       Pairwise Consistency Test ........................................................................................ 41
+  10.3     Periodic/On-Demand Self-Test ......................................................................................... 41
+  10.4     Error States ...................................................................................................................... 41
+11 Life-cycle assurance .......................................................................................... 44
+  11.1     Delivery and Operation .................................................................................................... 44
+     11.1.1       Module Installation ................................................................................................... 44
+     11.1.2       Operating Environment Configuration ...................................................................... 44
+     11.1.3       Module Installation for Vendor Affirmed Platforms ................................................... 45
+     11.1.4       End of Life Procedure ............................................................................................... 45
+  11.2     Crypto Officer Guidance ................................................................................................... 45
+     11.2.1       AES XTS .................................................................................................................... 46
+     11.2.2       AES GCM IV .............................................................................................................. 46
+     11.2.3       Environment Variables ............................................................................................. 46
+     11.2.4       Key derivation using SP800-132 PBKDF ................................................................... 47
+12 Mitigation of other attacks ................................................................................ 48
+
+
+
+
+                                          © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                                        3 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+1 General
+This document is the non-proprietary FIPS 140-3 Security Policy for version 4.4 of the SUSE Linux
+Enterprise OpenSSL Cryptographic Module. It has a one-to-one mapping to the [SP800-140B]
+starting with section B.2.1 named “General” that maps to section 1 in this document and ending
+with section B.2.12 named “Mitigation of other attacks” that maps to section 12 in this document.
+
+
+     ISO/IEC 24759                        FIPS 140-3 Section Title                            Security Level
+       Section 6.
+       [Number
+        Below]
+
+              1             General                                                                     1
+
+              2             Cryptographic Module Specification                                          1
+
+              3             Cryptographic Module Interfaces                                             1
+
+              4             Roles, Services, and Authentication                                         1
+
+              5             Software/Firmware Security                                                  1
+
+              6             Operational Environment                                                     1
+
+              7             Physical Security                                                         N/A
+
+              8             Non-invasive Security                                                     N/A
+
+              9             Sensitive Security Parameter Management                                     1
+
+             10             Self-tests                                                                  1
+
+             11             Life-cycle Assurance                                                        1
+
+             12             Mitigation of Other Attacks                                                 1
+
+                                                Table 1 - Security Levels
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   4 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2 Cryptographic Module Specification
+2.1      Module Embodiment
+The SUSE Linux Enterprise OpenSSL Cryptographic Module (hereafter referred to as “the module”)
+is a Software multi-chip standalone cryptographic module.
+
+
+2.2      Module Design, Components, Versions
+The software block diagram below shows the cryptographic boundary of the module, and its
+interfaces with the operational environment.
+
+
+
+
+                                           Figure 1 - Cryptographic boundary
+
+Table 2 lists the software components of the cryptographic module, which defines its
+cryptographic boundary.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   5 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Components                            Description
+
+ libcrypto.so.1.1                      Shared library for cryptographic algorithms.
+ .libcrypto.so.1.1.hmac                Integrity check HMAC value for the libcrypto shared library.
+ libssl.so.1.1                         Shared library for TLS/DTLS network protocols.
+ .libssl.so.1.1.hmac                   Integrity check HMAC value for the libssl shared library.
+
+                                      Table 2 – Cryptographic Module Components
+
+
+2.3      Modes of operation
+When the module starts up successfully, after passing all the pre-operational and conditional
+cryptographic algorithms self-tests (CASTs), the module is operating in the approved mode of
+operation by default and can only be transitioned into the non-Approved mode by calling one of
+the non-Approved services listed in Table 12. Please see section 4 for the details on service
+indicator provided by the module that identifies when an approved service is called.
+
+
+2.4      Tested Operational Environments
+The module has been tested on the following platforms with the corresponding module variants
+and configuration options:
+
+
+ #      Operating System                  Hardware              Processor          PAA/Acceleration           Module
+                                          Platform                                                            version
+ 1   SUSE Linux Enterprise            Supermicro              Intel® Xeon®         With and without            32-bit
+     Server 15 SP4                    Super Server            Silver 4215R         AES-NI (PAA)                64-bit
+                                      SYS-6019P-WTR
+ 2   SUSE Linux Enterprise            GIGABYTE R181-          AMD EPYCÔ            With and without            64-bit
+     Server 15 SP4                    Z90-00                  7371                 AES-NI (PAA)
+ 3   SUSE Linux Enterprise            GIGABYTE G242-          ARM                  With and without            64-bit
+     Server 15 SP4                    P32-QZ                  Ampere®              Cryptography
+                                                              Altra® Q80-30        Extensions (PAA)
+ 4   SUSE Linux Enterprise            IBM z/15                z15                  With and without            64-bit
+     Server 15 SP4                                                                 CPACF (PAI)
+ 5   SUSE Linux Enterprise            IBM Power               Power10              With and without            64-bit
+     Server 15 SP4 on                 E1080 (9080-                                 ISA (PAA)
+     PowerVM (VIOS 3.1.4.00)          HEX)
+                                       Table 3 - Tested Operational Environments
+
+
+2.5      Vendor-Affirmed Operational Environments
+In addition to the platforms listed in Table 3, SUSE has also tested the module on the platforms in
+Table 4 and Table 5, and claims vendor affirmation on them.
+Note: the CMVP makes no statement as to the correct operation of the module or the security
+strengths of the generated keys when so ported if the specific operational environment is not
+listed on the validation certificate.
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   6 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+2.5.1        OpenSSL 64-bit Vendor Affirmed Operational Environments
+
+
+ #    Operating System                          Hardware                  Processor           PAA/Acceleration
+                                                Platform
+
+ 1    SUSE Linux Enterprise Server              IBM LinuxONE III          z15                 With and without
+      15SP4                                     LT1                                           CPACF (PAI)
+ 2    SUSE Linux Enterprise Micro               Supermicro Super          Intel® Xeon®        With and without
+      5.3                                       Server SYS-6019P-         Silver 4215R        AES-NI (PAA)
+                                                WTR
+ 3    SUSE Linux Enterprise Micro               GIGABYTE R181-            AMD EPYCÔ           With and without
+      5.3                                       Z90-00                    7371                AES-NI (PAA)
+ 4    SUSE Linux Enterprise Micro               GIGABYTE G242-            ARM                 With and without
+      5.3                                       P32-QZ                    Ampere®             Cryptography
+                                                                          Altra® Q80-         Extensions (PAA)
+                                                                          30
+ 5    SUSE Linux Enterprise Micro               IBM z/15                  z15                 With and without
+      5.3                                                                                     CPACF (PAI)
+ 6    SUSE Linux Enterprise Micro               IBM LinuxONE III          z15                 With and without
+      5.3                                       LT1                                           CPACF (PAI)
+ 7    SUSE Linux Enterprise Server              Supermicro Super          Intel® Xeon®        With and without
+      for SAP 15SP4                             Server SYS-6019P-         Silver 4215R        AES-NI (PAA)
+                                                WTR
+ 8    SUSE Linux Enterprise Server              GIGABYTE R181-            AMD EPYCÔ           With and without
+      for SAP 15SP4                             Z90-00                    7371                AES-NI (PAA)
+ 9    SUSE Linux Enterprise Server              IBM Power E1080           Power10             With and without ISA
+      for SAP 15SP4 on PowerVM                  (9080-HEX)                                    (PAA)
+      (VIOS 3.1.4.00)
+ 10   SUSE Linux Enterprise Base                Supermicro Super          Intel® Xeon®        With and without
+      Container Image 15SP4                     Server SYS-6019P-         Silver 4215R        AES-NI (PAA)
+                                                WTR
+ 11   SUSE Linux Enterprise Base                GIGABYTE R181-            AMD EPYCÔ           With and without
+      Container Image 15SP4                     Z90-00                    7371                AES-NI (PAA)
+ 12   SUSE Linux Enterprise Base                GIGABYTE G242-            ARM                 With and without
+      Container Image 15SP4                     P32-QZ                    Ampere®             Cryptography
+                                                                          Altra® Q80-         Extensions (PAA)
+                                                                          30
+ 13   SUSE Linux Enterprise Base                IBM z/15                  z15                 With and without
+      Container Image 15SP4                                                                   CPACF (PAI)
+ 14   SUSE Linux Enterprise Base                IBM LinuxONE III          z15                 With and without
+      Container Image 15SP4                     LT1                                           CPACF (PAI)
+ 15   SUSE Linux Enterprise Base                IBM Power E1080           Power10             With and without ISA
+      Container Image 15SP4 on                  (9080-HEX)                                    (PAA)
+      PowerVM (VIOS 3.1.4.00)
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   7 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ #    Operating System                          Hardware                  Processor           PAA/Acceleration
+                                                Platform
+
+ 16   SUSE Linux Enterprise Desktop             Supermicro Super          Intel® Xeon®        With and without
+      15SP4                                     Server SYS-6019P-         Silver 4215R        AES-NI (PAA)
+                                                WTR
+ 17   SUSE Linux Enterprise Desktop             GIGABYTE R181-            AMD EPYCÔ           With and without
+      15SP4                                     Z90-00                    7371                AES-NI (PAA)
+ 18   SUSE Linux Enterprise Real                Supermicro Super          Intel® Xeon®        With and without
+      Time 15SP4                                Server SYS-6019P-         Silver 4215R        AES-NI (PAA)
+                                                WTR
+ 19   SUSE Linux Enterprise Real                GIGABYTE R181-            AMD EPYCÔ           With and without
+      Time 15SP4                                Z90-00                    7371                AES-NI (PAA)
+                        Table 4 - Vendor-Affirmed Operational Environments for OpenSSL (64-bit)
+
+2.5.2        OpenSSL 32-bit Vendor Affirmed Operational Environments
+
+
+ #    Operating System                          Hardware                 Processor            PAA/Acceleration
+                                                Platform
+
+ 1    SUSE Linux Enterprise Server              GIGABYTE R181-           AMD EPYCÔ            With and without
+      15SP4                                     Z90-00                   7371                 AES-NI (PAA)
+ 2    SUSE Linux Enterprise Server              Supermicro Super         Intel® Xeon®         With and without
+      for SAP 15SP4                             Server SYS-              Silver 4215R         AES-NI (PAA)
+                                                6019P-WTR
+ 3    SUSE Linux Enterprise Server              GIGABYTE R181-           AMD EPYCÔ            With and without
+      for SAP 15SP4                             Z90-00                   7371                 AES-NI (PAA)
+ 4    SUSE Linux Enterprise Desktop             Supermicro Super         Intel® Xeon®         With and without
+      15SP4                                     Server SYS-              Silver 4215R         AES-NI (PAA)
+                                                6019P-WTR
+ 5    SUSE Linux Enterprise Desktop             GIGABYTE R181-           AMD EPYCÔ            With and without
+      15SP4                                     Z90-00                   7371                 AES-NI (PAA)
+ 6    SUSE Linux Enterprise Real                Supermicro Super         Intel® Xeon®         With and without
+      Time 15SP4                                Server SYS-              Silver 4215R         AES-NI (PAA)
+                                                6019P-WTR
+ 7    SUSE Linux Enterprise Real                GIGABYTE R181-           AMD EPYCÔ            With and without
+      Time 15SP4                                Z90-00                   7371                 AES-NI (PAA)
+                        Table 5 - Vendor-Affirmed Operational Environments for OpenSSL (32-bit)
+
+
+2.6      Approved Algorithms
+Table 6 lists all the approved security functions of the module, including specific key strengths
+employed for approved services.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   8 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert        Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                 and Standard                                     Key Strength(s)
+
+
+A3136, A3137, AES                    CBC, CCM, CFB1,        128, 192, 256-bit keys with             Symmetric
+A3138, A3150, FIPS197,               CFB8, CFB128,          128-256 bits of security                encryption;
+A3154, A3158, SP800-38A,             CTR, OFB               strength                                Symmetric
+A3160, A3162, SP800-38C                                                                             decryption
+A3163, A3165,
+A3166, A3167
+
+A3136, A3137, AES                    CMAC                   128, 192, 256-bit keys with             Message
+A3138, A3150, SP800-38B                                     128-256 bits of security                authentication
+A3154, A3158,                                               strength                                code (MAC)
+A3160, A3162,
+A3163, A3165,
+A3166, A3167
+
+A3136, A3137, AES                    ECB                    128, 192, 256-bit keys with             Symmetric
+A3138, A3140, FIPS197,                                      128-256 bits of security                encryption;
+A3141, A3142, SP800-38A                                     strength                                Symmetric
+A3143, A3149,                                                                                       decryption
+A3150, A3154,
+A3157, A3158,
+A3160, A3162,
+A3163, A3165,
+A3166, A3167,
+A3169, A3170,
+A3171, A3172
+
+
+A3151, A3152, AES                    GCM with internal 128, 192, 256-bit keys with                  Symmetric
+A3153, A3155, SP800-38D              IV                128-256 bits of security                     encryption;
+A3159, A3176,                        (IV Gen Mode      strength                                     Symmetric
+A3177, A3178,                        8.2.1)                                                         decryption
+A3179, A3180,
+A3181, A3182,
+A3183, A3184,
+A3190, A3194,
+A3195, A3196,
+A3197, A3198,
+A3199, A3200,
+A3201, A3204,
+A3205, A3206
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   9 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert          Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                   and Standard                                     Key Strength(s)
+
+
+A3151, A3152, AES                      GCM with               128, 192, 256-bit keys with             Symmetric
+A3153, A3155, SP800-38D                external IV            128-256 bits of security                decryption
+A3159, A3176,                          (IV Gen Mode           strength
+A3177, A3178,                          8.2.1)
+A3179, A3180,
+A3181, A3182,
+A3183, A3184,
+A3190, A3194,
+A3195, A3196,
+A3197, A3198,
+A3199, A3200,
+A3201, A3204,
+A3205, A3206
+
+A3136, A3137, AES                      KW, KWP                128, 192, 256-bit keys with             Key wrapping
+A3138, A3150, SP800-38F                                       128-256 bits of security                and unwrapping
+A3154, A3158,                                                 strength
+A3160, A3162,
+A3163, A3165,
+A3166, A3167
+
+A3136, A3137, AES                      XTS                    128, 256-bit keys with 128-             Symmetric
+A3138, A3150, SP800-38E                                       256 bits of security strength           encryption;
+A3154, A3158,                                                                                         Symmetric
+A3160, A3162,                                                                                         decryption (for
+A3163, A3165,                                                                                         data storage)
+A3166, A3167
+
+Vendor             CKG           FIPS186-4, SP800- RSA: 2048 to 16384-bit keys     Key pair
+Affirmed           SP800-133rev2 56Arev3, SP800-   with 112-256   bits of security generation
+                                 90Arev1           strength
+                                                   ECDSA: P-224, P-256, P-384, P-
+                                                   521-bit keys with 112-256 bits
+                                                   of security strength
+                                                   Safe Primes: 2048, 3072,
+                                                   4096, 6144, 8192-bit keys with
+                                                   112-200 bits of security
+                                                   strength
+
+A3136, A3137, DRBG          CTR_DRBG:                         128, 192, 256-bit keys with             Random number
+A3138, A3150, SP800-90Arev1 AES-128, AES-                     128, 192 and 256 bits of                generation
+A3154, A3158,               192, AES-256                      security strength
+A3160, A3162,               with/without DF,
+A3163, A3165,               with/without PR
+A3166, A3167
+
+A3147, A3156, ECDSA                    B.4.2 Testing          P-224, P-256, P-384, P-521              Key pair
+A3185, A3186, FIPS186-4                Candidates             with 112-256 bits of security           generation
+A3187, A3188,                                                 strength
+
+
+                                       © 2025 SUSE, LLC / atsec information security.
+           This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     10 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert        Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                 and Standard                                     Key Strength(s)
+
+A3193, A3202,                        N/A                    P-224, P-256, P-384, P-521              Key pair
+A3203, A3210                                                with 112-256 bits of security           validation,
+                                                            strength                                ECDSA Public
+                                                                                                    key validation
+
+A3144, A3145,                        SHA2-224, SHA2- P-224, P-256, P-384, P-521                     Digital signature
+A3146, A3147,                        256, SHA2-384,  with 112-256 bits of security                  generation
+A3148, A3156,                        SHA2-512        strength
+A3173, A3174,
+                                     SHA3-224, SHA3-
+A3175, A3185,
+                                     256, SHA3-384,
+A3186, A3187,
+                                     SHA3-512
+A3188, A3193,
+A3202, A3203,
+                                     SHA-1, SHA2-224, P-192, P-224, P-256, P-384, P-                Digital signature
+A3210
+                                     SHA2-256, SHA2- 521 with 80-256 bits of                        verification
+                                     384, SHA2-512    security strength                             (usage of P-192
+                                     SHA3-224, SHA3-                                                curve or SHA-1
+                                     256, SHA3-384,                                                 are considered
+                                     SHA3-512                                                       Legacy Use)
+
+E22, E28,        ESV                 N/A                    N/A                                     Entropy source
+E29, E30         SP800-90B
+
+
+A3147, A3156, HMAC                   SHA-1, SHA2-224, ³ 112-bit keys with 112-256                   Message
+A3185, A3186, FIPS198-1              SHA2-256, SHA2- bits of security strength                      authentication
+A3187, A3188,                        384, SHA2-512                                                  code (MAC)
+A3193, A3202,
+A3203, A3210
+
+A3161                                SHA2-256
+
+A3144, A3145,                        SHA3-224, SHA3- ³ 112-bit keys with 112 -256                   Message
+A3146, A3148,                        256, SHA3-384,  bits of security strength                      authentication
+A3173, A3174,                        SHA3-512                                                       code (MAC)
+A3175
+
+A3147, A3156, KAS-ECC-SSC ECC                               P-224, P-256, P-384, P-521              (EC Diffie-
+A3185, A3186, SP800-56Arev3 Ephemeral                       with 112-256 bits of security           Hellman) Key
+A3187, A3188,               Unified Scheme                  strength                                agreement
+A3193, A3202,
+A3203, A3210
+
+A3207, A3211 KAS-FFC-SSC   dhEphem Scheme MODP-2048, MODP-3072,                                     (Diffie-Hellman)
+             SP800-56Arev3 with safe prime MODP-4096, MODP-6144,                                    key agreement
+                           groups          MODP-8192, ffdhe2048,
+                                           ffdhe3072, ffdhe4096,
+                                           ffdhe6144, ffdhe8192 with
+                                           keys with 112-200 bits of
+                                           security strength
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   11 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert        Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                 and Standard                                     Key Strength(s)
+
+
+CVL. A3139,      KDA HKDF      SHA2-224, SHA2- N/A                                                  Key derivation
+A3168            SP800-56Crev1 256, SHA2-384,                                                       for TLS v1.3
+                               SHA2-512                                                             used in the TLS
+                                                                                                    protocol service
+
+CVL. A3140, KDF SSH         AES with SHA-1, 128, 192, 256-bit keys with                             Key derivation
+A3141, A3142, SP800-135rev1 SHA2-256, SHA2- 128-256 bits of security
+A3143, A3149,               384, SHA2-512   strength
+A3157, A3169,
+A3170, A3171,
+A3172
+
+CVL. A3147, KDF TLS         TLS v1.0, v1.1,                 N/A                                     Key derivation
+A3156, A3185, SP800-135rev1 v1.2
+A3186, A3187,
+              RFC7627
+A3188, A3193,
+A3202, A3203,
+A3210
+
+A3136, A3137, KTS                    AES KW, KWP            128, 192, 256-bit keys with             Key wrapping;
+A3138, A3150, SP800-38F                                     128-256 bits of security                Key unwrapping
+A3154, A3158,                                               strength
+A3160, A3162,
+A3163, A3165,
+A3166, A3167
+
+A3136, A3137, KTS                    AES CCM                128, 256-bit keys with 128,             Key wrapping
+A3138, A3150, SP800-38C                                     256 bits of security strength           and key
+A3154, A3158,                                                                                       unwrapping (as
+A3160, A3162,                                                                                       part of the
+A3163, A3165,                                                                                       cipher suites in
+A3166, A3167                                                                                        the TLS
+                                                                                                    protocol)
+A3151, A3152, KTS                    AES GCM                128, 256-bit keys with 128,
+A3153, A3155, SP800-38D                                     256 bits of security strength
+A3159, A3176,
+A3177, A3178,
+A3179, A3180,
+A3181, A3182,
+A3183, A3184,
+A3190, A3194,
+A3195, A3196,
+A3197, A3198,
+A3199, A3200,
+A3201, A3204,
+A3205, A3206
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   12 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert        Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                 and Standard                                     Key Strength(s)
+
+
+(AES)         KTS                    AES CBC and            128, 256-bit keys with 128,
+A3136, A3137, SP800-38A,             HMAC                   256 bits of security strength
+A3138, A3150, FIPS198-1
+A3154, A3158,
+A3160, A3162,
+A3163, A3165,
+A3166, A3167
+(HMAC)
+A3144, A3145,
+A3146, A3147,
+A3148, A3156,
+A3161, A3173,
+A3174, A3175,
+A3185, A3186,
+A3187, A3188,
+A3193, A3202,
+A3203, A3210
+
+A3144, A3145, PBKDF                  HMAC-SHA-1,    N/A                                             Key derivation
+A3146, A3147, SP800-132              HMAC-SHA2-224,
+A3148, A3156,                        HMAC-SHA2-256,
+A3173, A3174,                        HMAC-SHA2-384,
+A3175, A3185,                        HMAC-SHA2-512
+A3186, A3187,                        HMAC-SHA3-224,
+A3188, A3193,                        HMAC-SHA3-256,
+A3202, A3203,                        HMAC-SHA3-384,
+A3210                                HMAC-SHA3-512
+
+A3147, A3156, RSA                    B.3.3 Random           2048, 3072 and 4096-bit keys            Key pair
+A3185, A3186, FIPS186-4              Probable Primes        with 112-149 bits of security           generation
+A3187, A3188,                                               strength
+A3193, A3202,                                               Key sizes greater than 4096
+A3203, A3210                                                bits provide 150-256 bits of
+                                                            security strength.
+Key sizes
+other than                           PKCS#1v1.5:     2048, 3072 and 4096-bit keys                   Digital signature
+mentioned                            SHA2-224, SHA2- with 112-149 bits of security                  generation
+here and up                          256, SHA2-384,  strength
+to 16384 bits                        SHA2-512
+are not CAVP
+tested but                           PSS:            2048, 3072 and 4096-bit keys
+approved per                         SHA2-224, SHA2- with 112-149 bits of security
+IG C.F                               256, SHA2-384,  strength
+                                     SHA2-512
+
+                                     X9.31:          2048, 3072 and 4096-bit keys
+                                     SHA2-256, SHA2- with 112-149 bits of security
+                                     384, SHA2-512   strength
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   13 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ CAVP Cert        Algorithm            Mode/Method            Description / Key Size(s) /            Use / Function
+                 and Standard                                     Key Strength(s)
+
+
+                                     PKCS#1v1.5:      1024, 2048, 3072 and 4096-bit Digital signature
+                                     SHA-1, SHA2-224, keys with 80-149 bits of         verification
+                                     SHA2-256, SHA2-  security strength                (usage of 1024-
+                                     384, SHA2-512                                     bit keys or SHA-
+                                                                                       1 is considered
+                                     PSS:             1024, 2048,  3072 and   4096-bit Legacy Use)
+                                     SHA-1, SHA2-224, keys with  80-149 bits of
+                                     SHA2-256, SHA2- security strength
+                                     384, SHA2-512
+
+                                     X9.31:           1024, 2048, 3072 and 4096
+                                     SHA-1, SHA2-224, keys with 80-149 bits of
+                                     SHA2-256, SHA2- security strength
+                                     384, SHA2-512
+
+A3207, A3211 Safe Primes   Section 5.6.1.1.4 MODP-2048, MODP-3072,                                  Key pair
+             SP800-56Arev3 Testing           MODP-4096, MODP-6144,                                  generation,
+                           Candidates        MODP-8192, ffdhe2048,                                  Diffie-Hellman
+                                             ffdhe3072, ffdhe4096,                                  public key
+                                             ffdhe6144, ffdhe8192 keys                              validation
+                                             with 112-200 bits of security
+                                             strength
+
+A3144, A3145, SHA-3                  SHA3-224, SHA3- N/A                                            Message digest
+A3146, A3148, FIPS202                256, SHA3-384,
+A3173, A3174,                        SHA3-512,
+A3175                                SHAKE-128,
+                                     SHAKE-256
+
+A3147, A3156, SHS                    SHA-1, SHA2-224, N/A                                           Message digest
+A3185, A3186, FIPS180-4              SHA2-256, SHA2-
+A3187, A3188,                        384, SHA2-512
+A3193, A3202,
+A3203, A3210
+
+A3161                                SHA2-256
+
+                                             Table 6 – Approved Algorithms
+
+
+2.7      Non-Approved Algorithms Allowed in the Approved Mode
+         of Operation
+The module does not implement non-approved algorithms that are allowed in the approved mode
+of operation.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   14 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+2.8      Non-Approved Algorithms Allowed in the Approved Mode
+         of Operation with No Security Claimed
+Table 7 lists the non-approved algorithms that are allowed in the approved mode of operation with
+no security claimed. These algorithms are used by the approved services listed in Table 10.
+
+
+   Algorithm1                                  Caveat                                        Use/Function
+
+MD5                  Only allowed as the PRF in TLSv1.0 and v1.1 per               Message digest used in
+                     IG 2.4.A                                                      TLSv1.0 / v1.1 KDF only
+         Table 7 - Non-Approved Algorithms Allowed in the Approved Mode of Operation with No Security Claimed
+
+
+2.9      Non-Approved Algorithms Not Allowed in the Approved
+         Mode of Operation
+Table 8 lists non-approved algorithms that are not allowed in the approved mode of operation.
+These algorithms are used by the non-approved services listed in Table 12.
+
+
+                    Algorithm/Functions                                               Use/Function
+
+AES(GCM) with external IV                                         Symmetric encryption
+
+ARIA                                                              Symmetric encryption; Symmetric decryption
+
+Blake2                                                            Message digest
+
+Blowfish                                                          Symmetric encryption; Symmetric decryption
+
+Camellia                                                          Symmetric encryption; Symmetric decryption
+
+CAST                                                              Symmetric encryption; Symmetric decryption
+
+CAST5                                                             Symmetric encryption; Symmetric decryption
+
+ChaCha20                                                          Symmetric encryption; Symmetric decryption
+
+DES                                                               Symmetric encryption; Symmetric decryption
+
+Chacha20 and Poly1305                                             Authenticated encryption; Authenticated
+                                                                  decryption
+CMAC with Triple-DES                                              Message authentication code (MAC)
+
+Diffie-Hellman with keys generated with domain                    Key pair generation; Diffie-Hellman public key
+parameters other than safe primes                                 validation; Key agreement; Shared secret
+                                                                  computation
+DSA with any key sizes                                            Key pair generation; Domain parameter
+                                                                  generation, Digital signature generation; Digital
+                                                                  signature verification
+
+
+
+
+1 These algorithms do not claim any security and are not used to meet FIPS 140-3 requirements. Therefore, SSPs do not
+map to these algorithms.
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   15 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                    Algorithm/Functions                                                Use/Function
+
+EC Diffie-Hellman with P-192 curve, K curves, B curves             Key agreement; Shared secret computation
+and non-NIST curves
+ECDSA with P-192 curve, K curves, B curves and non-NIST Key pair generation; Key pair validation; ECDSA
+curves                                                  public key validation
+ECDSA with P-192 curve, K curves, B curves and non-NIST Digital signature generation; Digital signature
+curves                                                  verification
+GHASH                                                              Message digest
+
+Gost                                                               Message digest
+
+HKDF                                                               Key derivation as a standalone service
+
+HMAC with less than 112-bit keys                                   Message authentication Code (MAC)
+
+KDF SSH using Triple-DES                                           Key derivation
+
+MD4                                                                Message digest
+
+MD5                                                                Message digest
+
+MDC2                                                               Message digest
+
+Multiblock ciphers using AES in CBC mode with 128- and             Authenticated encryption; Authenticated
+256-bit keys and HMAC SHA-1 and SHA2-256 (available                decryption
+only in Intel processors with AES-NI capability)
+PBKDF with non-approved message digest algorithms or               Key derivation
+using input parameters not meeting requirements stated
+in section 11.2.4
+RC2                                                                Symmetric encryption; Symmetric decryption
+
+RC4                                                                Symmetric encryption; Symmetric decryption
+
+RMD160                                                             Message digest
+
+RSA with keys smaller than 2048 bits                               Key pair generation; Domain parameter
+                                                                   verification; Digital signature generation
+RSA with keys smaller than 1024 bits                               Digital signature verification
+
+RSA encryption and decryption with any key sizes                   Key encapsulation
+
+SEED                                                               Symmetric encryption; Symmetric decryption
+
+SHA-1                                                              Digital signature generation
+
+SipHash                                                            Message authentication code (MAC)
+
+SM3                                                                Message digest
+
+SM4                                                                Symmetric encryption; Symmetric decryption
+
+Triple-DES                                                         Symmetric encryption; Symmetric decryption
+
+                    Table 8 - Non-Approved Algorithms Not Allowed in the Approved Mode of Operation
+
+
+                                      © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    16 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+3 Cryptographic Module Ports and Interfaces
+As a software-only module, the module does not have physical ports. The operator can only
+interact with the module through the API provided by the module. Thus, the physical ports are
+interpreted to be the physical ports of the hardware platform on which the module runs. The
+following table shows the logical interfaces implemented in the module.
+All data output via data output interface is inhibited when the module is performing pre-
+operational test or zeroization or when the module enters error state.
+
+
+
+      Logical Interface                              Data that passes over port/interface
+
+Data Input                         API input parameters, kernel I/O network or files on filesystem, TLS
+                                   protocol input messages.
+
+Data Output                        API output parameters, kernel I/O network or files on filesystem, TLS
+                                   protocol output messages.
+
+Control Input                      API function calls, API input parameters for control.
+
+Status Output                      API return codes, API output parameters for status output.
+
+                                             Table 9 - Ports and Interfaces
+
+Note: The module does not implement a control output interface.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   17 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+4 Roles, services, and authentication
+4.1      Services
+The module supports the Crypto Officer role only. This sole role is implicitly assumed
+by the operator of the module when performing a service. The module does not support
+authentication.
+
+
+    Role                         Service                                  Input                       Output
+
+Crypto       Symmetric encryption                              Plaintext, key                Ciphertext
+Officer (CO)
+             Symmetric decryption                              Ciphertext, key               Plaintext
+
+               Authenticated encryption                        Plaintext, key                Ciphertext,
+                                                                                             authentication tag
+
+               Authenticated decryption                        Ciphertext,             Plaintext
+                                                               authentication tag, key
+
+               Key pair generation                             Key size                      Key pair
+
+               Domain parameter generation                     Key size                      Domain parameters
+
+               Domain parameter verification                   Domain parameters             Return codes/log
+                                                                                             messages
+
+               Key pair validation                             Key pair                      Return codes/log
+                                                                                             messages
+
+               Key agreement                                   Key pair                      Shared secret
+
+               Digital signature generation                    Message, hash                 Signature
+                                                               algorithm, private key
+
+               Digital signature verification                  Signature, hash               Signature verification
+                                                               algorithm, public key         result
+
+               Random number generation                        Size                          Random number
+
+               Message digest                                  Message                       Message digest
+
+               Message authentication code (MAC)               Message, key                  Message
+                                                                                             authentication code
+
+               Key wrapping                                    Key to be wrapped, key Wrapped key
+                                                               wrapping key
+
+               Key unwrapping                                  Wrapped key, key              Unwrapped key
+                                                               unwrapping key
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   18 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+    Role                         Service                                  Input                       Output
+
+               Key encapsulation                               Key to be                     Encapsulated key
+                                                               encapsulated, key
+                                                               encapsulating key
+
+               Shared secret computation                       Private key, public key Shared secret
+                                                               from peer
+
+               Diffie-Hellman key generation using             Safe prime                    Key pair
+               safe primes
+
+               Public key validation                           Public key                    Return codes/log
+                                                                                             messages
+
+               TLS Key derivation                              TLS pre-master secret         Derived key
+
+               SSH Key Derivation                              Shared secret                 Derived key
+
+               PBKDF Key Derivation                            Password/passphrase           Derived key
+
+               HKDF Key Derivation                             Shared secret                 Derived key
+
+               Show status                                     None                          Return codes/log
+                                                                                             messages
+
+               Zeroization                                     Context containing            None
+                                                               SSPs
+
+               Self-test                                       Module reset                  Self-test results
+
+               On-demand integrity test                        None                          Self-test results
+
+               Module installation and configuration           None                          Log messages
+
+               Module initialization                           None                          Log messages
+
+               Show module name and version                    None                          Name and version of
+                                                                                             the module
+
+               Transport Layer Security (TLS)                  Application data              Application data
+               network protocol
+
+                                 Table 10 - Roles, Service Commands, Input and Output
+
+The module provides services to the users that assume one of the available roles. All services are
+shown in Table 11 and Table 12.
+
+4.2      Approved Services
+Table 11 lists the approved services. For each service, the table lists the associated cryptographic
+algorithm(s), the role to perform the service, the cryptographic keys or SSPs involved, and their
+access type(s). No support of intermediate key generation is provided. The following convention is
+used to specify access rights to an SSP:
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   19 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    •   G = Generate: The module generates or derives the SSP.
+    •   R = Read: The SSP is read from the module (e.g., the SSP is output).
+    •   W = Write: The SSP is updated, imported, or written to the module.
+    •   E = Execute: The module uses the SSP in performing a cryptographic operation.
+    •   Z = Zeroize: The module zeroizes the SSP.
+    •   N/A: the calling application does not access any SSP or key during its operation.
+The details of the approved cryptographic algorithms including the CAVP certificate numbers can
+be found in Table 6.
+The “Indicator” column shows the service indicator API functions that must be used to verify the
+service indicator for each of the services. A value of 1 indicates that the service is approved, and 0
+indicates that the service is non-approved.
+Additionally there is a separate indicator used for the following services.
+    •   The API function used to determine the indicator for the “TLS network protocol” service
+        returns the cipher suite established for the TLS session. If the returned cipher suite ID
+        belongs to one of the cipher suites listed in Table 20 of Appendix A, then the service is
+        approved, otherwise, it is non-approved.
+    •   The “Show status”, “Zeroization”, “Self-tests” and “Show module name and version”
+        services listed under the “Other FIPS-related Services” group are always approved. The
+        service level indicator is implicit.
+For more information, see the “FIPS server level indicator” man pages.
+
+
+    Service        Description         Approved         Keys and/or      Roles Access                Indicator
+                                        Security           SSPs                 rights
+                                       Functions                               to Keys
+                                                                                and/or
+                                                                                 SSPs
+                                              Cryptographic Services
+Symmetric        Perform AES        AES               AES key            CO      W, E       fips_sli_is_approved_EVP
+encryption       encryption                                                                 _CIPHER_CTX returns 1
+
+Symmetric        Perform AES        AES               AES key                    W, E       fips_sli_is_approved_EVP
+decryption       decryption                                                                 _CIPHER_CTX returns 1
+
+Key pair         Generate RSA       RSA, DRBG         RSA public key,            E, G, R    fips_sli_is_approved_EVP
+generation       key pairs                            RSA private key                       _PKEY_CTX returns 1
+
+                 Generate           ECDSA, DRBG       ECDSA public               E, G, R    fips_sli_is_approved_EVP
+                 ECDSA key                            key, ECDSA                            _PKEY_CTX returns 1
+                 pairs                                private key
+Digital          Sign using RSA RSA, SHS              RSA private key            W, E       fips_sli_is_approved_EVP
+signature                                                                                   _PKEY_CTX returns 1
+generation       Sign using         ECDSA, DRBG,      ECDSA private              W, E       fips_sli_is_approved_EVP
+                 ECDSA              SHS               key                                   _PKEY_CTX returns 1
+
+Digital          Verify RSA         RSA, SHS          RSA public key             W, E       fips_sli_is_approved_EVP
+signature        signatures                                                                 _PKEY_CTX returns 1
+verification
+                 Verify ECDSA       ECDSA, SHS        ECDSA public               W, E       fips_sli_is_approved_EVP
+                 signatures                           key                                   _PKEY_CTX returns 1
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   20 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    Service        Description         Approved         Keys and/or      Roles Access                Indicator
+                                        Security           SSPs                 rights
+                                       Functions                               to Keys
+                                                                                and/or
+                                                                                 SSPs
+Key pair         Validate ECDSA ECDSA                 ECDSA public               W, E       fips_sli_is_approved_EVP
+validation       public key                           key                                   _PKEY_CTX returns 1
+
+                                                      ECDSA private              W, E
+                                                      key
+ECDSA public Validate ECDSA ECDSA                     ECDSA public               W, E       fips_sli_is_approved_EVP
+key validation public key                             key                                   _PKEY_CTX returns 1
+
+Random           Generate           DRBG              Entropy input              W, E       fips_sli_RAND_bytes_is_a
+number           random                                                                     pproved returns 1
+generation       bitstrings                           DRBG seed ,                E, G       fips_sli_RAND_priv_bytes
+                                                      DRBG internal                         _is_approved returns 1
+                                                      state (V, Key)
+Message          Compute SHA        SHA-1, SHA2-      None                       N/A        fips_sli_SHA*_is_approve
+digest           hashes             224,                                                    d returns 1
+                                    SHA2-256,
+                                    SHA2-384,
+                                    SHA2-512
+                                    SHA3-224,
+                                    SHA3-256,
+                                    SHA3-384,
+                                    SHA3-512
+Message        Compute HMAC HMAC          HMAC key                               W, E       fips_sli_HMAC_is_approve
+authentication                                                                              d returns 1
+code (MAC)     Compute and  CMAC with AES AES key                                           fips_sli_is_approved_CMA
+               AES-based                                                                    C_CTX returns 1
+               CMAC
+Key wrapping Perform AES-           AES-KW, AES-      AES key                    W, E       fips_sli_is_approved_EVP
+             based key              KWP                                                     _CIPHER_CTX returns 1
+             wrapping
+Key              Perform AES-       AES-KW, AES-      AES key                    W, E       fips_sli_is_approved_EVP
+unwrapping       based key          KWP                                                     _CIPHER_CTX returns 1
+                 unwrapping
+Shared secret Diffie-Hellman        KAS-FFC-SSC       Diffie-Hellman             W, E       fips_sli_is_approved_EVP
+computation shared secret                             public key,                           _PKEY_CTX returns 1
+              computation                             Diffie-Hellman
+                                                      private key
+                                                      Diffie-Hellman             G, R
+                                                      shared secret
+                 EC Diffie-     KAS-ECC-SSC           EC Diffie-                 W, E       fips_sli_is_approved_EVP
+                 Hellman shared                       Hellman public                        _PKEY_CTX returns 1
+                 secret                               key, EC Diffie-
+                 computation                          Hellman private
+                                                      key
+                                                      EC Diffie-                 G, R
+                                                      Hellman shared
+                                                      secret
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   21 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    Service        Description         Approved         Keys and/or       Roles Access               Indicator
+                                        Security           SSPs                  rights
+                                       Functions                                to Keys
+                                                                                 and/or
+                                                                                  SSPs
+Diffie-Hellman Perform Diffie- Safe Primes Key Diffie-Hellman                    E, G, R    fips_sli_is_approved_EVP
+key            Hellman key     Generation      public key,                                  _PKEY_CTX returns 1
+generation     generation with                 Diffie-Hellman
+               safe primes                     private key
+Diffie-Hellman Perform Diffie-      Safe Primes        Diffie-Hellman            W, E       fips_sli_is_approved_EVP
+public key     Hellman public       Public key         public key                           _PKEY_CTX returns 1
+validation     key validation       validation
+Key derivation Perform key          TLS KDF            TLS pre-master            W, E       fips_sli_is_approved_EVP
+               derivation                              secret                               _KDF_CTX returns 1
+
+                                                       TLS master                W, E, G
+                                                       secret
+                                                       TLS derived key           G, R
+                                    SSH KDF            Diffie-Hellman            W, E       fips_sli_is_approved_EVP
+                                                       or EC Diffie-                        _KDF_CTX returns 1
+                                                       Hellman shared
+                                                       secret
+                                                       SSH derived               G, R
+                                                       key
+                                    PBKDF KDF          Password/passp            W, E       fips_sli_PKCS5_PBKDF2_HM
+                                                       hrase                                AC_is_approved returns 1
+
+                                                       PBKDF Derived             G, R
+                                                       key
+Transport      Provide              Supported          RSA public key,           W, E       SSL_CIPHER_get_protocol_
+Layer Security supported            cipher suites in   RSA private                          id or
+(TLS) network cipher suites in      the approved       key, ECDSA                           SSL_get_current_cipher
+                                                                                            return a two-byte ID
+protocol       the approved         mode (see          public key,
+                                                                                            matching an approved cipher
+               mode                 Appendix A for     ECDSA private                        suite (listed in Appendix C).
+                                    the complete       key
+                                    list of valid
+                                    cipher suites)     TLS pre-master            E, G
+                                                       secret, TLS
+                                                       master secret, ,
+                                                       Diffie-Hellman
+                                                       private key, EC
+                                                       Diffie-Hellman
+                                                       private key, TLS
+                                                       derived key
+                                                       Diffie-Hellman            W, E, G,
+                                                       public key, EC            R
+                                                       Diffie-Hellman
+                                                       public key,
+                                           Other FIPS-related Services
+Show status      Show module        N/A                None               CO     N/A        Implicit (always
+                 status                                                                     approved)
+Zeroization      Zeroize SSPs       N/A                All SSPs                  Z          Implicit (always
+                                                                                            approved)
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   22 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+    Service         Description        Approved         Keys and/or      Roles Access                Indicator
+                                        Security           SSPs                 rights
+                                       Functions                               to Keys
+                                                                                and/or
+                                                                                 SSPs
+Self-tests       Perform self-      AES, Diffie-      None                       N/A        Implicit (always
+                 tests              Hellman, EC                                             approved)
+                                    Diffie-Hellman,
+                                    ECDSA, DRBG,
+                                    HMAC, RSA,
+                                    SHS
+Show module Show module             N/A               None                       N/A        Implicit (always
+name and    name and                                                                        approved)
+version     version
+
+                                              Table 11 - Approved Services
+
+Table 12 lists the non-approved services. The details of the non-approved cryptographic
+algorithms available in non-approved mode can be found in Table 8.
+
+
+
+       Service                     Description                            Algorithms Accessed                       Roles
+
+                                              Cryptographic Services
+
+Symmetric              Compute the cipher for                ARIA, Blowfish, Camellia, ChaCha20, CAST,             CO
+encryption             encryption                            CAST5, DES, RC2, RC4, SEED, Triple-DES
+Symmetric              Compute the plaintext for
+decryption             decryption
+Authenticated          Compute authenticated                 AES-GCM with external IV
+encryption             encryption cipher
+Authenticated          Compute authenticated                 AES and SHA from multi-buffer or stitch
+encryption             encryption cipher                     implementations listed in Table 8, ChaCha20
+                                                             and Poly1305
+Authenticated          Compute plaintext from
+decryption             authenticated encryption
+Key pair generation Generate RSA, DSA, and ECDSA RSA, DSA and ECDSA with restrictions listed in
+                    key pairs                    Table 8
+Digital signature      Sign using RSA, DSA or ECDSA          RSA, DSA and ECDSA and message digest
+generation                                                   restrictions listed in Table 8
+Digital signature      Verify RSA, DSA, ECDSA
+verification           signatures
+Message digest         Compute message digest                Blake2, Gost, MD4, MD5, MDC2, RMD160
+Message             Compute HMAC and CMAC                    HMAC and CMAC with restrictions listed in
+authentication code                                          Table 8
+(MAC)
+
+
+Key encapsulation      Perform RSA key encapsulation         RSA encryption and decryption with any key
+                                                             sizes
+Shared secret          Perform Diffie-Hellman or EC          Diffie-Hellman and EC Diffie-Hellman
+computation            Diffie-Hellman key agreement          restrictions listed in Table 8
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   23 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+       Service                     Description                            Algorithms Accessed                       Roles
+
+Key derivation         Perform key derivation                KDF SSH using Triple-DES
+
+                                                             HKDF (as a standalone service)
+                                                             PBKDF using non-approved message digest or
+                                                             input parameters not meeting requirements
+                                                             stated in section 11.2.4
+                                          Network Protocol Services
+Transport Layer        Provide non-supported cipher          Non-supported cipher suites (see Appendix A           CO
+Security (TLS)         suites                                for the complete list of valid cipher suites)
+network protocol
+
+                                           Table 12 - Non-Approved Services
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   24 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+5 Software/Firmware security
+5.1      Integrity Techniques
+The integrity of the module is verified by comparing an HMAC-SHA2-256 value calculated at run
+time with the HMAC value stored in the .hmac file that was computed at build time for each
+software component of the module listed in section 2. If the HMAC values do not match, the test
+fails, and the module enters the error state.
+
+5.2      On-Demand Integrity Test
+On-Demand integrity tests can be invoked by powering-off and reloading the module.
+
+5.3      Executable Code
+The module consists of executable code in the form of libcrypto and libssl shared libraries as
+stated in section 2.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   25 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+6 Operational Environment
+6.1      Applicability
+This module operates in a modifiable operational environment per the FIPS 140-3 level 1
+specifications. The SUSE Linux Enterprise Server operating system is used as the basis of other
+products. Compliance is maintained for SUSE products whenever the binary is found unchanged
+per the vendor affirmation from SUSE based on the allowance FIPS 140-3 management manual
+[FIPS140-3_MM] section 7.9.1 bullet 1 a i).
+Note: The CMVP makes no statement as to the correct operation of the module or the security
+strengths of the generated keys when supported if the specific operational environment is not
+listed on the validation certificate.
+
+6.2      Policy
+Instrumentation tools like the ptrace system call, gdb and strace utilities, userspace live patching,
+as well as other tracing mechanisms offered by the Linux environment such as ftrace or
+systemtap, shall not be used in the operational environment. The use of any of these tools implies
+that the cryptographic module is running in a non-tested operational environment.
+
+6.3      Requirements
+The module shall be installed as stated in section 11. The operating system provides process
+isolation and memory protection mechanisms that ensure appropriate separation for memory
+access among the processes on the system. Each process has control over its own data and
+uncontrolled access to the data of other processes is prevented.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   26 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+7 Physical Security
+The module is comprised of software only, and therefore this section is not applicable.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   27 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+8 Non-invasive Security
+This module does not implement any non-invasive security mechanism and therefore this section
+is not applicable.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   28 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+9 Sensitive Security Parameter Management
+Table 13 summarizes the Sensitive Security Parameters (SSPs) that are used by the cryptographic
+services implemented in the module.
+
+
+ Key/SSP Stren          Security         Generation       Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth         Function and                                            ment        age                   related SSPs
+    e                 Cert. Number
+
+
+
+
+AES key       128,   AES-CBC, AES-  N/A                  Import: CM         N/A           RAM    EVP_CIPHER_   Use:
+              192,   CCM, AES-CFB1,                      from TOEPP                              CTX_free,     Symmetric
+              256    AES-CFB128,                         Path.                                   EVP_CIPHER_   encryption and
+                     AES-CFB8, AES-                      Passed to the                           CTX_reset     decryption;
+                     CMAC, AES-                          module via API                                        Key wrapping
+                     CTR, AES-GCM,                       parameters in                                         and
+                     AES-KW, AES-                        plaintext (P)                                         unwrapping;
+                     KWP, AES- OFB,                      format.                                               Message
+                     AES-XTS, CTR-                                                                             authentication
+                     DRBG                                                                                      code (MAC)
+                     A3136, A3137,                       Export: N/A                                           generation and
+                     A3138, A3140,                                                                             verification
+                     A3141, A3142,                                                                             Related
+                     A3143, A3149,                                                                             keys: N/A
+                     A3150, A3151,
+                     A3152, A3153,
+                     A3154, A3155,
+                     A3157, A3158,
+                     A3159, A3160,
+                     A3162, A3163,
+                     A3165, A3166,
+                     A3167, A3169,
+                     A3170, A3171,
+                     A3172, A3176,
+                     A3177, A3178,
+                     A3179, A3180,
+                     A3181, A3182,
+                     A3183, A3184,
+                     A3190, A3194,
+                     A3195, A3196,
+                     A3197, A3198,
+                     A3199, A3200,
+                     A3201, A3204,
+                     A3205, A3206
+
+HMAC key      112    HMAC              N/A               Import: CM         N/A           RAM    HMAC_CTX_fr    Use: Message
+              to     A3144, A3145,                       from TOEPP                              ee             authentication
+              256    A3146, A3147,                       Path.                                                  code (MAC)
+                     A3148, A3156,                       Passed to the                                          generation
+                     A3161, A3173,                       module via API                                         and
+                     A3174, A3175,                       parameters in                                          verification
+                     A3185, A3186,                       plaintext (P)                                          Related
+                     A3187, A3188,                       format.                                                keys: N/A
+                     A3193, A3202,
+                     A3203, A3210
+                                                         Export: N/A
+
+
+
+
+                                      © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    29 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+  Key/SSP Stren         Security          Generation        Import/Export     Establish     Stor   Zeroization        Use &
+ Name/Typ  gth        Function and                                              ment        age                   related SSPs
+     e                Cert. Number
+
+
+
+
+Module-       112,    RSA               Generated           Import: N/A       N/A           RAM    RSA_free       Use: Key
+generated     to      A3147, A3156,     using the                                                                 generation
+RSA public    2562    A3185, A3186,     random                                                                    Related
+key                                     probable primes     Export: CM to
+                      A3187, A3188,                         TOEPP Path.                                           keys: DRBG
+                      A3193, A3202,     method (B.3.3)                                                            internal state;
+                      A3203, A3210      specified in FIPS   Passed from the                                       Module-
+                                        186-4; random       module via API                                        generated
+                                        values are          parameters in                                         RSA private
+                                        obtained from       plaintext (P)                                         key
+                                        the SP800-          format.
+                                        90Arev1 DRBG.
+
+Module-     112       RSA               Generated           Import: N/A       N/A           RAM    RSA_free       Use: Key
+generated   to        A3147, A3156,     using the                                                                 generation
+RSA private 256       A3185, A3186,     random                                                                    Related
+key                                     probable primes     Export: CM to
+                      A3187, A3188,                         TOEPP Path.                                           keys: DRBG
+                      A3193, A3202,     method (B.3.3)                                                            internal state;
+                      A3203, A3210      specified in FIPS   Passed from the                                       Module-
+                                        186-4; random       module via API                                        generated
+                                        values are          parameters in                                         RSA public key
+                                        obtained from       plaintext (P)
+                                        the SP800-          format.
+                                        90Arev1 DRBG.
+RSA public    803 to RSA                N/A                 Import: CM        N/A           RAM    RSA_free       Use: Digital
+key           256    A3147, A3156,                          from TOEPP                                            signature
+                     A3185, A3186,                          Path.                                                 verification
+                     A3187, A3188,                          Passed to the                                         Related
+                     A3193, A3202,                          module via API                                        keys: RSA
+                     A3203, A3210                           parameters in                                         private key
+                                                            plaintext (P)
+                                                            format.
+
+
+                                                            Export: N/A
+
+
+
+RSA private 112       RSA               N/A                 Import: CM        N/A           RAM    RSA_free       Use: Digital
+key         to        A3147, A3156,                         from TOEPP                                            signature
+            256       A3185, A3186,                         Path.                                                 generation
+                      A3187, A3188,                         Passed to the                                         Related
+                      A3193, A3202,                         module via API                                        keys: RSA
+                      A3203, A3210                          parameters in                                         public key
+                                                            plaintext (P)
+                                                            format.
+
+
+                                                            Export: N/A
+
+
+
+
+2 The security strength of RSA is based on key sizes between 2048 and up to 16384 bits allowed by IG C.F.
+
+3 RSA public key with less than 2048 bits and security strength of 80-111 bits is allowed for legacy use.
+
+
+                                       © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                     30 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren         Security         Generation        Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth        Function and                                             ment        age                   related SSPs
+    e                Cert. Number
+
+
+
+
+Module-       112,   ECDSA            B.4.2 Testing       Import: N/A       N/A           RAM    EC_KEY_free    Use: Key
+generated     128,   A3144, A3145,    Candidates                                                                generation
+ECDSA         192,   A3146, A3147,                                                                              Related
+public key    256                                         Export: CM to
+                     A3148, A3156,    Generated           TOEPP Path.                                           keys: DRBG
+                     A3173, A3174,    using the                                                                 internal state,
+                     A3175, A3185,                        Passed from the                                       Module-
+                                      testing             module via API
+                     A3186, A3187,    candidates                                                                generated
+                     A3188, A3193,                        parameters in                                         ECDSA private
+                                      method              plaintext (P)
+                     A3202, A3203,    specified in FIPS                                                         key
+                     A3210                                format.
+                                      186-4; random
+                                      values are
+                                      obtained from
+                                      the SP800-
+                                      90Arev1 DRBG
+
+
+
+
+Module-       112,   ECDSA            B.4.2 Testing       Import: N/A       N/A           RAM    EC_KEY_free    Use: Key
+generated     128,   A3144, A3145,    Candidates                                                                generation
+ECDSA         192,   A3146, A3147,                                                                              Related
+private key   256                                         Export: CM to
+                     A3148, A3156,    Generated           TOEPP Path.                                           keys: DRBG
+                     A3173, A3174,    using the                                                                 internal state,
+                     A3175, A3185,                        Passed from the                                       Module-
+                                      testing             module via API
+                     A3186, A3187,    candidates                                                                generated
+                     A3188, A3193,                        parameters in                                         ECDSA public
+                                      method              plaintext (P)
+                     A3202, A3203,    specified in FIPS                                                         key
+                     A3210                                format.
+                                      186-4; random
+                                      values are
+                                      obtained from
+                                      the SP800-
+                                      90Arev1 DRBG
+
+
+
+
+ECDSA         112,   ECDSA            N/A                 Import: CM        N/A           RAM    EC_KEY_free    Use: Key pair
+public key    128,   A3144, A3145,                        from TOEPP                                            validation;
+              192,   A3146, A3147,                        Path.                                                 ECDSA public
+              256    A3148, A3156,                        Passed to the                                         key validation;
+                     A3173, A3174,                        module via API                                        Digital
+                     A3175, A3185,                        parameters in                                         signature
+                     A3186, A3187,                        plaintext (P)                                         verification
+                     A3188, A3193,                        format.                                               Related
+                     A3202, A3203,                                                                              keys: ECDSA
+                     A3210                                                                                      private key
+                                                          Export: N/A
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   31 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren         Security         Generation       Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth        Function and                                            ment        age                   related SSPs
+    e                Cert. Number
+
+
+
+
+ECDSA         112,   ECDSA            N/A               Import: CM         N/A           RAM    EC_KEY_free    Use: Key pair
+private key   128,   A3144, A3145,                      from TOEPP                                             validation;
+              192,   A3146, A3147,                      Path.                                                  Digital
+              256    A3148, A3156,                      Passed to the                                          signature
+                     A3173, A3174,                      module via API                                         generation
+                     A3175, A3185,                      parameters in                                          Related
+                     A3186, A3187,                      plaintext (P)                                          keys: ECDSA
+                     A3188, A3193,                      format.                                                public key
+                     A3202, A3203,
+                     A3210
+                                                        Export: N/A
+
+
+
+
+Module-       112    KAS-ECC-SSC      Generated         Import: N/A        N/A           RAM    EC_KEY_free    Use: Key
+generated     to     A3147, A3156,    using the                                                                generation;
+EC Diffie-    256    A3185, A3186,    testing                                                                  Shared secret
+Hellman                               candidates        Export: CM to                                          computation;
+                     A3187, A3188,                      TOEPP Path.
+public key           A3193, A3202,    method                                                                   Transport
+                     A3203, A3210     specified in      Passed from the                                        Layer Security
+                                      SP800-56Arev3;    module via API                                         (TLS) network
+                                      random values     parameters in                                          protocol
+                                      are obtained      plaintext (P)                                          Related
+                                      from the SP800    format.                                                SSPs: DRBG
+                                      90Arev1 DRBG.                                                            internal state;
+                                                                                                               EC Diffie-
+                                                                                                               Hellman
+                                                                                                               private key;
+                                                                                                               EC Diffie-
+                                                                                                               Hellman
+                                                                                                               shared secret
+
+Module-       112    KAS-ECC-SSC      Generated         Import: N/A        N/A           RAM    EC_KEY_free    Use: Key
+generated     to     A3147, A3156,    using the                                                                generation;
+EC Diffie-    256    A3185, A3186,    testing                                                                  Shared secret
+Hellman                               candidates        Export: CM to                                          computation;
+                     A3187, A3188,                      TOEPP Path.
+private key          A3193, A3202,    method                                                                   Transport
+                     A3203, A3210     specified in      Passed from the                                        Layer Security
+                                      SP800-56Arev3;    module via API                                         (TLS) network
+                                      random values     parameters in                                          protocol
+                                      are obtained      plaintext (P)                                          Related
+                                      from the SP800    format.                                                SSPs: DRBG
+                                      90Arev1 DRBG.                                                            internal state;
+                                                                                                               EC Diffie-
+                                                                                                               Hellman
+                                                                                                               public key; EC
+                                                                                                               Diffie-Hellman
+                                                                                                               shared secret
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   32 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren         Security         Generation       Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth        Function and                                            ment        age                   related SSPs
+    e                Cert. Number
+
+
+
+
+EC Diffie-    112   KAS-ECC-SSC       N/A               Import: CM         N/A           RAM    EC_KEY_free    Use: Key pair
+Hellman       to    A3147, A3156,                       from TOEPP                                             validation;
+public key    256   A3185, A3186,                       Path.                                                  Shared secret
+                    A3187, A3188,                       Passed to the                                          computation;
+                    A3193, A3202,                       module via API                                         Transport
+                    A3203, A3210                        parameters in                                          Layer Security
+                                                        plaintext (P)                                          (TLS) network
+                                                        format.                                                protocol
+                                                                                                               Related
+                                                                                                               SSPs: EC
+                                                        Export: N/A                                            Diffie-Hellman
+                                                                                                               shared secret
+
+
+
+
+EC Diffie-    112   KAS-ECC-SSC       N/A               Import: CM         N/A           RAM    EC_KEY_free    Use: Key pair
+Hellman       to    A3147, A3156,                       from TOEPP                                             validation;
+private key   256   A3185, A3186,                       Path.                                                  Shared secret
+                    A3187, A3188,                       Passed to the                                          computation
+                    A3193, A3202,                       module via API                                         Related
+                    A3203, A3210                        parameters in                                          SSPs: EC
+                                                        plaintext (P)                                          Diffie-Hellman
+                                                        format.                                                shared secret
+
+
+                                                        Export: N/A
+
+
+
+
+Module-       112   KAS-FFC-SSC       Generated         Import: N/A        N/A           RAM    DH_free        Use: Key
+generated     to    A3207, A3211      using safe                                                               generation;
+Diffie-       200                     prime key                                                                Shared secret
+Hellman                               generation        Export: CM to                                          computation;
+public key                            method            TOEPP Path.                                            Transport
+                                      specified in      Passed from the                                        Layer Security
+                                      SP800-56Arev3;    module via API                                         (TLS) network
+                                      random values     parameters in                                          protocol
+                                      are obtained      plaintext (P)                                          Related
+                                      from the SP800-   format.                                                SSPs: DRBG
+                                      90Arev1 DRBG.                                                            internal state;
+                                                                                                               Module-
+                                                                                                               generated
+                                                                                                               Diffie-Hellman
+                                                                                                               private key;
+                                                                                                               Diffie-Hellman
+                                                                                                               shared secret
+
+Module-       112   KAS-FFC-SSC       Generated         Import: N/A        N/A           RAM    DH_free        Use: Key
+generated     to    A3207, A3211      using safe                                                               generation;
+Diffie-       200                     prime key                                                                Shared secret
+Hellman                               generation        Export: CM to                                          computation;
+private key                           method            TOEPP Path.                                            Transport
+                                      specified in      Passed rom the                                         Layer Security
+                                      SP800-56Arev3;    module via API
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   33 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren          Security         Generation       Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth         Function and                                            ment        age                   related SSPs
+    e                 Cert. Number
+
+
+
+                                       random values   parameters in                                            (TLS) network
+                                       are obtained    plaintext (P)                                            protocol
+                                       from the SP800- format.                                                  Related
+                                       90Arev1 DRBG.                                                            SSPs: DRBG
+                                                                                                                internal state;
+                                                                                                                Module-
+                                                                                                                generated
+                                                                                                                Diffie-Hellman
+                                                                                                                public key;
+                                                                                                                Diffie-Hellman
+                                                                                                                shared secret
+Diffie-       112    KAS-FFC-SSC       N/A.              Import: CM         N/A           RAM    DH_free        Use: Diffie-
+Hellman       to     A3207, A3211                        from TOEPP                                             Hellman
+public key    200                                        Path.                                                  public key
+                                                         Passed to the                                          validation;
+                                                         module via API                                         Shared secret
+                                                         parameters in                                          computation;
+                                                         plaintext (P)                                          Transport
+                                                         format.                                                Layer Security
+                                                                                                                (TLS) network
+                                                                                                                protocol
+                                                         Export: N/A                                            Related
+                                                                                                                SSPs: Diffie-
+                                                                                                                Hellman
+                                                                                                                shared secret
+Diffie-       112    KAS-FFC-SSC       N/A               Import: CM         N/A           RAM    DH_free        Use: Shared
+Hellman       to     A3207, A3211                        from TOEPP                                             secret
+private key   200                                        Path.                                                  computation
+                                                         Passed to the                                          Related
+                                                         module via API                                         SSPs: Diffie-
+                                                         parameters in                                          Hellman
+                                                         plaintext (P)                                          shared secret
+                                                         format.
+
+
+                                                         Export: N/A
+EC Diffie-    112    KAS-ECC-SSC       N/A               Import/Export:     Computed      RAM    EC_KEY_free    Use: Key
+Hellman       to     A3147, A3156,                       CM to/from         during the                          derivation; EC
+shared        256    A3185, A3186,                       TOEPP Path.        EC Diffie-                          Diffie-Hellman
+secret               A3187, A3188,                       Passed to/from     Hellman                             shared secret
+                     A3193, A3202,                       the module via     key                                 computation
+                     A3203, A3210                        API parameters     agreement                           Related
+                                                         in plaintext (P)   and shared                          SSPs: EC
+                                                         format.            secret                              Diffie-Hellman
+                                                                            computatio                          public key; EC
+                                                                            n per                               Diffie-Hellman
+                                                                            SP800-                              private key;
+                                                                            56Arev3.                            TLS derived
+                                                                                                                key; SSH
+                                                                                                                derived key
+Diffie-       112    KAS-FFC-SSC       N/A               Import/Export:     Computed      RAM    DH_free        Use: Key
+Hellman       to     A3207, A3211                        CM to/from         during the                          derivation; DH
+shared        200                                        TOEPP Path.        Diffie-                             shared secret
+secret                                                   Passed to/from     Hellman                             computation
+                                                         the module via     key                                 Related
+                                                         API parameters     agreement                           SSPs: Diffie-
+                                                         in plaintext (P)   and shared                          Hellman
+                                                         format.            secret                              public key;
+                                                                            computatio                          Diffie-Hellman
+
+                                      © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    34 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren          Security         Generation        Import/Export    Establish     Stor   Zeroization        Use &
+Name/Typ  gth         Function and                                            ment        age                   related SSPs
+    e                 Cert. Number
+
+
+
+                                                                            n per                               private key;
+                                                                            SP800-                              TLS derived
+                                                                            56Arev3.                            key; SSH
+                                                                                                                derived key
+
+Password/p    N/A    PBKDF             N/A                Import: CM to     N/A           RAM    EVP_PKEY_fr    Use: Key
+assphrase            A3144, A3145,                        TOEPP Path.                            ee             derivation.
+                     A3146, A3147,                        Passed to the                                         Related
+                     A3148, A3156,                        module via API                                        SSPs: PBKDF
+                     A3173, A3174,                        parameters in                                         derived key
+                     A3175, A3185,                        plaintext (P)
+                     A3186, A3187,                        format.
+                     A3188, A3193,
+                     A3202, A3203,
+                     A3210                                Export: N/A
+
+TLS           AES    TLS KDF           Generated          Import: N/A       N/A           RAM    EVP_PKEY_fr    Use:
+Derived       128,   A3147, A3156,     during the TLS                                            ee             Transport
+key           192,   A3185, A3186,     KDF                                                                      Layer Security
+              256;                                        Export: CM to                                         (TLS) network
+                     A3187, A3188,                        TOEPP Path.
+              HMAC   A3193, A3202,                                                                              protocol
+              112    A3203, A3210                         Passed from the                                       Related
+              to                                          module via API                                        SSPs: TLS
+              256    KDA HKDF                             parameters in                                         pre-master
+                     A3139, A3168                         plaintext (P)                                         secret, TLS
+                                                          format.                                               master secret
+SSH           AES    SSH KDF           Generated          Import: N/A       N/A           RAM    EVP_PKEY_fr    Use: Key
+Derived       128,   A3140, A3141,     during the SSH                                            ee             derivation
+key           192,   A3142, A3143,     KDF                                                                      Related
+              256;                                        Export: CM to
+                     A3149, A3157,                        TOEPP Path.                                           SSPs: Shared
+              HMAC   A3169, A3170,                                                                              secret
+              112    A3171, A3172                         Passed from the
+              to                                          module via API
+              256                                         parameters in
+                                                          plaintext (P)
+                                                          format.
+PBKDF         112    PBKDF             Generated          Import: N/A       N/A           RAM    EVP_PKEY_fr    Use: Key
+Derived       to     A3144, A3145,     during the                                                ee             derivation
+key           256    A3146, A3147,     PBKDF                                                                    Related
+                                       compliant with     Export: CM to
+                     A3148, A3156,                        TOEPP Path.                                           SSPs:
+                     A3173, A3174,     SP800-132.                                                               Password/pass
+                     A3175, A3185,                        Passed from the                                       phrase
+                     A3186, A3187,                        module via API
+                     A3188, A3193,                        parameters in
+                     A3202, A3203,                        plaintext (P)
+                     A3210                                format.
+
+Entropy       192    CTR_DRBG          Obtained from      Import/Export:    N/A           RAM    FIPS_drbg_f    Use: Random
+input         to     A3136, A3137,     the SP800-90B      N/A; it remains                        ree            number
+              384    A3138, A3150,     entropy source     within the                                            generation
+                     A3154, A3158,                        cryptographic                                         Related
+IG D.L                                                    boundary.
+compliant            A3160, A3162,                                                                              SSPs: DRBG
+                     A3163, A3165,                                                                              seed
+                     A3166, A3167
+
+DRBG seed     192    CTR_DRBG          Derived from       Import/Export:    N/A           RAM    FIPS_drbg_f    Use: Random
+              to     A3136, A3137,     the entropy        N/A; it remains                        ree            number
+              384    A3138, A3150,     input as defined   within the                                            generation
+IG D.L                                 in SP800-          cryptographic
+compliant            A3154, A3158,                                                                              Related
+                     A3160, A3162,     90Arev1            boundary.                                             SSPs: Entropy
+
+
+                                      © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    35 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                                  FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+ Key/SSP Stren            Security         Generation       Import/Export     Establish     Stor   Zeroization        Use &
+Name/Typ  gth           Function and                                            ment        age                   related SSPs
+    e                   Cert. Number
+
+
+
+                       A3163, A3165,                                                                              input, DRBG
+                       A3166, A3167                                                                               Internal state
+
+
+DRBG            128    CTR_DRBG          Derived from      Import/Export:     N/A           RAM    FIPS_drbg_f    Use: Random
+internal        to     A3136, A3137,     seed as defined   N/A; it remains                         ree            number
+state (V,       256    A3138, A3150,     in SP800-         within the                                             generation
+key)                   A3154, A3158,     90Arev1           cryptographic                                          Related
+                       A3160, A3162,                       boundary.                                              SSPs: Entropy
+IG D.L                 A3163, A3165,                                                                              input, DRBG
+compliant              A3166, A3167                                                                               seed
+
+TLS pre-        DH     TLS KDF           N/A               Import: CM to      Computed      RAM    SSL_free,      Use:
+master          112    A3147, A3156,                       TOEPP Path.        during key           SSL_clear      Transport
+secret          to     A3185, A3186,                       Passed to the      agreement                           Layer Security
+                200    A3187, A3188,                       module via API     for Diffie-                         (TLS) network
+                ECDH   A3193, A3202,                       parameters in      Hellman or                          protocol
+                128    A3203, A3210                        plaintext (P)      EC Diffie-                          Related
+                to                                         format.            Hellman                             SSPs: TLS
+                256                                                           cipher                              master secret
+                                                                              suites.
+                                                           Export: N/A
+
+TLS master      384    TLS KDF           Derived from      Import/Export:     N/A           RAM    SSL_free,      Use:
+secret                 A3147, A3156,     TLS pre-master    N/A; it remains                         SSL_clear      Transport
+                       A3185, A3186,     secret using      within the                                             Layer Security
+                       A3187, A3188,     TLS KDF per       cryptographic                                          (TLS) network
+                       A3193, A3202,     SP800-135rev1.    boundary.                                              protocol
+                       A3203, A3210                                                                               Related
+                                                                                                                  SSPs: TLS
+                                                                                                                  pre-master
+                                                                                                                  secret; TLS
+                                                                                                                  derived key
+
+                                                        Table 13 - SSPs
+
+
+9.1         Random Number Generation
+The module employs a Deterministic Random Bit Generator (DRBG) based on [SP800-90Arev1] for
+the creation of seeds for asymmetric keys, random numbers for security functions (e.g. ECDSA
+signature generation), and server and client random numbers for the TLS protocol. In addition, the
+module provides a Random Number Generation service to calling applications.
+The DRBG supports the CTR_DRBG mechanisms. The DRBG is initialized during module
+initialization; the module loads by default the DRBG using the CTR_DRBG mechanism with AES-
+256, with derivation function, and without prediction resistance. A different DRBG mechanism can
+be chosen through an API function call.
+The module uses an SP800-90B-compliant entropy source specified in Table 14. This entropy
+source is located within the physical perimeter, but outside of the cryptographic boundary of the
+module. The module obtains 384 bits to seed the DRBG, and 256 bits to reseed it, sufficient to
+provide a DRBG with 256 bits of security strength.
+
+
+
+
+                                        © 2025 SUSE, LLC / atsec information security.
+            This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                      36 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ Entropy Sources           Minimum number of                                          Details
+                             bits of entropy
+
+ESV certs. E22, E28, 256 bits of entropy in the Standalone Userspace CPU Time Jitter RNG version
+E29, E30             256-bit output             3.4.0 entropy source with SHA-3 as the vetted
+                                                conditioning component is located within the
+                                                physical perimeter of the operational environment
+                                                but outside the module cryptographic boundary.
+
+                         Table 14 - Non-Deterministic Random Number Generation Specification
+
+
+9.2      SSP Generation
+The SSP generation methods implemented in the module are compliant with [SP800-133rev2].
+For generating RSA, ECDSA keys, the module implements asymmetric key generation services
+compliant with [FIPS186-4]. A seed (i.e., the random value) used in asymmetric key generation is
+directly obtained from the [SP800-90Arev1] DRBG.
+The public and private keys used in the EC Diffie-Hellman key agreement schemes are generated
+internally by the module using the ECDSA key generation method compliant with [FIPS186-4] and
+[SP800-56Arev3]. The Diffie-Hellman key agreement scheme is also compliant with [SP800-
+56Arev3] and generates keys using safe primes defined in RFC7919 and RFC3526, as described in
+the next section. In accordance with FIPS 140-3 IG D.H, the cryptographic module performs
+Cryptographic Key Generation (CKG) for asymmetric keys as per section 5.1 of SP800-133rev2
+(vendor affirmed) by obtaining a random bit string directly from an approved DRBG and that can
+support the required security strength requested by the caller (without any V, as described in
+Additional Comments 2 of IG D.H).
+The module supports the following key derivation methods according to [SP800-135rev1]:
+    •   KDF for the TLS protocol, used as pseudo-random functions (PRF) for TLSv1.0/1.1, TLSv1.2;
+    •   HKDF for the TLS protocol, used as pseudo-random functions (PRF) for TLSv1.3; and
+    •   KDF for the SSHv2 protocol.
+The module also supports password-based key derivation (PBKDF). The implementation is
+compliant with option 1a of [SP800-132]. Keys derived from passwords or passphrases using this
+method can only be used in storage applications.
+
+9.3      SSP establishment
+The module provides Diffie-Hellman and EC Diffie-Hellman shared secret computation compliant
+with SP800-56Arev3, in accordance with scenario 2 (1) of IG D.F.
+
+The module also provides Diffie-Hellman and EC Diffie-Hellman key agreement schemes compliant
+with SP800-56rev3 and used as part of the TLS protocol key exchange in accordance with scenario
+2 (2) of IG D.F; that is, the shared secret computation (KAS-FFC-SSC and KAS-ECC-SSC) followed by
+the derivation of the keying material using SP800-135rev1 KDF.
+For Diffie-Hellman, the module supports the use of safe primes from RFC7919 for domain
+parameters and key generation, which are used in the TLS key agreement implemented by the
+module.
+    •   TLS (RFC7919)
+        ◦   ffdhe2048 (ID = 256)
+        ◦   ffdhe3072 (ID = 257)
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   37 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+        ◦   ffdhe4096 (ID = 258)
+        ◦   ffdhe6144 (ID = 259)
+        ◦   ffdhe8192 (ID = 260)
+The module also supports the use of safe primes from RFC3526, which are part of the Modular
+Exponential (MODP) Diffie-Hellman groups that can be used for Internet Key Exchange (IKE). Note
+that the module only implements key generation and verification, and shared secret computation
+using safe primes, but no part of the IKE protocol.
+    •   IKEv2 (RFC3526)
+        ◦   MODP-2048 (ID=14)
+        ◦   MODP-3072 (ID=15)
+        ◦   MODP-4096 (ID=16)
+        ◦   MODP-6144 (ID=17)
+        ◦   MODP-8192 (ID=18)
+The module also provides the following key transport mechanisms:
+    • Key wrapping using AES-KW and AES-KWP modes.
+    •   Key wrapping using AES-CCM, AES-GCM, and AES-CBC with HMAC, used in the context of
+        the TLS protocol cipher suites with 128-bit or 256-bit keys.
+According to Table 2: Comparable strengths in [SP800-57rev5], the key sizes of AES, RSA, Diffie-
+Hellman and EC Diffie-Hellman provides the following security strength in the approved mode of
+operation:
+    •   AES key wrapping using AES in KW, KWP provides between 128 and 256 bits of encryption
+        strength.
+    •   AES key wrapping using AES-CCM, AES-GCM, and AES in CBC mode and HMAC, provides
+        between 128 or 256 bits of encryption strength.
+    •   Diffie-Hellman key agreement provides between 112 and 200 bits of encryption strength.
+    •   EC Diffie-Hellman key agreement provides between 112 and 256 bits of encryption
+        strength.
+
+9.4      SSP Entry and Output
+The module does not support manual SSP entry or intermediate SSP generation output. The SSPs
+are provided to the module via API input parameters in plaintext form and output via API output
+parameters in plaintext form within the physical perimeter of the operational environment. This is
+allowed by [FIPS140-3_IG] IG 9.5.A, according to the “CM Software to/from App via TOEPP Path”
+entry in the Key Establishment Table.
+
+9.5      SSP Storage
+The module does not perform persistent storage of SSPs. The SSPs are temporarily stored in the
+RAM in plaintext form. SSPs are provided to the module by the calling process and are destroyed
+when released by the appropriate zeroization function calls.
+
+9.6      SSP Zeroization
+The memory occupied by SSPs is allocated by regular memory allocation operating system calls.
+The application that is acting as the CO is responsible for calling the appropriate zeroization
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   38 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+functions provided in the module's API and listed in Table 13. Calling the SSL_free() and SSL_clear()
+will zeroize the SSPs stored in the TLS protocol internal state and also invoke the corresponding
+API functions listed in Table 13 to zeroize SSPs. The zeroization functions overwrite the memory
+occupied by SSPs with “zeros” and deallocate the memory with the regular memory deallocation
+operating system call. The completion of a zeroization routine(s) will indicate that a zeroization
+procedure succeeded.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   39 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+10 Self-Tests
+The module performs the pre-operational self-test and CASTs automatically when the module is
+loaded into memory. Pre-operational self-test ensure that the module is not corrupted, and the
+CASTs ensure that the cryptographic algorithms work as expected. While the module is executing
+the pre-operational test and the CASTs, the module services are not available, and input and
+output are inhibited. The module is not available for use by the calling application until the pre-
+operational self-test and the CASTs are completed successfully. After the pre-operational test and
+the CASTs succeed, the module becomes operational. If any of the pre-operational test or any of
+the CASTs fail an error message is returned, and the module transitions to the error state.
+
+
+       Algorithm                                                        Test
+
+ AES                         KAT AES ECB mode with 128-bit key, encryption and decryption
+                             (separately tested)
+                             KAT AES CCM mode with 192-bit key, encryption and decryption
+                             (separately tested)
+                             KAT AES GCM mode with 256-bit key, encryption and decryption
+                             (separately tested)
+                             KAT AES XTS mode with 128 and 256-bit keys, encryption, and decryption
+                             (separately tested)
+
+ CMAC                        KAT AES CMAC with 128-,192-, and 256-bit keys, MAC generation
+
+ Diffie-Hellman              Primitive “Z” computation KAT with 2048-bit key
+
+ DRBG                        KAT CTR_DRBG with AES with 256-bit keys with and without DF, with and
+                             without PR
+                             Health tests according to section 11.3 of [SP800-90Arev1]
+
+ EC Diffie-Hellman           Primitive “Z” computation KAT with P-256 curve
+
+ ECDSA                       KAT ECDSA with P-256 and SHA2-256, signature generation and
+                             verification (separately tested)
+
+ HMAC                        KAT HMAC-SHA-1, HMAC-SHA2-224, HMAC-SHA2-256, HMAC-SHA2-384,
+                             HMAC-SHA2-512
+                             KAT HMAC-SHA3-224, HMAC-SHA3-256, HMAC-SHA3-384,
+                             HMAC-SHA3-512
+
+ PBKDF                       KAT with SHA2-256
+
+ RSA                         KAT RSA with 2048-bit key, PKCS#1 v1.5 scheme and SHA2-256,
+                             signature generation and verification (separately tested)
+                             KAT RSA with 2048-bit key, PSS scheme and SHA2-256, signature
+                             generation and verification (separately tested)
+
+ SHA-3                       KAT SHA3-256, SHA3-512, SHAKE-128 and SHAKE-256
+
+ SHA                         KAT SHA-1, SHA2-224, SHA2-256, SHA2-384 and SHA2-512.
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   40 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+       Algorithm                                                        Test
+
+ SSH KDF                     KAT with SHA2-256
+
+ TLSv1.2 KDF                 KAT with SHA2-256
+
+ HKDF                        KAT with SHA2-256
+
+                                     Table 15 – Cryptographic Algorithms Self-Tests
+
+
+10.1 Pre-Operational Tests
+The module performs the integrity test of the shared libraries that comprise the module. The
+details of integrity test are provided in section 5.1.
+
+10.2 Conditional Tests
+10.2.1       Cryptographic Algorithm Self-Tests
+Table 15 specifies all the CASTs. All the CASTs are performed in the form of the Known Answer
+Tests (KATs) and are run prior to performing the integrity test. A KAT includes the comparison of a
+calculated output with an expected known answer, hard coded as part of the test vectors used in
+the test. If the values do not match, the KAT fails.
+
+
+10.2.2       Pairwise Consistency Test
+The module performs the Pair-wise Consistency Tests (PCT) shown in the following table. If at least
+one of the tests fails, the module returns an error code and enters the Error state. When the
+module is in the Error state, no data is output, and cryptographic operations are not allowed.
+
+
+Algorithm                     Test
+
+ ECDSA key generation          PCT using SHA2-256, signature generation and verification
+
+ RSA key generation            PCT using SHA2-256, signature generation and verification
+
+ Diffie-Hellman key            PCT according to section 5.6.2.1.4 of [SP800-56Arev3]
+ generation
+
+ ECDH key generation           Covered by ECDSA PCT as allowed by IG 10.3, additional comment 1.
+
+                                          Table 16 - Pairwise Consistency Test
+
+
+10.3 Periodic/On-Demand Self-Test
+On-Demand self-tests can be invoked by powering-off and reloading the module which cause the
+module to run the power-up tests again.
+
+10.4 Error States
+When the module fails the pre-operational self-test or any conditional test, the module returns an
+error code to indicate the error and enter the “Abort” error state, showing the following message to
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   41 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                               FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+stderr: “OpenSSL internal error, assertion failed: FATAL FIPS SELFTEST FAILURE” and stopping
+functioning. The only way to recover from this error is to restart the application. If the failure
+persists, the module must be reinstalled.
+When a PCT fails during conditional tests, the module returns an error code to indicate the error
+and enter the “Error” error state. Any further cryptographic operation is inhibited. The calling
+application can obtain the module state by requesting the “Show status” service by calling the
+FIPS_selftest_failed() API function. The function returns 1 if the module is in the “Error” state, 0
+if the module is in the Operational state.
+Some cryptographic services cannot handle the return value of the “Error” state, and when the
+module is in that state and receives a service request, shows an error message and transitions to
+the “Abort” state, showing the following message to stderr: “OpenSSL internal error, assertion
+failed: FATAL FIPS SELFTEST FAILURE” and stopping functioning. The only way to recover from this
+error is to restart the application.
+Table 17 shows the error codes and the corresponding condition:
+
+
+  State                        Cause of Error                                          Status Indicator
+
+ Abort       The integrity test fails at power-up.                     FIPS_R_FINGERPRINT_DOES_NOT_MATC
+                                                                       H (110).
+                                                                       Module stops functioning.
+
+ Abort       Any of the AES, CMAC, DRBG, HMAC, or SHA                  FIPS_R_SELFTEST_FAILED (101).
+             KATs fails during CAST.                                   Module stops functioning.
+
+ Abort       Any of the KATs for RSA or ECDSA fails                    FIPS_R_TEST_FAILURE (117).
+             during CAST.                                              Module stops functioning.
+
+ Abort       The KAT of a DRBG fails during CAST.                      FIPS_R_NOPR_TEST1_FAILURE (145)
+                                                                       FIPS_R_NOPR_TEST2_FAILURE(146)
+                                                                       FIPS_R_PR_TEST1_FAILURE (147)
+                                                                       FIPS_R_PR_TEST2_FAILURE (148)
+                                                                       Module stops functioning.
+
+ Error       The PCT of a newly generated RSA, ECDSA,                  FIPS_R_PAIRWISE_TEST_FAILED (127)
+             Diffie-Hellman or EC Diffie-Hellman key pair
+             fails during conditional tests.
+
+ Error       The module is in the Error state and a                    FIPS_R_FIPS_SELFTEST_FAILED (106)
+             cryptographic service other than the
+             following is invoked: Message Digest,
+             Encryption/Decryption, Diffie-Hellman.
+
+ Abort       The module is in the Error state and one of               Error message “OpenSSL internal error,
+             the following cryptographic services is                   assertion failed: FATAL FIPS SELFTEST
+             invoked: Message Digest,                                  FAILURE” shown in stderr.
+             Encryption/Decryption, Diffie-Hellman.                    Module stops functioning.
+
+                                                  Table 17 - Error States
+
+
+
+                                      © 2025 SUSE, LLC / atsec information security.
+          This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                    42 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+In the “Error” state, errors are reported through the regular ERR interface of the modules and can
+be queried by functions such as ERR_get_error(). See the OpenSSL man pages for the function
+description.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   43 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+11 Life-cycle assurance
+11.1 Delivery and Operation
+
+11.1.1       Module Installation
+The Crypto Officer can install the RPM packages containing the module as listed in Table 19 using
+the zypper tool as follows:
+        # zypper install libopenssl1_1
+        # zypper install libopenssl1_1-hmac
+If the use of certified 32-bit Openssl libraries on Intel x86 is required, then use the following to
+install the 32bit libraries and hmac packages:
+        # zypper install libopenssl1_1-32bit
+        # zypper install libopenssl1_1-hmac-32bit
+The integrity of the RPM package is automatically verified during the installation, and the Crypto
+Officer shall not install the RPM package if there is any integrity error.
+
+11.1.2       Operating Environment Configuration
+The operating environment needs to be configured to support the approved mode of operation, so
+the following steps shall be performed with the root privilege:
+1. Install the dracut-fips RPM package:
+        # zypper install dracut-fips
+2. Recreate the INITRAMFS image:
+        # dracut -f
+3. After regenerating the initrd, the Crypto Officer has to append the following parameter in the
+/etc/default/grub configuration file in the GRUB_CMDLINE_LINUX_DEFAULT line:
+        fips=1
+4. After editing the configuration file, please run the following command to change the setting in
+the boot loader:
+        # grub2-mkconfig -o /boot/grub2/grub.cfg
+If /boot or /boot/efi resides on a separate partition, the kernel parameter boot=<partition of /boot
+or /boot/efi> must be supplied. The partition can be identified with the command "df /boot" or "df
+/boot/efi" respectively. For example:
+        # df /boot
+        Filesystem            1K-blocks           Used          Available             Use%        Mounted on
+        /dev/sda1             233191              30454         190296                14%          /boot
+The partition of /boot is located on /dev/sda1 in this example. Therefore, the following string needs
+to be appended in the aforementioned grub file:
+        "boot=/dev/sda1"
+5. Reboot to apply these settings.
+Now, the operating environment is configured to support the approved mode of operation. The
+Crypto Officer should check the existence of the file /proc/sys/crypto/fips_enabled, and verify it
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   44 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+contains a numeric value “1”. If the file does not exist or does not contain “1”, the operating
+environment is not configured to support the approved mode of operation and the module will not
+operate as a FIPS validated module properly.
+
+11.1.3       Module Installation for Vendor Affirmed Platforms
+Table 18 includes the information on module installation process for the vendor affirmed platforms
+that are listed in Table 4 and Table 5.
+
+        Product                                                         Link
+
+SUSE Linux Enterprise https://documentation.suse.com/sle-micro/5.3/single-html/SLE-Micro-
+Micro 5.3             security/#sec-fips-slemicro-install
+
+SUSE Linux Enterprise https://documentation.suse.com/sles/15-SP4/html/SLES-all/book-
+Server for SAP 15SP4 security.html
+
+SUSE Linux Enterprise https://documentation.suse.com/smart/linux/html/concept-bci/index.html
+Base Container Image
+15SP4
+
+SUSE Linux Enterprise https://documentation.suse.com/sled/15-SP4/html/SLED-all/book-
+Desktop 15SP4         security.html
+
+SUSE Linux Enterprise https://documentation.suse.com/sle-rt/15-SP4
+Real Time 15SP4
+
+                                  Table 18 - Installation for Vendor Affirmed Platforms
+
+Note: Per section 7.9 in the FIPS 140-3 Management Manual [FIPS140-3_MM], the Cryptographic
+Module Validation Program (CMVP) makes no statement as to the correct operation of the module
+or the security strengths of the generated keys when this module is ported and executed in an
+operational environment not listed on the validation certificate.
+
+11.1.4       End of Life Procedure
+For secure sanitization of the cryptographic module, the module needs first to be powered off,
+which will zeroize all keys and CSPs in volatile memory. Then, for actual deprecation, the module
+shall be upgraded to a newer version that is FIPS 140-3 validated.
+The module does not possess persistent storage of SSPs, so further sanitization steps are not
+needed.
+
+11.2 Crypto Officer Guidance
+
+The binaries of the module are contained in the RPM packages for delivery. The Crypto Officer
+shall follow section 11.1.1 and 11.1.2 to configure the operational environment and install the
+module to be operated as a FIPS 140-3 validated module.
+Table 19 lists the RPM packages that contain the FIPS validated module and the OE directory
+where the components are installed. The "Show module name and version" service returns the
+value "OpenSSL 1.1.1l-fips 24 Aug 2021 SUSE release 150400.7.81.1”, which matches the version
+included in the RPM package filenames.
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   45 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+     Processor                                         RPM Packages                                       Location in
+    Architecture                                                                                            the OE
+
+Intel 64-bit              libopenssl1_1-1.1.1l-150400.7.81.1.x86_64.rpm                                  /usr/lib64
+                          libopenssl1_1-hmac-1.1.1l-150400.7.81.1.x86_64.rpm
+
+Intel 32-bit              libopenssl1_1-32bit-1.1.1l-150400.7.81.1.x86_64.rpm                            /usr/lib
+                          libopenssl1_1-hmac-32bit-1.1.1l-150400.7.81.1.x86_64.rpm
+
+AMD 64-bit                libopenssl1_1-1.1.1l-150400.7.81.1.x86_64.rpm                                  /usr/lib64
+                          libopenssl1_1-hmac-1.1.1l-150400.7.81.1.x86_64.rpm
+
+IBM z15                   libopenssl1_1-1.1.1l-150400.7.81.1.s390x.rpm                                   /usr/lib64
+                          libopenssl1_1-hmac-1.1.1l-150400.7.81.1.s390x.rpm
+
+ARMv8 64-bit              libopenssl1_1-1.1.1l-150400.7.81.1.aarch64.rpm                                 /usr/lib64
+                          libopenssl1_1-hmac-1.1.1l-150400.7.81.1.aarch64.rpm
+
+IBM Power10 64-bit libopenssl1_1-1.1.1l-150400.7.81.1.ppc64le.rpm                                        /usr/lib64
+                   libopenssl1_1-hmac-1.1.1l-150400.7.81.1.ppc64le.rpm
+
+                                                Table 19 - RPM packages
+
+11.2.1       AES XTS
+The AES algorithm in XTS mode can be only used for the cryptographic protection of data on
+storage devices, as specified in [SP800-38E]. The length of a single data unit encrypted with the
+XTS-AES shall not exceed 2²⁰ AES blocks, that is 16MB of data.
+To meet the requirement stated in IG C.I, the module implements a check that ensures, before
+performing any cryptographic operation, that the two AES keys used in AES XTS mode are not
+identical.
+Note: AES-XTS shall be used with 128 and 256-bit keys only. AES-XTS with 192-bit keys is not an
+Approved service.
+
+11.2.2       AES GCM IV
+The AES GCM IV generation is in compliance with the [RFC5288] and shall only be used for the TLS
+protocol version 1.2 to be compliant with [FIPS140-3_IG] IG C.H, provision 1 (“TLS protocol IV
+generation”); in addition, the module is compliant with section 3.3.1 of [SP800-52rev2].
+The nonce_explicit part of the IV does not exhaust the maximum number of possible values for a
+given session key. The design of the TLS protocol in this module implicitly ensures that the
+nonce_explicit, or counter portion of the IV will not exhaust all of its possible values.
+In case the module's power is lost and then restored, the key used for the AES GCM encryption or
+decryption shall be redistributed.
+When a GCM IV is used for decryption, the responsibility for the IV generation lies with the party
+that performs the AES GCM encryption.
+
+11.2.3       Environment Variables
+OPENSSL_ENFORCE_MODULUS_BITS
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   46 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+Setting the environment variable OPENSSL_ENFORCE_MODULUS_BITS can restrict the module to
+only generate the acceptable key sizes of RSA. If the environment variable is set, the module
+enforces the generation of keys of 2048 bits or more.
+Notice that even if this environment variable is not set, the module will provide the corresponding
+value of the service indicator depending on the size of the key generated.
+
+11.2.4       Key derivation using SP800-132 PBKDF
+The module provides password-based key derivation (PBKDF), compliant with SP800-132 and IG
+D.N. The module supports option 1a from section 5.4 of [SP800-132], in which the Master Key (MK)
+or a segment of it is used directly as the Data Protection Key (DPK).
+In accordance with [SP800-132], the following requirements shall be met.
+    •   Derived keys shall only be used in storage applications. The Master Key (MK) shall not be
+        used for other purposes. The length of the MK or DPK shall be of 112 bits or more (this is
+        verified by the module to determine the service is approved).
+    •   A portion of the salt, with a length of at least 128 bits (this is verified by the module to
+        determine the service is approved), shall be generated randomly using the SP800-90Arev1
+        DRBG.
+    •   The iteration count shall be selected as large as possible, as long as the time required to
+        generate the key using the entered password is acceptable for the users. The minimum
+        value shall be 1000 (this is verified by the module to determine the service is approved).
+    •   Passwords or passphrases, used as an input for the PBKDF, shall not be used as
+        cryptographic keys.
+    •   The length of the password or passphrase shall be of at least 20 characters (this is verified
+        by the module to determine the service is approved), and shall consist of lower-case, upper-
+        case and numeric characters. The probability of guessing the value is estimated to be
+        1/6220 = 10-36, which is less than 2-112.
+The calling application shall also observe the rest of the requirements and recommendations
+specified in [SP800-132].
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   47 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+12 Mitigation of other attacks
+The module implements blinding against RSA timing attacks.
+RSA is vulnerable to timing attacks. In a setup where attackers can measure the time of RSA
+decryption or signature operations, blinding must be used to protect the RSA operation from that
+attack.
+The module provides the API functions RSA_blinding_on() and RSA_blinding_off() to turn the
+blinding on and off for RSA. When the blinding is on, the module generates a random value to form
+a blinding factor in the RSA key before the RSA key is used in the RSA cryptographic operations.
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   48 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix A.                      TLS Cipher Suites
+The module supports the following cipher suites for the TLS protocol versions 1.0, 1.1, 1.2 and 1.3
+compliant with section 3.3.1 of [SP800-52rev2]. Each cipher suite defines the key exchange
+algorithm, the bulk encryption algorithm (including the symmetric key size) and the MAC
+algorithm.
+
+
+
+                             Cipher Suite                                               ID              Reference
+
+TLS_DH_RSA_WITH_AES_128_CBC_SHA                                                 { 0x00, 0x31 }            RFC3268
+
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA                                                { 0x00, 0x33 }            RFC3268
+
+TLS_DH_RSA_WITH_AES_256_CBC_SHA                                                 { 0x00, 0x37 }            RFC3268
+
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA                                                { 0x00, 0x39 }            RFC3268
+
+TLS_DH_RSA_WITH_AES_128_CBC_SHA256                                               { 0x00,0x3F }            RFC5246
+
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA256                                              { 0x00,0x67 }            RFC5246
+
+TLS_DH_RSA_WITH_AES_256_CBC_SHA256                                               { 0x00,0x69 }            RFC5246
+
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA256                                              { 0x00,0x6B }            RFC5246
+
+TLS_PSK_WITH_AES_128_CBC_SHA                                                    { 0x00, 0x8C }            RFC4279
+
+TLS_PSK_WITH_AES_256_CBC_SHA                                                    { 0x00, 0x8D }            RFC4279
+
+TLS_DHE_RSA_WITH_AES_128_GCM_SHA256                                             { 0x00, 0x9E }            RFC5288
+
+TLS_DHE_RSA_WITH_AES_256_GCM_SHA384                                             { 0x00, 0x9F }            RFC5288
+
+TLS_DH_RSA_WITH_AES_128_GCM_SHA256                                              { 0x00, 0xA0 }            RFC5288
+
+TLS_DH_RSA_WITH_AES_256_GCM_SHA384                                              { 0x00, 0xA1 }            RFC5288
+
+TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA                                             { 0xC0, 0x04 }            RFC4492
+
+TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA                                             { 0xC0, 0x05 }            RFC4492
+
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA                                            { 0xC0, 0x09 }            RFC4492
+
+TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA                                            { 0xC0, 0x0A }            RFC4492
+
+TLS_ECDH_RSA_WITH_AES_128_CBC_SHA                                               { 0xC0, 0x0E }            RFC4492
+
+TLS_ECDH_RSA_WITH_AES_256_CBC_SHA                                               { 0xC0, 0x0F }            RFC4492
+
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA                                              { 0xC0, 0x13 }            RFC4492
+
+TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA                                              { 0xC0, 0x14 }            RFC4492
+
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256                                         { 0xC0, 0x23 }            RFC5289
+
+TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384                                         { 0xC0, 0x24 }            RFC5289
+
+TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256                                          { 0xC0, 0x25 }            RFC5289
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   49 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+                             Cipher Suite                                               ID              Reference
+
+TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384                                          { 0xC0, 0x26 }            RFC5289
+
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256                                           { 0xC0, 0x27 }            RFC5289
+
+TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384                                           { 0xC0, 0x28 }            RFC5289
+
+TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256                                            { 0xC0, 0x29 }            RFC5289
+
+TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384                                            { 0xC0, 0x2A }            RFC5289
+
+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256                                         { 0xC0, 0x2B }            RFC5289
+
+TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384                                         { 0xC0, 0x2C }            RFC5289
+
+TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256                                          { 0xC0, 0x2D }            RFC5289
+
+TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384                                          { 0xC0, 0x2E }            RFC5289
+
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256                                           { 0xC0, 0x2F }            RFC5289
+
+TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384                                           { 0xC0, 0x30 }            RFC5289
+
+TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256                                            { 0xC0, 0x31 }            RFC5289
+
+TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384                                            { 0xC0, 0x32 }            RFC5289
+
+TLS_DHE_RSA_WITH_AES_128_CCM                                                    { 0xC0, 0x9E }            RFC6655
+
+TLS_DHE_RSA_WITH_AES_256_CCM                                                    { 0xC0, 0x9F }            RFC6655
+
+TLS_DHE_RSA_WITH_AES_128_CCM_8                                                  { 0xC0, 0xA2 }            RFC6655
+
+TLS_DHE_RSA_WITH_AES_256_CCM_8                                                  { 0xC0, 0xA3 }            RFC6655
+
+TLS_AES_128_GCM_SHA256                                                          { 0x13, 0x01 }            RFC8446
+
+TLS_AES_256_GCM_SHA384                                                          { 0x13, 0x02 }            RFC8446
+
+TLS_AES_128_CCM_SHA256                                                          { 0x13, 0x04 }            RFC8446
+
+TLS_AES_128_CCM_8_SHA256                                                        { 0x13, 0x05 }            RFC8446
+
+                                              Table 20 - TLS Cipher Suites
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   50 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix B.                      Glossary and Abbreviations
+        AES                 Advanced Encryption Standard
+        AES-NI              Advanced Encryption Standard New Instructions
+        CAST                Cryptographic Algorithm Self-Tests
+        CAVP                Cryptographic Algorithm Validation Program
+        CBC                 Cipher Block Chaining
+        CCM                 Counter with Cipher Block Chaining-Message Authentication Code
+        CFB                 Cipher Feedback
+        CMAC                Cipher-based Message Authentication Code
+        CMVP                Cryptographic Module Validation Program
+        CPACF               Central Processor Assist for Cryptographic Function
+        CSP                 Critical Security Parameter
+        CTR                 Counter Mode
+        DES                 Data Encryption Standard
+        DF                  Derivation Function
+        DSA                 Digital Signature Algorithm
+        DRBG                Deterministic Random Bit Generator
+        ECB                 Electronic Code Book
+        ECC                 Elliptic Curve Cryptography
+        FFC                 Finite Field Cryptography
+        FIPS                Federal Information Processing Standards Publication
+        FSM                 Finite State Model
+        GCM                 Galois Counter Mode
+        HMAC                Hash Message Authentication Code
+        ISA                 Instruction Set Architecture
+        KAS                 Key Agreement Schema
+        KAT                 Known Answer Test
+        KW                  AES Key Wrap
+        KWP                 AES Key Wrap with Padding
+        MAC                 Message Authentication Code
+        NDF                 No Derivation Function
+        NIST                National Institute of Science and Technology
+        OFB                 Output Feedback
+        PAA                 Processor Algorithm Acceleration
+        PAI                 Processor Algorithm Implementation
+        PR                  Prediction Resistance
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   51 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+        PSS                 Probabilistic Signature Scheme
+        RNG                 Random Number Generator
+        RSA                 Rivest, Shamir, Addleman
+        SDK                 Software Development Kit
+        SHA                 Secure Hash Algorithm
+        SHS                 Secure Hash Standard
+        SSH                 Secure Shell
+        SSP                 Sensitive Security Parameter
+        TDES                Triple-DES
+        XTS                 XEX-based Tweaked-codebook mode with cipher text Stealing
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   52 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+Appendix C.                      References
+ FIPS140-3               FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+                         March 2019
+                         https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-
+                         program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf
+
+ FIPS140-3_IG            Implementation Guidance for FIPS PUB 140-3 and the
+                         Cryptographic Module Validation Program
+                         October 2022
+                         https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-
+                         program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf
+
+ FIPS140-3_MM            FIPS 140-3 Cryptographic Module Validation Program -
+                         Management Manual
+                         April 2024
+                         https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-
+                         program/documents/fips%20140-3/FIPS-140-3-
+                         CMVP%20Management%20Manual.pdf
+
+ FIPS180-4               Secure Hash Standard (SHS)
+                         March 2012
+                         https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+ FIPS186-4               Digital Signature Standard (DSS)
+                         July 2013
+                         https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+
+ FIPS197                 Advanced Encryption Standard
+                         November 2001
+                         https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+ FIPS198-1               The Keyed Hash Message Authentication Code (HMAC)
+                         July 2008
+                         https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+ FIPS202                 SHA-3 Standard: Permutation-Based Hash and Extendable-Output
+                         Functions
+                         August 2015
+                         https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+
+ PKCS#1                  Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+                         Specifications Version 2.1
+                         February 2003
+                         https://www.ietf.org/rfc/rfc3447.txt
+
+ RFC3394                 Advanced Encryption Standard (AES) Key Wrap Algorithm
+                         September 2002
+                         https://www.ietf.org/rfc/rfc3394.txt
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   53 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ RFC5649                 Advanced Encryption Standard (AES) Key Wrap with Padding
+                         Algorithm
+                         September 2009
+                         https://www.ietf.org/rfc/rfc5649.txt
+
+ SP800-38A               NIST Special Publication 800-38A - Recommendation for Block
+                         Cipher Modes of Operation Methods and Techniques
+                         December 2001
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         38a.pdf
+
+ SP800-38B               NIST Special Publication 800-38B - Recommendation for Block
+                         Cipher Modes of Operation: The CMAC Mode for Authentication
+                         May 2005
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38B.pdf
+
+ SP800-38C               NIST Special Publication 800-38C - Recommendation for Block
+                         Cipher Modes of Operation: the CCM Mode for Authentication and
+                         Confidentiality
+                         May 2004
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         38c.pdf
+
+ SP800-38D               NIST Special Publication 800-38D - Recommendation for Block
+                         Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC
+                         November 2007
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         38d.pdf
+
+ SP800-38E               NIST Special Publication 800-38E - Recommendation for Block
+                         Cipher Modes of Operation: The XTS AES Mode for Confidentiality
+                         on Storage Devices
+                         January 2010
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         38e.pdf
+
+ SP800-38F               NIST Special Publication 800-38F - Recommendation for Block
+                         Cipher Modes of Operation: Methods for Key Wrapping
+                         December 2012
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+ SP800-38G               NIST Special Publication 800-38G - Recommendation for Block
+                         Cipher Modes of Operation: Methods for Format - Preserving
+                         Encryption
+                         March 2016
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38G.pdf
+
+ SP800-52rev2            NIST Special Publication 800-52 Revision 2 - Guidelines for the
+                         Selection, Configuration, and Use of Transport Layer Security (TLS)
+                         Implementations
+                         August 2019
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   54 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ SP800-56Arev3           NIST Special Publication 800-56A Revision 3 - Recommendation for
+                         Pair Wise Key Establishment Schemes Using Discrete Logarithm
+                         Cryptography
+                         April 2018
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+ SP800-56Crev2           Recommendation for Key Derivation through Extraction-then-
+                         Expansion
+                         August 2020
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr2.pdf
+
+ SP800-57rev5            NIST Special Publication 800-57 Part 1 Revision 5 -
+                         Recommendation for Key Management Part 1: General
+                         May 2020
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-
+                         57pt1r5.pdf
+
+ SP800-90Arev1           NIST Special Publication 800-90A - Revision 1 - Recommendation for
+                         Random Number Generation Using Deterministic Random Bit
+                         Generators
+                         June 2015
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+ SP800-90B               NIST Special Publication 800-90B - Recommendation for the
+                         Entropy Sources Used for Random Bit Generation
+                         January 2018
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+ SP800-131Arev2          NIST Special Publication 800-131A Revision 2 - Transitions:
+                         Recommendation for Transitioning the Use of Cryptographic
+                         Algorithms and Key Lengths
+                         March 2019
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-
+                         131Ar2.pdf
+
+ SP800-132               NIST Special Publication 800-132 - Recommendation for Password-
+                         Based Key Derivation - Part 1: Storage Applications
+                         December 2010
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         132.pdf
+
+ SP800-133rev2           NIST Special Publication 800-133 Revision 2 - Recommendation for
+                         Cryptographic Key Generation
+                         June 2020
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+ SP800-135rev1           NIST Special Publication 800-135 Revision 1 - Recommendation for
+                         Existing Application-Specific Key Derivation Functions
+                         December 2011
+                         https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-
+                         135r1.pdf
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   55 of 56
+SUSE Linux Enterprise OpenSSL Cryptographic Module                              FIPS 140-3 Non-Proprietary Security Policy
+
+
+
+
+ SP800-140B              NIST Special Publication 800-140B - CMVP Security Policy
+                         Requirements
+                         March 2020
+                         https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140B.pdf
+
+
+
+
+                                     © 2025 SUSE, LLC / atsec information security.
+         This document can be reproduced and distributed only whole and intact, including this copyright notice.
+                                                                                                                   56 of 56
+
