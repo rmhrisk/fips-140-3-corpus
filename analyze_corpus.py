@@ -206,7 +206,7 @@ def classify_device(cert, sp):
 # Reachability is weighted BY archetype: a network interface on a software library is
 # host-mediated (low), on an appliance it is the mgmt/data plane (high). Impact is an
 # EXPERT PRIOR per archetype (documented, not corpus-derived). Review priority =
-# Likelihood × Impact, ordinal — explicit rules, no magic weights.
+# Likelihood + Impact as ordinal ranks (a rank SUM, banded into tiers), explicit rules, no magic weights.
 def archetype(cert, sp, device_class):
     nm = (cert.get("moduleName") or "").lower(); v = ((cert.get("vendor") or {}).get("name") or "").lower()
     def hn(*w): return any(x in nm for x in w)          # module-name only
@@ -459,7 +459,7 @@ def summarize(rows):
         "device_class_dist": dict(Counter(r["device_class"] for r in rows).most_common()),
     }
     N = max(1, len(rows))
-    # operational archetypes + ordinal review-priority (Likelihood × Impact)
+    # operational archetypes + ordinal review-priority (Likelihood + Impact, a rank sum)
     archs = [a for a,_ in Counter(r["archetype"] for r in rows).most_common()]
     out["archetypes"] = {
         "dist": dict(Counter(r["archetype"] for r in rows).most_common()),
@@ -485,7 +485,7 @@ def summarize(rows):
     top = sorted(frows, key=lambda r:(-prio_rank[r["review_priority"]], -(r["cve_pressure"] or 0), -(r["months_since_last_validation"] or 0)))
     out["review_priority"] = {
         "dist": dict(Counter(r["review_priority"] for r in frows).most_common()),
-        "model": "Review priority = Likelihood × Impact (ordinal). Likelihood = archetype-weighted reachability (service-conditional) + no-CMVP-validation-update + ≥18mo stale + measured CVE drift. Impact = expert prior per archetype. No weighted coefficients; every input explicit and evidence-graded. These are attack-path REVIEW CANDIDATES requiring confirmation, NOT confirmed reachable vulnerabilities.",
+        "model": "Review priority combines two ordinal ranks by ADDING their positions (a rank sum, not a product), then bands the sum into Critical/High/Medium/Low. Likelihood is an additive point score over archetype-weighted reachability (service-conditional), no-CMVP-validation-update, >=18mo staleness, and measured upstream CVE drift (scored at both >=10 and >=25, so drift weighs most). Impact is an expert prior per archetype. Every input is explicit and evidence-graded. These are attack-path REVIEW-ORDER CANDIDATES requiring confirmation, NOT confirmed vulnerabilities or a severity score.",
         "top": [{"cert":r["cert"],"module":(r["module"] or "")[:44],"archetype":r["archetype"],
                  "priority":r["review_priority"],"likelihood":r["likelihood"],"impact":r["impact"],
                  "reachability":r["reachability"],"net_services":r["net_services"],"cve_pressure":r["cve_pressure"],

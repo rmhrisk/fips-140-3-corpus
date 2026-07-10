@@ -198,7 +198,7 @@ Device *embodiment* (hardware/software/firmware) is too coarse for risk. **Opera
 | Storage/data-at-rest | 9 | High | 56% |
 | Firmware/boot | 1 | High | 0% |
 
-**Review priority = Likelihood × Impact (ordinal — no weighted coefficients).** Review priority = Likelihood × Impact (ordinal). Likelihood = archetype-weighted reachability (service-conditional) + no-CMVP-validation-update + ≥18mo stale + measured CVE drift. Impact = expert prior per archetype. No weighted coefficients; every input explicit and evidence-graded. These are attack-path REVIEW CANDIDATES requiring confirmation, NOT confirmed reachable vulnerabilities.
+**Review priority = Likelihood + Impact, combined as ordinal ranks (a rank sum, not a product) and banded into tiers.** Review priority combines two ordinal ranks by ADDING their positions (a rank sum, not a product), then bands the sum into Critical/High/Medium/Low. Likelihood is an additive point score over archetype-weighted reachability (service-conditional), no-CMVP-validation-update, >=18mo staleness, and measured upstream CVE drift (scored at both >=10 and >=25, so drift weighs most). Impact is an expert prior per archetype. Every input is explicit and evidence-graded. These are attack-path REVIEW-ORDER CANDIDATES requiring confirmation, NOT confirmed vulnerabilities or a severity score.
 
 Distribution: **{'Medium': 71, 'Low': 31, 'High': 29, 'Critical': 5}**. Impact is an explicit expert prior per archetype (documented, not corpus-derived); Likelihood combines archetype-weighted reachability, never-updated, staleness, and *measured* upstream CVE drift (which weighs most, being real evidence rather than heuristic).
 

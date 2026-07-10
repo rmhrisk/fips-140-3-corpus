@@ -248,7 +248,7 @@ w("Device *embodiment* (hardware/software/firmware) is too coarse for risk. **Op
 w("| archetype | n | impact prior | % never updated |\n|---|--:|--:|--:|\n")
 for a,v in arc["by_archetype"].items():
     w(f"| {a} | {v['n']} | {v['impact_prior']} | {v['pct_never_updated']:.0f}% |\n")
-w(f"\n**Review priority = Likelihood × Impact (ordinal — no weighted coefficients).** {rp['model']}\n")
+w(f"\n**Review priority = Likelihood + Impact, combined as ordinal ranks (a rank sum, not a product) and banded into tiers.** {rp['model']}\n")
 w(f"\nDistribution: **{rp['dist']}**. Impact is an explicit expert prior per archetype (documented, not corpus-derived); "
   "Likelihood combines archetype-weighted reachability, never-updated, staleness, and *measured* upstream CVE drift (which weighs most, "
   "being real evidence rather than heuristic).\n")

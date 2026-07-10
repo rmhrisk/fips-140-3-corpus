@@ -387,8 +387,8 @@ def main():
     P.append("<h2>10 · Operational archetypes &amp; review-priority</h2>")
     P.append("<p class='muted'>Embodiment (hw/sw/fw) is too coarse for risk. <b>Operational archetype</b> captures the attack path and lets "
              "reachability be weighted by class — a network interface on a <b>software library</b> is host-mediated (the app listens, not the "
-             "module), on a <b>network appliance</b> it is the management/data plane. <b>Review priority = Likelihood × Impact</b>, ordinal, "
-             "explicit rules, <i>no weighted coefficients</i>; measured upstream CVE drift weighs most (real evidence, not heuristic).</p>")
+             "module), on a <b>network appliance</b> it is the management/data plane. <b>Review priority = Likelihood + Impact</b> as ordinal ranks (a rank sum, not a product) banded into tiers, "
+             "explicit rules, <i>no weighted coefficients</i>; measured upstream CVE drift weighs most (real evidence, not heuristic). The tiers are review-order candidates, <b>not</b> vulnerability severities.</p>")
     P.append("<div class='cols'>")
     P.append(f"<div class='card'><h3>Archetype mix</h3>{bars(arc['dist'],' mod')}</div>")
     P.append(f"<div class='card'><h3>Review-priority distribution</h3>{bars(rp['dist'],' mod')}"
