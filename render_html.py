@@ -133,7 +133,9 @@ def _render_prose(paras: list[str]) -> str:
     out = []
     for p in paras:
         m = _SECNUM_RE.match(p)
-        if m:  # a numbered section heading — size it by its depth (markdown-style)
+        # A real section heading is short. A long paragraph that merely starts with
+        # a section number (a run-on pdftotext blob) is body prose, not a heading.
+        if m and len(p) <= 80:
             depth = min(m.group(1).count(".") + 1, 4)
             out.append(f"<div class='sec sec{depth}'>{esc(p)}</div>")
         else:
