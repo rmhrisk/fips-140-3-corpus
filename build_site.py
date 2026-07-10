@@ -217,12 +217,12 @@ def build_index():
     # inline, theme-aware diagram: the product's functionality as feature blocks, then
     # the scope narrowing twice into the module and into the approved functions.
     # TCB-related product functions (the update, network, OS, and admin paths the
-    # module's security leans on) get a teal OUTLINE — distinct from the solid-teal
-    # validated-scope box, because these surfaces sit OUTSIDE the validated boundary.
+    # module's security leans on) get a teal DASHED outline — dashed because these
+    # surfaces sit OUTSIDE the validated boundary, versus the solid-teal validated box.
     feats = [("User interface", 36, 58, False), ("Networking", 189, 58, True), ("Storage", 342, 58, False), ("Logging", 495, 58, False),
              ("Config / updates", 36, 110, True), ("Business logic", 189, 110, False), ("OS / runtime", 342, 110, True), ("Admin &amp; APIs", 495, 110, True)]
     fcells = "".join(
-        (f"<rect x='{x}' y='{y}' width='143' height='44' rx='8' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
+        (f"<rect x='{x}' y='{y}' width='143' height='44' rx='8' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5' stroke-dasharray='4 3'/>"
          if tcb else
          f"<rect x='{x}' y='{y}' width='143' height='44' rx='8' fill='var(--surface)' stroke='var(--line)'/>")
         + f"<text x='{x+71}' y='{y+27}' text-anchor='middle' font-size='12' fill='{'var(--accent-2)' if tcb else 'var(--ink-2)'}'>{lbl}</text>"
@@ -230,7 +230,7 @@ def build_index():
     boundary_svg = (
         "<svg viewBox='0 0 676 290' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
         "aria-label='The validated scope is a single small box, the FIPS-approved functions, inside the full-width "
-        "cryptographic module, itself a small part of the product. The product functions outlined in teal "
+        "cryptographic module, itself a small part of the product. The product functions in a teal dashed outline "
         "(networking, updates, OS/runtime, admin) are the trusted-computing-base surfaces the module depends on, "
         "which sit outside the validated boundary.'>"
         "<text x='22' y='32' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
@@ -265,9 +265,9 @@ def build_index():
         "specific module <b>version</b>, configuration, and operational environment.</p>"
         "<div class='panel' style='padding:18px 20px'>" + boundary_svg +
         "<p class='muted' style='font-size:12.5px;margin-top:2px'>The <span style='color:var(--accent-2);font-weight:600'>"
-        "teal-outlined</span> product functions, networking, updates, OS and runtime, admin, are the trusted-computing-base "
-        "surfaces the module's security leans on. They sit <b>outside</b> the validated boundary, which is why a review has "
-        "to look past the certificate to reach them.</p>"
+        "teal dashed</span> product functions, networking, updates, OS and runtime, admin, are the trusted-computing-base "
+        "surfaces the module's security leans on. The dashed edge marks that they sit <b>outside</b> the validated boundary, "
+        "which is why a review has to look past the certificate to reach them.</p>"
         "<p class='muted' style='margin-top:6px'>The scope narrows twice. A validation covers only the "
         "<b>cryptographic module</b>, a small boundary inside the product; and within that, only the "
         "<b>FIPS-approved functions operated in the approved mode</b>. Non-approved algorithms can sit inside the same "
