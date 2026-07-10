@@ -8,7 +8,7 @@ PY ?= python3
 # is identical on every machine. This is what makes `make verify` byte-exact.
 export PYTHONHASHSEED := 0
 
-.PHONY: all analyze drift version-exact render report findings explorer verify clean
+.PHONY: all analyze drift version-exact render report findings site verify clean
 
 all: analyze drift version-exact render
 
@@ -24,24 +24,31 @@ version-exact: version_exact.json
 version_exact.json: build_version_exact.py analyze_corpus.py drift.json ve_cache.json
 	$(PY) build_version_exact.py
 
-render: report findings explorer
+# render = the report + the findings memo + the published static site (docs/).
+render: report findings site
 
-report: report_html.py corpus_analysis.json drift.json version_exact.json
+report: corpus_report.html
+corpus_report.html: report_html.py corpus_analysis.json drift.json version_exact.json
 	$(PY) report_html.py
 
-findings: findings_md.py corpus_analysis.json drift.json version_exact.json
+findings: FINDINGS.md
+FINDINGS.md: findings_md.py corpus_analysis.json drift.json version_exact.json
 	$(PY) findings_md.py
 
-explorer: build_explorer.py corpus_analysis.json
-	$(PY) build_explorer.py
+# The published static site: landing + report + one page per module, into docs/
+# (GitHub Pages: Settings -> Pages -> main branch, /docs folder).
+site: docs/index.html
+docs/index.html: build_site.py corpus_report.html corpus_analysis.json drift.json
+	$(PY) build_site.py
 
 # Rebuild everything, then confirm the committed artifacts did not change.
 verify:
 	@$(MAKE) -s all
-	@if git diff --quiet -- corpus_analysis.json drift.json version_exact.json corpus_report.html explorer.html FINDINGS.md; then \
-		echo "OK: all artifacts reproduce byte-identically"; \
+	@if git diff --quiet -- corpus_analysis.json drift.json version_exact.json corpus_report.html FINDINGS.md docs; then \
+		echo "OK: all artifacts and the docs/ site reproduce byte-identically"; \
 	else \
 		echo "CHANGED: regenerated artifacts differ from committed"; git --no-pager diff --stat; fi
 
 clean:
-	rm -f corpus_analysis.json drift.json version_exact.json corpus_report.html explorer.html FINDINGS.md
+	rm -f corpus_analysis.json drift.json version_exact.json corpus_report.html FINDINGS.md
+	rm -rf docs

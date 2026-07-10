@@ -58,7 +58,7 @@ build_drift.py               NVD component-drift join (cached)  -> drift.json
 build_version_exact.py       NVD version-exact refinement (cached)  -> version_exact.json
 report_html.py               the report  -> corpus_report.html
 findings_md.py               the findings memo  -> FINDINGS.md
-build_explorer.py            interactive review-priority explorer  -> explorer.html
+build_site.py                the published static site  -> docs/
 verify_tables.py, profiles.py, security_policy.py, specs.py, specs.json
                              helper modules used by analyze_corpus
 
@@ -66,10 +66,28 @@ corpus_analysis.json         committed intermediate (analyzer output)
 drift.json, version_exact.json           committed NVD-join outputs
 drift_cache.json, ve_cache.json          committed NVD response caches (offline replay)
 
-corpus_report.html           rendered report        (open in a browser)
-explorer.html                interactive explorer   (open in a browser)
+corpus_report.html           standalone rendered report
 FINDINGS.md                  findings memo
+
+docs/                        the published static site (GitHub Pages)
+  index.html                 landing page
+  report.html                the corpus report, under the site navigation
+  modules/index.html         browsable index of every module
+  modules/<cert>.html        one detail page per module
 ```
+
+## The published site
+
+`docs/` is a single, self-contained static site. Open `docs/index.html` locally,
+or publish it with **GitHub Pages** (repo Settings -> Pages -> Source: your
+default branch, folder `/docs`). Every page shares one design and one top
+navigation:
+
+- **Overview** (`index.html`): the thesis, the headline numbers, and the way in.
+- **Report** (`report.html`): the full corpus analysis.
+- **Modules** (`modules/index.html`): all modules, ranked by review priority,
+  each linking to a per-module page with its TCB surfaces, component drift,
+  review drivers, evidence completeness, and what to confirm next.
 
 ## The pipeline
 
@@ -77,9 +95,9 @@ FINDINGS.md                  findings memo
 corpus140_3/records/  ──analyze_corpus.py──▶  corpus_analysis.json ─┐
                       ──build_drift.py─────▶  drift.json           ─┤
                              (drift.json) ──build_version_exact.py▶  version_exact.json ─┤
-                                                                                          ├─▶ report_html.py    ▶ corpus_report.html
-                                                                                          ├─▶ findings_md.py    ▶ FINDINGS.md
-                                                                                          └─▶ build_explorer.py ▶ explorer.html
+                                            ├─▶ report_html.py  ▶ corpus_report.html ─┐
+                                            ├─▶ findings_md.py  ▶ FINDINGS.md         │
+                                            └─────────────────── build_site.py ◀──────┴─▶ docs/
 ```
 
 - **Analysis** (`analyze_corpus.py`) reads the provided records and is fully
@@ -87,8 +105,11 @@ corpus140_3/records/  ──analyze_corpus.py──▶  corpus_analysis.json ─
 - **NVD joins** (`build_drift.py`, `build_version_exact.py`) query the NVD CVE
   API, but ship with response caches so they replay offline. They only touch the
   network on a cache miss.
-- **Render** (`report_html.py`, `findings_md.py`, `build_explorer.py`) are
-  standard-library only and read the committed intermediates.
+- **Render** (`report_html.py`, `findings_md.py`, `build_site.py`) are standard
+  library only and read the committed intermediates.
+
+(An experimental interactive explorer, `build_explorer.py`, is kept in the repo
+but is not part of the published site.)
 
 ## Reproduce it
 
@@ -97,8 +118,9 @@ make all        # rebuild every artifact from the committed corpus + caches (off
 make analyze    # records -> corpus_analysis.json
 make drift      # records + cache -> drift.json
 make version-exact
-make render     # report + findings + explorer
-make verify     # rebuild and confirm the committed artifacts are byte-identical
+make render     # report + findings + the docs/ site
+make site       # (re)build the docs/ static site
+make verify     # rebuild and confirm every artifact + docs/ is byte-identical
 make clean      # remove generated artifacts (all regenerate from make all)
 ```
 
