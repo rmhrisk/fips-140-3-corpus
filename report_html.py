@@ -52,7 +52,7 @@ def main():
         "<header class='mast'><div class='mast-in'>"
         "<div class='eyebrow'>CMVP · FIPS 140-3 validated-module corpus</div>"
         "<h1>What a FIPS 140 certificate actually tells you</h1>"
-        "<p class='dek'>Read across the public corpus, FIPS certificates and their Security Policies reveal far more than a pass/fail stamp. They show the trusted-computing-base surfaces around each module, how far its components have drifted since validation, and where a security review should look first.</p>"
+        "<p class='dek'>Read across the public corpus, FIPS certificates and their Security Policies are a structured record of how cryptographic systems are built, validated, and maintained. They show the trusted-computing-base surfaces around each module, how far its components have drifted since validation, and where a security review should look first.</p>"
         f"<div class='meta'><span>{s['n']} modules</span><span>{NF} with full SP extraction</span><span>ref {esc(cov['reference_date'])}</span>"
         f"<span>{esc(cov['cert_number_span'])}</span><span>source: CMVP + NVD</span></div>"
         f"<div class='kpis'>{kpi_strip}</div>"
@@ -134,7 +134,7 @@ def main():
              "transition-driven surge (~500/yr). The population skews to very recent certificates, so the freeze/exposure patterns are "
              "structural and will bite as the 2024–26 cohort ages inside its window without updates.</p>")
     asr = s["assurance"]
-    P.append("<h3 style='margin-top:16px'>Assurance type — not every certificate is the same</h3>")
+    P.append("<h3 style='margin-top:16px'>Assurance type — certificates differ in what backs them</h3>")
     P.append(f"<div class='cols'><div class='card'>{bars(asr['type_dist'],' mod')}</div>"
              f"<div class='card muted'><b>Interim Validation ({asr['interim_pct']:.0f}% here)</b> — a backlog-reduction path CMVP launched "
              "2024-06-06: CMVP-issued but relying more on the CSTL submission with less CMVP review depth, sunsetting in <b>2 years, not 5</b> "
