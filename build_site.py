@@ -77,6 +77,14 @@ a.card:hover{border-color:var(--accent-line);background:var(--surface-2)}
 .card p{font-size:13.5px;color:var(--ink-2);margin:6px 0 0}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.panel h3{color:var(--accent)} .panel p{font-size:14px;margin:6px 0 0}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
+@media(max-width:720px){.cols2,.cols3{grid-template-columns:1fr}}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:16px 0}
+.flow .step{font:500 13px var(--sans);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 13px;color:var(--ink-2)}
+.flow .step.end{border-color:var(--accent-line);background:var(--accent-wash);color:var(--accent-2);font-weight:600}
+.flow .arr{color:var(--ink-3);font-size:13px}
 .kv{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14px} .kv div{min-width:0} .kv .k{color:var(--ink-3);font-size:12px}
 .chip{display:inline-block;font:500 12px var(--mono);padding:3px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);margin:3px 4px 3px 0}
 .tag{display:inline-block;font:600 11px/1 var(--sans);padding:4px 10px;border-radius:20px;letter-spacing:.01em}
@@ -125,41 +133,93 @@ def tagp(p): return f"<span class='tag {PRI_CLS.get(p,'t-med')}'>{esc(p)} review
 
 # ---- landing ---------------------------------------------------------------
 def build_index():
-    lc = S["lifecycle"]; rc = S["recertification"]; al = S["algorithms"]; mt = S["motifs"]
+    lc = S["lifecycle"]; rc = S["recertification"]; mt = S["motifs"]
     win = lc["exposure_window_months (validation->sunset)"]["median"]
+    no_update = N - rc["modules_with_updates"]
+    upstream = len({m["cert"] for m in json.load(open("drift.json"))}) if os.path.exists("drift.json") else 0
+    have_ver = 0
+    for p in sorted(__import__("glob").glob("corpus140_3/records/*.json")):
+        c = json.load(open(p)).get("certificate") or {}
+        if (c.get("softwareVersions") or c.get("firmwareVersions")):
+            have_ver += 1
     tiles = [
-        ("v", f"{N}", "modules analyzed", esc(S["coverage"]["cert_number_span"])),
-        ("v", f"{100-rc['pct_with_updates']:.0f}%", "never re-validated", f"{N-rc['modules_with_updates']} of {N}"),
-        ("v", f"{win:.0f} mo", "median cert window", "validation to sunset"),
-        ("v", f"{al['modules_with_any_legacy_pct']:.0f}%", "carry a legacy primitive", "SHA-1 / ECB / 3DES"),
+        (f"{N}", "sampled modules analyzed", "sweep #4700 to #5157, step 3"),
+        (f"{no_update}", "no recorded update", f"{100-rc['pct_with_updates']:.0f}% of the sampled certificates"),
+        (f"{win:.0f} mo", "median validation-to-sunset window", "how long the certified state stands"),
+        (f"{have_ver}", "record a software/firmware version", f"{round(100*have_ver/N)}%; the rest cannot be version-checked from the record"),
+        (f"{upstream}", "name an upstream dependency to reconcile", "against the certified version and vendor backports"),
     ]
-    th = "".join(f"<div class='tile'><div class='v'>{v}</div><div class='l'>{esc(l)}</div>"
-                 f"{'<div class=s>'+s+'</div>' if s else ''}</div>" for _, v, l, s in tiles)
+    th = "".join(f"<div class='tile'><div class='v'>{esc(v)}</div><div class='l'>{esc(l)}</div>"
+                 f"{'<div class=s>'+esc(s)+'</div>' if s else ''}</div>" for v, l, s in tiles)
+    steps = ["certificate found", "deployed module identified", "version matched",
+             "operational environment matched", "approved mode confirmed",
+             "patches &amp; dependencies reconciled"]
+    flow = "<span class='arr'>&#8594;</span>".join(f"<span class='step'>{s}</span>" for s in steps)
+    flow += ("<span class='arr'>&#8594;</span><span class='step end'>claim supported</span>")
     surf = "".join(f"<span class='chip'>{esc(k)} &nbsp;{v}</span>" for k, v in mt["freq"].items())
     body = (
         "<main>"
-        "<div class='eyebrow'>CMVP · FIPS 140-3 validated-module corpus</div>"
+        "<div class='eyebrow'>CMVP · FIPS 140-3 · sampled certificate-number sweep</div>"
         "<h1>What a FIPS certificate actually tells you</h1>"
-        "<p class='dek'>Read across the public corpus, FIPS certificates and their Security Policies reveal far more "
-        "than a pass/fail stamp. They show the trusted-computing-base surfaces around each module, how far its "
-        "components have drifted since validation, and where a security review should look first.</p>"
+        "<p class='dek'>A CMVP certificate shows that a defined cryptographic module version, in a specific "
+        "configuration, operational environment, and approved mode, completed validation. It does not by itself show "
+        "that the product running today still uses that validated state. This corpus reads the public record for what "
+        "it establishes, where correspondence to a deployment becomes uncertain, and what evidence a reviewer should "
+        "request next.</p>"
         f"<div class='tiles'>{th}</div>"
+
+        "<h2>The question this answers</h2>"
+        "<p class='muted'>A certificate is <b>necessary</b> evidence of deployed FIPS compliance, but not "
+        "<b>sufficient</b> evidence that the deployed cryptographic function still matches the validated state. "
+        "Establishing that runs a chain, and any unresolved step turns into an evidence request.</p>"
+        f"<div class='flow'>{flow}</div>"
+        "<p class='muted' style='font-size:13px'>Any step the public record cannot close reads as "
+        "<b>additional evidence required</b>, not as a finding.</p>"
+
+        "<div class='cols2'>"
+        "<div class='panel'><h3>What the corpus can establish</h3><ul>"
+        "<li>the validated module identity and certificate status</li>"
+        "<li>the documented operational environments and approved services</li>"
+        "<li>the declared module boundary, interfaces, and dependencies where stated</li>"
+        "<li>the public validation-update history recorded on the certificate</li></ul></div>"
+        "<div class='panel'><h3>What still requires deployment evidence</h3><ul>"
+        "<li>the module version actually installed</li>"
+        "<li>whether vendor patches changed code inside the validated boundary</li>"
+        "<li>whether fixes were backported without changing the reported version</li>"
+        "<li>whether the product operates the module in approved mode</li>"
+        "<li>whether the consuming service invokes the validated implementation</li>"
+        "<li>whether the deployed environment is listed or covered by portability rules</li></ul></div>"
+        "</div>"
+
         "<div class='cards'>"
         "<a class='card' href='report.html'><h3>The analysis</h3><div class='big'>Corpus report</div>"
-        "<p>The full read of the corpus: what a certificate proves, how the certified state freezes, the TCB surfaces "
-        "the artifacts reveal, and where to look first.</p></a>"
+        "<p>What the public record establishes, how the certified state ages, the deployed-state clues the artifacts "
+        "carry, and where the evidence stops.</p></a>"
         "<a class='card' href='modules/index.html'><h3>Browse</h3><div class='big'>All modules</div>"
-        f"<p>Every one of the {N} modules, each with its own page: archetype, TCB surfaces, component drift, review "
-        "priority, and what to confirm next.</p></a>"
+        f"<p>Every one of the {N} modules opens its full Security Policy, with the deployed-state clues and unresolved "
+        "gaps folded into the top.</p></a>"
         "</div>"
-        "<h2>What these artifacts are good for</h2>"
-        "<p>A certificate attests one module version, in one approved-mode configuration, at one moment. Read across "
-        "the whole corpus it still delivers three things a reviewer can act on: a map of the trusted-computing-base "
-        "surfaces around each module, a measure of how far its named components have drifted since validation, and a "
-        "ranked view of where a review should look first. It is best read as a map of what to verify in a deployment, "
-        "which is what makes it a fast way to aim that verification.</p>"
-        f"<h2>TCB surfaces across the corpus</h2><p class='muted'>Architectural patterns where a bug class would matter, "
-        f"visible even when the component behind them is not named.</p><p>{surf}</p>"
+
+        "<h2>How to read the clues</h2>"
+        "<p class='muted'>Every signal on the site sits in one of three layers, and they are not interchangeable.</p>"
+        "<div class='cols3'>"
+        "<div class='panel'><h3>Public fact</h3><p>Stated directly in the certificate metadata or the Security "
+        "Policy: module identity, status, operational environments, approved services.</p></div>"
+        "<div class='panel'><h3>Derived review clue</h3><p>A deterministic inference from the structured public "
+        "evidence, or a keyword detected in the text. A prompt to confirm, not a conclusion.</p></div>"
+        "<div class='panel'><h3>Deployment-dependent conclusion</h3><p>Needs vendor, product, SBOM, package, or "
+        "operator evidence. It cannot be reached from the public corpus alone.</p></div>"
+        "</div>"
+
+        "<h2>Public clues relevant to deployed-state review</h2>"
+        "<p class='muted'>Signals extracted from Security Policies and certificate records that may mark an area "
+        "requiring confirmation. These are review prompts, not findings that a component is exposed, vulnerable, or "
+        "inside the validated boundary. A single module can raise several; the counts are of modules, not of "
+        f"confirmed issues.</p><p>{surf}</p>"
+
+        "<p class='dek' style='font-size:16px;margin-top:32px'>The result is not a vulnerability verdict. It is a "
+        "deployed-assurance workflow: identify the validated claim, test its correspondence to the deployed state, "
+        "and turn each unresolved gap into a specific evidence request.</p>"
         "</main>")
     return page("What a FIPS certificate actually tells you", "", "home", body)
 

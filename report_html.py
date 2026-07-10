@@ -39,7 +39,7 @@ def main():
     kpi_strip = "".join([
         kpi("modules analyzed", s["n"], esc(cov['cert_number_span'])),
         kpi("median cert window", f"{win['median']:.0f} mo", "validation → sunset"),
-        kpi("never re-validated", f"{100-rc['pct_with_updates']:.0f}%", f"{s['n']-rc['modules_with_updates']} of {s['n']} modules"),
+        kpi("no recorded update", f"{100-rc['pct_with_updates']:.0f}%", f"{s['n']-rc['modules_with_updates']} of {s['n']} certificates"),
         kpi("lattice PQC present", f"{pq['by_kind_pct'].get('ML-KEM (FIPS 203)',0):.0f}%", "ML-KEM / ML-DSA / SLH-DSA"),
         kpi("carry a legacy primitive", f"{al['modules_with_any_legacy_pct']:.0f}%", "SHA-1 / ECB / 3DES"),
     ])
