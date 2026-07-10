@@ -182,19 +182,19 @@ def build_index():
         f"<text x='{x+71}' y='{y+27}' text-anchor='middle' font-size='12' fill='var(--ink-2)'>{lbl}</text>"
         for lbl, x, y in feats)
     boundary_svg = (
-        "<svg viewBox='0 0 676 300' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
-        "aria-label='The validated scope is only the FIPS-approved functions, inside the cryptographic module, "
-        "which is itself a small part of the product'>"
+        "<svg viewBox='0 0 676 304' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
+        "aria-label='The validated scope is only the FIPS-approved functions, a small box inside the cryptographic "
+        "module, which is itself a small part of the product'>"
         "<text x='22' y='32' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
-        "<rect x='18' y='44' width='640' height='246' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
+        "<rect x='18' y='44' width='640' height='250' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
         + fcells +
-        "<rect x='100' y='172' width='476' height='108' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
-        "<text x='116' y='194' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
-        "<text x='116' y='210' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
-        "<rect x='118' y='220' width='440' height='52' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
-        "<text x='338' y='244' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
-        "FIPS-approved functions, in approved mode</text>"
-        "<text x='338' y='261' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
+        "<rect x='36' y='170' width='602' height='110' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
+        "<text x='52' y='192' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
+        "<text x='52' y='208' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
+        "<rect x='243' y='214' width='190' height='64' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
+        "<text x='338' y='233' text-anchor='middle' font-size='10.5' font-weight='600' fill='var(--accent-2)'>FIPS-approved functions</text>"
+        "<text x='338' y='248' text-anchor='middle' font-size='9.5' fill='var(--accent-2)'>in approved mode</text>"
+        "<text x='338' y='264' text-anchor='middle' font-size='9' fill='var(--accent-2)'>the validated scope</text>"
         "</svg>")
 
     body = (
