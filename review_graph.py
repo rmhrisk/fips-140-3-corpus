@@ -156,9 +156,9 @@ def normalize_evidence(evidence: list[str], limit: int = 3) -> list[str]:
 
 _CLUE_CLASS = {"high": "clueHigh", "medium": "clueMedium", "low": "clueLow"}
 _CLUE_STYLES = [
-    "classDef clueHigh fill:#eef3f9,stroke:#2f6fb0,stroke-width:2px;",
-    "classDef clueMedium fill:#eef3f9,stroke:#6f7f91;",
-    "classDef clueLow fill:#f7f7f7,stroke:#999,stroke-dasharray:4 4;",
+    "classDef clueHigh fill:#eef3f9,stroke:#2f6fb0,stroke-width:2px,color:#1f3a5f;",
+    "classDef clueMedium fill:#eef3f9,stroke:#6f7f91,color:#1f3a5f;",
+    "classDef clueLow fill:#f7f7f7,stroke:#999,stroke-dasharray:4 4,color:#444;",
 ]
 
 
@@ -265,10 +265,11 @@ def to_mermaid_lanes(module: str, clues: list[dict]) -> str:
     for x in lanes:
         n = x["n"]
         L.append(f"  C{n} --> I{n} --> R{n} --> E{n}")
-    L += ["  classDef clue fill:#eef3f9,stroke:#6f7f91;",
-          "  classDef infer fill:#fff7e6,stroke:#b98500;",
-          "  classDef risk fill:#fbe9e9,stroke:#b02a2a;",
-          "  classDef evidence fill:#e6f4ea,stroke:#1e7d34;"]
+    # dark text on the light pastel fills, so nodes stay readable under either mermaid theme
+    L += ["  classDef clue fill:#eef3f9,stroke:#6f7f91,color:#1f3a5f;",
+          "  classDef infer fill:#fff7e6,stroke:#b98500,color:#6b4e00;",
+          "  classDef risk fill:#fbe9e9,stroke:#b02a2a,color:#7a1f1f;",
+          "  classDef evidence fill:#e6f4ea,stroke:#1e7d34,color:#14532d;"]
     ids = lambda p: ",".join(f"{p}{x['n']}" for x in lanes)
     L.append(f"  class {ids('C')} clue;")
     L.append(f"  class {ids('I')} infer;")

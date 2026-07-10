@@ -651,7 +651,7 @@ DOCUMENT = """<!DOCTYPE html>
   .pagemark .top {{ float:right; color:var(--muted); font-weight:400; }}
 
   /* ---- prose (markdown-style) ---- */
-  p.prose, ul.prose, ol.prose {{ font-size:var(--fs-body); color:#3b4a58; margin:.4rem 0; line-height:1.6; }}
+  p.prose, ul.prose, ol.prose {{ font-size:var(--fs-body); color:var(--ink); margin:.4rem 0; line-height:1.6; }}
   ul.prose, ol.prose {{ padding-left:1.4rem; }}
   ul.prose li, ol.prose li {{ margin:.18rem 0; }}
   .sec {{ font-weight:700; color:var(--navy); line-height:1.3; margin:1.1rem 0 .4rem; }}
@@ -667,7 +667,7 @@ DOCUMENT = """<!DOCTYPE html>
   figure.fig figcaption {{ font-size:var(--fs-sm); color:var(--muted); margin-top:.4rem; font-style:italic; }}
 
   /* ---- AI markdown block ---- */
-  .aimd {{ font-size:var(--fs-body); color:#3b4a58; line-height:1.6; }}
+  .aimd {{ font-size:var(--fs-body); color:var(--ink); line-height:1.6; }}
   .aimd h2 {{ font-size:var(--fs-3); color:var(--navy); border:none; margin:1rem 0 .3rem; padding:0; }}
   .aimd ol, .aimd ul {{ margin:.3rem 0 .7rem; padding-left:1.4rem; }}
   .aimd li {{ margin:.15rem 0; }}
@@ -700,7 +700,9 @@ DOCUMENT = """<!DOCTYPE html>
 </style></head><body>{body}
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({{startOnLoad:false, securityLevel:'loose', flowchart:{{useMaxWidth:true}},
+  mermaid.initialize({{startOnLoad:false, securityLevel:'loose',
+                       flowchart:{{useMaxWidth:false, htmlLabels:true}},
+                       themeVariables:{{fontSize:'15px'}},
                        theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'neutral')}});
   mermaid.run({{querySelector:'.mermaid'}}).catch(function(e){{console.error(e);}});
 </script>
