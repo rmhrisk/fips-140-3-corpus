@@ -488,25 +488,21 @@ def build_module(r):
     page_texts = open(ptf, encoding="utf-8", errors="replace").read().split("\f") if os.path.exists(ptf) else []
     doc = render_html.render(raw, page_texts)
 
-    # fold the analysis signals into the document: extra chips in the masthead + a strip
+    # fold the analysis signals into the document as one review strip under the masthead
     prio = r["review_priority"]; surfaces = r.get("motifs") or []
     dr = DRIFT.get(cert); stale = r.get("months_since_last_validation")
-    extra = f"<span class='chip'><span class='k'>Review priority</span><span class='v'>{esc(prio)}</span></span>"
-    if surfaces:
-        extra += f"<span class='chip'><span class='k'>TCB surfaces</span><span class='v'>{len(surfaces)}</span></span>"
+    sep = " &nbsp;·&nbsp; "
+    bits = [f"<b>{esc(prio)}</b> review priority"]
+    bits.append(f"exposes {esc(', '.join(surfaces))}" if surfaces else "no TCB surface named")
     if dr:
-        extra += (f"<span class='chip'><span class='k'>Upstream drift</span><span class='v'>"
-                  f"{esc(dr['component'])} {esc(dr['cves_in_component_since_cert'])} CVEs</span></span>")
-    doc = doc.replace("<div class='chips'>", "<div class='chips'>" + extra, 1)
-
-    surf_txt = ", ".join(surfaces) if surfaces else "none named"
-    drift_txt = (f" &nbsp;·&nbsp; upstream drift: <b>{esc(dr['component'])}</b> "
-                 f"{esc(dr['cves_in_component_since_cert'])} CVEs since cert" if dr else "")
-    stale_txt = f" &nbsp;·&nbsp; {esc(stale)} months since last validation" if stale is not None else ""
+        bits.append(f"<b>{esc(dr['component'])}</b> has moved {esc(dr['cves_in_component_since_cert'])} "
+                    f"upstream CVEs since certification")
+    if stale is not None:
+        bits.append(f"last validated {esc(stale)} months ago")
     strip = (f"<div style='max-width:100%;margin:14px 0;padding:12px 16px;border:1px solid var(--line);"
              f"border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--pill);font-size:14px'>"
-             f"<b>Review priority: {esc(prio)}</b> &nbsp;·&nbsp; TCB surfaces: {esc(surf_txt)}{drift_txt}{stale_txt}. "
-             f"<a href='../report.html' style='color:var(--accent)'>Analysis &amp; methodology &#8594;</a></div>")
+             f"{sep.join(bits)}. "
+             f"<a href='../report.html' style='color:var(--accent)'>How this is derived &#8594;</a></div>")
     doc = doc.replace("</header>", "</header>" + strip, 1)
 
     navbar = ("<nav class='sitenav'><div class='sitenav-in'>"

@@ -260,6 +260,34 @@ def _present_cols(rows, ordered):
     return [c for c in ordered if any(str(r.get(c, "")).strip() for r in rows)]
 
 
+# Acronyms to keep upper-cased when a normalized field key is turned into a label.
+_COL_ACRONYMS = {"iso", "cavp", "acvp", "kdf", "drbg", "aes", "rsa", "hmac", "sha", "tls",
+                 "ssp", "csp", "id", "oe", "sp", "fips", "api", "os", "cvl", "ecdsa", "dsa",
+                 "kts", "kat", "cast", "sed", "tcg", "lba", "cm", "hw", "usb", "pci"}
+
+
+def _label_words(k, keep_lower=False):
+    """Split a camelCase / snake_case field key into readable words."""
+    words = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", k or "").replace("_", " ").split()
+    out = [w.upper() if w.lower() in _COL_ACRONYMS else (w.lower() if keep_lower else w) for w in words]
+    s = " ".join(out)
+    return s[:1].upper() + s[1:] if s else ""
+
+
+def _col_label(k):
+    """Human-readable column header from a normalized key (blank for positional placeholders)."""
+    if re.fullmatch(r"col\d+", k or "", re.I):
+        return ""
+    return _label_words(k)
+
+
+def _type_label(t):
+    """Human-readable label for a table type, e.g. approvedAlgorithm -> 'Approved algorithm'."""
+    words = [w for w in re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", t or "").replace("_", " ").split()
+             if w.lower() != "table"]
+    return _label_words(" ".join(words), keep_lower=True)
+
+
 def _objects_table(rows, ordered_cols):
     extra_keys = []
     for r in rows:
@@ -268,7 +296,7 @@ def _objects_table(rows, ordered_cols):
                 extra_keys.append(k)
     cols = _present_cols(rows, ordered_cols)
     xcols = [k for k in extra_keys if any((r.get("extraColumns") or {}).get(k, "").strip() for r in rows)]
-    headers = cols + [f"{k} *" for k in xcols]
+    headers = [_col_label(c) for c in cols] + [_col_label(k) for k in xcols]
     trows = []
     for r in rows:
         line = [r.get(c, "") for c in cols]
@@ -311,17 +339,12 @@ def render(record: dict, page_texts=None) -> str:
     srcs = [("Certificate page", cert_url), ("Security Policy PDF", sp_url),
             ("Signed certificate", cc_url)]
     src_line = " ".join(f"{link(u, t)}" for t, u in srcs if u)
-    prov = [f"{esc(sp.get('pageCount'))} pages", f"{len(sp.get('tables', []))} tables",
-            f"{len(sp.get('figures', []))} figures"]
-    if meta.get("ModDate"):
-        prov.append(f"modified {esc(meta['ModDate'])}")
     parts.append(f"""
     <header class='masthead'>
-      <div class='eyebrow'>CMVP Validated Module · reconstruction from normalized record</div>
+      <div class='eyebrow'>CMVP Validated Module · FIPS 140-3 Security Policy</div>
       <h1>{esc(cert.get('moduleName'))}</h1>
       <div class='chips'>{chips}</div>
       <div class='src'><span class='lbl'>Sources</span> {src_line}</div>
-      <div class='prov'>{' · '.join(prov)} · SP&nbsp;PDF&nbsp;sha256 <code>{esc(sp_sha[:16])}…</code></div>
     </header>""")
     parts.append(kv_card("Certificate", [
         ("Standard", cert.get("standard")), ("Overall level", cert.get("overallLevel")),
@@ -334,7 +357,7 @@ def render(record: dict, page_texts=None) -> str:
     vend = cert.get("vendor") or {}
     if vend.get("productUrl") or vend.get("supportUrl"):
         status = vend.get("supportStatus", "")
-        badge = (f"<span class='badge badge-{esc(status)}'>support: {esc(status)}</span>"
+        badge = (f"<span class='badge badge-{esc(status)}'>{esc(status)} support</span>"
                  if status else "")
         rows = []
         if vend.get("productUrl"):
@@ -350,11 +373,10 @@ def render(record: dict, page_texts=None) -> str:
             rows.append(f"<tr><th class='k'>Assessment</th>"
                         f"<td class='v muted'>{esc(vend['supportNote'])}</td></tr>")
         parts.append("<section class='card'><h2>Vendor resources "
-                     "<span class='muted'>(AI-discovered, human-verifiable)</span></h2>"
+                     "<span class='muted'>(verify with the vendor)</span></h2>"
                      f"<table class='kv'>{''.join(rows)}</table></section>")
     algos = cert.get("approvedAlgorithms", [])
     if algos:
-        src_note = " (recovered from SP)" if algos[0].get("source") == "securityPolicy" else ""
         arows = []
         for a in algos:
             name = a.get("name") or ""
@@ -371,8 +393,8 @@ def render(record: dict, page_texts=None) -> str:
             arows.append(f"<tr><td>{name_html}</td><td>{cell}</td></tr>")
         atable = ("<table class='scroll'><thead><tr><th>Algorithm</th><th>ACVP Cert</th>"
                   "</tr></thead><tbody>" + "".join(arows) + "</tbody></table>")
-        parts.append(f"<section class='card'><h2>Approved Algorithms{src_note} "
-                     f"<span class='muted'>({len(algos)}, from certificate)</span></h2>"
+        parts.append(f"<section class='card'><h2>Approved Algorithms "
+                     f"<span class='muted'>({len(algos)})</span></h2>"
                      + atable + "</section>")
     if sp.get("securityLevels"):
         parts.append("<section class='card'><h2>Security Levels (Table 1)</h2>"
@@ -495,7 +517,7 @@ def render(record: dict, page_texts=None) -> str:
                 cont_anchor[p["page"]].append(cp)
                 anchored.add(cp)
 
-    body = ["<h2 class='sectionhdr'>Page-anchored content</h2>"]
+    body = ["<h2 class='sectionhdr'>Security Policy, page by page</h2>"]
     for pg in all_pages:
         extra = "".join(f"<span id='p{cp}'></span>" for cp in cont_anchor.get(pg, []))
         body.append(f"<div class='pagemark' id='p{pg}'>Page {pg}"
@@ -506,19 +528,16 @@ def render(record: dict, page_texts=None) -> str:
         for start, kind, payload, rows in sorted(by_page.get(pg, []), key=lambda b: b[1] != "typed"):
             if kind == "typed":
                 p = payload
-                span = f"p{p['page']}" + (f"–{max(p['continuationPages'])}" if p.get("continuationPages") else "")
-                tag = (f"<span class='tag t-{esc(p['type'])}'>{esc(p['type'])}</span> "
-                       f"<span class='muted'>{span} · core {p.get('coreCoverage')} · "
-                       f"fill {p.get('columnFill')} · {len(rows)} rows</span>")
+                label = _type_label(p["type"])
+                cap = f"<div class='tblcap'>{esc(label)}</div>" if label else ""
                 headers, trows = _objects_table(rows, _canonical_order(p["type"]))
-                body.append(f"<div class='tbl'><div class='cap'>{tag}</div>"
+                body.append(f"<div class='tbl'>{cap}"
                             + html_table(headers, trows, cls="typed") + "</div>")
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
                 headers = t["rows"][0] if t["rows"] else None
                 trows = t["rows"][1:] if t["rows"] else []
-                body.append(f"<div class='tbl'><div class='cap'><span class='muted'>"
-                            f"p{t['page']} · raw table · {t['nRows']}×{t['nCols']}</span></div>"
+                body.append(f"<div class='tbl'>"
                             + html_table(headers, trows, cls="raw") + "</div>")
         ai_md = (sp.get("proseMarkdown") or {}).get(str(pg))
         if ai_md and _MD:  # AI-structured markdown for this page (preferred)
@@ -656,6 +675,7 @@ DOCUMENT = """<!DOCTYPE html>
 
   /* ---- captions & type badges (one consistent style) ---- */
   .cap {{ margin:.1rem 0 .4rem; font-size:var(--fs-xs); color:var(--muted); }}
+  .tblcap {{ margin:.9rem 0 .35rem; font-size:var(--fs-sm); font-weight:600; color:var(--ink); }}
   .tag {{ display:inline-block; padding:.1rem .5rem; border-radius:999px; font-size:var(--fs-xs);
           font-weight:600; letter-spacing:.02em; background:var(--pill); color:var(--navy);
           border:1px solid var(--line); }}
