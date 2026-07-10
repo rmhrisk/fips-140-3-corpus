@@ -586,8 +586,12 @@ def main():
       main{padding:14px 0} h2{padding-top:32px}
     }
     """
+    # A type=module script runs after DOMContentLoaded, so startOnLoad:true would
+    # register a listener that never fires. Initialize with startOnLoad:false and
+    # call mermaid.run() explicitly so the diagrams render regardless of timing.
     mermaid = ("<script type='module'>import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';"
-               "mermaid.initialize({startOnLoad:true,theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'neutral')});</script>")
+               "mermaid.initialize({startOnLoad:false,theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'neutral')});"
+               "mermaid.run().catch(function(e){console.error('mermaid',e);});</script>")
 
     # --- assemble: masthead + contents rail + main + footer -------------------
     body = "".join(P)
