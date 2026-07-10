@@ -254,11 +254,6 @@ def html_table(headers, rows, cls=""):
     return f"<table class='{cls}'>{thead}<tbody>{body}</tbody></table>"
 
 
-def _present_cols(rows, ordered):
-    """Columns (in order) that have at least one non-empty value — drops the
-    all-empty columns that made merged tables look broken."""
-    return [c for c in ordered if any(str(r.get(c, "")).strip() for r in rows)]
-
 
 # Acronyms to keep upper-cased when a normalized field key is turned into a label.
 _COL_ACRONYMS = {"iso", "cavp", "acvp", "kdf", "drbg", "aes", "rsa", "hmac", "sha", "tls",
@@ -281,6 +276,16 @@ def _col_label(k):
     return _label_words(k)
 
 
+# A cell that is only brackets / parens / punctuation is PDF-extraction residue
+# (e.g. "[ [", "( (", a lone "]"), never real content, so it is treated as empty.
+_NOISE_CELL = re.compile(r"^[\s\[\]\(\)\{\}·•.,;:/\\|_\-–—]*$")
+
+
+def _clean_cell(v: str) -> str:
+    v = (v or "").strip()
+    return "" if _NOISE_CELL.match(v) else v
+
+
 def _type_label(t):
     """Human-readable label for a table type, e.g. approvedAlgorithm -> 'Approved algorithm'."""
     words = [w for w in re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", t or "").replace("_", " ").split()
@@ -294,14 +299,13 @@ def _objects_table(rows, ordered_cols):
         for k in (r.get("extraColumns") or {}):
             if k not in extra_keys:
                 extra_keys.append(k)
-    cols = _present_cols(rows, ordered_cols)
-    xcols = [k for k in extra_keys if any((r.get("extraColumns") or {}).get(k, "").strip() for r in rows)]
+    val = lambda r, c: _clean_cell(r.get(c, ""))
+    xval = lambda r, k: _clean_cell((r.get("extraColumns") or {}).get(k, ""))
+    # keep only columns that carry at least one real (non-noise) value
+    cols = [c for c in ordered_cols if any(val(r, c) for r in rows)]
+    xcols = [k for k in extra_keys if any(xval(r, k) for r in rows)]
     headers = [_col_label(c) for c in cols] + [_col_label(k) for k in xcols]
-    trows = []
-    for r in rows:
-        line = [r.get(c, "") for c in cols]
-        line += [(r.get("extraColumns") or {}).get(k, "") for k in xcols]
-        trows.append(line)
+    trows = [[val(r, c) for c in cols] + [xval(r, k) for k in xcols] for r in rows]
     return headers, trows
 
 
