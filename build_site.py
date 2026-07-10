@@ -54,7 +54,7 @@ b,strong{font-weight:600;color:var(--ink)} .muted{color:var(--ink-2)} .mono{font
 .nav .brand{font:600 14px/1 var(--mono);letter-spacing:.02em;color:var(--ink);border:0;white-space:nowrap}
 .nav .brand .dot{color:var(--accent)}
 .nav a{font:500 13.5px/1 var(--sans);color:var(--ink-2);border:0;padding:4px 0}
-.nav a:hover{color:var(--ink)} .nav a.on{color:var(--accent);font-weight:600}
+.nav a:hover{color:var(--ink)} .nav a.on{color:var(--accent)}
 .nav .sp{flex:1}
 
 .wrap{max-width:1120px;margin:0 auto;padding:0 32px}
@@ -189,6 +189,18 @@ def build_index():
         "module implements NIST-approved algorithms correctly (through the separate CAVP program), enforces an "
         "<b>approved mode</b> of operation, protects its keys, and runs its self-tests. Every validation names a "
         "specific module <b>version</b>, configuration, and operational environment.</p>"
+        "<p class='muted'>The four security levels roughly escalate from “the cryptography is implemented correctly” to "
+        "increasingly strong physical protection:</p>"
+        "<div class='tw'><table><thead><tr><th>level</th><th>roughly</th><th>what it adds</th></tr></thead><tbody>"
+        "<tr><td><b>Level 1</b></td><td>implementation correct</td><td>approved algorithms, correctly implemented; no "
+        "physical security required. Software modules live here.</td></tr>"
+        "<tr><td><b>Level 2</b></td><td>tamper-evident</td><td>tamper-evidence (you can tell if the module was opened) "
+        "and role-based authentication.</td></tr>"
+        "<tr><td><b>Level 3</b></td><td>tamper-resistant</td><td>tamper detection and response (the module zeroizes its "
+        "keys on intrusion) and identity-based authentication.</td></tr>"
+        "<tr><td><b>Level 4</b></td><td>tamper-resistant, hardened</td><td>a complete protection envelope that also "
+        "detects and responds to environmental attacks.</td></tr>"
+        "</tbody></table></div>"
 
         "<h2>Who it was built for</h2>"
         "<p>FIPS validation is a <b>procurement</b> instrument. US federal agencies are required to use validated "
@@ -300,7 +312,7 @@ POLICY_SKIN = (
     ".sitenav{border-bottom:1px solid var(--line);background:var(--card)}"
     ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}"
     ".sitenav .brand{font:600 14px/1 ui-monospace,'SF Mono',Menlo,monospace;color:var(--ink);text-decoration:none;white-space:nowrap}.sitenav .brand .dot{color:var(--accent)}"
-    ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none}.sitenav a:hover{color:var(--ink)}.sitenav a.on{color:var(--accent);font-weight:600}"
+    ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none}.sitenav a:hover{color:var(--ink)}.sitenav a.on{color:var(--accent)}"
     ".sitenav .sp{flex:1}.backbar{margin:0 0 8px;padding:0;font-size:13px}"
     # render_html hardcodes light zebra/header backgrounds; theme them so dark mode is readable
     "table tbody tr:nth-child(even) td{background:var(--pill)!important}"
@@ -374,7 +386,7 @@ def build_report():
               ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}"
               ".sitenav .brand{font:600 14px/1 var(--mono);color:var(--ink);border:0;white-space:nowrap}.sitenav .brand .dot{color:var(--accent)}"
               ".sitenav a{font:500 13.5px/1 var(--sans);color:var(--ink-2);border:0}.sitenav a:hover{color:var(--ink)}"
-              ".sitenav a.on{color:var(--accent);font-weight:600}.sitenav .sp{flex:1}")
+              ".sitenav a.on{color:var(--accent)}.sitenav .sp{flex:1}")
     navhtml = ("<nav class='sitenav'><div class='sitenav-in'>"
                "<a class='brand' href='index.html'>FIPS&nbsp;140&#8209;3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
                "<a href='index.html'>Overview</a><a href='report.html' class='on'>Report</a>"
