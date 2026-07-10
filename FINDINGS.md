@@ -197,7 +197,7 @@ Device *embodiment* (hardware/software/firmware) is too coarse for risk. **Opera
 
 **Review priority = Likelihood × Impact (ordinal — no weighted coefficients).** Review priority = Likelihood × Impact (ordinal). Likelihood = archetype-weighted reachability (service-conditional) + no-CMVP-validation-update + ≥18mo stale + measured CVE drift. Impact = expert prior per archetype. No weighted coefficients; every input explicit and evidence-graded. These are attack-path REVIEW CANDIDATES requiring confirmation, NOT confirmed reachable vulnerabilities.
 
-Distribution: **{'Medium': 65, 'Low': 41, 'High': 25, 'Critical': 5}**. Impact is an explicit expert prior per archetype (documented, not corpus-derived); Likelihood combines archetype-weighted reachability, never-updated, staleness, and *measured* upstream CVE drift (which weighs most, being real evidence rather than heuristic).
+Distribution: **{'Medium': 71, 'Low': 31, 'High': 29, 'Critical': 5}**. Impact is an explicit expert prior per archetype (documented, not corpus-derived); Likelihood combines archetype-weighted reachability, never-updated, staleness, and *measured* upstream CVE drift (which weighs most, being real evidence rather than heuristic).
 
 **Highest-priority review candidates** (every row auditable to its inputs; a review *queue requiring confirmation*, not a vulnerability list — 'reach' confidence is **high** only when the SP names a consuming network service, **medium** for a bare interface):
 
@@ -208,15 +208,15 @@ Distribution: **{'Medium': 65, 'Low': 41, 'High': 25, 'Critical': 5}**. Impact i
 | **Critical** | #4832 | Network appliance | Network appliance; names service admin/ike/ipsec (service-path signal high, deployment reachability likely); no CMVP validation update; 21mo stale | svc-path:high · deploy-reach:likely · ver-CVE:n/a · drift:n/a |
 | **Critical** | #4907 | Network appliance | Network appliance; names service ssh/syslog/tls (service-path signal high, deployment reachability likely); no CMVP validation update; 19mo stale | svc-path:high · deploy-reach:likely · ver-CVE:n/a · drift:n/a |
 | **Critical** | #4916 | Network appliance | Network appliance; names service ike/ipsec (service-path signal high, deployment reachability likely); no CMVP validation update; 19mo stale | svc-path:high · deploy-reach:likely · ver-CVE:n/a · drift:n/a |
+| **High** | #5021 | Software crypto library | Software crypto library; names service ssh/tls (service-path signal high, deployment reachability unknown); no CMVP validation update; 39 CVEs in named component/version since cert | svc-path:high · deploy-reach:unknown · ver-CVE:medium · drift:high |
+| **High** | #5132 | Software crypto library | Software crypto library; names service ssh/tls (service-path signal high, deployment reachability unknown); no CMVP validation update; 38 CVEs in named component/version since cert | svc-path:high · deploy-reach:unknown · ver-CVE:medium · drift:high |
+| **High** | #4775 | Software crypto library | Software crypto library; names service ssh/tls (service-path signal high, deployment reachability unknown); no CMVP validation update; 22mo stale; 25 CVEs in named component/version since cert | svc-path:high · deploy-reach:unknown · ver-CVE:high · drift:high |
+| **High** | #4823 | Software crypto library | Software crypto library; names service ssh/tls (service-path signal high, deployment reachability unknown); no CMVP validation update; 21mo stale; 24 CVEs in named component/version since cert | svc-path:high · deploy-reach:unknown · ver-CVE:high · drift:high |
 | **High** | #4650 | Secure element/SoC | Secure element/SoC; reach=low (deployment reachability unknown); no CMVP validation update; 32mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:n/a · drift:n/a |
 | **High** | #4727 | OS/kernel crypto | OS/kernel crypto; reach=low (deployment reachability unknown); no CMVP validation update; 24mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:medium · drift:n/a |
 | **High** | #4748 | Secure element/SoC | Secure element/SoC; reach=low (deployment reachability unknown); no CMVP validation update; 23mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:n/a · drift:n/a |
 | **High** | #4772 | Secure element/SoC | Secure element/SoC; reach=low (deployment reachability unknown); no CMVP validation update; 23mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:n/a · drift:n/a |
 | **High** | #4796 | OS/kernel crypto | OS/kernel crypto; reach=low (deployment reachability unknown); no CMVP validation update; 22mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:medium · drift:n/a |
-| **High** | #4808 | OS/kernel crypto | OS/kernel crypto; reach=low (deployment reachability unknown); no CMVP validation update; 22mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:medium · drift:n/a |
-| **High** | #4826 | Secure element/SoC | Secure element/SoC; reach=low (deployment reachability unknown); no CMVP validation update; 21mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:n/a · drift:n/a |
-| **High** | #4835 | OS/kernel crypto | OS/kernel crypto; reach=medium (deployment reachability unknown); no CMVP validation update; 21mo stale | svc-path:medium · deploy-reach:unknown · ver-CVE:n/a · drift:n/a |
-| **High** | #4865 | OS/kernel crypto | OS/kernel crypto; reach=low (deployment reachability unknown); no CMVP validation update; 20mo stale | svc-path:low · deploy-reach:unknown · ver-CVE:medium · drift:n/a |
 
 **Offensive archetype × attack-path hypothesis** (expert priors — *where to look*, not corpus findings):
 

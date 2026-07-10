@@ -10,10 +10,15 @@ export PYTHONHASHSEED := 0
 
 .PHONY: all analyze drift version-exact render report findings site verify clean
 
-all: analyze drift version-exact render
+all: analyze render
 
+# analyze reads drift.json + version_exact.json for the CVE-drift signal that
+# feeds review-priority, so those MUST be built first. Declaring them as
+# prerequisites makes the order correct on a clean build and re-runs analyze
+# whenever they change (a plain `all: analyze drift ...` ran analyze first and
+# silently dropped the signal).
 analyze: corpus_analysis.json
-corpus_analysis.json: analyze_corpus.py components.py motifs.py verify_tables.py profiles.py security_policy.py
+corpus_analysis.json: analyze_corpus.py components.py motifs.py verify_tables.py profiles.py security_policy.py drift.json version_exact.json
 	$(PY) analyze_corpus.py
 
 drift: drift.json
@@ -41,9 +46,11 @@ site: docs/index.html
 docs/index.html: build_site.py render_html.py review_graph.py corpus_report.html corpus_analysis.json drift.json
 	$(PY) build_site.py
 
-# Rebuild everything, then confirm the committed artifacts did not change.
+# Rebuild everything from scratch, then confirm the committed artifacts did not
+# change. Cleans first so every stage genuinely re-runs (a plain `all` can skip
+# up-to-date targets and verify nothing).
 verify:
-	@$(MAKE) -s all
+	@$(MAKE) -s clean all
 	@if git diff --quiet -- corpus_analysis.json drift.json version_exact.json corpus_report.html FINDINGS.md docs; then \
 		echo "OK: all artifacts and the docs/ site reproduce byte-identically"; \
 	else \

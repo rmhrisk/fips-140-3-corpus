@@ -27,14 +27,17 @@ try:  # multiple (module x component) entries per cert now — keep the MAX pres
         if _m.get("component") != "Linux kernel":
             _c = _m.get("cves_in_component_since_cert") or 0
             _DRIFT[_m["cert"]] = max(_DRIFT.get(_m["cert"], 0), _c)
-except Exception:
-    pass
+except FileNotFoundError:
+    pass  # warned about below, once, when version_exact.json is also absent
 _VE = set()
 try:  # version-EXACT count (tighter evidence) overrides component drift where available
     for _m in json.load(open("version_exact.json")):
         _DRIFT[_m["cert"]] = _m.get("version_exact_cves"); _VE.add(_m["cert"])
-except Exception:
-    pass
+except FileNotFoundError:
+    # The CVE-drift signal feeds review-priority; run `make all` (which builds
+    # drift.json / version_exact.json first) rather than analyze_corpus.py alone.
+    print("WARNING: drift.json / version_exact.json not found; review-priority will "
+          "omit the CVE-drift signal. Build via `make all`.", file=sys.stderr)
 
 _MONTHS = {m: i for i, m in enumerate(
     ["january","february","march","april","may","june","july","august",
