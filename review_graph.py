@@ -235,6 +235,21 @@ def _node(text: str) -> str:
     return re.sub(r'[\"<>]', "", re.sub(r"\s+", " ", text)).replace("&", "and").strip()
 
 
+def _wrap(text: str, width: int = 26) -> str:
+    # Break a label into short <br/>-separated lines so nodes stay narrow enough
+    # that the four-lane graph fits the content column instead of overflowing it.
+    lines, cur = [], ""
+    for w in text.split():
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        lines.append(cur)
+    return "<br/>".join(lines)
+
+
 def to_mermaid_lanes(module: str, clues: list[dict]) -> str:
     """Deterministic full 4-tier graph. Structurally identical to the model-pass
     output (Cn→In→Rn→En) so it passes validate_graph and renders the same way."""
@@ -248,19 +263,19 @@ def to_mermaid_lanes(module: str, clues: list[dict]) -> str:
     for x in lanes:
         c = x["clue"]
         ev = "<br/>".join(normalize_evidence(c["evidence"]))
-        L.append(f'    C{x["n"]}["[{c.get("confidence","?")}] {_node(c["label"])}<br/><i>{ev}</i>"]')
+        L.append(f'    C{x["n"]}["[{c.get("confidence","?")}] {_wrap(_node(c["label"]))}<br/><i>{ev}</i>"]')
     L.append("  end")
     L.append('  subgraph Inference["Derived inference"]')
     for x in lanes:
-        L.append(f'    I{x["n"]}["{_node(x["inference"])}"]')
+        L.append(f'    I{x["n"]}["{_wrap(_node(x["inference"]))}"]')
     L.append("  end")
     L.append('  subgraph Risk["Reviewer question"]')
     for x in lanes:
-        L.append(f'    R{x["n"]}["{_node(x["risk"])}"]')
+        L.append(f'    R{x["n"]}["{_wrap(_node(x["risk"]))}"]')
     L.append("  end")
     L.append('  subgraph Evidence["Evidence needed to close"]')
     for x in lanes:
-        L.append(f'    E{x["n"]}["{_node(" · ".join(x["evidence"]))}"]')
+        L.append(f'    E{x["n"]}["{_wrap(_node(" · ".join(x["evidence"])))}"]')
     L.append("  end")
     for x in lanes:
         n = x["n"]
