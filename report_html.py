@@ -384,6 +384,27 @@ def main():
              "<p class='muted' style='margin-top:8px'>Impact is a documented expert prior per archetype; Likelihood = archetype-weighted "
              "reachability + never-updated + ≥18mo stale + upstream CVE drift.</p></div>")
     P.append("</div>")
+    # Update behavior crossed with archetype: which classes get patched, which stay frozen.
+    ba = arc["by_archetype"]
+    uorder = sorted(ba.items(), key=lambda kv: (-kv[1]["pct_never_updated"], -kv[1]["n"]))
+    urows = ""
+    for a, v in uorder:
+        ms = v["median_months_stale"]
+        ms_txt = f"{ms:g} mo" if ms is not None else "–"
+        urows += (f"<tr><td>{esc(a)}</td><td>{v['n']}</td>"
+                  f"<td>{v['pct_never_updated']:.0f}%</td><td>{ms_txt}</td></tr>")
+    P.append("<div class='card'><h3>Update behavior by archetype <span class='muted'>(which classes get patched, which stay frozen)</span></h3>"
+             f"<table><thead><tr><th>archetype</th><th>modules</th><th>never updated</th><th>median months since last validation</th></tr></thead><tbody>{urows}</tbody></table>"
+             "<p class='muted'>The classes that are hardest to reship are the ones that go unpatched. <b>Secure elements and SoCs</b>, "
+             "where the cryptography is baked into silicon and a change means a new part, are the least maintained "
+             f"({ba.get('Secure element/SoC',{}).get('pct_never_updated',0):.0f}% show no CMVP update). At the other end, the "
+             f"{ba.get('HSM/accelerator',{}).get('n',0)} <b>HSM/accelerator</b> modules were each updated at least once, "
+             "consistent with a serviceable device carrying an ongoing vendor maintenance relationship, though that count is far "
+             "too small to lean on. Two confounders keep this a heuristic, not a law: many <b>software libraries</b> ship a "
+             "<i>new certificate</i> per release rather than an update entry on the old one, so their no-update share overstates "
+             "how frozen any given deployment is; and a missing update entry is a maintenance-friction proxy, not proof a module "
+             "is insecure. Read it alongside the median-staleness column, which shows how long each class's certified state has "
+             "actually stood.</p></div>")
     prows = ""
     for r in rp["top"][:14]:
         c = r["confidence"]

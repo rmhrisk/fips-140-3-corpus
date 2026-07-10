@@ -220,7 +220,7 @@ def build_index():
     body = (
         "<main>"
         "<div class='eyebrow'>CMVP · Cryptographic Module Validation Program</div>"
-        "<h1>FIPS 140-3 validation, in practice</h1>"
+        "<h1>What is FIPS 140-3 validation?</h1>"
         "<p class='dek'>FIPS 140-3 is the US and Canadian government standard for validating that a cryptographic "
         "module correctly implements approved algorithms and meets a defined security bar. It exists to give buyers, "
         "originally federal agencies, assurance before they procure. It is widely referenced, expensive and slow to "

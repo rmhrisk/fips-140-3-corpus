@@ -443,6 +443,8 @@ def summarize(rows):
             "n": sum(1 for r in rows if r["archetype"]==a),
             "impact_prior": _IMPACT.get(a,"Medium"),
             "pct_never_updated": round(100*sum(1 for r in rows if r["archetype"]==a and r["n_updates"]==0)/max(1,sum(1 for r in rows if r["archetype"]==a)),0),
+            "median_months_stale": med([r["months_since_last_validation"] for r in rows
+                                        if r["archetype"]==a and r["months_since_last_validation"] is not None]),
             "reachability_mix": dict(Counter(r["reachability"] for r in rows if r["archetype"]==a)),
         } for a in archs},
     }
