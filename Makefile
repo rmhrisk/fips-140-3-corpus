@@ -18,7 +18,7 @@ all: analyze render
 # whenever they change (a plain `all: analyze drift ...` ran analyze first and
 # silently dropped the signal).
 analyze: corpus_analysis.json
-corpus_analysis.json: analyze_corpus.py components.py motifs.py verify_tables.py profiles.py security_policy.py drift.json version_exact.json
+corpus_analysis.json: analyze_corpus.py components.py motifs.py verify_tables.py profiles.py security_policy.py vendors.py drift.json version_exact.json
 	$(PY) analyze_corpus.py
 
 drift: drift.json

@@ -29,6 +29,10 @@ structure figures use the **136** with full SP extraction (see *Corpus scope* be
 - **TCB surfaces** (over the 136 full-extraction modules): debug/recovery interface
   (25), network crypto parser (24), HSM/SE firmware trust anchor (20),
   firmware-update authentication (20), boot-chain verification (9).
+- **Product families:** the 415 certificates entity-normalize to 174 vendors and
+  cluster into ~360 product families; **13% of the never-updated modules have a
+  later-validated successor** in the corpus (a deterministic lower bound), which
+  refines the raw "never updated" figure.
 - **Component lineage:** 89 modules name a CPE-mappable upstream component;
   **62** of those carry a measurable upstream CVE-drift signal. The rest,
   disproportionately hardware and appliance modules, name nothing the join can

@@ -18,6 +18,7 @@ from verify_tables import verify
 from security_policy import required_sections, section_present
 from components import extract_components
 from motifs import match_motifs, MOTIF_INFO
+from vendors import norm_vendor, family_key
 
 # component-CVE-pressure per cert (from build_drift.py; kernel excluded — whole-kernel
 # volume is not crypto-specific and would dominate the signal)
@@ -380,6 +381,8 @@ def analyze_record(path):
         # are metadata-derivable and use the whole corpus.
         "full_extraction": (r.get("extraction") or {}).get("level") != "metadata+text",
         "vendor": (c.get("vendor") or {}).get("name"),
+        "vendor_norm": norm_vendor((c.get("vendor") or {}).get("name") or ""),
+        "family_key": family_key(norm_vendor((c.get("vendor") or {}).get("name") or ""), c.get("moduleName") or ""),
         "module": c.get("moduleName"),
         "level": c.get("overallLevel"), "type": c.get("moduleType"),
         "device_class": dclass, "archetype": arch, "assurance": assurance,
@@ -626,10 +629,56 @@ def summarize(rows):
                                    "interfaces":r["interfaces"],"never_updated":r["n_updates"]==0}
                                   for r in sorted(stale_active,key=lambda x:-(x["months_since_last_validation"] or 0))[:8]],
     }
-    # vendors with multiple certs (re-fips-140 signal across cert numbers)
-    byv = defaultdict(list)
-    for r in rows: byv[r["vendor"]].append(r["cert"])
-    out["vendors_multi_cert"] = {v: len(cs) for v,cs in sorted(byv.items(), key=lambda x:-len(x[1])) if len(cs)>1}
+    # Vendor entities — normalized so punctuation / legal-suffix variants of the same
+    # organization ("Cisco Systems, Inc." vs "Cisco Systems, Inc") count as one.
+    byv = defaultdict(list); disp = defaultdict(Counter)
+    for r in rows:
+        nv = r["vendor_norm"]
+        if not nv: continue
+        byv[nv].append(r["cert"]); disp[nv][r["vendor"]] += 1
+    label = {nv: disp[nv].most_common(1)[0][0] for nv in byv}   # display the commonest raw form
+    out["vendors"] = {
+        "distinct_raw": len({r["vendor"] for r in rows if r["vendor"]}),
+        "distinct_entities": len(byv),
+        "top": {label[nv]: len(cs) for nv, cs in sorted(byv.items(), key=lambda x: -len(x[1]))[:15]},
+    }
+    out["vendors_multi_cert"] = {label[nv]: len(cs) for nv, cs in
+                                 sorted(byv.items(), key=lambda x: -len(x[1])) if len(cs) > 1}
+    # Product families — certificates clustered by normalized vendor + de-noised module
+    # name. Lets a per-cert "never updated" be read against whether the vendor validated
+    # a SUCCESSOR (a family-mate with a later initial validation). Conservative: it
+    # under-merges rather than inventing links, so these are lower bounds.
+    def _fam_label(v):
+        s = " / ".join(sorted({m["module"] or "" for m in v}))
+        if len(s) > 80:
+            s = s[:79].rstrip().rsplit(" ", 1)[0].rstrip(" /") + "…"
+        return s
+    fam = defaultdict(list)
+    for r in rows:
+        fam[r["family_key"]].append(r)
+    fam_sizes = Counter(len(v) for v in fam.values())
+    never = [r for r in rows if r["n_updates"] == 0]
+    def has_successor(r):
+        init = r["initial_validation"]
+        if not init:
+            return False
+        return any(m is not r and m["initial_validation"] and m["initial_validation"] > init
+                   for m in fam[r["family_key"]])
+    never_with_succ = sum(1 for r in never if has_successor(r))
+    out["families"] = {
+        "note": ("Certificates clustered by normalized vendor + de-noised module name. "
+                 "A conservative, deterministic heuristic (no NIST 'replaced-by' fetch), so "
+                 "family and successor counts are lower bounds."),
+        "n_families": len(fam),
+        "n_multi_cert_families": sum(1 for v in fam.values() if len(v) > 1),
+        "size_dist": {str(k): v for k, v in sorted(fam_sizes.items())},
+        "largest": sorted(({"family": _fam_label(v), "certs": sorted(m["cert"] for m in v)}
+                           for v in fam.values() if len(v) > 1),
+                          key=lambda x: (-len(x["certs"]), x["family"]))[:8],
+        "never_updated": len(never),
+        "never_updated_with_successor": never_with_succ,
+        "never_updated_with_successor_pct": round(100 * never_with_succ / max(1, len(never)), 1),
+    }
     return out
 
 def main():

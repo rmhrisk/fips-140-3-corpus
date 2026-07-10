@@ -170,8 +170,8 @@ def build_index():
          "A near-census of the FIPS 140-3 modules validated in this certificate-number window, enough to show "
          "how the certified state ages across the population rather than in a small sample."),
         (f"{no_update}", "no recorded update",
-         "Most certified modules show no public update after their first validation, so their approved-mode "
-         "code is effectively frozen while the world around it keeps moving."),
+         "Most certified modules show no update after their first validation. Some are superseded by a newer "
+         "certificate rather than abandoned (the report quantifies this), but the rest are effectively frozen."),
         (f"{win:.0f} mo", "median active window",
          "A module is presented as current for about five years, long enough for legacy primitives and "
          "unpatched components to accumulate well before the certificate lapses."),

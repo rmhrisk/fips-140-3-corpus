@@ -155,6 +155,21 @@ def main():
              f"{kpi('median gap between validations', gap)}"
              f"{kpi('avg updates / module', rc['avg_updates_per_module'])}</div>")
     P.append("</div>")
+    fam = s.get("families", {})
+    if fam:
+        frows = "".join(f"<tr><td>{esc(x['family'])}</td>"
+                        f"<td class='muted'>{', '.join('#'+str(c) for c in x['certs'])}</td></tr>"
+                        for x in fam.get("largest", [])[:6])
+        P.append("<div class='card'><h3>Certificate families and successors <span class='muted'>(the “never updated” caveat)</span></h3>"
+                 "<p class='muted'>A per-certificate “never updated” can understate maintenance: a vendor often validates a "
+                 "<b>successor under a new certificate number</b> instead of updating the old one. Clustering the "
+                 f"{s['n']} certificates into <b>{fam['n_families']} product families</b> (normalized vendor + de-noised module "
+                 f"name; {fam['n_multi_cert_families']} span more than one certificate) shows "
+                 f"<b>{fam['never_updated_with_successor']} of the {fam['never_updated']} never-updated modules "
+                 f"({fam['never_updated_with_successor_pct']:.0f}%)</b> have a later-validated family-mate — a likely successor "
+                 "rather than an abandoned certificate. It is a conservative, deterministic lower bound (no NIST “replaced-by” "
+                 "data), so the true successor share is at least this; the rest is the genuinely-frozen population.</p>"
+                 f"<table><thead><tr><th>largest product families</th><th>certificates</th></tr></thead><tbody>{frows}</tbody></table></div>")
 
     P.append("<div class='part'><div class='pk'>Part III</div><div class='pt'>Inside the validated boundary</div><div class='pd'>What cryptography the certificate actually covers, from the algorithms in use to the legacy still present to post-quantum readiness.</div></div>")
     P.append("<h2>3 · Cryptographic posture — specific algorithms</h2>")
@@ -455,7 +470,12 @@ def main():
     P.append("</div>")
 
     if s.get("vendors_multi_cert"):
+        ven = s.get("vendors", {})
         P.append("<h2>12 · Vendors with multiple certificates</h2>")
+        P.append("<p class='muted'>Vendor names are <b>entity-normalized</b> (trademark marks, legal suffixes, and "
+                 f"punctuation removed), so “Cisco Systems, Inc.” and “Cisco Systems, Inc” count once: "
+                 f"{ven.get('distinct_raw','?')} raw name strings collapse to <b>{ven.get('distinct_entities','?')}</b> "
+                 "organizations. Parent/subsidiary and rebrand relationships are not resolved.</p>")
         P.append(f"<div class='card'>{bars(s['vendors_multi_cert'],' certs')}</div>")
 
     P.append("<h2>13 · Market structure (labs)</h2>")
