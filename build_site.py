@@ -66,10 +66,13 @@ h3{font:600 12px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;c
 p{margin:11px 0;max-width:70ch} .dek{font-size:18px;line-height:1.5;color:var(--ink-2);margin:10px 0 0;max-width:64ch}
 .eyebrow{font:600 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
 
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;margin:22px 0;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.tile{background:var(--surface);padding:15px 17px}
-.tile .v{font:600 25px/1.05 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink)}
-.tile .l{font-size:12px;color:var(--ink-2);margin-top:5px} .tile .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+.obs{display:flex;flex-direction:column;gap:1px;margin:22px 0;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.obs-row{display:grid;grid-template-columns:150px 1fr;gap:22px;background:var(--surface);padding:16px 18px;align-items:baseline}
+.obs-k{align-self:baseline}
+.obs-v{font:600 25px/1.05 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink)}
+.obs-l{font-size:11.5px;color:var(--ink-3);margin-top:4px;text-transform:uppercase;letter-spacing:.03em}
+.obs-why{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:66ch} .obs-why b{color:var(--ink)}
+@media(max-width:600px){.obs-row{grid-template-columns:1fr;gap:6px}}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}
 .card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;color:inherit}
@@ -148,15 +151,28 @@ def build_index():
         if (c.get("softwareVersions") or c.get("firmwareVersions")):
             have_ver += 1
 
-    tiles = [
-        (f"{N}", "sampled modules", "every third certificate, #4700 to #5157"),
-        (f"{no_update}", "no recorded update", f"of {N} sampled certificates"),
-        (f"{win:.0f} mo", "median validation-to-sunset", "how long the certified state stands"),
-        (f"{interim}", "interim validations", "2-year window, reduced review depth"),
-        (f"{have_ver}", "record a software/firmware version", f"{round(100*have_ver/N)}%; the rest cannot be version-checked from the record"),
+    # Each statistic carries a one-sentence reading of why it matters, so the
+    # numbers are interpreted rather than left to speak for themselves.
+    obs = [
+        (f"{N}", "sampled modules",
+         "Large enough to show how the certified state ages in aggregate, while staying a directional "
+         "cross-section rather than a census of every FIPS 140-3 module."),
+        (f"{no_update}", "no recorded update",
+         "Most certified modules show no public update after their first validation, so their approved-mode "
+         "code is effectively frozen while the world around it keeps moving."),
+        (f"{win:.0f} mo", "median active window",
+         "A module is presented as current for about five years, long enough for legacy primitives and "
+         "unpatched components to accumulate well before the certificate lapses."),
+        (f"{interim}", "interim validations",
+         "Nearly a fifth arrived through the backlog-reduction path, which grants a shorter, less deeply "
+         "reviewed certificate, so two certificates do not always carry the same assurance."),
+        (f"{have_ver}", f"record a version ({round(100*have_ver/N)}%)",
+         "Almost four in ten certificates pin no software or firmware version, so for those modules you "
+         "cannot even check whether your deployed build is the one that was validated."),
     ]
-    th = "".join(f"<div class='tile'><div class='v'>{esc(v)}</div><div class='l'>{esc(l)}</div>"
-                 f"{'<div class=s>'+esc(s)+'</div>' if s else ''}</div>" for v, l, s in tiles)
+    th = "".join(f"<div class='obs-row'><div class='obs-k'><div class='obs-v'>{esc(v)}</div>"
+                 f"<div class='obs-l'>{esc(l)}</div></div><div class='obs-why'>{esc(w)}</div></div>"
+                 for v, l, w in obs)
 
     # Estimated validation timeline (elapsed time, not hard benchmark). The post-submission
     # phases are anchored to KeyPair's 2024 public analysis; everything else is an industry estimate.
@@ -388,7 +404,7 @@ def build_index():
         "<h2>What we observed in the sampled corpus</h2>"
         "<p class='muted'>Findings from a sampled sweep that took every third certificate from #4700 to #5157, not the complete "
         "FIPS 140-3 population. Absence of a successor or update entry does not prove none exists.</p>"
-        f"<div class='tiles'>{th}</div>"
+        f"<div class='obs'>{th}</div>"
         "<p class='muted' style='font-size:13px;margin-top:18px'>The timeline is estimated elapsed time, strongest for "
         "the post-submission phases and industry-estimate elsewhere. Corpus figures are deterministic extractions from "
         "public CMVP and NVD data; they are review prompts, not vulnerability findings.</p>"
