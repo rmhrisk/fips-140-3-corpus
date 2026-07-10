@@ -209,8 +209,8 @@ def build_index():
         "<text x='22' y='32' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
         "<rect x='18' y='44' width='640' height='236' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
         + fcells +
-        "<rect x='36' y='170' width='602' height='94' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
-        "<text x='52' y='196' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
+        "<rect x='36' y='170' width='602' height='94' rx='10' fill='var(--surface)' stroke='var(--ink-3)' stroke-width='1.5'/>"
+        "<text x='52' y='196' font-size='12.5' font-weight='600' fill='var(--ink)'>Cryptographic module</text>"
         "<text x='52' y='214' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
         "<rect x='489' y='184' width='133' height='64' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
         "<text x='555' y='206' text-anchor='middle' font-size='10' font-weight='600' fill='var(--accent-2)'>FIPS-approved functions</text>"
