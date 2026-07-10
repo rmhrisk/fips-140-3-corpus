@@ -396,13 +396,12 @@ def render(record: dict, page_texts=None) -> str:
             clues = []
     graph = stored or (to_mermaid_lanes(module, clues) if clues else "")
     if graph:
-        baseline = "" if stored else " <span class='muted'>(deterministic baseline, refine with the model pass)</span>"
         section = (f"<section class='card'><h2>Derived Review-Risk Graph "
-                   f"<span class='muted'>(review prompts, not findings)</span>{baseline}</h2>"
+                   f"<span class='muted'>(review prompts, not findings)</span></h2>"
                    f"<pre class='mermaid'>{esc(graph)}</pre>")
         if clues:  # keep the clue evidence available, collapsed; plain text (not a
             # second rendered diagram — Mermaid renders at zero width inside <details>)
-            section += ("<details class='muted'><summary>Clue evidence (deterministic, debug)</summary>"
+            section += ("<details class='muted'><summary>Underlying clues</summary>"
                         f"<pre>{esc(to_mermaid_cluetier(module, clues))}</pre></details>")
         parts.append(section + "</section>")
     # (The Table of Contents renders in place at its own page in the body below.)
