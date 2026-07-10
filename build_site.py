@@ -241,7 +241,7 @@ def build_index():
         "<b>FIPS-approved functions operated in the approved mode</b>. Non-approved algorithms can sit inside the same "
         "module and are not part of the validation, and everything the product does outside the module is not covered "
         "at all. That is why a product can be built around a validated module and still run cryptography that was "
-        "never validated.</p>"
+        "largely unvalidated.</p>"
         "<p class='muted' style='font-size:13px'>For example, the same module operated outside approved mode "
         "might seed a key from a non-approved source, such as the C library's <code>rand()</code>, which is fast but "
         "predictable and nothing like the validated DRBG and entropy path. The certificate says nothing about that "
