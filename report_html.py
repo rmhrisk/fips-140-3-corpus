@@ -46,7 +46,7 @@ def main():
     mast = (
         "<header class='mast'><div class='mast-in'>"
         "<div class='eyebrow'>CMVP · FIPS 140-3 validated-module corpus</div>"
-        "<h1>What a FIPS certificate actually tells you</h1>"
+        "<h1>What a FIPS 140 certificate actually tells you</h1>"
         "<p class='dek'>Read across the public corpus, FIPS certificates and their Security Policies reveal far more than a pass/fail stamp. They show the trusted-computing-base surfaces around each module, how far its components have drifted since validation, and where a security review should look first.</p>"
         f"<div class='meta'><span>{s['n']} modules</span><span>ref {esc(cov['reference_date'])}</span>"
         f"<span>{esc(cov['cert_number_span'])}</span><span>source: CMVP + NVD</span><span>deterministic extraction</span></div>"

@@ -1,4 +1,4 @@
-# What a FIPS certificate actually tells you
+# What a FIPS 140 certificate actually tells you
 
 A corpus-wide read of the public **FIPS 140-3** validated-module record (CMVP
 certificates plus their Security Policies), extracted and analyzed
