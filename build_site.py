@@ -211,6 +211,10 @@ def build_index():
         "mode at one moment. It does not, by itself, establish that a product shipping today still runs that same "
         "validated state, which is where the public record starts to leave questions.</p></div>"
         "</div>"
+        "<p class='muted'>Further reading on how these labels get conflated: "
+        "<a href='https://unmitigatedrisk.com/?p=991' target='_blank' rel='noopener'>TPMs, TEEs, and Everything In "
+        "Between</a>; and on what an HSM actually protects: <a href='https://unmitigatedrisk.com/?p=877' "
+        "target='_blank' rel='noopener'>HSMs Largely Protect Keys from Theft Rather Than Abuse</a>.</p>"
 
         "<h2>What it costs</h2>"
         "<p>Validation is a multi-year, multi-party process, and much of the elapsed time is spent <b>before</b> a "
@@ -288,13 +292,16 @@ POLICY_SKIN = (
     ":root[data-theme=light]{--navy:#0a5a5a;--accent:#0e6e6e;--ink:#0f1720;--muted:#47535f;--line:#e2e7ec;--line-soft:#eef1f4;--bg:#f4f6f8;--card:#fff;--pill:#f8fafb}"
     ":root[data-theme=dark]{--navy:#5fc9bf;--accent:#43b9af;--ink:#e6ecf1;--muted:#a6b2bc;--line:#243039;--line-soft:#1b242c;--bg:#0d1216;--card:#141b21;--pill:#101820}"
     "html,body{background:var(--bg)}"
-    "body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}"
+    # match the native pages: ~15.5px body text, full-width nav, a 900px centered content column
+    "html{font-size:17.2px}"
+    "body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:none!important;margin:0!important;padding:0!important}"
+    ".docwrap{max-width:900px;margin:0 auto;padding:22px 32px 56px}"
     "h1,.masthead h1{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif}"
     ".sitenav{border-bottom:1px solid var(--line);background:var(--card)}"
     ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}"
     ".sitenav .brand{font:600 14px/1 ui-monospace,'SF Mono',Menlo,monospace;color:var(--ink);text-decoration:none;white-space:nowrap}.sitenav .brand .dot{color:var(--accent)}"
     ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none}.sitenav a:hover{color:var(--ink)}.sitenav a.on{color:var(--accent);font-weight:600}"
-    ".sitenav .sp{flex:1}.backbar{max-width:1120px;margin:8px auto 0;padding:0 32px;font-size:13px}"
+    ".sitenav .sp{flex:1}.backbar{margin:0 0 8px;padding:0;font-size:13px}"
     # render_html hardcodes light zebra/header backgrounds; theme them so dark mode is readable
     "table tbody tr:nth-child(even) td{background:var(--pill)!important}"
     "table thead th{background:var(--pill)!important}"
@@ -349,13 +356,15 @@ def build_module(r):
              f"<a href='../report.html' style='color:var(--accent)'>Analysis &amp; methodology &#8594;</a></div>")
     doc = doc.replace("</header>", "</header>" + strip, 1)
 
-    nav = ("<nav class='sitenav'><div class='sitenav-in'>"
-           "<a class='brand' href='../index.html'>FIPS&nbsp;140&#8209;3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
-           "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"
-           "<a href='index.html' class='on'>Modules</a><span class='sp'></span></div></nav>"
-           "<div class='backbar'>&#8592; <a href='index.html'>All modules</a></div>")
+    navbar = ("<nav class='sitenav'><div class='sitenav-in'>"
+              "<a class='brand' href='../index.html'>FIPS&nbsp;140&#8209;3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
+              "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"
+              "<a href='index.html' class='on'>Modules</a><span class='sp'></span></div></nav>")
+    backbar = "<div class='backbar'>&#8592; <a href='index.html'>All modules</a></div>"
     doc = doc.replace("</head>", POLICY_SKIN + "</head>", 1)
-    doc = doc.replace("<body>", "<body>" + nav, 1)
+    # full-width nav bar, then a 900px centered content column (matches the native pages)
+    doc = doc.replace("<body>", "<body>" + navbar + "<div class='docwrap'>" + backbar, 1)
+    doc = doc.replace("</body>", "</div></body>", 1)
     return doc
 
 # ---- report (wrap the standalone report with the site nav) -----------------
