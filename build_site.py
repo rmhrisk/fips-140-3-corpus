@@ -112,6 +112,13 @@ tr:last-child td{border-bottom:0}
 .mbar input,.mbar select{font:14px var(--sans);padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .mbar input{flex:1 1 220px;min-width:180px}
 .mbar input:focus,.mbar select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.chipbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.chipbar .chip-lbl{font:600 11px var(--sans);text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);margin-right:2px}
+.chipf{font:500 12.5px var(--sans);padding:5px 12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.chipf:hover{border-color:var(--accent-line);color:var(--ink)}
+.chipf.on{background:var(--accent-wash);border-color:var(--accent);color:var(--accent-2);font-weight:600}
+.chipf:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.chipf.clear{color:var(--ink-3);border-style:dashed}
 th[data-k]{cursor:pointer;user-select:none;white-space:nowrap} th[data-k]:hover{color:var(--accent)}
 th[data-k]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 th[aria-sort=ascending]::after{content:' ▲';font-size:9px} th[aria-sort=descending]::after{content:' ▼';font-size:9px}
@@ -439,17 +446,28 @@ MODULES_JS = """<script>
 (function(){
  var tb=document.querySelector('tbody'), rows=[].slice.call(tb.querySelectorAll('tr'));
  var q=document.getElementById('q'),fa=document.getElementById('fa'),fl=document.getElementById('fl'),fe=document.getElementById('fe');
+ var clr=document.getElementById('clearf');
  var shown=document.getElementById('shown'),none=document.getElementById('noresult'),N=rows.length,dir={};
+ function chosen(bar,attr){var s=new Set();bar.querySelectorAll('.chipf.on').forEach(function(c){s.add(c.dataset[attr]);});return s;}
  function apply(){
-  var s=q.value.trim().toLowerCase(),a=fa.value,l=fl.value,e=fe.value,n=0;
+  var s=q.value.trim().toLowerCase(),aA=chosen(fa,'arch'),aL=chosen(fl,'level'),e=fe.value,n=0;
   rows.forEach(function(r){
-   var d=r.dataset, ok=(!s||d.search.indexOf(s)>=0)&&(!a||d.arch===a)&&(!l||d.level===l)&&(!e||d.full===e);
+   var d=r.dataset, ok=(!s||d.search.indexOf(s)>=0)&&(aA.size===0||aA.has(d.arch))&&(aL.size===0||aL.has(d.level))&&(!e||d.full===e);
    r.style.display=ok?'':'none'; if(ok)n++;
   });
   shown.textContent=(n===N?'All '+N:n+' of '+N);
   none.style.display=n?'none':'';
+  if(clr) clr.hidden=!(s||aA.size||aL.size||e);
  }
- [q,fa,fl,fe].forEach(function(el){el.addEventListener('input',apply);el.addEventListener('change',apply);});
+ q.addEventListener('input',apply); fe.addEventListener('change',apply);
+ [fa,fl].forEach(function(bar){bar.querySelectorAll('.chipf').forEach(function(c){
+  c.addEventListener('click',function(){var on=c.classList.toggle('on');c.setAttribute('aria-pressed',on?'true':'false');apply();});
+ });});
+ if(clr) clr.addEventListener('click',function(){
+  q.value='';fe.value='';
+  document.querySelectorAll('.chipf.on').forEach(function(c){c.classList.remove('on');c.setAttribute('aria-pressed','false');});
+  apply();
+ });
  function sortBy(th){
   var k=th.dataset.k,num=(k==='cert'||k==='surfaces'||k==='stale'),d=dir[k]=-(dir[k]||1);
   rows.sort(function(x,y){var xv=x.dataset[k],yv=y.dataset[k];
@@ -489,16 +507,19 @@ def build_modules_index():
                f"<td>{esc(r['archetype'])}</td>"
                f"<td>{surf_cell}</td>"
                f"<td>{esc(stale)}{' mo' if stale is not None else ''}</td></tr>")
-    lvl_opts = "".join(f"<option value='{esc(l)}'>Level {esc(l)}</option>" for l in levels)
-    arch_opts = "".join(f"<option value=\"{esc(a)}\">{esc(a)}</option>" for a in archs)
+    # Multi-select toggle chips: click several archetypes / levels to combine them
+    # (empty = all). The extraction tier stays a simple two-way dropdown.
+    arch_chips = "".join(f"<button type='button' class='chipf' data-arch=\"{esc(a)}\" aria-pressed='false'>{esc(a)}</button>" for a in archs)
+    lvl_chips = "".join(f"<button type='button' class='chipf' data-level='{esc(l)}' aria-pressed='false'>Level {esc(l)}</button>" for l in levels)
     controls = (
         "<div class='mbar'>"
         "<input id='q' type='search' placeholder='Search module, vendor, or cert #…' aria-label='Search modules'>"
-        f"<select id='fa' aria-label='Filter by archetype'><option value=''>All archetypes</option>{arch_opts}</select>"
-        f"<select id='fl' aria-label='Filter by security level'><option value=''>All levels</option>{lvl_opts}</select>"
         "<select id='fe' aria-label='Filter by extraction'><option value=''>All records</option>"
         "<option value='1'>Full SP extraction</option><option value='0'>Metadata + text</option></select>"
-        "</div>")
+        "<button type='button' id='clearf' class='chipf clear' hidden>Clear filters</button>"
+        "</div>"
+        f"<div class='chipbar' id='fa'><span class='chip-lbl'>Archetype</span>{arch_chips}</div>"
+        f"<div class='chipbar' id='fl'><span class='chip-lbl'>Level</span>{lvl_chips}</div>")
     body = ("<main>"
             "<p class='crumb'><a href='../index.html'>Overview</a> &nbsp;/&nbsp; Modules</p>"
             f"<h1><span id='shown'>All {N}</span> modules</h1>"
