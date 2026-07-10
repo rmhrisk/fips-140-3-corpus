@@ -396,7 +396,7 @@ def render(record: dict, page_texts=None) -> str:
             clues = []
     graph = stored or (to_mermaid_lanes(module, clues) if clues else "")
     if graph:
-        baseline = "" if stored else " <span class='muted'>(deterministic baseline — refine with the model pass)</span>"
+        baseline = "" if stored else " <span class='muted'>(deterministic baseline, refine with the model pass)</span>"
         section = (f"<section class='card'><h2>Derived Review-Risk Graph "
                    f"<span class='muted'>(review prompts, not findings)</span>{baseline}</h2>"
                    f"<pre class='mermaid'>{esc(graph)}</pre>")
@@ -550,7 +550,7 @@ def render(record: dict, page_texts=None) -> str:
 DOCUMENT = """<!DOCTYPE html>
 <html lang='en'><head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
-<title>{title} — reconstructed</title>
+<title>{title} (reconstructed)</title>
 <style>
   :root {{
     --navy:#1e3a5f; --accent:#2f6fb0; --ink:#24313d; --muted:#71808f;

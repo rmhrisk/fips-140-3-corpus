@@ -202,7 +202,7 @@ _LANE_TEMPLATES = {
            "risk": "Are interfaces blocked before the bootloader runs, or only after approved mode starts?",
            "evidence": ["lifecycle reachability matrix", "boot-stage interface timing", "factory/recovery/error-state access controls"]},
     "C5": {"inference": "A protocol is referenced, but whether it is a live channel or only a KDF/algorithm name is unconfirmed.",
-           "risk": "If a live TLS/SSH/IKE channel exists, could library CVEs apply — or is this only a KDF/documentation name?",
+           "risk": "If a live TLS/SSH/IKE channel exists, could library CVEs apply, or is this only a KDF/documentation name?",
            "evidence": ["library identity & version", "certificate-validation behaviour", "protocol-CVE disposition"]},
     "C6": {"inference": "A runtime/OS is referenced, but its membership in the cryptographic boundary is not established.",
            "risk": "If the OS/runtime is in-boundary, could its CVEs be hidden by firmware-only versioning?",
@@ -223,7 +223,7 @@ def build_review_lanes(clues: list[dict]) -> list[dict]:
         infer = t["inference"]
         if c.get("confidence") == "low":
             ev = ["confirm the disclosure itself (keyword hit, context unverified)"] + ev
-            infer = "Possible only — " + infer[0].lower() + infer[1:]
+            infer = "Possible only, " + infer[0].lower() + infer[1:]
         lanes.append({"n": c["id"][1:], "clue": c, "inference": infer,
                       "risk": t["risk"], "evidence": ev})
     return lanes
@@ -243,7 +243,7 @@ def to_mermaid_lanes(module: str, clues: list[dict]) -> str:
         return ""
     L = ["flowchart LR",
          f"  %% Deterministic review-risk graph for {module}",
-         "  %% Review prompts and evidence gaps — NOT vulnerability findings.",
+         "  %% Review prompts and evidence gaps, NOT vulnerability findings.",
          '  subgraph CMVP["CMVP-disclosed clues"]']
     for x in lanes:
         c = x["clue"]

@@ -144,7 +144,7 @@ def build_index():
             have_ver += 1
 
     tiles = [
-        (f"{N}", "sampled modules", "sweep #4700 to #5157, step 3"),
+        (f"{N}", "sampled modules", "every third certificate, #4700 to #5157"),
         (f"{no_update}", "no recorded update", f"of {N} sampled certificates"),
         (f"{win:.0f} mo", "median validation-to-sunset", "how long the certified state stands"),
         (f"{interim}", "interim validations", "2-year window, reduced review depth"),
@@ -222,7 +222,7 @@ def build_index():
         "module and are not part of the validation, and everything the product does outside the module is not covered "
         "at all. That is why a product can be built around a validated module and still run cryptography that was "
         "never validated.</p>"
-        "<p class='muted' style='font-size:13px'><b>Concretely:</b> the same module operated outside approved mode "
+        "<p class='muted' style='font-size:13px'>For example, the same module operated outside approved mode "
         "might seed a key from a non-approved source, such as the C library's <code>rand()</code>, which is fast but "
         "predictable and nothing like the validated DRBG and entropy path. The certificate says nothing about that "
         "mode.</p></div>"
@@ -285,7 +285,7 @@ def build_index():
         "internal engineering to scope, remediate, and evidence a module make validation a substantial investment "
         "well before the certificate is posted.</p>"
 
-        "<h2>The consequence: certified once, attacked continuously</h2>"
+        "<h2>Certified once, attacked continuously</h2>"
         "<p>Validation is slow and static; the threat landscape is neither. For decades Patch Tuesday has delivered a "
         "steady stream of fixes, and the pace only accelerates as automated and AI-assisted discovery lowers the cost "
         "of finding bugs. The number of vulnerabilities disclosed each year keeps "
@@ -321,9 +321,10 @@ def build_index():
         "helps if the device is not simply a signing oracle. If an attacker who reaches the application can ask the HSM "
         "to sign arbitrary data, the key never has to leave. In the "
         "<a href='https://www.enisa.europa.eu/sites/default/files/all_files/Operation_Black_Tulip_v2.pdf' "
-        "target='_blank' rel='noopener'>DigiNotar</a> compromise, the attacker used a certificate authority's signing "
-        "capability to mint hundreds of fraudulent, publicly trusted certificates and intercept the encrypted traffic "
-        "of Iranian internet users, including dissidents, simply by asking the device to sign.</p>"
+        "target='_blank' rel='noopener'>DigiNotar</a> compromise, reportedly the work of Iran-affiliated attackers "
+        "targeting dissidents, the intruder used a certificate authority's signing capability to mint hundreds of "
+        "fraudulent, publicly trusted certificates and, according to Fox-IT's investigation, intercept the encrypted "
+        "traffic of Iranian internet users, simply by asking the device to sign.</p>"
         "<p>Stronger designs move production of the signed object inside the device and constrain what it will do: a "
         "single-purpose transaction model rather than a general oracle. Cryptocurrency hardware wallets are the "
         "clearest example. A sign-transaction API where the device enforces the amount, the destination address, and "
@@ -345,7 +346,7 @@ def build_index():
         "</div>"
 
         "<h2>What we observed in the sampled corpus</h2>"
-        "<p class='muted'>Findings from the sampled certificate-number sweep (#4700 to #5157, step 3), not the complete "
+        "<p class='muted'>Findings from a sampled sweep that took every third certificate from #4700 to #5157, not the complete "
         "FIPS 140-3 population. Absence of a successor or update entry does not prove none exists.</p>"
         f"<div class='tiles'>{th}</div>"
         "<p class='muted' style='font-size:13px;margin-top:18px'>The timeline is estimated elapsed time, strongest for "
