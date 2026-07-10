@@ -81,6 +81,8 @@ a.card:hover{border-color:var(--accent-line);background:var(--surface-2)}
 .pull{margin:18px 0 8px;padding:6px 0 6px 22px;border-left:3px solid var(--accent);max-width:60ch}
 .pull p{margin:0;max-width:none;font:italic 400 21px/1.4 var(--serif);color:var(--ink);text-wrap:balance}
 .pull p+p{margin-top:12px;font-size:17px;line-height:1.5;color:var(--ink-2)}
+.chk{margin:10px 0 4px;padding-left:24px;list-style:none} .chk li{margin:8px 0;max-width:70ch;position:relative}
+.chk li::before{content:'✓';position:absolute;left:-22px;top:1px;color:var(--accent);font-weight:700}
 .panel h3{color:var(--accent)} .panel p{font-size:14px;margin:6px 0 0}
 .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
@@ -356,6 +358,31 @@ def build_index():
         "cannot resolve.</p></a>"
         "<a class='card' href='report.html'><h3>Understand</h3><div class='big'>Read the corpus findings</div>"
         "<p>How the certified state ages across the sampled set, and the method behind it.</p></a>"
+        "</div>"
+
+        "<div class='panel' style='padding:18px 22px'>"
+        "<h3 style='margin-bottom:12px'>Reading a certificate in practice</h3>"
+        "<ul class='chk'>"
+        "<li>Start from the full <b>Security Policy</b>, not the one-line certificate summary.</li>"
+        "<li>Confirm the exact <b>module version</b>, the <b>operational environments</b> listed, and that your "
+        "configuration is an <b>approved-mode</b> service the certificate actually covers.</li>"
+        "<li>Check how the vendor <b>maintains</b> the certificate: the patch cadence, and whether fixes ship as "
+        "revalidations or quietly outside the boundary. Absence of a listed successor does not prove the module is "
+        "unmaintained, only that the public record is silent.</li>"
+        "<li>For high-assurance use such as CAs and key management, prefer <b>Level 3 or above</b> hardware, "
+        "<b>constrained</b> signing services over general-purpose oracles, and evidence of how the key-handling TCB is "
+        "protected.</li>"
+        "<li>Treat <b>no known CVEs</b> against the certified version as necessary, not sufficient, and reconcile it "
+        "against the vendor's full change and disclosure history.</li>"
+        "</ul>"
+        "<p class='muted' style='font-size:13px;margin-top:6px'>Authoritative starting points: NIST's "
+        "<a href='https://csrc.nist.gov/projects/cryptographic-module-validation-program/validated-modules/search' "
+        "target='_blank' rel='noopener'>Validated Modules</a> search, "
+        "<a href='https://csrc.nist.gov/projects/cryptographic-module-validation-program/modules-in-process' "
+        "target='_blank' rel='noopener'>Modules in Process</a>, the "
+        "<a href='https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-standards' "
+        "target='_blank' rel='noopener'>CMVP standards and Implementation Guidance</a>, and "
+        "<a href='https://csrc.nist.gov/pubs/fips/140-3/final' target='_blank' rel='noopener'>FIPS 140-3</a> itself.</p>"
         "</div>"
 
         "<h2>What we observed in the sampled corpus</h2>"
