@@ -52,6 +52,7 @@ code{font:.92em var(--mono);background:var(--surface-2);border:1px solid var(--l
 
 .nav{border-bottom:1px solid var(--line);background:var(--surface)}
 .nav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}
+.nav .brand{font:600 14px/1 var(--mono);letter-spacing:.02em;color:var(--ink);border:0;white-space:nowrap}
 .nav a{font:500 13.5px/1 var(--sans);color:var(--ink-2);border:0;padding:4px 0}
 .nav a:hover{color:var(--ink)} .nav a.on{color:var(--accent)}
 .nav .sp{flex:1}
@@ -120,6 +121,7 @@ def nav(base, active):
          ("Modules", base + "modules/index.html", "modules")]
     links = "".join(f"<a href='{h}'{' class=on' if k==active else ''}>{t}</a>" for t, h, k in L)
     return (f"<nav class='nav'><div class='nav-in'>"
+            f"<a class='brand' href='{base}index.html'>FIPS&nbsp;140&#8209;3</a>"
             f"{links}</div></nav>")
 
 def foot():
@@ -450,6 +452,7 @@ POLICY_SKIN = (
     "h1,.masthead h1{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif}"
     ".sitenav{border-bottom:1px solid var(--line);background:var(--card)}"
     ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}"
+    ".sitenav .brand{font:600 14px/1 ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:.02em;color:var(--ink);text-decoration:none;white-space:nowrap}"
     ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none;padding:4px 0}.sitenav a:hover{color:var(--ink)}.sitenav a.on{color:var(--accent)}"
     ".sitenav .sp{flex:1}.backbar{margin:0 0 8px;padding:0;font-size:13px}"
     # render_html hardcodes light zebra/header backgrounds; theme them so dark mode is readable
@@ -507,6 +510,7 @@ def build_module(r):
     doc = doc.replace("</header>", "</header>" + strip, 1)
 
     navbar = ("<nav class='sitenav'><div class='sitenav-in'>"
+              "<a class='brand' href='../index.html'>FIPS&nbsp;140&#8209;3</a>"
               "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"
               "<a href='index.html' class='on'>Modules</a><span class='sp'></span></div></nav>")
     backbar = "<div class='backbar'>&#8592; <a href='index.html'>All modules</a></div>"
@@ -521,9 +525,11 @@ def build_report():
     h = open("corpus_report.html", encoding="utf-8").read()
     navcss = (".sitenav{border-bottom:1px solid var(--line);background:var(--surface)}"
               ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}"
+              ".sitenav .brand{font:600 14px/1 var(--mono);letter-spacing:.02em;color:var(--ink);border:0;white-space:nowrap}"
               ".sitenav a{font:500 13.5px/1 var(--sans);color:var(--ink-2);border:0;padding:4px 0}.sitenav a:hover{color:var(--ink)}"
               ".sitenav a.on{color:var(--accent)}.sitenav .sp{flex:1}")
     navhtml = ("<nav class='sitenav'><div class='sitenav-in'>"
+               "<a class='brand' href='index.html'>FIPS&nbsp;140&#8209;3</a>"
                "<a href='index.html'>Overview</a><a href='report.html' class='on'>Report</a>"
                "<a href='modules/index.html'>Modules</a><span class='sp'></span></div></nav>")
     h = h.replace("</style>", navcss + "</style>", 1)
