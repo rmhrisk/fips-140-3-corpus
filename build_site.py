@@ -9,7 +9,7 @@
 All pages share one design system and one top navigation. Pure stdlib; reads
 corpus_analysis.json + drift.json, and wraps the already-rendered corpus_report.html.
 """
-import json, html, os, re
+import json, html, os, re, base64
 import render_html  # the pipeline's Security-Policy document reconstruction
 
 def esc(s): return html.escape("" if s is None else str(s))
@@ -170,83 +170,22 @@ def build_modules_index():
     tr = ""
     for r in rows:
         surfaces = len(r.get("motifs") or [])
+        stale = r.get('months_since_last_validation')
         tr += (f"<tr><td><span class='cn'><a href='{r['cert']}.html'>#{r['cert']}</a></span></td>"
-               f"<td>{esc(r['module'])}</td><td class='muted'>{esc(r['vendor'])}</td>"
+               f"<td><a href='{r['cert']}.html'>{esc(r['module'])}</a></td><td class='muted'>{esc(r['vendor'])}</td>"
                f"<td>{esc(r['archetype'])}</td><td>{tagp(r['review_priority'])}</td>"
                f"<td>{surfaces or ''}</td>"
-               f"<td>{esc(r.get('months_since_last_validation'))}{' mo' if r.get('months_since_last_validation') is not None else ''}</td></tr>")
+               f"<td>{esc(stale)}{' mo' if stale is not None else ''}</td></tr>")
     body = ("<main>"
             "<p class='crumb'><a href='../index.html'>Overview</a> &nbsp;/&nbsp; Modules</p>"
             f"<h1>All {N} modules</h1>"
-            "<p class='dek'>Sorted by review priority, then by time since last validation. Each row links to a full "
-            "module page. Priority is a place to start a review, not a vulnerability finding.</p>"
+            "<p class='dek'>Sorted by review priority, then by time since last validation. Each row opens the module's "
+            "full Security Policy, with the analysis signals folded into the top. Priority is a place to start a review, "
+            "not a vulnerability finding.</p>"
             "<div class='tw'><table><thead><tr><th>cert</th><th>module</th><th>vendor</th><th>archetype</th>"
             "<th>review priority</th><th>TCB surfaces</th><th>since last val.</th></tr></thead>"
             f"<tbody>{tr}</tbody></table></div></main>")
     return page(f"All {N} modules", "../", "modules", body)
-
-# ---- per-module page -------------------------------------------------------
-def build_module(r):
-    cert = r["cert"]
-    facts = [("assurance", r.get("assurance")), ("security level", f"Level {r.get('level')}"),
-             ("embodiment", r.get("type")), ("status", r.get("status")),
-             ("initial validation", r.get("initial_validation")), ("last validation", r.get("last_validation")),
-             ("CMVP updates", r.get("n_updates")), ("months since last val.", r.get("months_since_last_validation")),
-             ("cert window (mo)", r.get("exposure_window_months")), ("doc grade", r.get("grade"))]
-    kv = "".join(f"<div><div class='k'>{esc(k)}</div><div>{esc(v)}</div></div>" for k, v in facts if v is not None and v != "")
-    def chips(items): return "".join(f"<span class='chip'>{esc(x)}</span>" for x in items) or "<span class='muted'>none named</span>"
-    motifs = chips(r.get("motifs") or [])
-    comps = chips([c.get("name") for c in (r.get("components") or [])])
-    ifaces = chips(r.get("interfaces") or [])
-    net = chips(r.get("net_services") or [])
-    drivers = "".join(f"<li>{esc(x)}</li>" for x in (r.get("drivers") or [])) or "<li class='muted'>none</li>"
-    reducers = "".join(f"<li>{esc(x)}</li>" for x in (r.get("reducers") or [])) or "<li class='muted'>none</li>"
-    ev = "".join("<div class='ev'><span>" + esc(k) + "</span><span class='pill " +
-                 EV_CLS.get(str(v).lower(), "na") + "'>" + esc(v) + "</span></div>"
-                 for k, v in (r.get("evidence") or {}).items())
-    dr = DRIFT.get(cert)
-    drift_html = ""
-    if dr:
-        drift_html = (
-            "<h2>Component drift</h2>"
-            "<p class='muted'>CVEs disclosed in the named upstream component (CPE-matched in NVD) since this module's "
-            "initial validation. A measure of how far the upstream moved past the certified snapshot, and a review "
-            "trigger, not a vulnerability count for the module.</p>"
-            f"<div class='panel'><div class='kv'>"
-            f"<div><div class='k'>component</div><div><b>{esc(dr['component'])}</b></div></div>"
-            f"<div><div class='k'>version as listed</div><div>{esc(dr.get('version') or '?')}</div></div>"
-            f"<div><div class='k'>upstream CVEs since cert</div><div><b>{esc(dr['cves_in_component_since_cert'])}</b></div></div>"
-            f"</div></div>")
-    body = (
-        "<main>"
-        f"<p class='crumb'><a href='../index.html'>Overview</a> &nbsp;/&nbsp; <a href='index.html'>Modules</a> "
-        f"&nbsp;/&nbsp; #{cert}</p>"
-        f"<div style='display:flex;gap:12px;align-items:baseline;flex-wrap:wrap'>"
-        f"<span class='mono' style='color:var(--ink-3);font-size:15px'>#{cert}</span>{tagp(r['review_priority'])}</div>"
-        f"<h1>{esc(r['module'])}</h1>"
-        f"<p class='dek'>{esc(r['vendor'])} &nbsp;·&nbsp; {esc(r['archetype'])}</p>"
-        f"<div class='panel'><div class='kv'>{kv}</div></div>"
-        f"<p><a href='{cert}-policy.html'><b>Read the full Security Policy detail for #{cert}</b> &#8594;</a> "
-        "<span class='muted'>(algorithms, sections, tables, and validation history, reconstructed from the record)</span></p>"
-        f"<h2>TCB surfaces</h2><p class='muted'>Architectural patterns where a bug class would matter (see the "
-        f"<a href='../report.html'>report</a> for what each means). Present, not a finding.</p><p>{motifs}</p>"
-        f"<h2>Identified components</h2><p>{comps}</p>"
-        f"<h2>Interfaces &amp; services</h2><div class='kv'><div><div class='k'>interfaces</div><div>{ifaces}</div></div>"
-        f"<div><div class='k'>network services named</div><div>{net}</div></div></div>"
-        f"{drift_html}"
-        f"<h2>Why it is prioritized</h2><div class='cards' style='grid-template-columns:1fr 1fr'>"
-        f"<div class='panel'><h3>Drivers</h3><ul>{drivers}</ul></div>"
-        f"<div class='panel'><h3>Not established / reducers</h3><ul>{reducers}</ul></div></div>"
-        f"<h2>Evidence completeness</h2><div class='panel'>{ev}</div>"
-        f"<h2>What to confirm next</h2><ul>"
-        "<li>exact deployed component version versus the certified version</li>"
-        "<li>which services consume this crypto, and whether any are reachable pre-authentication</li>"
-        "<li>vendor advisory / firmware / release-note visibility</li>"
-        "<li>distro or vendor back-port status for any named CVEs</li></ul>"
-        f"<p style='margin-top:20px'><a href='{CERT_URL.format(cert)}' target='_blank' rel='noopener'>"
-        "View the CMVP certificate on csrc.nist.gov &nbsp;&#8599;</a></p>"
-        "</main>")
-    return page(f"#{cert} {r['module']}", "../", "modules", body)
 
 # ---- per-module Security-Policy document view (render_html, re-skinned) -----
 # Remap render_html's own CSS variables to the site tokens (light + dark) and drop
@@ -267,20 +206,57 @@ POLICY_SKIN = (
     ".sitenav .sp{flex:1}.backbar{max-width:1120px;margin:8px auto 0;padding:0 22px;font-size:13px}"
     "</style>")
 
-def build_policy(r):
+def _placeholder_fig(fig):
+    lbl = re.sub(r"<[^>]+>", "", str(fig.get("label") or "Figure"))[:60]
+    svg = ("<svg xmlns='http://www.w3.org/2000/svg' width='480' height='120'>"
+           "<rect width='100%' height='100%' fill='none' stroke='#9aa4b0' stroke-dasharray='5 4' rx='8'/>"
+           f"<text x='50%' y='44%' fill='#9aa4b0' font-family='sans-serif' font-size='13' text-anchor='middle'>{esc(lbl)}</text>"
+           f"<text x='50%' y='66%' fill='#b6bec9' font-family='sans-serif' font-size='11' text-anchor='middle'>"
+           f"diagram on Security Policy page {esc(fig.get('page'))}, not extracted</text></svg>")
+    return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
+
+# The module page IS the full Security-Policy document reconstruction (render_html),
+# re-skinned to the site, with the analysis signals folded into its masthead.
+def build_module(r):
     cert = r["cert"]
-    # render_html needs the FULL raw record (certificate + securityPolicy sections
-    # and tables), not the analyzer's projection. page_texts drive the page-anchored
-    # prose; both are committed, so this needs no PDFs at build time.
     raw = json.load(open(f"corpus140_3/records/{cert}.json", encoding="utf-8"))
+    # embed figure images where we have them; a clear placeholder otherwise
+    for fig in (raw.get("securityPolicy") or {}).get("figures", []):
+        fp = os.path.join("figs", fig.get("imageFile", ""))
+        if fig.get("imageFile") and os.path.exists(fp):
+            fig["_dataUri"] = "data:image/png;base64," + base64.b64encode(open(fp, "rb").read()).decode()
+        else:
+            fig["_dataUri"] = _placeholder_fig(fig)
     ptf = f"sp_text/{cert}.txt"
     page_texts = open(ptf, encoding="utf-8", errors="replace").read().split("\f") if os.path.exists(ptf) else []
     doc = render_html.render(raw, page_texts)
+
+    # fold the analysis signals into the document: extra chips in the masthead + a strip
+    prio = r["review_priority"]; surfaces = r.get("motifs") or []
+    dr = DRIFT.get(cert); stale = r.get("months_since_last_validation")
+    extra = f"<span class='chip'><span class='k'>Review priority</span><span class='v'>{esc(prio)}</span></span>"
+    if surfaces:
+        extra += f"<span class='chip'><span class='k'>TCB surfaces</span><span class='v'>{len(surfaces)}</span></span>"
+    if dr:
+        extra += (f"<span class='chip'><span class='k'>Upstream drift</span><span class='v'>"
+                  f"{esc(dr['component'])} {esc(dr['cves_in_component_since_cert'])} CVEs</span></span>")
+    doc = doc.replace("<div class='chips'>", "<div class='chips'>" + extra, 1)
+
+    surf_txt = ", ".join(surfaces) if surfaces else "none named"
+    drift_txt = (f" &nbsp;·&nbsp; upstream drift: <b>{esc(dr['component'])}</b> "
+                 f"{esc(dr['cves_in_component_since_cert'])} CVEs since cert" if dr else "")
+    stale_txt = f" &nbsp;·&nbsp; {esc(stale)} months since last validation" if stale is not None else ""
+    strip = (f"<div style='max-width:100%;margin:14px 0;padding:12px 16px;border:1px solid var(--line);"
+             f"border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--pill);font-size:14px'>"
+             f"<b>Review priority: {esc(prio)}</b> &nbsp;·&nbsp; TCB surfaces: {esc(surf_txt)}{drift_txt}{stale_txt}. "
+             f"<a href='../report.html' style='color:var(--accent)'>Analysis &amp; methodology &#8594;</a></div>")
+    doc = doc.replace("</header>", "</header>" + strip, 1)
+
     nav = ("<nav class='sitenav'><div class='sitenav-in'>"
            "<a class='brand' href='../index.html'>FIPS&nbsp;140-3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
            "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"
            "<a href='index.html'>Modules</a><span class='sp'></span></div></nav>"
-           f"<div class='backbar'>&#8592; <a href='{cert}.html'>Back to the analysis summary for #{cert}</a></div>")
+           "<div class='backbar'>&#8592; <a href='index.html'>All modules</a></div>")
     doc = doc.replace("</head>", POLICY_SKIN + "</head>", 1)
     doc = doc.replace("<body>", "<body>" + nav, 1)
     return doc
@@ -308,6 +284,5 @@ open("docs/report.html", "w").write(build_report())
 open("docs/modules/index.html", "w").write(build_modules_index())
 for r in RECS:
     open(f"docs/modules/{r['cert']}.html", "w").write(build_module(r))
-    open(f"docs/modules/{r['cert']}-policy.html", "w").write(build_policy(r))
 open("docs/.nojekyll", "w").write("")
-print(f"wrote docs/ site: index + report + modules/index + {len(RECS)} analysis + {len(RECS)} policy pages")
+print(f"wrote docs/ site: index + report + modules/index + {len(RECS)} full module pages")
