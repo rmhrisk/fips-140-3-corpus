@@ -204,6 +204,9 @@ POLICY_SKIN = (
     ".sitenav .brand{font:600 14px/1 ui-monospace,'SF Mono',Menlo,monospace;color:var(--ink);text-decoration:none}.sitenav .brand .dot{color:var(--accent)}"
     ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none}.sitenav a:hover{color:var(--ink)}"
     ".sitenav .sp{flex:1}.backbar{max-width:1120px;margin:8px auto 0;padding:0 22px;font-size:13px}"
+    # render_html hardcodes light zebra/header backgrounds; theme them so dark mode is readable
+    "table tbody tr:nth-child(even) td{background:var(--pill)!important}"
+    "table thead th{background:var(--pill)!important}"
     "</style>")
 
 def _placeholder_fig(fig):
