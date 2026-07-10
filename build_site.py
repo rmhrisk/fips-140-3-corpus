@@ -136,88 +136,122 @@ def build_index():
     lc = S["lifecycle"]; rc = S["recertification"]; mt = S["motifs"]
     win = lc["exposure_window_months (validation->sunset)"]["median"]
     no_update = N - rc["modules_with_updates"]
+    interim = S["assurance"]["type_dist"].get("Interim (2-yr)", 0)
     upstream = len({m["cert"] for m in json.load(open("drift.json"))}) if os.path.exists("drift.json") else 0
     have_ver = 0
     for p in sorted(__import__("glob").glob("corpus140_3/records/*.json")):
         c = json.load(open(p)).get("certificate") or {}
         if (c.get("softwareVersions") or c.get("firmwareVersions")):
             have_ver += 1
+
     tiles = [
-        (f"{N}", "sampled modules analyzed", "sweep #4700 to #5157, step 3"),
-        (f"{no_update}", "no recorded update", f"{100-rc['pct_with_updates']:.0f}% of the sampled certificates"),
-        (f"{win:.0f} mo", "median validation-to-sunset window", "how long the certified state stands"),
+        (f"{N}", "sampled modules", "sweep #4700 to #5157, step 3"),
+        (f"{no_update}", "no recorded update", f"of {N} sampled certificates"),
+        (f"{win:.0f} mo", "median validation-to-sunset", "how long the certified state stands"),
+        (f"{interim}", "interim validations", "2-year window, reduced review depth"),
         (f"{have_ver}", "record a software/firmware version", f"{round(100*have_ver/N)}%; the rest cannot be version-checked from the record"),
-        (f"{upstream}", "name an upstream dependency to reconcile", "against the certified version and vendor backports"),
     ]
     th = "".join(f"<div class='tile'><div class='v'>{esc(v)}</div><div class='l'>{esc(l)}</div>"
                  f"{'<div class=s>'+esc(s)+'</div>' if s else ''}</div>" for v, l, s in tiles)
+
     steps = ["certificate found", "deployed module identified", "version matched",
              "operational environment matched", "approved mode confirmed",
              "patches &amp; dependencies reconciled"]
     flow = "<span class='arr'>&#8594;</span>".join(f"<span class='step'>{s}</span>" for s in steps)
-    flow += ("<span class='arr'>&#8594;</span><span class='step end'>claim supported</span>")
-    surf = "".join(f"<span class='chip'>{esc(k)} &nbsp;{v}</span>" for k, v in mt["freq"].items())
+    flow += "<span class='arr'>&#8594;</span><span class='step end'>claim supported</span>"
+
+    BASIS = {
+        "boot-chain verification": ("derived / keyword", "part"),
+        "firmware-update authentication": ("keyword clue", "part"),
+        "network crypto parser/protocol": ("derived from structured fields", "na"),
+        "debug/recovery interface": ("declared / keyword", "part"),
+        "kernel crypto consumer": ("derived from structured fields", "na"),
+        "HSM/SE firmware trust anchor": ("derived from structured fields", "na"),
+    }
+    clues = "".join(
+        f"<div class='ev'><span><b>{esc(k)}</b> <span class='muted'>&nbsp;·&nbsp; {v} modules</span></span>"
+        f"<span class='pill {BASIS.get(k,('',''))[1]}'>{esc(BASIS.get(k,('unclassified',''))[0])}</span></div>"
+        for k, v in mt["freq"].items())
+
     body = (
         "<main>"
         "<div class='eyebrow'>CMVP · FIPS 140-3 · sampled certificate-number sweep</div>"
         "<h1>What a FIPS certificate actually tells you</h1>"
-        "<p class='dek'>A CMVP certificate shows that a defined cryptographic module version, in a specific "
-        "configuration, operational environment, and approved mode, completed validation. It does not by itself show "
-        "that the product running today still uses that validated state. This corpus reads the public record for what "
-        "it establishes, where correspondence to a deployment becomes uncertain, and what evidence a reviewer should "
-        "request next.</p>"
-        f"<div class='tiles'>{th}</div>"
-
-        "<h2>The question this answers</h2>"
-        "<p class='muted'>A certificate is <b>necessary</b> evidence of deployed FIPS compliance, but not "
-        "<b>sufficient</b> evidence that the deployed cryptographic function still matches the validated state. "
-        "Establishing that runs a chain, and any unresolved step turns into an evidence request.</p>"
-        f"<div class='flow'>{flow}</div>"
-        "<p class='muted' style='font-size:13px'>Any step the public record cannot close reads as "
-        "<b>additional evidence required</b>, not as a finding.</p>"
-
-        "<div class='cols2'>"
-        "<div class='panel'><h3>What the corpus can establish</h3><ul>"
-        "<li>the validated module identity and certificate status</li>"
-        "<li>the documented operational environments and approved services</li>"
-        "<li>the declared module boundary, interfaces, and dependencies where stated</li>"
-        "<li>the public validation-update history recorded on the certificate</li></ul></div>"
-        "<div class='panel'><h3>What still requires deployment evidence</h3><ul>"
-        "<li>the module version actually installed</li>"
-        "<li>whether vendor patches changed code inside the validated boundary</li>"
-        "<li>whether fixes were backported without changing the reported version</li>"
-        "<li>whether the product operates the module in approved mode</li>"
-        "<li>whether the consuming service invokes the validated implementation</li>"
-        "<li>whether the deployed environment is listed or covered by portability rules</li></ul></div>"
-        "</div>"
+        "<p class='dek'>This static corpus organizes public CMVP certificates and Security Policies so you can inspect "
+        "the validated module, version, operational environments, services, interfaces, and update history, and see "
+        "where the public record leaves questions about the product deployed today. A certificate is <b>necessary</b> "
+        "evidence of deployed FIPS compliance, but not <b>sufficient</b> evidence that the running cryptographic "
+        "function still matches the validated state.</p>"
 
         "<div class='cards'>"
-        "<a class='card' href='report.html'><h3>The analysis</h3><div class='big'>Corpus report</div>"
-        "<p>What the public record establishes, how the certified state ages, the deployed-state clues the artifacts "
-        "carry, and where the evidence stops.</p></a>"
-        "<a class='card' href='modules/index.html'><h3>Browse</h3><div class='big'>All modules</div>"
-        f"<p>Every one of the {N} modules opens its full Security Policy, with the deployed-state clues and unresolved "
-        "gaps folded into the top.</p></a>"
+        "<a class='card' href='modules/index.html'><h3>Inspect</h3><div class='big'>Browse the "
+        f"{N} modules</div><p>Open any module to see its full Security Policy and the questions the public record "
+        "cannot resolve.</p></a>"
+        "<a class='card' href='report.html'><h3>Understand</h3><div class='big'>Read the corpus findings</div>"
+        "<p>How the certified state ages, what the public record does and does not establish, and the method behind "
+        "it.</p></a>"
         "</div>"
 
-        "<h2>How to read the clues</h2>"
-        "<p class='muted'>Every signal on the site sits in one of three layers, and they are not interchangeable.</p>"
+        "<h2>Start here</h2>"
+        "<div class='cols3'>"
+        "<div class='panel'><h3>Evaluating a specific module</h3><p>Open the <a href='modules/index.html'>module "
+        "index</a> and its pre-generated detail page for that certificate.</p></div>"
+        "<div class='panel'><h3>Understanding the lifecycle problem</h3><p>Read the <a href='report.html'>corpus "
+        "findings and methodology</a> for the deployed-state assurance gap across the sampled set.</p></div>"
+        "<div class='panel'><h3>Reviewing a product's FIPS claim</h3><p>Use the module page to identify what was "
+        "validated, then compare that public record with evidence supplied by the vendor or operator. The site does "
+        "not perform that comparison.</p></div>"
+        "</div>"
+
+        "<h2>What each module page contains</h2><ul>"
+        "<li>module and certificate identity</li>"
+        "<li>validation status and dates</li>"
+        "<li>documented versions and operational environments</li>"
+        "<li>declared algorithms, services, interfaces, and module-boundary clues</li>"
+        "<li>the certificate update history</li>"
+        "<li>named upstream components and maintenance activity, where available</li>"
+        "<li>the specific questions the public record cannot resolve</li></ul>"
+
+        "<h2>What you can learn here</h2>"
+        "<p class='muted'>The CMVP certificate remains the authoritative validation record. This site restructures "
+        "that public information so a reviewer can more quickly understand the validated claim and locate the "
+        "questions that still require vendor or deployment evidence.</p>"
+        "<div class='cols3'>"
+        "<div class='panel'><h3>What was validated</h3><p>The module identity, version, environment, approved "
+        "services, and certificate status documented in the public record.</p></div>"
+        "<div class='panel'><h3>What has changed publicly</h3><p>Certificate updates, elapsed time, successor clues, "
+        "and upstream maintenance activity that may need to be reconciled.</p></div>"
+        "<div class='panel'><h3>What remains unknown</h3><p>The installed module version, patch provenance, "
+        "approved-mode configuration, actual consuming services, and whether changes occurred inside the validated "
+        "boundary.</p></div>"
+        "</div>"
+        "<p class='muted'>Establishing a deployed claim runs a chain; any step the public record cannot close reads as "
+        "<b>additional evidence required</b>, not as a finding.</p>"
+        f"<div class='flow'>{flow}</div>"
+
+        "<h2>What we observed in the sampled corpus</h2>"
+        "<p class='muted'>Findings from the sampled certificate-number sweep, not the complete FIPS 140-3 population.</p>"
+        f"<div class='tiles'>{th}</div>"
+
+        "<h2>Trust-relevant clues in the public record</h2>"
+        "<p class='muted'>Interfaces, services, update paths, boot mechanisms, and trust anchors explicitly stated or "
+        "deterministically derived from public Security Policies. They are prompts for review, not findings of "
+        "exposure or vulnerability. A single module can raise several; counts are of modules.</p>"
+        f"<div class='panel'>{clues}</div>"
+
+        "<h2>Methodology &amp; limitations</h2>"
+        "<p class='muted'>The corpus is a <b>sampled</b> certificate-number sweep (#4700 to #5157, step 3), so it does "
+        "not represent every FIPS 140-3 validation, and absence of a successor or update entry does not prove none "
+        "exists. Every signal sits in one of three layers, and they are not interchangeable:</p>"
         "<div class='cols3'>"
         "<div class='panel'><h3>Public fact</h3><p>Stated directly in the certificate metadata or the Security "
-        "Policy: module identity, status, operational environments, approved services.</p></div>"
-        "<div class='panel'><h3>Derived review clue</h3><p>A deterministic inference from the structured public "
+        "Policy.</p></div>"
+        "<div class='panel'><h3>Derived review clue</h3><p>A deterministic inference from structured public "
         "evidence, or a keyword detected in the text. A prompt to confirm, not a conclusion.</p></div>"
         "<div class='panel'><h3>Deployment-dependent conclusion</h3><p>Needs vendor, product, SBOM, package, or "
-        "operator evidence. It cannot be reached from the public corpus alone.</p></div>"
+        "operator evidence; it cannot be reached from the public corpus alone.</p></div>"
         "</div>"
-
-        "<h2>Public clues relevant to deployed-state review</h2>"
-        "<p class='muted'>Signals extracted from Security Policies and certificate records that may mark an area "
-        "requiring confirmation. These are review prompts, not findings that a component is exposed, vulnerable, or "
-        "inside the validated boundary. A single module can raise several; the counts are of modules, not of "
-        f"confirmed issues.</p><p>{surf}</p>"
-
-        "<p class='dek' style='font-size:16px;margin-top:32px'>The result is not a vulnerability verdict. It is a "
+        "<p class='dek' style='font-size:16px;margin-top:28px'>The result is not a vulnerability verdict. It is a "
         "deployed-assurance workflow: identify the validated claim, test its correspondence to the deployed state, "
         "and turn each unresolved gap into a specific evidence request.</p>"
         "</main>")
