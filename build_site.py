@@ -48,6 +48,7 @@ body{font:15.5px/1.62 var(--sans);margin:0;color:var(--ink);background:var(--pap
 a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-line)} a:hover{border-bottom-color:var(--accent)}
 a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
 b,strong{font-weight:600;color:var(--ink)} .muted{color:var(--ink-2)} .mono{font:.92em var(--mono)}
+code{font:.92em var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 
 .nav{border-bottom:1px solid var(--line);background:var(--surface)}
 .nav-in{max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:baseline;gap:22px}
@@ -217,7 +218,11 @@ def build_index():
         "<b>FIPS-approved functions operated in the approved mode</b>. Non-approved algorithms can sit inside the same "
         "module and are not part of the validation, and everything the product does outside the module is not covered "
         "at all. That is why a product can be built around a validated module and still run cryptography that was "
-        "never validated.</p></div>"
+        "never validated.</p>"
+        "<p class='muted' style='font-size:13px'><b>Concretely:</b> the same module operated outside approved mode "
+        "might seed a key from a non-approved source, such as the C library's <code>rand()</code>, which is fast but "
+        "predictable and nothing like the validated DRBG and entropy path. The certificate says nothing about that "
+        "mode.</p></div>"
         "<p class='muted'>The four security levels roughly escalate from “the cryptography is implemented correctly” to "
         "increasingly strong physical protection:</p>"
         "<div class='tw'><table><thead><tr><th>level</th><th>roughly</th><th>what it adds</th></tr></thead><tbody>"
