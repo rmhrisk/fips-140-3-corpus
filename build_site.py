@@ -160,7 +160,7 @@ def build_index():
         ("Product remediation", "Fix gaps before formal testing: self-tests, approved vs non-approved behavior, services, key management, build and version alignment.", "1 to 6+ months", "estimate"),
         ("Algorithm &amp; entropy prerequisites", "Complete CAVP algorithm validation, entropy-source evidence, RNG documentation, and dependency mapping.", "1 to 4+ months", "estimate"),
         ("CSTL testing &amp; package prep", "The accredited lab tests the module, prepares evidence, reviews the Security Policy, and assembles the submission.", "3 to 9 months", "estimate"),
-        ("Cost recovery / intake", "Submission is received; fees, intake, and early package defects are resolved before it reaches the review queue.", "weeks to a few months", "estimate"),
+        ("Fees &amp; intake", "The CMVP cost-recovery fee is paid, the submission is received, and early package defects are resolved before it reaches the review queue.", "weeks to a few months", "estimate"),
         ("Pending &amp; CMVP review", "The submission waits for CMVP review resources, then undergoes document review.", "~12 months (366-day avg)", "benchmark"),
         ("Coordination &amp; finalization", "CMVP comments are resolved through lab and vendor; documents are revised; the certificate is finalized and posted.", "~7 months (213-day avg)", "benchmark"),
         ("Total post-submission", "From CMVP receipt of the validation report to certificate issuance.", "~19 months (579-day avg)", "benchmark"),
@@ -176,25 +176,25 @@ def build_index():
     # inline, theme-aware diagram: the product's functionality as feature blocks, then
     # the scope narrowing twice into the module and into the approved functions.
     feats = [("User interface", 36, 58), ("Networking", 189, 58), ("Storage", 342, 58), ("Logging", 495, 58),
-             ("Config / updates", 36, 104), ("Business logic", 189, 104), ("OS / runtime", 342, 104)]
+             ("Config / updates", 36, 110), ("Business logic", 189, 110), ("OS / runtime", 342, 110), ("Admin &amp; APIs", 495, 110)]
     fcells = "".join(
-        f"<rect x='{x}' y='{y}' width='143' height='40' rx='8' fill='var(--surface)' stroke='var(--line)'/>"
-        f"<text x='{x+71}' y='{y+25}' text-anchor='middle' font-size='12' fill='var(--ink-2)'>{esc(lbl)}</text>"
+        f"<rect x='{x}' y='{y}' width='143' height='44' rx='8' fill='var(--surface)' stroke='var(--line)'/>"
+        f"<text x='{x+71}' y='{y+27}' text-anchor='middle' font-size='12' fill='var(--ink-2)'>{lbl}</text>"
         for lbl, x, y in feats)
     boundary_svg = (
-        "<svg viewBox='0 0 676 296' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
+        "<svg viewBox='0 0 676 300' role='img' style='width:100%;height:auto;margin:10px 0;font-family:var(--sans)' "
         "aria-label='The validated scope is only the FIPS-approved functions, inside the cryptographic module, "
         "which is itself a small part of the product'>"
-        "<text x='22' y='30' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
-        "<rect x='18' y='42' width='640' height='246' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
+        "<text x='22' y='32' font-size='11' letter-spacing='1.4' fill='var(--ink-3)'>A PRODUCT AND ALL OF ITS FUNCTIONALITY</text>"
+        "<rect x='18' y='44' width='640' height='246' rx='14' fill='var(--surface-2)' stroke='var(--line)'/>"
         + fcells +
-        "<rect x='150' y='158' width='376' height='118' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
-        "<text x='166' y='180' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
-        "<text x='166' y='196' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
-        "<rect x='168' y='206' width='340' height='58' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
-        "<text x='338' y='231' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
+        "<rect x='100' y='172' width='476' height='108' rx='10' fill='var(--surface)' stroke='var(--accent)' stroke-width='1.5'/>"
+        "<text x='116' y='194' font-size='12.5' font-weight='600' fill='var(--accent-2)'>Cryptographic module</text>"
+        "<text x='116' y='210' font-size='10.5' fill='var(--ink-3)'>non-approved functions here are out of scope</text>"
+        "<rect x='118' y='220' width='440' height='52' rx='8' fill='var(--accent-wash)' stroke='var(--accent)' stroke-width='2'/>"
+        "<text x='338' y='244' text-anchor='middle' font-size='12.5' font-weight='600' fill='var(--accent-2)'>"
         "FIPS-approved functions, in approved mode</text>"
-        "<text x='338' y='249' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
+        "<text x='338' y='261' text-anchor='middle' font-size='10.5' fill='var(--accent-2)'>the validated scope</text>"
         "</svg>")
 
     body = (
