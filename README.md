@@ -59,6 +59,8 @@ build_version_exact.py       NVD version-exact refinement (cached)  -> version_e
 report_html.py               the report  -> corpus_report.html
 findings_md.py               the findings memo  -> FINDINGS.md
 build_site.py                the published static site  -> docs/
+render_html.py               per-module Security-Policy document reconstruction
+review_graph.py              review-graph clues used by render_html
 verify_tables.py, profiles.py, security_policy.py, specs.py, specs.json
                              helper modules used by analyze_corpus
 
@@ -73,7 +75,8 @@ docs/                        the published static site (GitHub Pages)
   index.html                 landing page
   report.html                the corpus report, under the site navigation
   modules/index.html         browsable index of every module
-  modules/<cert>.html        one detail page per module
+  modules/<cert>.html        analysis summary for one module
+  modules/<cert>-policy.html full Security-Policy detail for one module
 ```
 
 ## The published site
@@ -85,9 +88,12 @@ navigation:
 
 - **Overview** (`index.html`): the thesis, the headline numbers, and the way in.
 - **Report** (`report.html`): the full corpus analysis.
-- **Modules** (`modules/index.html`): all modules, ranked by review priority,
-  each linking to a per-module page with its TCB surfaces, component drift,
-  review drivers, evidence completeness, and what to confirm next.
+- **Modules** (`modules/index.html`): all modules, ranked by review priority.
+  Each module has two linked pages: an **analysis summary** (`<cert>.html`) with
+  its TCB surfaces, component drift, review drivers, evidence completeness, and
+  what to confirm next; and the **full Security-Policy detail** (`<cert>-policy.html`),
+  a document reconstruction (algorithms, sections, tables, validation history)
+  produced by `render_html.py` straight from the record.
 
 ## The pipeline
 

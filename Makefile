@@ -38,7 +38,7 @@ FINDINGS.md: findings_md.py corpus_analysis.json drift.json version_exact.json
 # The published static site: landing + report + one page per module, into docs/
 # (GitHub Pages: Settings -> Pages -> main branch, /docs folder).
 site: docs/index.html
-docs/index.html: build_site.py corpus_report.html corpus_analysis.json drift.json
+docs/index.html: build_site.py render_html.py review_graph.py corpus_report.html corpus_analysis.json drift.json
 	$(PY) build_site.py
 
 # Rebuild everything, then confirm the committed artifacts did not change.

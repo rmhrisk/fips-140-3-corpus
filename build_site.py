@@ -10,6 +10,7 @@ All pages share one design system and one top navigation. Pure stdlib; reads
 corpus_analysis.json + drift.json, and wraps the already-rendered corpus_report.html.
 """
 import json, html, os, re
+import render_html  # the pipeline's Security-Policy document reconstruction
 
 def esc(s): return html.escape("" if s is None else str(s))
 
@@ -225,6 +226,8 @@ def build_module(r):
         f"<h1>{esc(r['module'])}</h1>"
         f"<p class='dek'>{esc(r['vendor'])} &nbsp;·&nbsp; {esc(r['archetype'])}</p>"
         f"<div class='panel'><div class='kv'>{kv}</div></div>"
+        f"<p><a href='{cert}-policy.html'><b>Read the full Security Policy detail for #{cert}</b> &#8594;</a> "
+        "<span class='muted'>(algorithms, sections, tables, and validation history, reconstructed from the record)</span></p>"
         f"<h2>TCB surfaces</h2><p class='muted'>Architectural patterns where a bug class would matter (see the "
         f"<a href='../report.html'>report</a> for what each means). Present, not a finding.</p><p>{motifs}</p>"
         f"<h2>Identified components</h2><p>{comps}</p>"
@@ -244,6 +247,37 @@ def build_module(r):
         "View the CMVP certificate on csrc.nist.gov &nbsp;&#8599;</a></p>"
         "</main>")
     return page(f"#{cert} {r['module']}", "../", "modules", body)
+
+# ---- per-module Security-Policy document view (render_html, re-skinned) -----
+# Remap render_html's own CSS variables to the site tokens (light + dark) and drop
+# in the site nav, so the document reconstruction reads as part of the site.
+POLICY_SKIN = (
+    "<style>"
+    ":root{--navy:#0a5a5a;--accent:#0e6e6e;--ink:#0f1720;--muted:#47535f;--line:#e2e7ec;--line-soft:#eef1f4;--bg:#f4f6f8;--card:#fff;--pill:#f8fafb}"
+    "@media(prefers-color-scheme:dark){:root{--navy:#5fc9bf;--accent:#43b9af;--ink:#e6ecf1;--muted:#a6b2bc;--line:#243039;--line-soft:#1b242c;--bg:#0d1216;--card:#141b21;--pill:#101820}}"
+    ":root[data-theme=light]{--navy:#0a5a5a;--accent:#0e6e6e;--ink:#0f1720;--muted:#47535f;--line:#e2e7ec;--line-soft:#eef1f4;--bg:#f4f6f8;--card:#fff;--pill:#f8fafb}"
+    ":root[data-theme=dark]{--navy:#5fc9bf;--accent:#43b9af;--ink:#e6ecf1;--muted:#a6b2bc;--line:#243039;--line-soft:#1b242c;--bg:#0d1216;--card:#141b21;--pill:#101820}"
+    "html,body{background:var(--bg)}"
+    "body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}"
+    "h1,.masthead h1{font-family:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif}"
+    ".sitenav{border-bottom:1px solid var(--line);background:var(--card)}"
+    ".sitenav-in{max-width:1120px;margin:0 auto;padding:12px 22px;display:flex;align-items:baseline;gap:20px}"
+    ".sitenav .brand{font:600 14px/1 ui-monospace,'SF Mono',Menlo,monospace;color:var(--ink);text-decoration:none}.sitenav .brand .dot{color:var(--accent)}"
+    ".sitenav a{font:500 13.5px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted);text-decoration:none}.sitenav a:hover{color:var(--ink)}"
+    ".sitenav .sp{flex:1}.backbar{max-width:1120px;margin:8px auto 0;padding:0 22px;font-size:13px}"
+    "</style>")
+
+def build_policy(r):
+    cert = r["cert"]
+    doc = render_html.render(r, [])
+    nav = ("<nav class='sitenav'><div class='sitenav-in'>"
+           "<a class='brand' href='../index.html'>FIPS&nbsp;140-3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
+           "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"
+           "<a href='index.html'>Modules</a><span class='sp'></span></div></nav>"
+           f"<div class='backbar'>&#8592; <a href='{cert}.html'>Back to the analysis summary for #{cert}</a></div>")
+    doc = doc.replace("</head>", POLICY_SKIN + "</head>", 1)
+    doc = doc.replace("<body>", "<body>" + nav, 1)
+    return doc
 
 # ---- report (wrap the standalone report with the site nav) -----------------
 def build_report():
@@ -268,5 +302,6 @@ open("docs/report.html", "w").write(build_report())
 open("docs/modules/index.html", "w").write(build_modules_index())
 for r in RECS:
     open(f"docs/modules/{r['cert']}.html", "w").write(build_module(r))
+    open(f"docs/modules/{r['cert']}-policy.html", "w").write(build_policy(r))
 open("docs/.nojekyll", "w").write("")
-print(f"wrote docs/ site: index + report + modules/index + {len(RECS)} module pages")
+print(f"wrote docs/ site: index + report + modules/index + {len(RECS)} analysis + {len(RECS)} policy pages")
