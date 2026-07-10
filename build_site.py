@@ -175,9 +175,10 @@ def build_index():
         (f"{win:.0f} mo", "median active window",
          "A module is presented as current for about five years, long enough for legacy primitives and "
          "unpatched components to accumulate well before the certificate lapses."),
-        (f"{interim}", "interim validations",
-         "Nearly a fifth arrived through the backlog-reduction path, which grants a shorter, less deeply "
-         "reviewed certificate, so two certificates do not always carry the same assurance."),
+        (f"{interim}", f"interim validations ({round(100*interim/max(1,N))}%)",
+         "Identified authoritatively from the CMVP caveat, a large share came through the backlog-reduction "
+         "path, which relies more on the test lab with less CMVP review depth, so two certificates do not "
+         "always carry the same assurance."),
         (f"{have_ver}", f"record a version ({round(100*have_ver/max(1,NF))}% of full-extraction)",
          "Among modules with full Security-Policy extraction, many still pin no software or firmware version, "
          "so you cannot check whether your deployed build is the one that was validated."),
@@ -295,8 +296,8 @@ def build_index():
         "<div class='panel'><h3>Validation strength varies widely</h3><p>Level, embodiment, and assurance type differ "
         "materially, and the <b>overall level is the lowest of the per-area levels</b>, so one part of a module can be "
         "Level 4 while another is Level 1. Even two modules at the same overall level are not equivalent: the level is "
-        "a category and a floor, not a measure of real-world security. An interim two-year validation is not a full "
-        "five-year one either.</p></div>"
+        "a category and a floor, not a measure of real-world security. An interim validation relies more on the "
+        "test lab with less CMVP review depth than a full one.</p></div>"
         "<div class='panel'><h3>A certificate is a snapshot</h3><p>It attests a version, configuration, and approved "
         "mode at one moment. It does not, by itself, establish that a product shipping today still runs that same "
         "validated state, which is where the public record starts to leave questions.</p></div>"
@@ -573,8 +574,8 @@ def build_module(r):
     bits = [f"<b>{esc(prio)}</b> review priority"]
     bits.append(f"exposes {esc(', '.join(surfaces))}" if surfaces else "no TCB surface named")
     if dr:
-        bits.append(f"<b>{esc(dr['component'])}</b> has moved {esc(dr['cves_in_component_since_cert'])} "
-                    f"upstream CVEs since certification")
+        bits.append(f"<b>{esc(dr['component'])}</b> upstream has published {esc(dr['cves_in_component_since_cert'])} "
+                    f"CVEs since this module's initial validation")
     if stale is not None:
         bits.append(f"last validated {esc(stale)} months ago")
     strip = (f"<div style='max-width:100%;margin:14px 0;padding:12px 16px;border:1px solid var(--line);"

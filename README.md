@@ -29,9 +29,10 @@ structure figures use the **136** with full SP extraction (see *Corpus scope* be
 - **TCB surfaces** (over the 136 full-extraction modules): debug/recovery interface
   (25), network crypto parser (24), HSM/SE firmware trust anchor (20),
   firmware-update authentication (20), boot-chain verification (9).
-- **Component-level CVE drift** is measurable for **62** modules that name a
-  CPE-mappable component; the rest, disproportionately hardware and appliance
-  modules, name nothing the join can reach. That gap is itself a finding.
+- **Component lineage:** 89 modules name a CPE-mappable upstream component;
+  **62** of those carry a measurable upstream CVE-drift signal. The rest,
+  disproportionately hardware and appliance modules, name nothing the join can
+  reach. That gap is itself a finding.
 - The **boot chain** is treated as a first-class security property: several HSMs
   ship U-Boot inside the validated boundary, the exact surface of Binarly's U-Boot
   FIT signature-verification bypass (CVE-2026-46728).

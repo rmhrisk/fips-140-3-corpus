@@ -137,8 +137,9 @@ def main():
     P.append("<h3 style='margin-top:16px'>Assurance type — certificates differ in what backs them</h3>")
     P.append(f"<div class='cols'><div class='card'>{bars(asr['type_dist'],' mod')}</div>"
              f"<div class='card muted'><b>Interim Validation ({asr['interim_pct']:.0f}% here)</b> — a backlog-reduction path CMVP launched "
-             "2024-06-06: CMVP-issued but relying more on the CSTL submission with less CMVP review depth, sunsetting in <b>2 years, not 5</b> "
-             "(detected by the 2-yr window; all validate ≥ 2024-07). Two further grades — <b>vendor/user affirmation</b> (unlisted OE, CMVP makes "
+             "2024-06-06: CMVP-issued but relying more on the CSTL submission with less CMVP review depth, initially with a shorter active "
+             "window (it can follow a path to a full five-year period). Detected authoritatively from the CMVP <b>caveat</b> ('Interim "
+             "validation…'), not from certificate duration. Two further grades — <b>vendor/user affirmation</b> (unlisted OE, CMVP makes "
              "no statement) and <b>vendor-affirmed algorithms</b> (CAVP transition, no CMVP/CAVP assurance) — aren't in cert metadata but matter: "
              "the buyer question is <i>what kind of assurance backs the deployed state</i>, not merely 'is there a certificate?'</div></div>")
 
@@ -157,7 +158,7 @@ def main():
 
     P.append("<div class='part'><div class='pk'>Part III</div><div class='pt'>Inside the validated boundary</div><div class='pd'>What cryptography the certificate actually covers, from the algorithms in use to the legacy still present to post-quantum readiness.</div></div>")
     P.append("<h2>3 · Cryptographic posture — specific algorithms</h2>")
-    P.append(f"<p class='muted'>{al['distinct_algorithms_in_corpus']} distinct approved algorithms; median "
+    P.append(f"<p class='muted'>{al['distinct_algorithms_in_corpus']} distinct normalized approved-algorithm labels (operation-level, e.g. “RSA SigVer”, “ECDSA KeyGen”, not distinct primitives); median "
              f"{al['median_distinct_per_module']:.0f} per module. <b>Presence ≠ insecure use</b> — legacy primitives are often retained "
              f"for verify-only/legacy paths, and AES-ECB is a building block; the signal is breadth of the approved surface.</p>")
     P.append("<div class='cols'>")
@@ -184,7 +185,7 @@ def main():
         P.append("<h2>5 · Component identification &amp; drift</h2>")
         comp = s["components"]
         P.append("<p class='muted'>Components are identified <b>generically</b> — a full-record scan (module name + software/firmware "
-                 "versions + SP body/tables) against a CPE-mapped catalog, not a hardcoded list. <b>Strong</b> = the module names/ships "
+                 "versions + SP body/tables) against an extensible, CPE-mapped catalog (generic whole-record scanning rather than certificate-specific rules). <b>Strong</b> = the module names/ships "
                  "it (name/version field); a CPE enables the NVD drift join below.</p>")
         P.append("<p class='muted'>Naming the actual code is the <b>highest-resolution</b> view of a module's trust boundary the "
                  "public record offers — and the <b>sparsest</b>: it exists only where a component is named. It is the component-level "
@@ -226,7 +227,7 @@ def main():
                 "<a href='https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification' target='_blank' rel='noopener'>"
                 "U-Boot FIT signature-verification bypass</a> (CVE-2026-46728, U-Boot &lt; 2026.04) targets:</p>"
                 "<table><thead><tr><th>cert</th><th>module</th><th>component</th><th>version as listed</th>"
-                f"<th>validated</th><th>upstream CVEs since cert</th></tr></thead><tbody>{brows}</tbody></table>")
+                f"<th>validated</th><th>upstream CVEs since initial validation</th></tr></thead><tbody>{brows}</tbody></table>")
         if boot_any:
             P.append(
                 "<div class='card' style='border-left:3px solid var(--accent)'>"
@@ -269,7 +270,7 @@ def main():
                       f"<td>{esc(vdate)}</td><td>{esc(m['n_updates'])}</td>"
                       f"<td><b>{esc(m['cves_in_component_since_cert'])}</b></td></tr>")
         P.append(f"<div class='card'><h3>Crypto-library modules, by upstream CVE drift since validation</h3><table><thead><tr><th>cert</th><th>module</th>"
-                 f"<th>upstream</th><th>validated</th><th>updates</th><th>upstream CVEs since cert</th></tr></thead>"
+                 f"<th>upstream</th><th>validated</th><th>updates</th><th>upstream CVEs since initial validation</th></tr></thead>"
                  f"<tbody>{drows}</tbody></table>"
                  f"<p class='muted'>Source: NVD CVE API v2 (CPE virtualMatchString), quarterly counts, as of {esc(cov['reference_date'])}.</p></div>")
         if kern:
@@ -407,10 +408,11 @@ def main():
              f"<table><thead><tr><th>archetype</th><th>modules</th><th>never updated</th><th>median months since last validation</th></tr></thead><tbody>{urows}</tbody></table>"
              "<p class='muted'>The classes that are hardest to reship are the ones that go unpatched. <b>Secure elements and SoCs</b>, "
              "where the cryptography is baked into silicon and a change means a new part, are the least maintained "
-             f"({ba.get('Secure element/SoC',{}).get('pct_never_updated',0):.0f}% show no CMVP update). At the other end, the "
-             f"{ba.get('HSM/accelerator',{}).get('n',0)} <b>HSM/accelerator</b> modules were each updated at least once, "
-             "consistent with a serviceable device carrying an ongoing vendor maintenance relationship, though that count is far "
-             "too small to lean on. Two confounders keep this a heuristic, not a law: many <b>software libraries</b> ship a "
+             f"({ba.get('Secure element/SoC',{}).get('pct_never_updated',0):.0f}% show no CMVP update). "
+             f"<b>HSM/accelerator</b> modules are the best maintained "
+             f"({ba.get('HSM/accelerator',{}).get('pct_never_updated',0):.0f}% never updated, n={ba.get('HSM/accelerator',{}).get('n',0)}), "
+             "consistent with serviceable devices carrying an ongoing vendor maintenance relationship, though that count is still "
+             "small. Two confounders keep this a heuristic, not a law: many <b>software libraries</b> ship a "
              "<i>new certificate</i> per release rather than an update entry on the old one, so their no-update share overstates "
              "how frozen any given deployment is; and a missing update entry is a maintenance-friction proxy, not proof a module "
              "is insecure. Read it alongside the median-staleness column, which shows how long each class's certified state has "
@@ -437,7 +439,7 @@ def main():
              f"<table><thead><tr><th>archetype</th><th>attack-path hypothesis</th><th>next evidence to collect</th></tr></thead><tbody>{hrows}</tbody></table></div>")
 
     P.append("<div class='part'><div class='pk'>Part VI</div><div class='pt'>The evidence and the market</div><div class='pd'>How good the public documents are, and the vendor and lab structure that produces them.</div></div>")
-    P.append("<h2>11 · Document-quality grading</h2>")
+    P.append("<h2>11 · Machine-readability &amp; extraction confidence</h2>")
     P.append("<p class='muted'>An <b>extraction-friendliness / completeness</b> proxy, not a judgement of security. It measures whether "
              "the Security Policy is structured, complete, and machine-readable — a triage signal for a large corpus, not authoring quality per se.</p>")
     P.append("<div class='card'><h3>Rubric — composite score (0–100)</h3><table><tbody>"
@@ -457,7 +459,7 @@ def main():
         P.append(f"<div class='card'>{bars(s['vendors_multi_cert'],' certs')}</div>")
 
     P.append("<h2>13 · Market structure (labs)</h2>")
-    P.append(f"<p class='muted'>{labs['distinct_labs']} accredited labs; work is concentrated in a few CSTLs — a pipeline bottleneck and market-structure signal.</p>")
+    P.append(f"<p class='muted'>{labs['distinct_labs']} accredited labs; work is concentrated in a few CSTLs — concentrated delivery capacity and a potential systemic dependency. Where validation delay actually arises cannot be established from issued certificates alone (see the caveat in §14).</p>")
     P.append(f"<div class='card'>{bars(labs['top'],' validations')}</div>")
     tp = s["throughput_predictors"]
     P.append("<h2>14 · Where FIPS time accumulates</h2>")

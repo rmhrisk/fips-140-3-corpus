@@ -78,11 +78,16 @@ _PQC = r"ml-kem|ml-dsa|slh-dsa|\blms\b|\bxmss\b|hss|kyber|dilithium|sphincs|falc
 # PQC families in NIST terms — NOT interchangeable: LMS/XMSS are stateful hash-based
 # signatures (SP 800-208, long approved); ML-KEM/ML-DSA/SLH-DSA are the new FIPS
 # 203/204/205 standards. Reporting a single "PQC %" hides that distinction.
+# Crucially, the *approved* standards use the ML-KEM / ML-DSA / SLH-DSA names only.
+# Kyber / Dilithium / SPHINCS+ are the pre-standardization names; a module naming
+# those is discussing a pre-standard or non-approved function, NOT approved FIPS
+# 203/204/205 use, so they are bucketed separately and never counted as adoption.
 _PQC_KINDS = [
     ("stateful hash-sig (SP800-208: LMS/XMSS)", r"\blms\b|\bxmss\b|\bhss\b"),
-    ("ML-KEM (FIPS 203)", r"ml-kem|kyber"),
-    ("ML-DSA (FIPS 204)", r"ml-dsa|dilithium"),
-    ("SLH-DSA (FIPS 205)", r"slh-dsa|sphincs"),
+    ("ML-KEM (FIPS 203)", r"ml-kem"),
+    ("ML-DSA (FIPS 204)", r"ml-dsa"),
+    ("SLH-DSA (FIPS 205)", r"slh-dsa"),
+    ("pre-standard PQC name (Kyber/Dilithium/SPHINCS+)", r"kyber|dilithium|sphincs"),
     ("other PQC candidate", r"falcon|hqc|frodo|bike|mceliece"),
 ]
 
@@ -283,13 +288,19 @@ def analyze_record(path):
     sec_present = sum(1 for s in req if section_present(titles,s,std))
     sec_frac = sec_present/max(1,len(req))
     g, gscore = grade(clean, fill, sec_frac)
-    # assurance type — Interim Validation (started 2024-06-06) carries a 2-year
-    # active window instead of the normal 5; detectable from window + initial date.
+    # Assurance type. The CMVP caveat is AUTHORITATIVE — an interim validation says so
+    # in its caveat text ("Interim validation. ..."). Duration alone is unreliable: an
+    # interim certificate can follow a path to a full five-year active window, so a
+    # ~5-yr sunset does NOT mean "Full". Fall back to the duration signal only when the
+    # caveat text is absent (e.g. metadata that did not carry it).
+    _cav = (c.get("caveat") or "").lower()
     _win = months_between(initial, sunset) if (initial and sunset) else None
-    if _win is not None and 18 <= _win <= 30 and initial and initial >= (2024, 6):
+    if "interim validation" in _cav:
         assurance = "Interim (2-yr)"
     elif _win is not None and 54 <= _win <= 66:
         assurance = "Full (5-yr)"
+    elif _win is not None and 18 <= _win <= 30 and initial and initial >= (2024, 6):
+        assurance = "Interim (2-yr)"
     else:
         assurance = "Other/unclear"
     ifaces = iface_categories(sp)
@@ -569,7 +580,8 @@ def summarize(rows):
     # corpus coverage / confidence block
     certs = [r["cert"] for r in rows if isinstance(r["cert"], int)]
     out["coverage"] = {
-        "reference_date": "2026-07", "sweep_range": "cert #4700–#5157 (step 3)",
+        "reference_date": "2026-07",
+        "sweep_range": f"cert #{min(certs)}–#{max(certs)} (near-census of FIPS 140-3 in this window)" if certs else "n/a",
         "fips_140_3_modules": len(rows),
         "cert_number_span": f"#{min(certs)}–#{max(certs)}" if certs else "n/a",
         "status_dist": dict(Counter((r["status"] or "Active") for r in rows).most_common()),

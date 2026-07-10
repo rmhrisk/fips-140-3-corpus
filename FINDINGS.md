@@ -42,7 +42,7 @@ flowchart TD
 
 | decision node | what the corpus says |
 |---|---|
-| certificate status / assurance | Full 246 · **Interim 67** (16%) · other 102; status {'Active': 382, 'Historical': 33} |
+| certificate status / assurance | Full 200 · **Interim 146** (35%) · other 69; status {'Active': 382, 'Historical': 33} |
 | deployed version = certified version? | not answerable from CMVP alone — but **§9 measures the drift**: e.g. OpenSSL FIPS providers carry ~39–40 upstream CVEs disclosed since their cert date |
 | certificate ever updated (fixes pulled in)? | **78% never updated** — the certified snapshot is frozen for most |
 | operational environment / approved mode / services | in the Security Policy (extracted: sections, services, algorithms) — the per-module evidence to check, not a corpus aggregate |
@@ -52,7 +52,7 @@ flowchart TD
 | item | value |
 |---|---|
 | CMVP scrape / reference date | 2026-07 |
-| certificate range swept | cert #4700–#5157 (step 3) |
+| certificate range swept | cert #4650–#5159 (near-census of FIPS 140-3 in this window) |
 | FIPS 140-3 modules included | 415 (span #4650–#5159) |
 | status distribution | {'Active': 382, 'Historical': 33} |
 | with validation-history dates | 414/415 (~100%) |
@@ -68,9 +68,9 @@ Field provenance — **cert page:** level, type, embodiment, vendor, standard, s
 
 ## 2 · What kind of assurance backs the CMVP certificate?
 Not all FIPS 140-3 certificates carry the same assurance — and this is directly relevant to the deployed-compliance question. The certificate active window reveals the type:
-- **Full validation (5-yr window):** 246 modules.
-- **Interim Validation (2-yr window):** **67 modules (16%)** — a backlog-reduction mechanism CMVP launched **2024-06-06**: a CMVP-issued certificate that relies *more on the CSTL submission with less CMVP review depth*, sunsetting in 2 years instead of 5. Every interim module in this corpus validates ≥ 2024-07, confirming the detection.
-- **Other/unclear window:** 102 modules.
+- **Full validation (5-yr window):** 200 modules.
+- **Interim Validation (2-yr window):** **146 modules (35%)** — a backlog-reduction mechanism CMVP launched **2024-06-06**: a CMVP-issued certificate that relies *more on the CSTL submission with less CMVP review depth*, sunsetting in 2 years instead of 5. Every interim module in this corpus validates ≥ 2024-07, confirming the detection.
+- **Other/unclear window:** 69 modules.
 
 **Two more assurance grades exist that certificate *metadata* does not expose** (they need the Security Policy / caveat text, a next extraction target):
 - **Vendor/User Affirmation of ported configurations** — a module run in an operational environment *not* on the certificate. CMVP explicitly makes **no statement** as to correct operation or security strength for unlisted OEs; user *modifications* invalidate the validation entirely.
@@ -96,9 +96,10 @@ Not all FIPS 140-3 certificates carry the same assurance — and this is directl
   - 0% — ML-KEM (FIPS 203)
   - 0% — ML-DSA (FIPS 204)
   - 0% — SLH-DSA (FIPS 205)
+  - 0% — pre-standard PQC name (Kyber/Dilithium/SPHINCS+)
   - 0% — other PQC candidate
 - **Specific PQC algorithms present:** {'HSS': 9, 'LMS': 9, 'KYBER': 1}.
-- **The headline:** PQC in this corpus is almost entirely **stateful hash-based signatures (LMS/HSS, SP 800-208)** used for firmware/image signing — a mature, pre-existing capability. Adoption of the **new lattice standards (ML-KEM / ML-DSA, FIPS 203/204) and SLH-DSA (FIPS 205) is effectively zero**: only module(s) [4800] show any lattice KEM, and under the pre-standard 'Kyber' name. So 'X% PQC' overstates quantum-resistant readiness — the migration to the actual PQC standards has barely begun.
+- **The headline:** PQC in this corpus is almost entirely **stateful hash-based signatures (LMS/HSS, SP 800-208)** used for firmware/image signing — a mature, pre-existing capability. Adoption of the **new lattice standards (ML-KEM / ML-DSA, FIPS 203/204) and SLH-DSA (FIPS 205) is effectively zero**: only module(s) [] show any lattice KEM, and under the pre-standard 'Kyber' name. So 'X% PQC' overstates quantum-resistant readiness — the migration to the actual PQC standards has barely begun.
 
 ## 6 · Device classification
 Coarse taxonomy (name + vendor + type + embodiment).

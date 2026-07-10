@@ -44,6 +44,15 @@ def _sidecar_text(record, path):
     return ""
 
 
+_BOILERPLATE = re.compile(
+    r"^(n/?\.?a\.?|none|not\s+applicable|null|nil|tbd|see\s+.*|refer\s+to\s+.*|[-–—.\s]*)$", re.I)
+
+def _real_value(e: str) -> bool:
+    """True if a cell is a real value rather than a placeholder / boilerplate."""
+    e = re.sub(r"\s+", " ", (e or "")).strip()
+    return bool(e) and not _BOILERPLATE.match(e)
+
+
 def extract_clues(record: dict, text: str = "") -> list[dict]:
     sp = record.get("securityPolicy") or {}
     cert = record.get("certificate", {})
@@ -51,6 +60,10 @@ def extract_clues(record: dict, text: str = "") -> list[dict]:
     clues: list[dict] = []
 
     def add(cid, label, evidence, source, confidence):
+        # Drop boilerplate cells (N/A, None, dashes, "see section…") so a clue never
+        # fires on, or displays, a non-value — e.g. a "firmware version disclosed"
+        # clue whose only evidence was "N/A".
+        evidence = [e for e in (evidence or []) if _real_value(e)]
         if evidence:
             clues.append({"id": cid, "label": label, "evidence": evidence[:8],
                           "source": source, "confidence": confidence})
