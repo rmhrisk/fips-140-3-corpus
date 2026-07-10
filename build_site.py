@@ -90,7 +90,7 @@ ul{margin:6px 0;padding-left:20px} li{margin:3px 0;font-size:14px;color:var(--in
 .tw{overflow-x:auto;margin:14px 0} table{width:100%;border-collapse:collapse;font-size:13.5px}
 th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line-2)} td{font-variant-numeric:tabular-nums}
 th{font:600 11px/1.2 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
-tbody tr:hover{background:var(--surface-2)} td .cn{font:600 12.5px var(--mono);color:var(--ink-3)}
+tbody tr:hover{background:var(--surface-2)} tbody tr[data-href]{cursor:pointer} td .cn{font:600 12.5px var(--mono);color:var(--ink-3)}
 tr:last-child td{border-bottom:0}
 
 .crumb{font-size:13px;color:var(--ink-3);margin:0 0 6px} .crumb a{color:var(--ink-2)}
@@ -165,26 +165,27 @@ def build_index():
 
 # ---- module index ----------------------------------------------------------
 def build_modules_index():
-    rows = sorted(RECS, key=lambda r: (-PRI_ORD.get(r["review_priority"], 0),
-                                       -(r.get("months_since_last_validation") or 0)))
+    rows = sorted(RECS, key=lambda r: -(r.get("months_since_last_validation") or 0))
     tr = ""
     for r in rows:
         surfaces = len(r.get("motifs") or [])
         stale = r.get('months_since_last_validation')
-        tr += (f"<tr><td><span class='cn'><a href='{r['cert']}.html'>#{r['cert']}</a></span></td>"
-               f"<td><a href='{r['cert']}.html'>{esc(r['module'])}</a></td><td class='muted'>{esc(r['vendor'])}</td>"
-               f"<td>{esc(r['archetype'])}</td><td>{tagp(r['review_priority'])}</td>"
+        tr += (f"<tr data-href='{r['cert']}.html'>"
+               f"<td><span class='cn'><a href='{r['cert']}.html'>#{r['cert']}</a></span></td>"
+               f"<td>{esc(r['module'])}</td><td class='muted'>{esc(r['vendor'])}</td>"
+               f"<td>{esc(r['archetype'])}</td>"
                f"<td>{surfaces or ''}</td>"
                f"<td>{esc(stale)}{' mo' if stale is not None else ''}</td></tr>")
     body = ("<main>"
             "<p class='crumb'><a href='../index.html'>Overview</a> &nbsp;/&nbsp; Modules</p>"
             f"<h1>All {N} modules</h1>"
-            "<p class='dek'>Sorted by review priority, then by time since last validation. Each row opens the module's "
-            "full Security Policy, with the analysis signals folded into the top. Priority is a place to start a review, "
-            "not a vulnerability finding.</p>"
+            "<p class='dek'>Sorted by time since last validation. Each row opens the module's full Security Policy, "
+            "with the analysis signals folded into the top.</p>"
             "<div class='tw'><table><thead><tr><th>cert</th><th>module</th><th>vendor</th><th>archetype</th>"
-            "<th>review priority</th><th>TCB surfaces</th><th>since last val.</th></tr></thead>"
-            f"<tbody>{tr}</tbody></table></div></main>")
+            "<th>TCB surfaces</th><th>since last val.</th></tr></thead>"
+            f"<tbody>{tr}</tbody></table></div></main>"
+            "<script>document.querySelectorAll('tr[data-href]').forEach(function(r){"
+            "r.addEventListener('click',function(e){if(e.target.closest('a'))return;location.href=r.dataset.href;});});</script>")
     return page(f"All {N} modules", "../", "modules", body)
 
 # ---- per-module Security-Policy document view (render_html, re-skinned) -----
