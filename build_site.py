@@ -131,7 +131,7 @@ def tagp(p): return f"<span class='tag {PRI_CLS.get(p,'t-med')}'>{esc(p)} review
 
 # ---- landing ---------------------------------------------------------------
 def build_index():
-    lc = S["lifecycle"]; rc = S["recertification"]; mt = S["motifs"]
+    lc = S["lifecycle"]; rc = S["recertification"]
     win = lc["exposure_window_months (validation->sunset)"]["median"]
     no_update = N - rc["modules_with_updates"]
     interim = S["assurance"]["type_dist"].get("Interim (2-yr)", 0)
@@ -152,108 +152,106 @@ def build_index():
     th = "".join(f"<div class='tile'><div class='v'>{esc(v)}</div><div class='l'>{esc(l)}</div>"
                  f"{'<div class=s>'+esc(s)+'</div>' if s else ''}</div>" for v, l, s in tiles)
 
-    steps = ["certificate found", "deployed module identified", "version matched",
-             "operational environment matched", "approved mode confirmed",
-             "patches &amp; dependencies reconciled"]
-    flow = "<span class='arr'>&#8594;</span>".join(f"<span class='step'>{s}</span>" for s in steps)
-    flow += "<span class='arr'>&#8594;</span><span class='step end'>claim supported</span>"
-
-    BASIS = {
-        "boot-chain verification": ("derived / keyword", "part"),
-        "firmware-update authentication": ("keyword clue", "part"),
-        "network crypto parser/protocol": ("derived from structured fields", "na"),
-        "debug/recovery interface": ("declared / keyword", "part"),
-        "kernel crypto consumer": ("derived from structured fields", "na"),
-        "HSM/SE firmware trust anchor": ("derived from structured fields", "na"),
-    }
-    clues = "".join(
-        f"<div class='ev'><span><b>{esc(k)}</b> <span class='muted'>&nbsp;·&nbsp; {v} modules</span></span>"
-        f"<span class='pill {BASIS.get(k,('',''))[1]}'>{esc(BASIS.get(k,('unclassified',''))[0])}</span></div>"
-        for k, v in mt["freq"].items())
+    # Estimated validation timeline (elapsed time, not hard benchmark). The post-submission
+    # phases are anchored to KeyPair's 2024 public analysis; everything else is an industry estimate.
+    TL = [
+        ("Module scoping", "Define the cryptographic boundary, embodiment, operational environment, security level, algorithm set, versioning, and approved-mode model.", "2 to 8 weeks", "estimate"),
+        ("Product remediation", "Fix gaps before formal testing: self-tests, approved vs non-approved behavior, services, key management, build and version alignment.", "1 to 6+ months", "estimate"),
+        ("Algorithm &amp; entropy prerequisites", "Complete CAVP algorithm validation, entropy-source evidence, RNG documentation, and dependency mapping.", "1 to 4+ months", "estimate"),
+        ("CSTL testing &amp; package prep", "The accredited lab tests the module, prepares evidence, reviews the Security Policy, and assembles the submission.", "3 to 9 months", "estimate"),
+        ("Cost recovery / intake", "Submission is received; fees, intake, and early package defects are resolved before it reaches the review queue.", "weeks to a few months", "estimate"),
+        ("Pending &amp; CMVP review", "The submission waits for CMVP review resources, then undergoes document review.", "~12 months (366-day avg)", "benchmark"),
+        ("Coordination &amp; finalization", "CMVP comments are resolved through lab and vendor; documents are revised; the certificate is finalized and posted.", "~7 months (213-day avg)", "benchmark"),
+        ("Total post-submission", "From CMVP receipt of the validation report to certificate issuance.", "~19 months (579-day avg)", "benchmark"),
+        ("Total end-to-end", "Vendor preparation, remediation, lab testing, CMVP review, comment resolution, and finalization.", "~24 to 36+ months", "estimate"),
+    ]
+    trows = ""
+    for ph, what, tm, conf in TL:
+        top = " style='border-top:2px solid var(--line)'" if ph.startswith("Total") else ""
+        cls = "ok" if conf == "benchmark" else "na"
+        trows += (f"<tr{top}><td><b>{ph}</b></td><td class='muted'>{what}</td>"
+                  f"<td style='white-space:nowrap'>{tm}</td><td><span class='pill {cls}'>{conf}</span></td></tr>")
 
     body = (
         "<main>"
-        "<div class='eyebrow'>CMVP · FIPS 140-3 · sampled certificate-number sweep</div>"
-        "<h1>What a FIPS certificate actually tells you</h1>"
-        "<p class='dek'>This static corpus organizes public CMVP certificates and Security Policies so you can inspect "
-        "the validated module, version, operational environments, services, interfaces, and update history, and see "
-        "where the public record leaves questions about the product deployed today. A certificate is <b>necessary</b> "
-        "evidence of deployed FIPS compliance, but not <b>sufficient</b> evidence that the running cryptographic "
-        "function still matches the validated state.</p>"
+        "<div class='eyebrow'>CMVP · Cryptographic Module Validation Program</div>"
+        "<h1>FIPS 140-3 validation, in practice</h1>"
+        "<p class='dek'>FIPS 140-3 is the US and Canadian government standard for validating that a cryptographic "
+        "module correctly implements approved algorithms and meets a defined security bar. It exists to give buyers, "
+        "originally federal agencies, assurance before they procure. It is widely referenced, expensive and slow to "
+        "obtain, and frequently misunderstood. This site reads the public validation record for a sampled set of "
+        "modules to make what a certificate does and does not cover concrete.</p>"
 
+        "<h2>What FIPS 140-3 validates</h2>"
+        "<p>The standard (aligned with ISO/IEC 19790) is run by the <b>CMVP</b>, jointly operated by NIST in the US and "
+        "the CCCS in Canada. A validation covers a defined <b>cryptographic module</b>: a specific boundary of "
+        "hardware, software, or firmware, at one of four <b>security levels</b>. Within that boundary it confirms the "
+        "module implements NIST-approved algorithms correctly (through the separate CAVP program), enforces an "
+        "<b>approved mode</b> of operation, protects its keys, and runs its self-tests. Every validation names a "
+        "specific module <b>version</b>, configuration, and operational environment.</p>"
+
+        "<h2>Who it was built for</h2>"
+        "<p>FIPS validation is a <b>procurement</b> instrument. US federal agencies are required to use validated "
+        "cryptography, so a certificate is largely the gate for selling cryptographic products into government, and "
+        "into the regulated industries that inherit the requirement. It was designed as a purchasing bar and a "
+        "point-in-time assurance record, not as a vulnerability-hunting tool. That origin explains much of its shape, "
+        "and much of what people get wrong about it.</p>"
+
+        "<h2>What it is commonly misunderstood to mean</h2>"
+        "<div class='cols3'>"
+        "<div class='panel'><h3>“FIPS certified” is not product-wide</h3><p>A product can embed a validated "
+        "module and still run cryptography <b>outside</b> the validated boundary or outside approved mode. Both "
+        "<a href='https://wiki.openssl.org/index.php/FIPS_Warnings_and_Cautions' target='_blank' rel='noopener'>OpenSSL"
+        "</a> and <a href='https://web.archive.org/web/20220724205359/https://firefox-source-docs.mozilla.org/security/nss/legacy/fips_mode_-_an_explanation/index.html' target='_blank' rel='noopener'>Mozilla NSS</a> "
+        "document this explicitly.</p></div>"
+        "<div class='panel'><h3>Not all validations are equal</h3><p>Security level (1 to 4), embodiment, and assurance "
+        "type differ materially. An interim two-year validation and a full five-year validation are not the same "
+        "assurance, and a Level 1 software module is not a Level 3 hardware module.</p></div>"
+        "<div class='panel'><h3>A certificate is a snapshot</h3><p>It attests a version, configuration, and approved "
+        "mode at one moment. It does not, by itself, establish that a product shipping today still runs that same "
+        "validated state, which is where the public record starts to leave questions.</p></div>"
+        "</div>"
+
+        "<h2>What it costs</h2>"
+        "<p>Validation is a multi-year, multi-party process, and much of the elapsed time is spent <b>before</b> a "
+        "package reaches the review queue and <b>after</b> CMVP returns comments, not only in the government queue. "
+        "The one relatively clean public benchmark is post-submission: "
+        "<a href='https://keypair.us/2024/02/fips-140-3-validation-times/' target='_blank' rel='noopener'>KeyPair's "
+        "2024 analysis</a> found an average of <b>579 days</b> from CMVP receipt of the validation report to "
+        "certificate issuance, roughly 366 days of review plus 213 of coordination. The phases below are best read as "
+        "<b>estimated elapsed time</b>; only the post-submission rows are anchored to that benchmark.</p>"
+        "<div class='tw'><table><thead><tr><th>phase</th><th>what happens</th><th>estimated elapsed</th>"
+        f"<th>basis</th></tr></thead><tbody>{trows}</tbody></table></div>"
+        "<p class='muted'>The controllable areas are pre-submission readiness, documentation quality, evidence "
+        "traceability, and comment-response speed; the least controllable is the CMVP pending-review queue itself. "
+        "NIST's <a href='https://csrc.nist.gov/projects/cryptographic-module-validation-program/modules-in-process' "
+        "target='_blank' rel='noopener'>Modules in Process</a> status definitions describe the same states, where the "
+        "current action may sit with NIST, the lab, or the vendor. Money tracks time: accredited-lab fees plus the "
+        "internal engineering to scope, remediate, and evidence a module make validation a substantial investment "
+        "well before the certificate is posted.</p>"
+
+        "<h2>Where this corpus fits</h2>"
+        "<p>This static site reads the public CMVP certificates and Security Policies for a sampled certificate-number "
+        "sweep of FIPS 140-3 modules. It turns the abstractions above into something you can inspect: what a given "
+        "module actually had validated, how long its certified state has stood, and where the public record stops and "
+        "vendor or deployment evidence would have to take over.</p>"
         "<div class='cards'>"
         "<a class='card' href='modules/index.html'><h3>Inspect</h3><div class='big'>Browse the "
         f"{N} modules</div><p>Open any module to see its full Security Policy and the questions the public record "
         "cannot resolve.</p></a>"
         "<a class='card' href='report.html'><h3>Understand</h3><div class='big'>Read the corpus findings</div>"
-        "<p>How the certified state ages, what the public record does and does not establish, and the method behind "
-        "it.</p></a>"
+        "<p>How the certified state ages across the sampled set, and the method behind it.</p></a>"
         "</div>"
-
-        "<h2>Start here</h2>"
-        "<div class='cols3'>"
-        "<div class='panel'><h3>Evaluating a specific module</h3><p>Open the <a href='modules/index.html'>module "
-        "index</a> and its pre-generated detail page for that certificate.</p></div>"
-        "<div class='panel'><h3>Understanding the lifecycle problem</h3><p>Read the <a href='report.html'>corpus "
-        "findings and methodology</a> for the deployed-state assurance gap across the sampled set.</p></div>"
-        "<div class='panel'><h3>Reviewing a product's FIPS claim</h3><p>Use the module page to identify what was "
-        "validated, then compare that public record with evidence supplied by the vendor or operator. The site does "
-        "not perform that comparison.</p></div>"
-        "</div>"
-
-        "<h2>What each module page contains</h2><ul>"
-        "<li>module and certificate identity</li>"
-        "<li>validation status and dates</li>"
-        "<li>documented versions and operational environments</li>"
-        "<li>declared algorithms, services, interfaces, and module-boundary clues</li>"
-        "<li>the certificate update history</li>"
-        "<li>named upstream components and maintenance activity, where available</li>"
-        "<li>the specific questions the public record cannot resolve</li></ul>"
-
-        "<h2>What you can learn here</h2>"
-        "<p class='muted'>The CMVP certificate remains the authoritative validation record. This site restructures "
-        "that public information so a reviewer can more quickly understand the validated claim and locate the "
-        "questions that still require vendor or deployment evidence.</p>"
-        "<div class='cols3'>"
-        "<div class='panel'><h3>What was validated</h3><p>The module identity, version, environment, approved "
-        "services, and certificate status documented in the public record.</p></div>"
-        "<div class='panel'><h3>What has changed publicly</h3><p>Certificate updates, elapsed time, successor clues, "
-        "and upstream maintenance activity that may need to be reconciled.</p></div>"
-        "<div class='panel'><h3>What remains unknown</h3><p>The installed module version, patch provenance, "
-        "approved-mode configuration, actual consuming services, and whether changes occurred inside the validated "
-        "boundary.</p></div>"
-        "</div>"
-        "<p class='muted'>Establishing a deployed claim runs a chain; any step the public record cannot close reads as "
-        "<b>additional evidence required</b>, not as a finding.</p>"
-        f"<div class='flow'>{flow}</div>"
 
         "<h2>What we observed in the sampled corpus</h2>"
-        "<p class='muted'>Findings from the sampled certificate-number sweep, not the complete FIPS 140-3 population.</p>"
+        "<p class='muted'>Findings from the sampled certificate-number sweep (#4700 to #5157, step 3), not the complete "
+        "FIPS 140-3 population. Absence of a successor or update entry does not prove none exists.</p>"
         f"<div class='tiles'>{th}</div>"
-
-        "<h2>Trust-relevant clues in the public record</h2>"
-        "<p class='muted'>Interfaces, services, update paths, boot mechanisms, and trust anchors explicitly stated or "
-        "deterministically derived from public Security Policies. They are prompts for review, not findings of "
-        "exposure or vulnerability. A single module can raise several; counts are of modules.</p>"
-        f"<div class='panel'>{clues}</div>"
-
-        "<h2>Methodology &amp; limitations</h2>"
-        "<p class='muted'>The corpus is a <b>sampled</b> certificate-number sweep (#4700 to #5157, step 3), so it does "
-        "not represent every FIPS 140-3 validation, and absence of a successor or update entry does not prove none "
-        "exists. Every signal sits in one of three layers, and they are not interchangeable:</p>"
-        "<div class='cols3'>"
-        "<div class='panel'><h3>Public fact</h3><p>Stated directly in the certificate metadata or the Security "
-        "Policy.</p></div>"
-        "<div class='panel'><h3>Derived review clue</h3><p>A deterministic inference from structured public "
-        "evidence, or a keyword detected in the text. A prompt to confirm, not a conclusion.</p></div>"
-        "<div class='panel'><h3>Deployment-dependent conclusion</h3><p>Needs vendor, product, SBOM, package, or "
-        "operator evidence; it cannot be reached from the public corpus alone.</p></div>"
-        "</div>"
-        "<p class='dek' style='font-size:16px;margin-top:28px'>The result is not a vulnerability verdict. It is a "
-        "deployed-assurance workflow: identify the validated claim, test its correspondence to the deployed state, "
-        "and turn each unresolved gap into a specific evidence request.</p>"
+        "<p class='muted' style='font-size:13px;margin-top:18px'>The timeline is estimated elapsed time, strongest for "
+        "the post-submission phases and industry-estimate elsewhere. Corpus figures are deterministic extractions from "
+        "public CMVP and NVD data; they are review prompts, not vulnerability findings.</p>"
         "</main>")
-    return page("What a FIPS certificate actually tells you", "", "home", body)
+    return page("FIPS 140-3 validation, in practice", "", "home", body)
 
 # ---- module index ----------------------------------------------------------
 def build_modules_index():
