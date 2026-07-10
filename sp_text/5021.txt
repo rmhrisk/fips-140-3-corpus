@@ -1,0 +1,8965 @@
+Amazon Web Services, Inc.
+Amazon Linux 2023 OpenSSL FIPS Provider
+FIPS 140-3 Non-Proprietary Security Policy
+
+Document Version 1.2
+Last update: 2025-05-14
+
+Prepared by:
+atsec information security corporation
+4516 Seton Center Pkwy, Suite 250
+Austin, TX 78759
+www.atsec.com
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Table of Contents
+
+1 General ...................................................................................................................... 6
+1.1 Overview ....................................................................................................................................... 6
+1.1.1 How this Security Policy was Prepared ................................................................................... 6
+1.2 Security Levels .............................................................................................................................. 6
+2 Cryptographic Module Specification ............................................................................. 7
+2.1 Description .................................................................................................................................... 7
+2.2 Tested and Vendor Affirmed Module Version and Identification .................................................... 8
+2.3 Excluded Components ................................................................................................................... 9
+2.4 Modes of Operation ....................................................................................................................... 9
+2.5 Algorithms ..................................................................................................................................... 9
+2.6 Security Function Implementations ............................................................................................. 14
+2.7 Algorithm Specific Information .................................................................................................... 22
+2.7.1 AES GCM IV........................................................................................................................... 22
+2.7.2 AES XTS ................................................................................................................................ 22
+2.7.3 Key Derivation using SP 800-132 PBKDF2 ............................................................................ 22
+2.7.4 SP 800-56Ar3 Assurances ..................................................................................................... 23
+2.7.5 SHA-3 ................................................................................................................................... 23
+2.7.6 RSA Signatures ..................................................................................................................... 23
+2.7.7 Key Wrapping ....................................................................................................................... 23
+2.8 RBG and Entropy ......................................................................................................................... 23
+2.9 Key Generation ........................................................................................................................... 24
+2.10 Key Establishment ..................................................................................................................... 24
+2.11 Industry Protocols...................................................................................................................... 24
+3 Cryptographic Module Interfaces ............................................................................... 26
+3.1 Ports and Interfaces .................................................................................................................... 26
+4 Roles, Services, and Authentication ........................................................................... 27
+4.1 Authentication Methods .............................................................................................................. 27
+4.2 Roles ........................................................................................................................................... 27
+4.3 Approved Services ...................................................................................................................... 27
+4.4 Non-Approved Services ............................................................................................................... 34
+5 Software/Firmware Security ...................................................................................... 36
+5.1 Integrity Techniques.................................................................................................................... 36
+5.2 Initiate on Demand ...................................................................................................................... 36
+6 Operational Environment .......................................................................................... 37
+6.1 Operational Environment Type and Requirements ...................................................................... 37
+6.2 Configuration Settings and Restrictions ...................................................................................... 37
+7 Physical Security ...................................................................................................... 38
+8 Non-Invasive Security ............................................................................................... 39
+9 Sensitive Security Parameters Management ............................................................... 40
+9.1 Storage Areas.............................................................................................................................. 40
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 2 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9.2 SSP Input-Output Methods .......................................................................................................... 40
+9.3 SSP Zeroization Methods ............................................................................................................. 40
+9.4 SSPs ............................................................................................................................................ 41
+9.5 Transitions................................................................................................................................... 47
+10 Self-Tests ............................................................................................................... 48
+10.1 Pre-Operational Self-Tests ......................................................................................................... 48
+10.2 Conditional Self-Tests ................................................................................................................ 48
+10.3 Periodic Self-Test Information ................................................................................................... 58
+10.4 Error States ............................................................................................................................... 64
+10.5 Operator Initiation of Self-Tests ................................................................................................. 64
+11 Life-Cycle Assurance ............................................................................................... 65
+11.1 Installation, Initialization, and Startup Procedures .................................................................... 65
+11.2 Administrator Guidance............................................................................................................. 65
+11.3 Non-Administrator Guidance ..................................................................................................... 65
+11.6 End of Life ................................................................................................................................. 65
+12 Mitigation of Other Attacks ..................................................................................... 66
+12.1 Attack List ................................................................................................................................. 66
+Appendix A. Glossary and Abbreviations ....................................................................... 67
+Appendix B. References ............................................................................................... 69
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 3 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+List of Tables
+
+Table 1: Security Levels .......................................................................................................................... 6
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets).................. 8
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid ............................................... 9
+Table 4: Modes List and Description ........................................................................................................ 9
+Table 5: Approved Algorithms ............................................................................................................... 13
+Table 6: Vendor-Affirmed Algorithms .................................................................................................... 13
+Table 7: Non-Approved, Not Allowed Algorithms ................................................................................... 14
+Table 8: Security Function Implementations ......................................................................................... 22
+Table 9: Entropy Certificates ................................................................................................................. 23
+Table 10: Entropy Sources .................................................................................................................... 24
+Table 11: Ports and Interfaces............................................................................................................... 26
+Table 12: Roles ..................................................................................................................................... 27
+Table 13: Approved Services ................................................................................................................. 34
+Table 14: Non-Approved Services ......................................................................................................... 35
+Table 15: Storage Areas ........................................................................................................................ 40
+Table 16: SSP Input-Output Methods..................................................................................................... 40
+Table 17: SSP Zeroization Methods ....................................................................................................... 41
+Table 18: SSP Table 1 ........................................................................................................................... 44
+Table 19: SSP Table 2 ........................................................................................................................... 47
+Table 20: Pre-Operational Self-Tests ..................................................................................................... 48
+Table 21: Conditional Self-Tests ............................................................................................................ 58
+Table 22: Pre-Operational Periodic Information ..................................................................................... 59
+Table 23: Conditional Periodic Information ............................................................................................ 63
+Table 24: Error States ........................................................................................................................... 64
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 4 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+List of Figures
+
+Figure 1: Block Diagram .......................................................................................................................... 8
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 5 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for version 3.0.8- d694bfa693b76001
+of the Amazon Linux 2023 OpenSSL FIPS Provider. It contains the security rules under which the
+module must operate and describes how this module meets the requirements as specified in FIPS PUB
+140-3 (Federal Information Processing Standards Publication 140-3) for an overall Security Level 1
+module.
+This Non-Proprietary Security Policy may be reproduced and distributed, but only whole and intact and
+including this notice. Other documentation is proprietary to their authors.
+
+1.1.1 How this Security Policy was Prepared
+The vendor has provided the non-proprietary Security Policy of the cryptographic module, which was
+further consolidated into this document by atsec information security together with other vendorsupplied documentation. In preparing the Security Policy document, the laboratory formatted the
+vendor-supplied documentation for consolidation without altering the technical statements therein
+contained. The further refining of the Security Policy document was conducted iteratively throughout
+the conformance testing, wherein the Security Policy was submitted to the vendor, who would then
+edit, modify, and add technical contents. The vendor would also supply additional documentation,
+which the laboratory formatted into the existing Security Policy, and resubmitted to the vendor for
+their final editing.
+
+1.2 Security Levels
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Section
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+Table 1: Security Levels
+
+Security Level
+1
+1
+1
+1
+1
+1
+N/A
+N/A
+1
+1
+1
+1
+1
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 6 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The Amazon Linux 2023 OpenSSL FIPS Provider (hereafter referred to as “the module”) is defined as a
+software module in a multi-chip standalone embodiment. It provides a C language application program
+interface (API) for use by other applications that require cryptographic functionality. The module
+consists of one software component, the “FIPS provider”, which implements the FIPS requirements and
+the cryptographic functionality provided to the operator.
+
+Module Type: Software
+Module Embodiment: MultiChipStand
+Cryptographic Boundary:
+The cryptographic boundary of the module is defined as the fips.so shared library, which contains the
+compiled code implementing the FIPS provider.
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The TOEPP of the module is defined as the general-purpose computer on which the module is installed.
+Figure 1 shows a block diagram that represents the design of the module when the module is
+operational and providing services to other user space applications. In this diagram, the physical
+perimeter of the operational environment (a general-purpose computer on which the module is
+installed) is indicated by a purple dashed line. The cryptographic boundary is represented by the
+components painted in orange blocks, which consists only of the shared library implementing the FIPS
+provider (fips.so).
+Green lines indicate the flow of data between the cryptographic module and its operator application,
+through the logical interfaces defined in Section 3 Cryptographic Module Interfaces.
+Components in white are only included in the diagram for informational purposes. They are not
+included in the cryptographic boundary (and therefore not part of the module’s validation). For
+example, the kernel is responsible for managing system calls issued by the module itself, as well as
+other applications using the module for cryptographic services.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 7 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Figure 1: Block Diagram
+
+2.2 Tested and Vendor Affirmed Module Version and
+Identification
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code
+Sets):
+Software/ Firmware
+Features
+Integrity Test
+Version
+fips.so on Amazon Linux 3.0.8N/A
+HMAC-SHA-256
+2023 with AWS
+d694bfa693b76001
+Graviton3
+fips.so on Amazon Linux 3.0.8N/A
+HMAC-SHA-256
+2023 with Intel Xeon
+d694bfa693b76001
+Platinum 8375C
+fips.so on Amazon Linux 3.0.8N/A
+HMAC-SHA-256
+2023 with AMD EPYC
+d694bfa693b76001
+7702
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+Package or File Name
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+Amazon Linux
+2023
+Amazon Linux
+2023
+Amazon Linux
+2023
+Amazon Linux
+2023
+
+Hardware
+Platform
+EC2
+c7g.metal
+EC2
+c6i.metal
+AWS
+Snowball
+EC2
+c7g.metal
+
+Processors
+
+PAA/PAI
+
+AWS Graviton3
+
+Yes
+
+Intel Xeon Platinum
+8375C
+AMD EPYC 7702
+
+Yes
+
+AWS Graviton3
+
+No
+
+Yes
+
+Hypervisor
+Version(s)
+or Host OS
+N/A
+3.0.8d694bfa693b76001
+N/A
+3.0.8d694bfa693b76001
+N/A
+3.0.8d694bfa693b76001
+N/A
+3.0.8d694bfa693b76001
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 8 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Operating
+System
+Amazon Linux
+2023
+Amazon Linux
+2023
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Hardware
+Hypervisor
+Processors
+PAA/PAI
+Version(s)
+Platform
+or Host OS
+EC2
+Intel Xeon Platinum
+No
+N/A
+3.0.8c6i.metal
+8375C
+d694bfa693b76001
+AWS
+AMD EPYC 7702
+No
+N/A
+3.0.8Snowball
+d694bfa693b76001
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+2.3 Excluded Components
+There are no components excluded from the requirements of the FIPS 140-3 standard.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode Name
+Description
+Type
+Approved
+Automatically entered whenever an Approved
+mode
+approved service is requested
+
+Status Indicator
+Equivalent to the indicator (specified
+in Section 4.3) of the requested
+service
+Automatically entered whenever a
+NonEquivalent to the indicator (specified
+non-approved service is requested
+Approved in Section 4.3) of the requested
+service
+Table 4: Modes List and Description
+
+Nonapproved
+mode
+
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed on start-up,
+the module automatically transitions to the approved mode. No operator intervention is required to
+reach this point.
+In the operational state, the module accepts service requests from calling applications through its
+logical interfaces. At any point in the operational state, a calling application can end its process,
+causing the module to end its operation.
+
+Mode Change Instructions and Status:
+The module automatically switches between the approved and non-approved modes depending on the
+services requested by the operator. The status indicator of the mode of operation is equivalent to the
+indicator of the service that was requested.
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+AES-CBC
+
+CAVP Cert
+A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CBC-CS1 A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CBC-CS2 A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CBC-CS3 A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CCM
+A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CFB1
+A4605, A4606, A4607,
+A4609, A4610, A4611
+AES-CFB128 A4605, A4606, A4607,
+A4609, A4610, A4611
+
+Properties
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Key Length - 128, 192, 256
+
+Reference
+SP 800-38A
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+
+SP 800-38A
+
+SP 800-38A
+SP 800-38A
+SP 800-38A
+SP 800-38C
+
+SP 800-38A
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 9 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm
+AES-CFB8
+AES-CMAC
+AES-CTR
+AES-ECB
+
+AES-GCM
+
+AES-GMAC
+
+AES-KW
+AES-KWP
+AES-OFB
+
+CAVP Cert
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611,
+A4635, A4636, A4637,
+A4638, A4639
+A4614, A4615, A4616,
+A4617, A4620, A4621,
+A4622, A4623, A4624,
+A4625, A4626, A4627,
+A4628
+A4614, A4615, A4616,
+A4617, A4620, A4621,
+A4622, A4623, A4624,
+A4625, A4626, A4627,
+A4628
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611
+A4605, A4606, A4607,
+A4609, A4610, A4611
+
+AES-XTS
+Testing
+Revision 2.0
+Counter DRBG A4604
+ECDSA
+KeyGen
+(FIPS186-5)
+ECDSA
+KeyVer
+(FIPS186-5)
+ECDSA
+SigGen
+(FIPS186-5)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Properties
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Generation, Verification
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+
+Reference
+SP 800-38A
+
+Direction - Decrypt, Encrypt
+IV Generation - External, Internal
+IV Generation Mode - 8.2.1, 8.2.2
+Key Length - 128, 192, 256
+
+SP 800-38D
+
+Direction - Decrypt, Encrypt
+IV Generation - External
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+
+SP 800-38D
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 256
+
+SP 800-38F
+
+SP 800-38B
+SP 800-38A
+SP 800-38A
+
+SP 800-38F
+SP 800-38A
+SP 800-38E
+
+Prediction Resistance - No, Yes
+Mode - AES-128, AES-192, AES-256
+Derivation Function Enabled - No, Yes
+A4612, A4618, A4629, Curve - P-224, P-256, P-384, P-521
+A4630, A4631, A4632 Secret Generation Mode - testing candidates
+
+SP 800-90A
+Rev. 1
+
+A4612, A4618, A4629, Curve - P-224, P-256, P-384, P-521
+A4630, A4631, A4632
+
+FIPS 186-5
+
+FIPS 186-5
+
+A4612, A4618, A4629, Curve - P-224, P-256, P-384, P-521
+FIPS 186-5
+A4630, A4631, A4632 Hash Algorithm - SHA2-224, SHA2-256, SHA2-384,
+SHA2-512, SHA2-512/224, SHA2-512/256
+Component - No
+ECDSA
+A4613, A4619
+Curve - P-224, P-256, P-384, P-521
+FIPS 186-5
+SigGen
+Hash Algorithm - SHA3-224, SHA3-256, SHA3-384,
+SHA3-512
+(FIPS186-5)
+Component - No
+ECDSA SigVer A4612, A4618, A4629, Curve - P-224, P-256, P-384, P-521
+FIPS 186-5
+(FIPS186-5)
+A4630, A4631, A4632 Hash Algorithm - SHA2-224, SHA2-256, SHA2-384,
+SHA2-512, SHA2-512/224, SHA2-512/256
+ECDSA SigVer A4613, A4619
+Curve - P-224, P-256, P-384, P-521
+FIPS 186-5
+(FIPS186-5)
+Hash Algorithm - SHA3-224, SHA3-256, SHA3-384,
+SHA3-512
+Hash DRBG
+A4604
+Prediction Resistance - No, Yes
+SP 800-90A
+Mode - SHA-1, SHA2-256, SHA2-512
+Rev. 1
+HMAC DRBG A4604
+Prediction Resistance - No, Yes
+SP 800-90A
+Mode - SHA-1, SHA2-256, SHA2-512
+Rev. 1
+HMAC-SHA-1 A4612, A4618, A4629, Key Length - Key Length: 112-524288 Increment FIPS 198-1
+A4630, A4631, A4632 8
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 10 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm
+HMAC-SHA2224
+HMAC-SHA2256
+HMAC-SHA2384
+HMAC-SHA2512
+HMAC-SHA2512/224
+HMAC-SHA2512/256
+HMAC-SHA3224
+HMAC-SHA3256
+HMAC-SHA3384
+HMAC-SHA3512
+KAS-ECC-SSC
+Sp800-56Ar3
+
+CAVP Cert
+A4612, A4618, A4629,
+A4630, A4631, A4632
+A4608, A4612, A4618,
+A4629, A4630, A4631,
+A4632
+A4612, A4618, A4629,
+A4630, A4631, A4632
+A4612, A4618, A4629,
+A4630, A4631, A4632
+A4612, A4618, A4629,
+A4630, A4631, A4632
+A4612, A4618, A4629,
+A4630, A4631, A4632
+A4613, A4619
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Properties
+Key Length - Key Length: 112-524288 Increment
+8
+Key Length - Key Length: 112-524288 Increment
+8
+
+Reference
+FIPS 198-1
+FIPS 198-1
+
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+A4613, A4619
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+A4613, A4619
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+A4613, A4619
+Key Length - Key Length: 112-524288 Increment FIPS 198-1
+8
+A4612, A4618, A4629, Domain Parameter Generation Methods - P-224, SP 800-56A
+A4630, A4631, A4632 P-256, P-384, P-521
+Rev. 3
+Scheme ephemeralUnified KAS Role - initiator, responder
+KAS-FFC-SSC A4642
+Domain Parameter Generation Methods SP 800-56A
+Sp800-56Ar3
+ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144,
+Rev. 3
+ffdhe8192, MODP-2048, MODP-3072, MODP-4096,
+MODP-6144, MODP-8192
+Scheme dhEphem KAS Role - initiator, responder
+KDA HKDF
+A4603
+Derived Key Length - 2048
+SP 800-56C
+Sp800-56Cr1
+Shared Secret Length - Shared Secret Length:
+Rev. 2
+224-2048 Increment 8
+HMAC Algorithm - SHA-1, SHA2-224, SHA2-256,
+SHA2-384, SHA2-512, SHA2-512/224, SHA2512/256, SHA3-224, SHA3-256, SHA3-384
+KDA OneStep A4641
+Derived Key Length - 2048
+SP 800-56C
+SP800-56Cr2
+Shared Secret Length - Shared Secret Length:
+Rev. 2
+224-2048 Increment 8
+KDA TwoStep A4641
+MAC Salting Methods - default, random
+SP 800-56C
+SP800-56Cr2
+KDF Mode - feedback
+Rev. 2
+Derived Key Length - 2048
+Shared Secret Length - Shared Secret Length:
+224-2048 Increment 8
+KDF ANS 9.42 A4612, A4618, A4629, KDF Type - DER
+SP 800-135
+(CVL)
+A4630, A4631, A4632 Hash Algorithm - SHA-1, SHA2-224, SHA2-256,
+Rev. 1
+SHA2-384, SHA2-512, SHA2-512/224, SHA2512/256
+Key Data Length - Key Data Length: 8-4096
+Increment 8
+KDF ANS 9.42 A4613, A4619
+KDF Type - DER
+SP 800-135
+(CVL)
+Hash Algorithm - SHA3-224, SHA3-256, SHA3-384, Rev. 1
+SHA3-512
+Key Data Length - Key Data Length: 8-4096
+Increment 8
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 11 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm
+CAVP Cert
+Properties
+Reference
+KDF ANS 9.63 A4612, A4618, A4629, Hash Algorithm - SHA2-224, SHA2-256, SHA2-384, SP 800-135
+(CVL)
+A4630, A4631, A4632 SHA2-512, SHA2-512/224, SHA2-512/256
+Rev. 1
+Key Data Length - Key Data Length: 128-4096
+Increment 8
+KDF ANS 9.63 A4613, A4619
+Hash Algorithm - SHA3-224, SHA3-256, SHA3-384, SP 800-135
+(CVL)
+SHA3-512
+Rev. 1
+Key Data Length - Key Data Length: 128-4096
+Increment 8
+KDF SP800A4608, A4640
+KDF Mode - Counter, Feedback
+SP 800-108
+108
+Supported Lengths - Supported Lengths: 8, 72,
+Rev. 1
+128, 776, 3456, 4096
+KDF SSH
+A4635, A4636, A4637, Cipher - AES-128, AES-192, AES-256
+SP 800-135
+(CVL)
+A4638, A4639
+Hash Algorithm - SHA-1, SHA2-256, SHA2-384,
+Rev. 1
+SHA2-512
+PBKDF
+A4612, A4613, A4618, Iteration Count - Iteration Count: 1000-10000
+SP 800-132
+A4619, A4629, A4630, Increment 1
+A4631, A4632
+Password Length - Password Length: 8-128
+Increment 1
+RSA KeyGen A4612, A4618, A4629, Key Generation Mode - probableWithProbableAux FIPS 186-5
+(FIPS186-5)
+A4630, A4631, A4632 Modulo - 2048, 3072, 4096
+Primality Tests - 2powSecStr
+Private Key Format - standard
+RSA SigGen
+A4612, A4613, A4618, Modulo - 2048, 3072, 4096
+FIPS 186-5
+(FIPS186-5)
+A4619, A4629, A4630, Signature Type - pkcs1v1.5, pss
+A4631, A4632
+RSA SigVer
+A4612, A4618, A4629, Signature Type - PKCS 1.5, PKCSPSS
+FIPS 186-4
+(FIPS186-4)
+A4630, A4631, A4632 Modulo - 1024
+RSA SigVer
+A4612, A4613, A4618, Modulo - 2048, 3072, 4096
+FIPS 186-5
+(FIPS186-5)
+A4619, A4629, A4630, Signature Type - pkcs1v1.5, pss
+A4631, A4632
+Safe Primes
+A4642
+Safe Prime Groups - ffdhe2048, ffdhe3072,
+SP 800-56A
+Key
+ffdhe4096, ffdhe6144, ffdhe8192, MODP-2048,
+Rev. 3
+Generation
+MODP-3072, MODP-4096, MODP-6144, MODP8192
+Safe Primes
+A4642
+Safe Prime Groups - ffdhe2048, ffdhe3072,
+SP 800-56A
+Key
+ffdhe4096, ffdhe6144, ffdhe8192, MODP-2048,
+Rev. 3
+Verification
+MODP-3072, MODP-4096, MODP-6144, MODP8192
+SHA-1
+A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA2-224
+A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA2-256
+A4608, A4612, A4618, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4629, A4630, A4631, Increment 8
+A4632
+Large Message Sizes - 1, 2, 4, 8
+SHA2-384
+A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA2-512
+A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA2-512/224 A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA2-512/256 A4612, A4618, A4629, Message Length - Message Length: 0-65536
+FIPS 180-4
+A4630, A4631, A4632 Increment 8
+Large Message Sizes - 1, 2, 4, 8
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 12 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm
+SHA3-224
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+CAVP Cert
+A4613, A4619
+
+Properties
+Reference
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA3-256
+A4613, A4619
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA3-384
+A4613, A4619
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHA3-512
+A4613, A4619
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2, 4, 8
+SHAKE-128
+A4613, A4619
+Output Length - Output Length: 16-65536
+FIPS 202
+Increment 8
+SHAKE-256
+A4613, A4619
+Output Length - Output Length: 16-65536
+FIPS 202
+Increment 8
+TLS v1.2 KDF A4612, A4618, A4629, Hash Algorithm - SHA2-256, SHA2-384, SHA2-512 SP 800-135
+RFC7627
+A4630, A4631, A4632
+Rev. 1
+(CVL)
+TLS v1.3 KDF A4603
+HMAC Algorithm - SHA2-256, SHA2-384
+SP 800-135
+(CVL)
+KDF Running Modes - DHE, PSK, PSK-DHE
+Rev. 1
+Table 5: Approved Algorithms
+The table above lists all approved cryptographic algorithms of the module, including specific key
+lengths employed for approved services (see Approved Services table in Section 4.3 Approved
+Services), and implemented modes or methods of operation of the algorithms.
+
+Vendor-Affirmed Algorithms:
+Name
+Asymmetric Cryptographic Key
+Generation (CKG)
+
+Properties
+Implementation
+Reference
+Key
+N/A
+SP 800-133Rev2 section 4,
+Type:Asymmetric
+example 1
+Table 6: Vendor-Affirmed Algorithms
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+The module does not implement non-approved algorithms that are allowed in the approved mode of
+operation.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+The module does not implement non-approved algorithms that are allowed in the approved mode of
+operation with no security claimed.
+
+Non-Approved, Not Allowed Algorithms:
+Name
+AES GCM (external IV)
+HMAC (< 112-bit keys)
+KBKDF, KDA OneStep, KDA TwoStep, HKDF, ANS X9.42 KDF, ANS
+X9.63 KDF (< 112-bit keys)
+KDA OneStep, KDA TwoStep (SHAKE128, SHAKE256)
+ANS X9.42 KDF (SHAKE128, SHAKE256)
+ANS X9.63 KDF (SHA-1, SHAKE128, SHAKE256)
+SSH KDF (SHA-512/224, SHA-512/256, SHA-3, SHAKE128,
+SHAKE256)
+
+Use and Function
+Authenticated encryption
+Message authentication
+Key derivation
+Key derivation
+Key derivation
+Key derivation
+Key derivation
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 13 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+TLS 1.2 KDF (SHA-1, SHA-224, SHA-512/224, SHA-512/256, SHA3)
+TLS 1.3 KDF (SHA-1, SHA-224, SHA-512, SHA-512/224, SHA512/256, SHA-3)
+PBKDF2 (< 8 characters password; < 128 salt length; < 1000
+iterations; < 112-bit keys)
+RSA (KAS1, KAS2 schemes)
+RSA and ECDSA (pre-hashed message)
+
+Use and Function
+Key derivation
+Key derivation
+Password-based key derivation
+
+Shared secret computation
+Signature generation; Signature
+verification
+RSA-PSS (invalid salt length)
+Signature generation; Signature
+verification
+RSA-OAEP
+Asymmetric encryption; Asymmetric
+decryption
+Table 7: Non-Approved, Not Allowed Algorithms
+The table above lists all non-approved cryptographic algorithms of the module employed by the nonapproved services of the Non-Approved Services table in Section 4.4 Non-Approved Services.
+
+2.6 Security Function Implementations
+Name
+Encryption with
+AES
+
+Type
+BC-UnAuth
+
+Description
+Encryption using
+AES
+
+Properties
+Key:128, 192, 256 bit
+keys with 128, 192,
+256 bits of key
+strength, respectively
+
+Algorithms
+AES-ECB: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611, A4635,
+A4636, A4637,
+A4638, A4639)
+AES-CBC: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CBC-CS1:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CBC-CS2:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CBC-CS3:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CFB1: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CFB8: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CFB128:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CTR: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 14 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Type
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Properties
+
+Decryption with
+AES
+
+BC-UnAuth
+
+Decryption using
+AES
+
+Key:128, 192, 256 bit
+keys with 128, 192,
+256 bits of key
+strength, respectively
+
+Authenticated
+Encryption with
+AES
+
+BC-Auth
+
+Authenticated
+encryption using
+AES
+
+Key:128, 192, 256 bit
+keys with 128, 192,
+256 bits of key
+strength, respectively
+
+Algorithms
+AES-OFB: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-XTS Testing
+Revision 2.0:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-ECB: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611, A4635,
+A4636, A4637,
+A4638, A4639)
+AES-CBC: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CBC-CS1:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CBC-CS2:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CBC-CS3:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CFB1: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CFB8: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-CFB128:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CTR: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-OFB: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-XTS Testing
+Revision 2.0:
+(A4605, A4606,
+A4607, A4609,
+A4610, A4611)
+AES-CCM: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 15 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Type
+
+Authenticated
+Decryption with
+AES
+
+BC-Auth
+
+Key wrapping
+using AES KW
+
+KTS-Wrap
+
+Key unwrapping
+using AES KW
+
+KTS-Wrap
+
+Key wrapping
+using AES KWP
+
+KTS-Wrap
+
+Key unwrapping
+using AES KWP
+
+KTS-Wrap
+
+Key wrapping
+using AES CCM
+
+KTS-Wrap
+
+Key unwrapping
+using AES CCM
+
+KTS-Wrap
+
+Key wrapping
+using AES GCM
+
+KTS-Wrap
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Properties
+
+Algorithms
+AES-KW: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-KWP: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-GCM: (A4614,
+A4615, A4616,
+A4617, A4620,
+A4621, A4622,
+A4623, A4624,
+A4625, A4626,
+A4627, A4628)
+Authenticated
+Key:128, 192, 256 bit AES-CCM: (A4605,
+decryption using
+keys with 128, 192,
+A4606, A4607,
+AES
+256 bits of key
+A4609, A4610,
+strength, respectively A4611)
+AES-KW: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-KWP: (A4605,
+A4606, A4607,
+A4609, A4610,
+A4611)
+AES-GCM: (A4614,
+A4615, A4616,
+A4617, A4620,
+A4621, A4622,
+A4623, A4624,
+A4625, A4626,
+A4627, A4628)
+Key wrapping
+Security strength:128, AES-KW: (A4605,
+using AES KW
+192, 256 bits
+A4606, A4607,
+A4609, A4610,
+A4611)
+Key unwrapping
+Security strength:128, AES-KW: (A4605,
+using AES KW
+192, 256 bits
+A4606, A4607,
+A4609, A4610,
+A4611)
+Key wrapping
+Security strength:128, AES-KWP: (A4605,
+using AES KW with 192, 256 bits
+A4606, A4607,
+padding
+A4609, A4610,
+A4611)
+Key unwrapping
+Security strength:128, AES-KWP: (A4605,
+using AES KW with 192, 256 bits
+A4606, A4607,
+padding
+A4609, A4610,
+A4611)
+Key wrapping
+Security strength:128, AES-CCM: (A4605,
+using AES CCM
+192, 256 bits
+A4606, A4607,
+A4609, A4610,
+A4611)
+Key unwrapping
+Security strength:128, AES-CCM: (A4605,
+using AES CCM
+192, 256 bits
+A4606, A4607,
+A4609, A4610,
+A4611)
+Key wrapping
+Key:128, 192, 256 bit AES-GCM: (A4614,
+using AES GCM
+keys with 128, 192,
+A4615, A4616,
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 16 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Key unwrapping
+using AES GCM
+
+Type
+
+KTS-Wrap
+
+Shared secret
+KAS-SSC
+computation using
+Diffie-Hellman
+
+Shared secret
+KAS-SSC
+computation using
+EC Diffie-Hellman
+
+Hashing
+
+SHA
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Properties
+256 bits of key
+strength, respectively
+IV method:Internally
+generated
+
+Algorithms
+A4617, A4620,
+A4621, A4622,
+A4623, A4624,
+A4625, A4626,
+A4627, A4628)
+Key unwrapping
+Key:128, 192, 256 bit AES-GCM: (A4614,
+using AES GCM
+keys with 128, 192,
+A4615, A4616,
+256 bits of key
+A4617, A4620,
+strength, respectively A4621, A4622,
+IV method:Provided
+A4623, A4624,
+externally
+A4625, A4626,
+A4627, A4628)
+Compute shared
+Security strength:112- KAS-FFC-SSC
+secret using DH
+220 bits
+Sp800-56Ar3:
+Compliance:SP 800(A4642)
+56Arev3, FIPS 140-3
+IG D.F. Scenario 2 (1)
+Scheme:dpEphem
+Roles:initiator,
+responder
+Groups:MODP-2048,
+MODP-3072, MODP4096, MODP-6144,
+MODP-8192,
+ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144,
+ffdhe8192
+Compute shared
+Security strength:112, KAS-ECC-SSC
+secret using ECDH 128, 192, 256 bits
+Sp800-56Ar3:
+Compliance:SP 800
+(A4612, A4618,
+56Arev3, FIPS 140-3 A4629, A4630,
+IG D.F. Scenario 2 (1) A4631, A4632)
+Scheme:Ephemeral
+Unified Model
+Roles:initiator,
+responder
+Curves:P-224, P-256,
+P-384, P-521
+Compute message
+SHA-1: (A4612,
+digest using SHA
+A4618, A4629,
+A4630, A4631,
+A4632)
+SHA2-224: (A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+SHA2-256: (A4608,
+A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+SHA2-384: (A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+SHA2-512: (A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+SHA2-512/224:
+(A4612, A4618,
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 17 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Message
+authentication
+
+Type
+
+MAC
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Properties
+
+Algorithms
+A4629, A4630,
+A4631, A4632)
+SHA2-512/256:
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+SHA3-224: (A4613,
+A4619)
+SHA3-256: (A4613,
+A4619)
+SHA3-384: (A4613,
+A4619)
+SHA3-512: (A4613,
+A4619)
+Compute MAC tags HMAC hashes:SHA-1, AES-CMAC:
+using HMAC or
+SHA-224, SHA-256,
+(A4605, A4606,
+AES-based CMAC, SHA-384, SHA-512,
+A4607, A4609,
+GMAC
+SHA-512/224, SHAA4610, A4611)
+512/256, SHA3-224,
+AES-GMAC:
+SHA3-256, SHA3-384, (A4614, A4615,
+SHA3-512
+A4616, A4617,
+AES key:128, 192,
+A4620, A4621,
+256 bits
+A4622, A4623,
+A4624, A4625,
+A4626, A4627,
+A4628)
+HMAC-SHA-1:
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+HMAC-SHA2-224:
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+HMAC-SHA2-256:
+(A4608, A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+HMAC-SHA2-384:
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+HMAC-SHA2-512:
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+HMAC-SHA2512/224: (A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+HMAC-SHA2512/256: (A4612,
+A4618, A4629,
+A4630, A4631,
+A4632)
+HMAC-SHA3-224:
+(A4613, A4619)
+HMAC-SHA3-256:
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 18 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Type
+
+Description
+
+Key Pair
+Generation with
+RSA
+
+AsymKeyPairKeyGen
+
+Generate a key
+pair for RSA
+
+Key Pair
+Generation with
+ECDSA
+
+AsymKeyPairKeyGen
+
+Generate a key
+pair for ECDSA
+
+Public Key
+Verification with
+ECDSA
+
+AsymKeyPairKeyVer
+
+Verify public key
+for ECDSA
+
+Signature
+Generation with
+RSA
+
+DigSig-SigGen
+
+Generate a
+signature using
+RSA
+
+Signature
+Verification with
+RSA
+
+DigSig-SigVer
+
+Verify a signature
+using RSA
+
+Signature
+Generation with
+ECDSA
+
+DigSig-SigGen
+
+Generate a
+signature using
+ECDSA
+
+Signature
+Verification with
+ECDSA
+
+DigSig-SigVer
+
+Verify a signature
+using ECDSA
+
+Properties
+
+Mode:A.1.6 Probable
+Primes Based on
+Auxiliary Probable
+Primes
+Modulus:2048-16384
+bits
+Mode:A.2.2 Rejection
+Sampling
+Curves:P-224, P-256,
+P-384, P-521
+
+Algorithms
+(A4613, A4619)
+HMAC-SHA3-384:
+(A4613, A4619)
+HMAC-SHA3-512:
+(A4613, A4619)
+RSA KeyGen
+(FIPS186-5):
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+
+ECDSA KeyGen
+(FIPS186-5):
+(A4612, A4618,
+A4629, A4630,
+A4631, A4632)
+Mode:A.2.2 Rejection ECDSA KeyVer
+Sampling
+(FIPS186-5):
+Curves:P-224, P-256, (A4612, A4618,
+P-384. P-521
+A4629, A4630,
+A4631, A4632)
+Padding:PKCS#1 v1.5, RSA SigGen
+PSS
+(FIPS186-5):
+Hashes:SHA-224,
+(A4612, A4613,
+SHA- 256, SHA-384,
+A4618, A4619,
+SHA-512, SHAA4629, A4630,
+512/224, SHAA4631, A4632)
+512/256, SHA3-224,
+SHA3- 256, SHA3-384,
+SHA3-512
+Modulus:2048-16384
+bits
+Padding:PKCS#1 v1.5, RSA SigVer
+PSS
+(FIPS186-5):
+Hashes:SHA-224,
+(A4612, A4613,
+SHA- 256, SHA-384,
+A4618, A4619,
+SHA-512, SHAA4629, A4630,
+512/224, SHAA4631, A4632)
+512/256, SHA3-224,
+RSA SigVer
+SHA3- 256, SHA3-384, (FIPS186-4):
+(A4612, A4618,
+SHA3-512
+Modulus:1024-16384 A4629, A4630,
+bits
+A4631, A4632)
+Curves:P-224, P-256, ECDSA SigGen
+P-384, P-521
+(FIPS186-5):
+Hashes:SHA-224,
+(A4612, A4613,
+SHA- 256, SHA-384,
+A4618, A4619,
+SHA-512, SHAA4629, A4630,
+512/224, SHAA4631, A4632)
+512/256, SHA3-224,
+SHA3- 256, SHA3-384,
+SHA3-512
+Curves:P-224, P-256, ECDSA SigVer
+P-384, P-521
+(FIPS186-5):
+Hashes:SHA-224,
+(A4612, A4613,
+SHA- 256, SHA-384,
+A4618, A4619,
+SHA-512, SHAA4629, A4630,
+512/224, SHAA4631, A4632)
+512/256, SHA3-224,
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 19 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Type
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Extendable Output XOF
+Function
+
+Compute message
+digests from XOFs
+
+Random Number
+Generation with
+DRBG
+
+Generate random
+numbers using
+DRBGs
+
+DRBG
+
+Key derivation with KBKDF
+KBKDF
+
+Key derivation with KAS-56CKDF
+HKDF
+
+Key derivation with KAS-135KDF
+TLS 1.2 KDF
+
+Key derivation with
+TLS 1.3 KDF
+Key derivation with KAS-135KDF
+SSH KDF
+
+Key derivation with KAS-135KDF
+X9.63 KDF
+
+Properties
+SHA3- 256, SHA3-384,
+SHA3-512
+
+Algorithms
+SHAKE-128:
+(A4613, A4619)
+SHAKE-256:
+(A4613, A4619)
+Counter DRBG:
+(A4604)
+Hash DRBG:
+(A4604)
+HMAC DRBG:
+(A4604)
+
+CTR_DRBG:AES-128,
+AES-192, AES-256,
+with/without
+derivation function,
+with/without
+prediction resistance
+Hash_DRBG:SHA-1,
+SHA-256, SHA-512,
+with/without
+prediction resistance
+HMAC_DRBG:SHA-1,
+SHA-256, SHA-512,
+with/without
+prediction resistance
+Compliance:Compliant
+with SP 800-90Arev1
+Derive keys from a Modes:Counter,
+KDF SP800-108:
+key materials
+Feedback
+(A4608, A4640)
+MACs:CMAC and
+HMAC SHA-1, SHA224, SHA-256, SHA384, SHA-512, SHA512/224, SHA512/256, SHA3-224,
+SHA3-256, SHA3-384,
+SHA3-512
+Derive keys using Mode:Feedback
+KDA HKDF Sp800HKDF
+MACs:HMAC SHA-1,
+56Cr1: (A4603)
+SHA-224, SHA-256,
+SHA-384, SHA- 512,
+SHA-512/224, SHA512/256, SHA3-224,
+SHA3- 256, SHA3-384,
+SHA3-512
+Derive keys from
+Hashes:SHA-256,
+TLS v1.2 KDF
+TLS 1.2 KDF
+SHA- 384, SHA-512
+RFC7627: (A4612,
+Support:Extended
+A4618, A4629,
+Master Secret
+A4630, A4631,
+A4632)
+Derive keys from
+Modes:DHE, PSK, PSK- TLS v1.3 KDF:
+TLS 1.3 KDF
+DHE
+(A4603)
+Hashes:SHA-256,
+SHA-384
+Derive keys from
+Ciphers:AES-128, AES- KDF SSH: (A4635,
+SSH KDF
+192, AES-256
+A4636, A4637,
+Hashes:SHA-1, SHAA4638, A4639)
+224, SHA-256, SHA384, SHA-512
+Derive keys from
+Hashes:SHA-224,
+KDF ANS 9.63:
+ANS X9.63 KDF
+SHA- 256, SHA-384,
+(A4612, A4613,
+SHA-512, SHAA4618, A4619,
+512/224, SHAA4629, A4630,
+512/256, SHA3-224,
+A4631, A4632)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 20 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Type
+
+Description
+
+Key derivation with KAS-135KDF
+X9.42 KDF
+
+Derive keys from
+ANS X9.42 KDF
+
+Key derivation with PBKDF
+PBKDF
+
+Derive keys from
+PBKDF
+
+Key Pair
+Generation with
+Safe Primes
+
+AsymKeyPairKeyGen
+
+Generate a key
+pair from safe
+primes
+
+Key Pair
+Verification with
+Safe Primes
+
+AsymKeyPairKeyVer
+
+Verify a key pair
+using safe primes
+
+Key derivation
+using KDA
+OneStep
+
+KAS-56CKDF
+
+Key derivation
+using KDA
+OneStep
+
+Key derivation
+using KDA
+TwoStep
+
+KAS-56CKDF
+
+Key derivation
+using KDA
+TwoStep
+
+Properties
+Algorithms
+SHA3- 256, SHA3-384,
+SHA3-512
+Hashes:SHA-1, SHAKDF ANS 9.42:
+224, SHA-256, SHA(A4612, A4613,
+384, SHA- 512, SHA- A4618, A4619,
+512/224, SHAA4629, A4630,
+512/256, SHA3-224,
+A4631, A4632)
+SHA3- 256, SHA3-384,
+SHA3-512
+OID:AWS-KW 128,
+192, 256
+Option:1a
+PBKDF: (A4612,
+Password length:8A4613, A4618,
+128 characters
+A4619, A4629,
+Salt length:128-4096 A4630, A4631,
+bytes
+A4632)
+Iteration count:100010000
+Hashes:SHA-1, SHA224, SHA-256, SHA384, SHA-512, SHA512/224, SHA512/256, SHA3-224,
+SHA3-256, SHA3-384,
+SHA3-512
+Mode:Testing
+Safe Primes Key
+Candidates (SP 800- Generation:
+56Arev3 Appendix
+(A4642)
+5.6.1.1.4)
+Groups:MODP-2048,
+MODP-3072, MODP4096, MODP-6144,
+MODP-8192,
+ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144,
+ffdhe8192
+Mode:Testing
+Safe Primes Key
+Candidates (SP 800- Verification:
+56Arev3 Appendix
+(A4642)
+5.6.1.1.4)
+Groups:MODP-2048,
+MODP-3072, MODP4096, MODP-6144,
+MODP-8192,
+ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144,
+ffdhe8192
+MACs:(HMAC) SHA-1, KDA OneStep
+SHA-224, SHA-256,
+SP800-56Cr2:
+SHA-384, SHA-512,
+(A4641)
+SHA-512/224, SHA512/256, SHA3-224,
+SHA3-256, SHA3-384,
+SHA3-512
+Modes:Feedback
+KDA TwoStep
+MACs:HMAC SHA-1,
+SP800-56Cr2:
+SHA-224, SHA-256,
+(A4641)
+SHA-384, SHA-512,
+SHA-512/224, SHA512/256, SHA3-224,
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 21 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Type
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Properties
+SHA3-256, SHA3-384,
+SHA3-512
+Table 8: Security Function Implementations
+
+Algorithms
+
+2.7 Algorithm Specific Information
+2.7.1 AES GCM IV
+For TLS 1.2, the module offers the AES GCM implementation and uses the context of Scenario 1 of FIPS
+140-3 IG C.H. OpenSSL 3 is compliant with SP 800-52r2 Section 3.3.1 and the mechanism for IV
+generation is compliant with RFC 5288 and 8446.
+The module does not implement the TLS protocol. The module’s implementation of AES GCM is used
+together with an application that runs outside the module’s cryptographic boundary. The design of the
+TLS protocol implicitly ensures that the counter (the nonce_explicit part of the IV) does not exhaust the
+maximum number of possible values for a given session key. If the counter exhaustion condition is
+observed, the module returns an error indication to the calling application, which will then need to
+either abort the connection, or trigger a handshake to establish a new encryption key.
+In the event the module’s power is lost and restored, the consuming application must ensure that a
+new key for use with the AES GCM key encryption or decryption under this scenario shall be
+established.
+Alternatively, the Crypto Officer can use the module’s API to perform AES GCM encryption using
+internal IV generation. These IVs are always 96 bits and generated using the approved DRBG internal
+to the module’s boundary, compliant to Scenario 2 of FIPS 140-3 IG C.H.
+The module also provides a non-approved AES GCM encryption service which accepts arbitrary
+external IVs from the operator. This service can be requested by invoking the EVP_EncryptInit_ex2 API
+function with a non-NULL iv value. When this is the case, the API will set a non-approved service
+indicator.
+Finally, for TLS 1.3, the AES GCM implementation uses the context of Scenario 5 of FIPS 140-3 IG C.H.
+The protocol that provides this compliance is TLS 1.3, defined in RFC8446 of August 2018, using the
+cipher-suites that explicitly select AES GCM as the encryption/decryption cipher (Appendix B.4 of
+RFC8446). The module supports acceptable AES GCM cipher suites from Section 3.3.1 of SP800-52r2.
+TLS 1.3 employs separate 64-bit sequence numbers, one for protocol records that are received, and
+one for protocol records that are sent to a peer. These sequence numbers are set at zero at the
+beginning of a TLS 1.3 connection and each time when the AES-GCM key is changed. After reading or
+writing a record, the respective sequence number is incremented by one. The protocol specification
+determines that the sequence number should not wrap, and if this condition is observed, then the
+protocol implementation must either trigger a re-key of the session (i.e., a new key for AES-GCM), or
+terminate the connection.
+
+2.7.2 AES XTS
+The length of a single data unit encrypted or decrypted with AES XTS shall not exceed 2²⁰ AES blocks,
+that is 16MB, of data per XTS instance. An XTS instance is defined in Section 4 of SP 800-38E.
+To meet the requirement stated in IG C.I, the module implements a check that ensures, before
+performing any cryptographic operation, that the two AES keys used in AES XTS mode are not
+identical.
+The XTS mode shall only be used for the cryptographic protection of data on storage devices. It shall
+not be used for other purposes, such as the encryption of data in transit.
+
+2.7.3 Key Derivation using SP 800-132 PBKDF2
+The module provides password-based key derivation (PBKDF2), compliant with SP 800-132. The
+module supports option 1a from Section 5.4 of SP 800-132, in which the Master Key (MK) or a segment
+of it is used directly as the Data Protection Key (DPK). In accordance to SP 800-132 and FIPS 140-3 IG
+D.N, the following requirements are met:
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 22 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+•
+•
+•
+
+•
+•
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Derived keys shall be used only for storage applications, and shall not be used for any other
+purposes. The length of the MK or DPK is 112 bits or more (this is verified by the module).
+Passwords or passphrases, used as an input for the PBKDF2, shall not be used as cryptographic
+keys.
+The length of the password or passphrase is at least 8 characters (this is verified by the
+module), and may consist of lowercase, uppercase, and numeric characters. Assuming the
+worst-case scenario of all digits, the probability is estimated to be at most 10-8. Combined with
+the minimum iteration count as described in the fifth bullet point, this provides an acceptable
+trade-off between user experience and security against brute-force attacks.
+A portion of the salt shall be generated randomly using the SP 800-90Ar1 DRBG provided by
+the module. The minimum length required is 128 bits (this is verified by the module).
+The iteration count is selected as large as possible, as long as the time required to generate
+the key using the entered password is acceptable for the users. The minimum value is 1000
+(this is verified by the module).
+
+If any of these requirements are not met, the requested service is non-approved (see Non-Approved
+Services table in Section 4.4 Non-Approved Services).
+
+2.7.4 SP 800-56Ar3 Assurances
+To comply with the assurances found in Section 5.6.2 of SP 800-56Ar3, the operator must use the
+module together with an application that implements the TLS protocol. Additionally, the module’s
+approved key pair generation service (see Approved Services table in Section 4.3 Approved Services)
+must be used to generate ephemeral Diffie-Hellman or EC Diffie-Hellman key pairs, or the key pairs
+must be obtained from another FIPS-validated module. As part of this service, the module will
+internally perform the full public key validation of the generated public key.
+The module’s shared secret computation service will internally perform the full public key validation of
+the peer public key, complying with Sections 5.6.2.2.1 and 5.6.2.2.2 of SP 800-56Ar3.
+
+2.7.5 SHA-3
+To meet the requirement stated in IG C.C, the module implements the SHA-3 algorithms as both
+standalone and part of higher-level algorithms. As detailed in Section 2.6 Security Function
+Implementations with corresponding certificates, the cryptographic algorithms that use of SHA-3
+include RSA signature generation and verification, ECDSA signature generation and verification,
+KBKDF, HKDF, X9.63 KDF, X9.42 KDF, PBKDF, OneStep KDA, TwoStep KDA, and HMAC. In addition, the
+implementation of the extendable output functions SHAKE128 and SHAKE256 were verified to have a
+standalone usage.
+
+2.7.6 RSA Signatures
+To meet the requirement stated in IG C.F, the module implements only the approved modulus sizes of
+2048, 3072, and 4096 bits for signature generation. For signature verification, the module implements
+only the approved module sizes of 1024, 2048, 3072, and 4096 bits. Each algorithm was tested, and
+corresponding certificates can be found detailed in Section 2.6 Security Function Implementations.
+
+2.7.7 Key Wrapping
+To meet the requirement stated in IG D.G, the module implements AES KW, KWP, GCM, and CCM as
+approved key wrapping algorithms. In addition, AES KW and AES KWP meets the requirements of SP
+800-38F. Each approve key wrapping algorithm was tested, and corresponding certificates can be
+found detailed in Section 2.6 Security Function Implementations.
+
+2.8 RBG and Entropy
+Cert
+Vendor Name
+Number
+E125
+Amazon Web Services, Inc.
+Table 9: Entropy Certificates
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 23 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+Amazon
+OpenSSL CPU
+Time Jitter RNG
+Entropy Source
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Entropy
+Conditioning
+per
+Component
+Sample
+NonAmazon Linux 2023 on EC2
+256 bits 256 bits SHA-3 (A4551); HMACPhysical c7g.metal; Amazon Linux 2023
+SHA-512 DRBG (A4551);
+on EC2 c6i.metal; Amazon
+AES-256 CTR DRBG
+Linux 2023 on AWS Snowball
+(A4604)
+Table 10: Entropy Sources
+Type
+
+Operational Environment
+
+Sample
+Size
+
+The module employs two Deterministic Random Bit Generator (DRBG) implementations based on SP
+800-90Ar1. These DRBGs are used internally by the module (e.g. to generate seeds for asymmetric key
+pairs and random numbers for security functions). They can also be accessed using the specified API
+functions. The following parameters are used:
+1.
+2.
+
+Private DRBG: AES-256 CTR_DRBG with derivation function. This DRBG is used to generate
+secret random values (e.g. during asymmetric key pair generation). It can be accessed using
+RAND_priv_bytes .
+Public DRBG: AES-256 CTR_DRBG with derivation function. This DRBG is used to generate
+general purpose random values that do not need to remain secret (e.g. initialization vectors). It
+can be accessed using RAND_bytes .
+
+These DRBGs will always employ prediction resistance. More information regarding the configuration
+and design of these DRBGs can be found in the module’s manual pages.
+
+2.9 Key Generation
+The module implements Cryptographic Key Generation (CKG, vendor affirmed), compliant with SP 800133r2. When random values are required, they are obtained from the SP 800-90Ar1 approved DRBG,
+compliant with Section 4 of SP 800-133r2 (without XOR).
+Intermediate key generation values are not output from the module and are explicitly zeroized after
+processing the service.
+
+2.10 Key Establishment
+The module implements SSP transport methods as listed in the table above. Additionally, the module
+implements the following key derivation methods:
+•
+•
+•
+•
+•
+
+KBKDF: compliant with SP 800-108r1. This implementation can be used to generate secret
+keys from a pre-existing key-derivation-key.
+KDA OneStep, KDA TwoStep, HKDF: compliant with SP 800-56Cr1 (HKDF) and SP 800-56Cr2
+(KDA OneStep, KDA TwoStep). These implementations shall only be used to generate secret
+keys in the context of an SP 800-56Ar3 key agreement scheme.
+ANS X9.42 KDF, ANS X9.63 KDF: compliant with SP 800-135r1. These implementations shall
+only be used to generate secret keys in the context of an ANS X9.42-2001 resp. ANS X9.632001 key agreement scheme.
+SSH KDF, TLS 1.2 KDF, TLS 1.3 KDF: compliant with SP 800-135r1. These implementations shall
+only be used to generate secret keys in the context of the SSH, TLS 1.2, or TLS 1.3 protocols,
+respectively.
+PBKDF2: compliant with option 1a of SP 800-132. This implementation shall only be used to
+derive keys for use in storage applications.
+
+2.11 Industry Protocols
+The module implements the SSH key derivation function for use in the SSH protocol (RFC 4253 and
+RFC 6668).
+GCM with internal IV generation in the approved mode is compliant with versions 1.2 and 1.3 of the
+TLS protocol (RFC 5288 and 8446) and shall only be used in conjunction with the TLS protocol.
+Additionally, the module implements the TLS 1.2 and TLS 1.3 key derivation functions for use in the
+TLS protocol.
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 24 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+For Diffie-Hellman, the module supports the use of the following safe primes:
+•
+
+IKE (RFC 3526):
+•
+MODP-2048 (ID = 14)
+•
+MODP-3072 (ID = 15)
+•
+MODP-4096 (ID = 16)
+•
+MODP-6144 (ID = 17)
+•
+MODP-8192 (ID = 18)
+
+•
+
+TLS (RFC 7919)
+•
+ffdhe2048 (ID = 256)
+•
+ffdhe3072 (ID = 257)
+•
+ffdhe4096 (ID = 258)
+•
+ffdhe6144 (ID = 259)
+•
+ffdhe8192 (ID = 260)
+
+No parts of the SSH, TLS, or IKE protocols, other than those mentioned above, have been tested by the
+CAVP and CMVP.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 25 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical
+Logical
+Data That Passes
+Port
+Interface(s)
+N/A
+Data Input
+API input parameters
+N/A
+Data Output API output parameters
+N/A
+Control Input API function calls
+N/A
+Status Output API return codes, error queue
+Table 11: Ports and Interfaces
+The logical interfaces are the APIs through which the applications request services. These logical
+interfaces are logically separated from each other by the API design. The module does not implement
+a control output interface.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 26 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+The module does not support authentication methods.
+
+4.2 Roles
+Name
+Crypto Officer
+
+Role
+
+Type
+
+Operator Type Authentication Methods
+CO
+None
+Table 12: Roles
+
+The module supports the Crypto Officer role only. This sole role is implicitly and always assumed by
+the operator of the module when performing a service. The module does not support multiple
+concurrent operators.
+
+4.3 Approved Services
+Name
+Message
+digest
+XOF
+
+Descrip
+tion
+
+Indicator
+
+Compute EVP_DigestFinal_ex returns 1
+a
+message
+digest
+Compute EVP_DigestFinalXOF_ex returns 1
+output of
+XOF
+
+Encryptio Encrypt EVP_EncryptFinal_ex returns 1
+n
+a
+plaintext
+
+Security
+Output
+SSP
+Function
+s
+Access
+s
+Messag Digest Hashing
+Crypto
+e
+value
+Officer
+Inputs
+
+Messag Digest
+e,
+value
+output
+length
+Plaintex Ciphert
+t, AES ext
+key
+
+Extendabl Crypto
+e Output Officer
+Function
+
+Encryptio Crypto
+n with
+Officer
+AES
+- AES key:
+W,E
+Decryptio Decrypt EVP_DecryptFinal_ex returns 1
+Ciphert Plaintex Decryptio Crypto
+n
+a
+ext,
+t
+n with
+Officer
+plaintext
+AES
+AES
+- AES key:
+key
+W,E
+Authentic Encrypt AES GCM:
+AES
+Ciphert Authentic Crypto
+ated
+and
+EVP_CIPHER_REDHAT_FIPS_INDICATOR_ key, IV ext,
+ated
+Officer
+Encryptio authenti APPROVED; Others:
+(only
+MAC
+Encryptio - AES key:
+n
+cate a
+EVP_EncryptFinal_ex returns 1
+CCM
+tag
+n with
+W,E
+plaintext
+and
+(only
+AES
+GCM), CCM
+Key
+plaintex and
+wrapping
+t
+GCM)
+using AES
+KW
+Key
+wrapping
+using AES
+KWP
+Key
+wrapping
+using AES
+CCM
+Key
+wrapping
+using AES
+GCM
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 27 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Security
+Output
+SSP
+Function
+s
+Access
+s
+Authentic Decrypt AES GCM:
+AES
+Plaintex Authentic Crypto
+ated
+and
+EVP_CIPHER_REDHAT_FIPS_INDICATOR_ key,
+t or
+ated
+Officer
+Decryptio authenti APPROVED; Others:
+ciphert failure Decryptio - AES key:
+n
+cate a
+EVP_DecryptFinal_ex returns 1
+ext,
+n with
+W,E
+cipherte
+MAC
+AES
+xt
+tag
+Key
+(only
+unwrappi
+CCM
+ng using
+and
+AES KW
+GCM),
+Key
+IV (only
+unwrappi
+CCM
+ng using
+and
+AES KWP
+GCM)
+Key
+unwrappi
+ng using
+AES CCM
+Key
+unwrappi
+ng using
+AES GCM
+Message Compute HMAC:
+Messag MAC
+Message Crypto
+Authentic s a MAC EVP_MAC_REDHAT_FIPS_INDICATOR_AP e, AES tag
+authentic Officer
+ation
+tag
+PROVED; Others: EVP_MAC_final returns or
+ation
+- AES key:
+HMAC
+W,E
+1
+key
+- HMAC
+key: W,E
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP KeyKBKDF Key
+Crypto
+derivation key from ROVED
+derivati Derived derivation Officer
+with
+a keyon key key
+with
+- KeyKBKDF
+derivatio
+KBKDF
+derivation
+n key
+key: W,E
+using
+- KBKDF
+KBKDF
+Derived
+key: G,R
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared HKDF
+Key
+Crypto
+derivation key from ROVED
+secret Derived derivation Officer
+with HKDF a shared
+key
+with HKDF - HKDF
+secret
+Derived
+using
+key: G,R
+HKDF
+- Shared
+secret: W,E
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared TLS
+Key
+Crypto
+derivation key from ROVED
+secret Derived derivation Officer
+with TLS a shared
+key
+with TLS - Shared
+KDF
+secret
+1.2 KDF
+secret: W,E
+using
+Key
+- TLS
+TLS KDF
+derivation Derived
+with TLS key: G,R
+1.3 KDF
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared SSH
+Key
+Crypto
+derivation key from ROVED
+secret Derived derivation Officer
+with SSH a shared
+key
+with SSH - Shared
+KDF
+secret
+KDF
+secret: W,E
+using
+- SSH
+SSH KDF
+Derived
+key: G,R
+Name
+
+Descrip
+tion
+
+Indicator
+
+Inputs
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 28 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Security
+Output
+SSP
+Function
+s
+Access
+s
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared X9.63
+Key
+Crypto
+derivation key from ROVED
+secret Derived derivation Officer
+with
+a shared
+key
+with
+- Shared
+X9.63 KDF secret
+X9.63 KDF secret: W,E
+using
+- X9.63
+Derived
+X9.63
+KDF
+key: G,R
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared X9.42
+Key
+Crypto
+derivation key from ROVED
+secret Derived derivation Officer
+using
+a shared
+key
+with
+- Shared
+X9.42 KDF secret
+X9.42 KDF secret: W,E
+using
+- X9.42
+X9.42
+Derived
+KDF
+key: G,R
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared KDA
+Key
+Crypto
+derivation key from ROVED
+secret OneSte derivation Officer
+with KDA a shared
+p
+using KDA - KDA
+OneStep secret
+Derived OneStep OneStep
+using
+Derived
+key
+KDA
+key: G,R
+OneStep
+- Shared
+secret: W,E
+Key
+Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Shared KDA
+Key
+Crypto
+derivation key from ROVED
+secret TwoSte derivation Officer
+with KDA a shared
+p
+using KDA - KDA
+TwoStep secret
+Derived TwoStep TwoStep
+using
+Derived
+key
+KDA
+key: G,R
+OneStep
+- Shared
+secret: W,E
+Password- Derive a EVP_KDF_REDHAT_FIPS_INDICATOR_APP Passwo PBKDF Key
+Crypto
+based key key from ROVED
+rd, salt, Derived derivation Officer
+iteratio key
+- Password:
+derivation a
+with
+n count
+W,E
+passwor
+PBKDF
+- PBKDF
+d
+Derived
+key: G,R
+Random Generate EVP_RAND_generate returns 1
+Seed,
+Random Random Crypto
+number
+random
+Output bytes
+Number
+Officer
+generatio bytes
+length
+Generatio - Entropy
+n
+n with
+input: W,E
+DRBG
+- DRBG
+seed: G,E
+- Internal
+state (V,
+Key): G,W,E
+- Internal
+state (V, C):
+G,W,E
+Shared
+Compute EVP_PKEY_derive returns 1
+DH
+Shared Shared
+Crypto
+secret
+a shared
+private secret secret
+Officer
+computati secret
+computati - Shared
+key, DH
+on
+on using secret: G,R
+public
+Diffie- DH
+key; EC
+Hellman private key:
+private
+Shared
+key, EC
+W,E
+secret
+public
+- DH public
+key
+computati key: W,E
+Name
+
+Descrip
+tion
+
+Indicator
+
+Inputs
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 29 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Security
+Output
+SSP
+Function
+s
+Access
+s
+on using - EC private
+EC Diffie- key: W,E
+Hellman - EC public
+key: W,E
+Signature Generate RSA:
+Messag Signatu Signature Crypto
+generatio a
+OSSL_RH_FIPSINDICATOR_APPROVED
+e, RSA re
+Generatio Officer
+n
+signatur and
+or EC
+n with
+- RSA
+e
+EVP_SIGNATURE_REDHAT_FIPS_INDICAT private
+RSA
+private key:
+OR_APPROVED; ECDSA:
+key
+Signature W,E
+OSSL_RH_FIPSINDICATOR_APPROVED
+Generatio - EC private
+n with
+key: W,E
+ECDSA
+Signature Verify a RSA:
+Messag Pass/fail Signature Crypto
+verificatio sigantur OSSL_RH_FIPSINDICATOR_APPROVED
+e,
+Verificatio Officer
+n
+e
+and
+signatu
+n with
+- RSA public
+EVP_SIGNATURE_REDHAT_FIPS_INDICAT re, RSA
+RSA
+key: W,E
+OR_APPROVED; ECDSA:
+or EC
+Signature - EC public
+OSSL_RH_FIPSINDICATOR_APPROVED
+public
+Verificatio key: W,E
+key
+n with
+ECDSA
+Key pair
+Generate EVP_PKEY_generate returns 1
+Group; DH key Key Pair
+Crypto
+generatio a key
+Curve; pair; EC Generatio Officer
+n
+pair
+Modulu key
+n with
+- DH
+s bits
+pair;
+RSA
+private key:
+RSA key Key Pair
+G,R
+Generatio - DH public
+pair
+n with
+key: G,R
+ECDSA
+- RSA
+Key Pair
+private key:
+Generatio G,R
+n with
+- RSA public
+Safe
+key: G,R
+Primes
+- EC private
+key: G,R
+- EC public
+key: G,R
+Intermediat
+e key
+generation
+value:
+G,E,Z
+Public key Verify an EVP_PKEY_public_check or
+EC
+Pass/fail Public Key Crypto
+verificatio EC public EVP_PKEY_private_check or
+public
+Verificatio Officer
+n
+key
+EVP_PKEY_check returns 1
+key
+n with
+- EC public
+ECDSA
+key: W,E
+Key pair
+Verify a EVP_PKEY_public_check or
+DH
+Pass/fail Key Pair
+Crypto
+verificatio DH key EVP_PKEY_private_check or
+public
+Verificatio Officer
+n
+pair
+EVP_PKEY_check returns 1
+n with
+- DH
+key; DH
+Safe
+private
+private key:
+Primes
+key
+W,E
+- DH public
+key: W,E
+Show
+Return
+None
+N/A
+Name
+None
+Unauthenti
+version
+the
+and
+cated
+name
+version
+and
+informa
+version
+tion
+Name
+
+Descrip
+tion
+
+Indicator
+
+Inputs
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 30 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Descrip
+tion
+
+informati
+on
+Show
+Return
+None
+status
+the
+module
+status
+Self-tests Perform None
+CASTs
+and
+integrity
+test
+
+Indicator
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Inputs
+
+Security
+Output
+Function
+s
+s
+
+SSP
+Access
+
+N/A
+
+Module None
+status
+
+Unauthenti
+cated
+
+N/A
+
+Pass/fail Encryptio Unauthenti
+results n with
+cated
+of self- AES
+tests
+Decryptio
+n with
+AES
+Authentic
+ated
+Encryptio
+n with
+AES
+Authentic
+ated
+Decryptio
+n with
+AES
+Shared
+secret
+computati
+on using
+DiffieHellman
+Shared
+secret
+computati
+on using
+EC DiffieHellman
+Hashing
+Message
+authentic
+ation
+Key Pair
+Generatio
+n with
+RSA
+Key Pair
+Generatio
+n with
+ECDSA
+Public Key
+Verificatio
+n with
+ECDSA
+Signature
+Generatio
+n with
+RSA
+Signature
+Verificatio
+n with
+RSA
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 31 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Descrip
+tion
+
+Indicator
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Inputs
+
+Security
+Output
+Function
+s
+s
+Signature
+Generatio
+n with
+ECDSA
+Signature
+Verificatio
+n with
+ECDSA
+Random
+Number
+Generatio
+n with
+DRBG
+Key
+derivation
+with
+KBKDF
+Key
+derivation
+with HKDF
+Key
+derivation
+with TLS
+1.2 KDF
+Key
+derivation
+with TLS
+1.3 KDF
+Key
+derivation
+with SSH
+KDF
+Key
+derivation
+with
+X9.63 KDF
+Key
+derivation
+with
+X9.42 KDF
+Key
+derivation
+with
+PBKDF
+Key Pair
+Generatio
+n with
+Safe
+Primes
+Key
+derivation
+using KDA
+OneStep
+Key
+derivation
+using KDA
+TwoStep
+
+SSP
+Access
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 32 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Descrip
+tion
+
+Zeroizatio Zeroize None
+n
+any SSP
+
+Indicator
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Inputs
+Any
+SSP
+
+Security
+Output
+SSP
+Function
+s
+Access
+s
+None
+None
+Unauthenti
+cated
+- AES key:
+Z
+- HMAC
+key: Z
+- Keyderivation
+key: Z
+- Shared
+secret: Z
+- Password:
+Z
+- KBKDF
+Derived
+key: Z
+- HKDF
+Derived
+key: Z
+- X9.63
+Derived
+key: Z
+- X9.42
+Derived
+key: Z
+- SSH
+Derived
+key: Z
+- KDA
+OneStep
+Derived
+key: Z
+- KDA
+TwoStep
+Derived
+key: Z
+- TLS
+Derived
+key: Z
+- PBKDF
+Derived
+key: Z
+- Entropy
+input: Z
+- DRBG
+seed: Z
+- Internal
+state (V,
+Key): Z
+- Internal
+state (V, C):
+Z
+- DH
+private key:
+Z
+- DH public
+key: Z
+- EC private
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 33 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Descrip
+tion
+
+Indicator
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Inputs
+
+Security
+Output
+Function
+s
+s
+
+Table 13: Approved Services
+
+SSP
+Access
+key: Z
+- EC public
+key: Z
+- RSA
+private key:
+Z
+- RSA public
+key: Z
+Intermediat
+e key
+generation
+value: Z
+
+The module provides services to operators that assume the available role. All services are described in
+detail in the API documentation (manual pages). The convention below applies when specifying the
+access permissions (types) that the service has for each SSP.
+•
+•
+•
+•
+•
+•
+
+Generate (G): The module generates or derives the SSP.
+Read (R): The SSP is read from the module (e.g. the SSP is output).
+Write (W): The SSP is updated, imported, or written to the module.
+Execute (E): The module uses the SSP in performing a cryptographic operation.
+Zeroize (Z): The module zeroizes the SSP.
+N/A: The module does not access any SSP or key during its operation.
+
+To interact with the module, a calling application must use the EVP API layer provided by OpenSSL.
+This layer will delegate the request to the FIPS provider, which will in turn perform the requested
+service. Additionally, this EVP API layer can be used to retrieve the approved service indicator for the
+module. The redhat_ossl_query_fipsindicator() function indicates whether an EVP API function is
+approved. After a cryptographic service was performed by the module, the API context (listed in the
+left column of the bullets below) associated with this request can contain a parameter (listed in the
+right column of the bullets below) which represents the approved service indicator:
+•
+•
+•
+•
+•
+•
+
+EVP_CIPHER_CTX: OSSL_CIPHER_PARAM_REDHAT_FIPS_INDICATOR
+EVP_MAC_CTX: OSSL_MAC_PARAM_REDHAT_FIPS_INDICATOR
+EVP_KDF_CTX: OSSL_KDF_PARAM_REDHAT_FIPS_INDICATOR
+EVP_PKEY_CTX: OSSL_KEM_PARAM_REDHAT_FIPS_INDICATOR
+EVP_PKEY_CTX: OSSL_SIGNATURE_PARAM_REDHAT_FIPS_INDICATOR
+EVP_PKEY_CTX: OSSL_ASYM_CIPHER_PARAM_REDHAT_FIPS_INDICATOR
+
+The exact process to use these functions and parameters are described in the module’s manual pages.
+
+4.4 Non-Approved Services
+Name
+Encryption
+Message
+authentication
+Key derivation
+
+Description
+Encrypt a plaintext
+Compute a MAC tag
+
+Algorithms
+AES GCM (external IV)
+HMAC (< 112-bit keys)
+
+Role
+CO
+CO
+
+Derive a key from a keyderivation key or a shared
+secret
+
+KBKDF, KDA OneStep, KDA TwoStep, HKDF, CO
+ANS X9.42 KDF, ANS X9.63 KDF (< 112-bit
+keys)
+KDA OneStep, KDA TwoStep (SHAKE128,
+SHAKE256)
+ANS X9.42 KDF (SHAKE128, SHAKE256)
+ANS X9.63 KDF (SHA-1, SHAKE128,
+SHAKE256)
+SSH KDF (SHA-512/224, SHA-512/256, SHA-
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 34 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Algorithms
+3, SHAKE128, SHAKE256)
+TLS 1.2 KDF (SHA-1, SHA-224, SHA512/224, SHA-512/256, SHA-3)
+TLS 1.3 KDF (SHA-1, SHA-224, SHA-512,
+SHA-512/224, SHA-512/256, SHA-3)
+Password-based key Derive a key from a password PBKDF2 (< 8 characters password; < 128
+derivation
+salt length; < 1000 iterations; < 112-bit
+keys)
+Shared secret
+Compute a shared secret
+RSA (KAS1, KAS2 schemes)
+computation
+Signature
+Generate a signature
+RSA and ECDSA (pre-hashed message)
+generation
+RSA-PSS (invalid salt length)
+Signature
+Verify a signature
+RSA and ECDSA (pre-hashed message)
+verification
+RSA-PSS (invalid salt length)
+Asymmetric
+Encrypt a plaintext
+RSA-OAEP
+encryption
+Asymmetric
+Decrypt a ciphertext
+RSA-OAEP
+decryption
+Table 14: Non-Approved Services
+
+Role
+
+CO
+CO
+CO
+CO
+CO
+CO
+
+The table above lists the non-approved services in this module, the algorithms involved, the roles that
+can request the service. In this table, CO specifies the Crypto Officer role.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 35 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The integrity of the module is verified by comparing a HMAC SHA-256 value calculated at run time with
+the HMAC SHA-256 value embedded in the fips.so file that was computed at build time.
+
+5.2 Initiate on Demand
+Integrity tests are performed as part of the pre-operational self-tests, which are executed when the
+module is initialized. The integrity test may be invoked on-demand by unloading and subsequently reinitializing the module, or by calling the OSSL_PROVIDER_self_test function. This will perform (among
+others) the software integrity test.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 36 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+How Requirements are Satisfied:
+Any SSPs contained within the module are protected by the process isolation and memory separation
+mechanisms provided by the Linux kernel, and only the module has control over these SSPs.
+
+6.2 Configuration Settings and Restrictions
+The module shall be installed as stated in Section 11 Life-Cycle Assurance. If properly installed, the
+operating system provides process isolation and memory protection mechanisms that ensure
+appropriate separation for memory access among the processes on the system. Each process has
+control over its own data and uncontrolled access to the data of other processes is prevented.
+Instrumentation tools like the ptrace system call, gdb and strace, userspace live patching, as well as
+other tracing mechanisms offered by the Linux environment such as ftrace or systemtap, shall not be
+used in the operational environment. The use of any of these tools implies that the cryptographic
+module is running in a non-validated operational environment.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 37 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+7 Physical Security
+The module is comprised of software only, and therefore this section is not applicable.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 38 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+8 Non-Invasive Security
+This module does not implement any non-invasive security mechanism, and therefore this section is
+not applicable.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 39 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+Storage
+Persistence
+Area
+Description
+Type
+Name
+RAM
+Temporary storage for SSPs used by the module as part of service execution. Dynamic
+SSPs are stored until they are zeroized by the operator (using a zeroization call
+or removing power from the module) or zeroized automatically.
+Table 15: Storage Areas
+The module does not perform persistent storage of SSPs. The SSPs are temporarily stored in the RAM
+in plaintext form.
+
+9.2 SSP Input-Output Methods
+Name
+
+From
+
+API input
+parameters
+API output
+parameters
+
+To
+
+Format Distribution Entry
+SFI or
+Type
+Type
+Type Algorithm
+Plaintext Manual
+Electronic
+
+Operator calling
+Cryptographic
+application (TOEPP) module
+Cryptographic
+Operator calling
+Plaintext Manual
+module
+application (TOEPP)
+Table 16: SSP Input-Output Methods
+
+Electronic
+
+9.3 SSP Zeroization Methods
+Zeroization
+Description
+Rationale
+Operator Initiation
+Method
+Free cipher
+Zeroizes the
+Memory occupied by SSPs By calling the appropriate zeroization
+handle
+SSPs contained is overwritten with
+functions: AES key: EVP_CIPHER_CTX_free
+within the cipher zeroes, which renders the and EVP_MAC_CTX_free; HMAC key:
+SSP values irretrievable. EVP_MAC_CTX_free; Key-derivation key:
+handle
+The completion of the
+EVP_KDF_CTX_free; Shared secret:
+zeroization routine
+EVP_KDF_CTX_free; Password:
+indicates that the
+EVP_KDF_CTX_free; KBKDF Derived key:
+zeroization procedure
+EVP_KDF_CTX_free; HKDF Derived key:
+succeeded.
+EVP_KDF_CTX_free; TLS Derived key:
+EVP_KDF_CTX_free; SSH Derived key:
+EVP_KDF_CTX_free; X9.63 Derived key:
+EVP_KDF_CTX_free; X9.42 Derived key:
+EVP_KDF_CTX_free; PBKDF Derived key:
+EVP_KDF_CTX_free; KDA OneStep Derived
+key: EVP_KDF_CTX_free; KDA TwoStep
+Derived key: EVP_KDF_CTX_free; Entropy
+input: EVP_RAND_CTX_free; DRBG seed:
+EVP_RAND_CTX_free; Internal state:
+EVP_RAND_CTX_free; DH public & private
+key: EVP_PKEY_free; EC public & private
+key: EVP_PKEY_free; RSA public & private
+key: EVP_PKEY_free
+Automatic
+Automatically
+Memory occupied by SSPs N/A
+zeroized by the is overwritten with
+module when no zeroes, which renders the
+longer needed
+SSP values irretrievable
+Remove
+De-allocates the Volatile memory used by By unloading the module
+power from
+volatile memory the module is overwritten
+the module
+within nanoseconds when
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 40 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Zeroization
+Method
+
+Description
+used to store
+SSPs
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Rationale
+
+Operator Initiation
+
+the module is unloaded.
+The successful
+completion of the
+removal of power from
+the module indicates that
+zeroization has
+completed.
+Table 17: SSP Zeroization Methods
+
+All data output is inhibited during zeroization.
+
+9.4 SSPs
+Name
+
+Description Size - Strength
+
+Type Category
+Symmetric
+key - CSP
+
+AES key
+
+AES key used XTS: 256, 512
+for
+bits; Other
+encryption,
+modes: 128,
+decryption,
+192, 256 bits and
+XTS: 128, 256
+computing
+bits; Other
+MAC tags
+modes: 128,
+192, 256 bits
+
+HMAC key
+
+HMAC key
+112-524288 bits Symmetric
+used for
+- 112-256 bits
+key - CSP
+computing
+MAC tag
+Shared secret 224-8192 bits - Shared
+generated by 112-256 bits
+secret - CSP
+(EC) DiffieHellman
+
+Shared
+secret
+
+Generated Established
+By
+By
+
+Shared
+secret
+computation
+using DiffieHellman
+Shared
+secret
+computation
+using EC
+DiffieHellman
+
+Used By
+Encryption
+with AES
+Decryption
+with AES
+Key wrapping
+using AES KW
+Key
+unwrapping
+using AES KW
+Key wrapping
+using AES KWP
+Key
+unwrapping
+using AES KWP
+Key wrapping
+using AES CCM
+Key
+unwrapping
+using AES CCM
+Key wrapping
+using AES GCM
+Key
+unwrapping
+using AES GCM
+Message
+authentication
+Shared secret
+computation
+using DiffieHellman
+Shared secret
+computation
+using EC
+Diffie-Hellman
+Key derivation
+using KDA
+OneStep
+Key derivation
+using KDA
+TwoStep
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 41 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Description Size - Strength
+
+Keyderivation
+key
+
+Symmetric
+112-4096 bits key used to
+112-256 bits
+derive
+symmetric
+keys
+Password
+Password
+8-128
+used to
+characters - N/A
+derive
+symmetric
+keys
+KBKDF
+Symmetric
+112-4096 bits Derived key key derived 112-256 bits
+from a keyderivation
+key
+HKDF
+Symmetric
+112-4096 bits Derived key key derived 112-256 bits
+from a shared
+secret
+TLS Derived Symmetric
+112-4096 bits key
+key derived 112-256 bits
+from a shared
+secret
+
+SSH Derived Symmetric
+112-4096 bits key
+key derived 112-256 bits
+from a shared
+secret
+X9.63
+Symmetric
+112-4096 bits Derived key key derived 112-256 bits
+from a shared
+secret
+X9.42
+Symmetric
+112-4096 bits Derived key key derived 112-256 bits
+from a shared
+secret
+PBKDF
+Symmetric
+112-4096 bits Derived key key derived 112-256 bits
+from a
+password
+KDA
+Symmetric
+112-4096 bits OneStep
+key derived 112-256 bits
+Derived key from a shared
+secret
+KDA
+Symmetric
+112-4096 bits TwoStep
+key derived 112-256 bits
+Derived key from a shared
+secret
+Entropy
+Entropy input 128-384 bits input
+used to seed 128-256 bits
+the DRBGs
+DRBG seed
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Type Category
+Symmetric
+key - CSP
+
+Generated Established
+By
+By
+
+Password CSP
+
+Used By
+Key derivation
+with KBKDF
+
+Key derivation
+with PBKDF
+
+Symmetric
+key - CSP
+
+Key
+derivation
+with KBKDF
+
+Key derivation
+with KBKDF
+
+Symmetric
+key - CSP
+
+Key
+derivation
+with HKDF
+
+Key derivation
+with HKDF
+
+Symmetric
+key - CSP
+
+Key
+derivation
+with TLS 1.2
+KDF
+Key
+derivation
+with TLS 1.3
+KDF
+Key
+derivation
+with SSH
+KDF
+Key
+derivation
+with X9.63
+KDF
+Key
+derivation
+with X9.42
+KDF
+Key
+derivation
+with PBKDF
+
+Key derivation
+with TLS 1.2
+KDF
+Key derivation
+with TLS 1.3
+KDF
+
+Key
+derivation
+using KDA
+OneStep
+Key
+derivation
+using KDA
+TwoStep
+
+Key derivation
+using KDA
+OneStep
+
+Symmetric
+key - CSP
+Symmetric
+key - CSP
+Symmetric
+key - CSP
+Symmetric
+key - CSP
+Symmetric
+key - CSP
+Symmetric
+key - CSP
+Entropy
+input - CSP
+
+DRBG seed
+CTR_DRBG: 256, Seed - CSP
+derived from 320, 384 bits;
+entropy input Hash_DRBG:
+440, 888 bits;
+
+Random
+Number
+Generation
+with DRBG
+
+Key derivation
+with SSH KDF
+Key derivation
+with X9.63
+KDF
+Key derivation
+with X9.42
+KDF
+Key derivation
+with PBKDF
+
+Key derivation
+using KDA
+TwoStep
+Random
+Number
+Generation
+with DRBG
+Random
+Number
+Generation
+with DRBG
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 42 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Description Size - Strength
+
+Internal
+state (V,
+Key)
+
+Internal
+state (V, C)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Type Category
+
+HMAC_DRBG:
+160, 256, 512
+bits CTR_DRBG: 128,
+192, 256 bits;
+Hash_DRBG:
+128, 256 bits;
+HMAC_DRBG:
+128, 256 bits
+Internal state CTR_DRBG: 256, Internal
+of CTR_DRBG 320, 348 bits;
+state - CSP
+and
+HMAC_DRBG:
+HMAC_DRBG 320, 512, 1024
+instances
+bits CTR_DRBG: 128,
+192, 256 bits;
+HMAC_DRBG:
+128, 256 bits
+Internal state 880, 1776 bits - Internal
+of
+128, 256 bits
+state - CSP
+Hash_DRBG
+
+Generated Established
+By
+By
+
+Random
+Number
+Generation
+with DRBG
+
+Random
+Number
+Generation
+with DRBG
+2048-8192 bits - Private key - Key Pair
+112-200 bits
+CSP
+Generation
+with Safe
+Primes
+
+DH private
+key
+
+Private key
+used for
+DiffieHellman
+
+DH public
+key
+
+Public key
+used for
+DiffieHellman
+
+2048-8192 bits - Public key 112-200 bits
+PSP
+
+EC private
+key
+
+Private key
+used for
+ECDH and
+ECDSA
+
+P-224, P-256, P- Private key - Key Pair
+384, P-521 CSP
+Generation
+112, 128, 192,
+with ECDSA
+256 bits
+
+Key Pair
+Generation
+with Safe
+Primes
+
+Used By
+
+Random
+Number
+Generation
+with DRBG
+
+Random
+Number
+Generation
+with DRBG
+Shared secret
+computation
+using DiffieHellman
+Key Pair
+Generation
+with Safe
+Primes
+Key Pair
+Verification
+with Safe
+Primes
+Shared secret
+computation
+using DiffieHellman
+Key Pair
+Generation
+with Safe
+Primes
+Key Pair
+Verification
+with Safe
+Primes
+Shared secret
+computation
+using EC
+Diffie-Hellman
+Key Pair
+Generation
+with ECDSA
+Public Key
+Verification
+with ECDSA
+Signature
+Generation
+with ECDSA
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 43 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Type Category
+P-224, P-256, P- Public key 384, P-521 PSP
+112, 128, 192,
+256 bits
+
+Generated Established
+Used By
+By
+By
+EC public
+Public key
+Key Pair
+Shared secret
+key
+used for
+Generation
+computation
+ECDH and
+with ECDSA
+using EC
+ECDSA
+Diffie-Hellman
+Key Pair
+Generation
+with ECDSA
+Public Key
+Verification
+with ECDSA
+Signature
+Verification
+with ECDSA
+RSA private Private key
+2048-16384 bits Private key - Key Pair
+Key Pair
+key
+used for RSA - 112-256 bits
+CSP
+Generation
+Generation
+signature
+with RSA
+with RSA
+generation
+Signature
+Generation
+with RSA
+RSA public
+Public key
+Signature
+Public key - Key Pair
+Key Pair
+key
+used for RSA verification:
+PSP
+Generation
+Generation
+signature
+1024-16384
+with RSA
+with RSA
+verification
+bits; Key pair
+Signature
+generation:
+Verification
+2048-16384 bits
+with RSA
+- Signature
+verification: 80256 bits; Key
+pair generation:
+112-256 bits
+Intermediate Temporary
+2048-16384 bits Intermediate Key Pair
+Key Pair
+key
+value
+- 112-256 bits
+value - CSP Generation
+Generation
+generation
+generated
+with RSA
+with RSA
+value
+during key
+Key Pair
+Key Pair
+pair
+Generation
+Generation
+generation
+with ECDSA
+with ECDSA
+services
+Key Pair
+Key Pair
+Generation
+Generation
+with Safe
+with Safe
+Primes
+Primes
+Table 18: SSP Table 1
+Name
+
+Description Size - Strength
+
+Input Output
+API input
+parameters
+
+Storage
+Duration
+RAM:Plaintext For the duration
+of the service
+
+HMAC key
+
+API input
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+Shared secret
+
+API input
+parameters
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+Name
+AES key
+
+Storage
+
+Zeroization
+
+Related SSPs
+
+Free cipher
+handle
+Remove power
+from the
+module
+Free cipher
+handle
+Remove power
+from the
+module
+Free cipher
+DH private
+handle
+key:Established By
+Remove power DH public
+from the
+key:Established By
+module
+EC private
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 44 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Input Output
+
+Storage
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+Duration
+
+Key-derivation
+key
+
+API input
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+Password
+
+API input
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+KBKDF Derived API output
+key
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+HKDF Derived
+key
+
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+TLS Derived
+key
+
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+SSH Derived
+key
+
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+X9.63 Derived
+key
+
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+X9.42 Derived
+key
+
+API output
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+PBKDF Derived API output
+key
+parameters
+
+RAM:Plaintext For the duration
+of the service
+
+Zeroization
+
+Related SSPs
+key:Established By
+EC public
+key:Established By
+HKDF Derived
+key:Derives
+KDA OneStep Derived
+key:Derives
+KDA TwoStep Derived
+key:Derives
+TLS Derived
+key:Derives
+SSH Derived
+key:Derives
+X9.63 Derived
+key:Derives
+X9.42 Derived
+key:Derives
+KBKDF Derived
+key:Derives
+
+Free cipher
+handle
+Remove power
+from the
+module
+Free cipher
+PBKDF Derived
+handle
+key:Derives
+Remove power
+from the
+module
+Free cipher
+Key-derivation
+handle
+key:Derived From
+Remove power
+from the
+module
+Free cipher
+Shared secret:Derived
+handle
+From
+Remove power
+from the
+module
+Free cipher
+Shared secret:Derived
+handle
+From
+Remove power
+from the
+module
+Free cipher
+Shared secret:Derived
+handle
+From
+Remove power
+from the
+module
+Free cipher
+Shared secret:Derived
+handle
+From
+Remove power
+from the
+module
+Free cipher
+Shared secret:Derived
+handle
+From
+Remove power
+from the
+module
+Free cipher
+Password:Derived
+handle
+From
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 45 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Name
+
+Input Output
+
+KDA OneStep
+Derived key
+
+API output
+parameters
+
+KDA TwoStep
+Derived key
+
+API output
+parameters
+
+Entropy input
+
+DRBG seed
+
+Internal state
+(V, Key)
+
+Internal state
+(V, C)
+
+DH private key API input
+parameters
+API output
+parameters
+DH public key
+
+API input
+parameters
+API output
+parameters
+
+EC private key
+
+API input
+parameters
+API output
+parameters
+
+EC public key
+
+API input
+parameters
+API output
+parameters
+
+RSA private key API input
+parameters
+API output
+parameters
+
+Storage
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+Duration
+
+Zeroization
+
+Related SSPs
+
+Remove power
+from the
+module
+RAM:Plaintext For the duration Free cipher
+Shared secret:Derived
+of the service
+handle
+From
+Remove power
+from the
+module
+RAM:Plaintext For the duration Free cipher
+Shared secret:Derived
+of the service
+handle
+From
+Remove power
+from the
+module
+RAM:Plaintext From generation Automatic
+DRBG seed:Derives
+until DRBG seed Remove power
+is created
+from the
+module
+RAM:Plaintext While the DRBG Automatic
+Entropy input:Derived
+is instantiated
+Remove power From
+from the
+Internal state (V,
+module
+Key):Generates
+Internal state (V,
+C):Generates
+RAM:Plaintext From DRBG
+Free cipher
+DRBG seed:Generated
+instantiation until handle
+From
+Remove power
+DRBG
+from the
+termination
+module
+RAM:Plaintext From DRBG
+Free cipher
+DRBG seed:Generated
+instantiation until handle
+From
+DRBG
+Remove power
+termination
+from the
+module
+RAM:Plaintext For the duration Free cipher
+DH public key:Paired
+of the service
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+RAM:Plaintext For the duration Free cipher
+DH private key:Paired
+of the service
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+RAM:Plaintext For the duration Free cipher
+EC public key:Paired
+of the service
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+RAM:Plaintext For the duration Free cipher
+EC private key:Paired
+of the service
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+RAM:Plaintext For the duration Free cipher
+RSA public key:Paired
+of the service
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 46 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Input Output
+RSA public key API input
+parameters
+API output
+parameters
+
+Storage
+Duration
+RAM:Plaintext For the duration
+of the service
+
+Intermediate
+key generation
+value
+
+RAM:Plaintext For the duration
+of the service
+
+Name
+
+Storage
+
+Table 19: SSP Table 2
+
+Zeroization
+
+Related SSPs
+
+Free cipher
+RSA private key:Paired
+handle
+With
+Remove power Intermediate key
+from the
+generation
+module
+value:Generated From
+Automatic
+DH private
+key:Generates
+DH public
+key:Generates
+EC private
+key:Generates
+EC public
+key:Generates
+RSA private
+key:Generates
+RSA public
+key:Generates
+
+9.5 Transitions
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes, starting
+January 1, 2031.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 47 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+Algorithm or
+Test
+HMAC-SHA2-256
+(A4608)
+HMAC-SHA2-256
+(A4612)
+HMAC-SHA2-256
+(A4618)
+HMAC-SHA2-256
+(A4629)
+HMAC-SHA2-256
+(A4630)
+HMAC-SHA2-256
+(A4631)
+HMAC-SHA2-256
+(A4632)
+
+Test
+Test Method
+Test Type
+Indicator
+Properties
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+256-bit key Message
+SW/FW
+Module becomes
+authentication
+Integrity
+operational
+Table 20: Pre-Operational Self-Tests
+
+Details
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+Integrity test for
+fips.so
+
+The pre-operational software integrity tests are performed automatically when the module is
+initialized, before the module transitions into the operational state. While the module is executing the
+self-tests, services are not available, and data output (via the data output interface) is inhibited until
+the tests are successfully completed. The module transitions to the operational state only after the
+pre-operational self-tests are passed successfully.
+
+10.2 Conditional Self-Tests
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+SHA-1
+24-bit message
+KAT
+CAST Module is
+(A4612)
+operational
+
+Details
+
+Conditions
+
+Message digest
+
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+
+SHA-1
+(A4618)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA-1
+(A4629)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA-1
+(A4630)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA-1
+(A4631)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA-1
+(A4632)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA2-512
+(A4612)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 48 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Test
+Method Type
+
+Indicator
+
+Details
+
+SHA2-512
+(A4618)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA2-512
+(A4629)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA2-512
+(A4630)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA2-512
+(A4631)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA2-512
+(A4632)
+
+24-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA3-256
+(A4613)
+
+32-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+SHA3-256
+(A4619)
+
+32-bit message
+
+KAT
+
+CAST Module is
+operational
+
+Message digest
+
+AES-GCM
+(A4614)
+
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+256-bit key, 96-bit KAT
+IV, 128-bit
+plaintext, 128-bit
+additional data
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+CAST Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+AES-GCM
+(A4615)
+AES-GCM
+(A4616)
+AES-GCM
+(A4617)
+AES-GCM
+(A4620)
+AES-GCM
+(A4621)
+AES-GCM
+(A4622)
+
+Conditions
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 49 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4623)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4624)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4625)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4626)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4627)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-GCM
+256-bit key, 96-bit KAT
+CAST Module is
+(A4614)
+IV, 128-bit
+operational
+plaintext, 128-bit
+additional data
+AES-ECB
+128-bit key; 128- KAT
+CAST Module is
+(A4605)
+bit ciphertext
+operational
+
+Details
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Decryption
+
+AES-ECB
+(A4606)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4607)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4609)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4610)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4611)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4635)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4636)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4637)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+Conditions
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 50 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Test
+Method Type
+
+Indicator
+
+Details
+
+AES-ECB
+(A4638)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+AES-ECB
+(A4639)
+
+128-bit key; 128bit ciphertext
+
+KAT
+
+CAST Module is
+operational
+
+Decryption
+
+KDF SP800108 (A4640)
+
+Counter mode;
+HMAC-SHA-256;
+128-bit input key
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDA OneStep SHA-224; 392-bit
+SP800-56Cr2 input secret
+(A4641)
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDA HKDF
+Sp800-56Cr1
+(A4603)
+
+SHA-256, 48-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4613)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4612)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4618)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4619)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4629)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4630)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4631)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.42 SHA-1 with AES(A4632)
+128 KW; 160-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4618)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+Conditions
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 51 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+KDF SSH
+SHA-1; 1056-bit
+KAT
+CAST Module is
+(A4635)
+input secret
+operational
+KDF SSH
+(A4636)
+
+SHA-1; 1056-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+KDF SSH
+(A4637)
+
+SHA-1; 1056-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+KDF SSH
+(A4638)
+
+SHA-1; 1056-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+KDF SSH
+(A4639)
+
+SHA-1; 1056-bit
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4612)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4618)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4629)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4630)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4631)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.2 KDF SHA-256; 384-bit
+RFC7627
+input secret
+(A4632)
+
+KAT
+
+CAST Module is
+operational
+
+TLS v1.3 KDF Extract and
+(A4603)
+expand modes;
+SHA-256
+
+KAT
+
+CAST Module is
+operational
+
+SHA-256; 24
+KAT
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+SHA-256; 24
+KAT
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+
+CAST Module is
+operational
+
+PBKDF
+(A4612)
+
+PBKDF
+(A4613)
+
+CAST Module is
+operational
+
+Details
+
+Conditions
+
+Key derivation
+
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Key derivation
+Module
+initialization
+(before
+integrity test)
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 52 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Properties
+Test
+PBKDF
+SHA-256; 24
+(A4618)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+PBKDF
+SHA-256; 24
+(A4619)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+PBKDF
+SHA-256; 24
+(A4629)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+PBKDF
+SHA-256; 24
+(A4630)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+PBKDF
+SHA-256; 24
+(A4631)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+PBKDF
+SHA-256; 24
+(A4632)
+character
+password; 288-bit
+salt; Iteration
+count: 4096
+Counter DRBG AES-128 with
+(A4604)
+prediction
+resistance
+
+Test Test
+Indicator
+Method Type
+KAT
+CAST Module is
+operational
+
+Hash DRBG
+(A4604)
+
+Details
+
+Conditions
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Password-based key Module
+derivation
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+SHA-256 with
+prediction
+resistance
+
+KAT
+
+CAST Module is
+operational
+
+HMAC DRBG
+(A4604)
+
+SHA-1 with
+prediction
+resistance
+
+KAT
+
+CAST Module is
+operational
+
+KAS-FFC-SSC
+Sp800-56Ar3
+(A4642)
+
+ffdhe2048
+
+KAT
+
+CAST Module is
+operational
+
+KAS-ECC-SSC P-256
+Sp800-56Ar3
+(A4612)
+
+KAT
+
+CAST Module is
+operational
+
+KAS-ECC-SSC P-256
+Sp800-56Ar3
+(A4618)
+
+KAT
+
+CAST Module is
+operational
+
+Instantiate;
+Module
+Generate; Reseed
+initialization
+(compliant to SP
+(before
+800-90Arev1 Section integrity test)
+11.3)
+Instantiate;
+Module
+Generate; Reseed
+initialization
+(compliant to SP
+(before
+800-90Arev1 Section integrity test)
+11.3)
+Instantiate;
+Module
+Generate; Reseed
+initialization
+(compliant to SP
+(before
+800-90Arev1 Section integrity test)
+11.3)
+Shared Secret
+Module
+Computation
+initialization
+(before
+integrity test)
+Shared Secret
+Module
+Computation
+initialization
+(before
+integrity test)
+Shared Secret
+Module
+Computation
+initialization
+(before
+integrity test)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 53 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+KAS-ECC-SSC P-256
+KAT
+CAST Module is
+Sp800-56Ar3
+operational
+(A4629)
+
+Details
+
+Conditions
+
+Shared Secret
+Computation
+
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+
+KAS-ECC-SSC P-256
+Sp800-56Ar3
+(A4630)
+
+KAT
+
+CAST Module is
+operational
+
+Shared Secret
+Computation
+
+KAS-ECC-SSC P-256
+Sp800-56Ar3
+(A4631)
+
+KAT
+
+CAST Module is
+operational
+
+Shared Secret
+Computation
+
+KAS-ECC-SSC P-256
+Sp800-56Ar3
+(A4632)
+
+KAT
+
+CAST Module is
+operational
+
+Shared Secret
+Computation
+
+RSA SigGen
+(FIPS186-5)
+(A4612)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4613)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4618)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4619)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4629)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4630)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4631)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigGen
+(FIPS186-5)
+(A4632)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+generation
+
+RSA SigVer
+(FIPS186-5)
+(A4612)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4613)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4618)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 54 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Test
+Method Type
+
+Indicator
+
+Details
+
+RSA SigVer
+(FIPS186-5)
+(A4619)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4629)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4630)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4631)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-5)
+(A4632)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4612)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4618)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4629)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4630)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4631)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+RSA SigVer
+(FIPS186-4)
+(A4632)
+
+PKCS#1 v1.5 with KAT
+SHA-256; 2048-bit
+key
+
+CAST Module is
+operational
+
+Signature
+verification
+
+ECDSA
+SigGen
+(FIPS186-5)
+(A4612)
+ECDSA
+SigGen
+(FIPS186-5)
+(A4613)
+ECDSA
+SigGen
+(FIPS186-5)
+(A4618)
+
+SHA-256; P-224, P- KAT
+256, P-384, P-521
+
+CAST Module is
+operational
+
+Signature
+generation
+
+SHA-256; P-224, P- KAT
+256, P-384, P-521
+
+CAST Module is
+operational
+
+Signature
+generation
+
+SHA-256; P-224, P- KAT
+256, P-384, P-521
+
+CAST Module is
+operational
+
+Signature
+generation
+
+Conditions
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 55 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+ECDSA
+SHA-256; P-224, P- KAT
+CAST Module is
+SigGen
+256, P-384, P-521
+operational
+(FIPS186-5)
+(A4619)
+ECDSA
+SHA-256; P-224, P- KAT
+CAST Module is
+SigGen
+256, P-384, P-521
+operational
+(FIPS186-5)
+(A4629)
+ECDSA
+SHA-256; P-224, P- KAT
+CAST Module is
+SigGen
+256, P-384, P-521
+operational
+(FIPS186-5)
+(A4630)
+ECDSA
+SHA-256; P-224, P- KAT
+CAST Module is
+SigGen
+256, P-384, P-521
+operational
+(FIPS186-5)
+(A4631)
+ECDSA
+SHA-256; P-224, P- KAT
+CAST Module is
+SigGen
+256, P-384, P-521
+operational
+(FIPS186-5)
+(A4632)
+ECDSA SigVer SHA-256; P-224, P- KAT
+CAST Module is
+(FIPS186-5)
+256, P-384, P-521
+operational
+(A4618)
+
+Details
+Signature
+generation
+Signature
+generation
+Signature
+generation
+Signature
+generation
+Signature
+generation
+Signature
+verification
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4619)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4629)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4630)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4631)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4632)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+Safe Primes
+Key
+Generation
+(A4642)
+RSA KeyGen
+(FIPS186-5)
+(A4612)
+RSA KeyGen
+(FIPS186-5)
+(A4618)
+RSA KeyGen
+(FIPS186-5)
+(A4629)
+
+N/A
+
+PCT
+
+PCT
+
+Key pair
+SP 800-56Arev3
+generation is Section 5.6.2.1.4
+successful
+
+N/A
+
+PCT
+
+PCT
+
+N/A
+
+PCT
+
+PCT
+
+N/A
+
+PCT
+
+PCT
+
+Key pair
+generation is
+sucessful
+Key pair
+generation is
+sucessful
+Key pair
+generation is
+sucessful
+
+Signature
+generation &
+verification
+Signature
+generation &
+verification
+Signature
+generation &
+verification
+
+Conditions
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Key pair
+generation
+Key pair
+generation
+Key pair
+generation
+Key pair
+generation
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 56 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+RSA KeyGen N/A
+PCT
+PCT Key pair
+(FIPS186-5)
+generation is
+(A4630)
+sucessful
+RSA KeyGen N/A
+PCT
+PCT Key pair
+(FIPS186-5)
+generation is
+(A4631)
+sucessful
+RSA KeyGen N/A
+PCT
+PCT Key pair
+(FIPS186-5)
+generation is
+(A4632)
+sucessful
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4612)
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4618)
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4629)
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4630)
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4631)
+ECDSA
+SHA-256
+PCT
+PCT Key pair
+KeyGen
+generation
+(FIPS186-5)
+successful
+(A4632)
+ECDSA SigVer SHA-256; P-224, P- KAT
+CAST Module is
+(FIPS186-5)
+256, P-384, P-521
+operational
+(A4613)
+KDF ANS 9.63 SHA-256; 192-bit
+(A4613)
+input secret
+
+Details
+
+Conditions
+
+Signature
+generation &
+verification
+Signature
+generation &
+verification
+Signature
+generation &
+verification
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+generation &
+verification
+
+Key pair
+generation
+
+Signature
+verification
+
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+ECDSA SigVer SHA-256; P-224, P- KAT
+(FIPS186-5)
+256, P-384, P-521
+(A4612)
+
+CAST Module is
+operational
+
+Signature
+verification
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4612)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4619)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4629)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+Key pair
+generation
+Key pair
+generation
+Key pair
+generation
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 57 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or
+Test Test
+Test Properties
+Indicator
+Test
+Method Type
+KDF ANS 9.63 SHA-256; 192-bit KAT
+CAST Module is
+(A4630)
+input secret
+operational
+
+Details
+
+Conditions
+
+Key derivation
+
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+Module
+initialization
+(before
+integrity test)
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4631)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF ANS 9.63 SHA-256; 192-bit
+(A4632)
+input secret
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDA TwoStep SHA-256, 48-bit
+SP800-56Cr2 input secret
+(A4641)
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+KDF SP800108 (A4608)
+
+KAT
+
+CAST Module is
+operational
+
+Key derivation
+
+Counter mode;
+HMAC-SHA-256;
+128-bit input key
+
+Table 21: Conditional Self-Tests
+
+The module performs self-tests on all approved cryptographic algorithms as part of the approved
+services supported in the approved mode of operation, using the tests shown in the table above.
+Upon generation of a DH, RSA, or EC key pair, the module will perform a pair-wise consistency test
+(PCT) as shown in the Conditional Self-tests table in Section 10.2 Conditional Self-Tests, which provides
+some assurance that the generated key pair is well formed. For DH key pairs, this test consists of the
+PCT described in Section 5.6.2.1.4 of SP 800-56Ar3. For RSA and EC key pairs, this test consists of a
+signature generation and a signature verification operation.
+Data output through the data output interface is inhibited during the conditional self-tests. The module
+does not return control to the calling application until the tests are completed. If any of these tests
+fails, the module transitions to the error state (Section 10.4 Error States).
+
+10.3 Periodic Self-Test Information
+Algorithm or Test
+Test Method
+HMAC-SHA2-256
+Message
+(A4608)
+authentication
+
+Test Type
+SW/FW Integrity
+
+Period
+On demand
+
+HMAC-SHA2-256
+(A4612)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+HMAC-SHA2-256
+(A4618)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+HMAC-SHA2-256
+(A4629)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+HMAC-SHA2-256
+(A4630)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+HMAC-SHA2-256
+(A4631)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+HMAC-SHA2-256
+(A4632)
+
+Message
+authentication
+
+SW/FW Integrity
+
+On demand
+
+Periodic Method
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+Unload and reinitialize the
+module
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 58 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Table 22: Pre-Operational Periodic Information
+Algorithm or Test
+Test Method
+SHA-1 (A4612)
+KAT
+SHA-1 (A4618)
+KAT
+SHA-1 (A4629)
+KAT
+SHA-1 (A4630)
+KAT
+SHA-1 (A4631)
+KAT
+SHA-1 (A4632)
+KAT
+SHA2-512 (A4612) KAT
+SHA2-512 (A4618) KAT
+SHA2-512 (A4629) KAT
+SHA2-512 (A4630) KAT
+SHA2-512 (A4631) KAT
+SHA2-512 (A4632) KAT
+SHA3-256 (A4613) KAT
+SHA3-256 (A4619) KAT
+AES-GCM (A4614) KAT
+AES-GCM (A4615) KAT
+AES-GCM (A4616) KAT
+AES-GCM (A4617) KAT
+AES-GCM (A4620) KAT
+AES-GCM (A4621) KAT
+AES-GCM (A4622) KAT
+AES-GCM (A4623) KAT
+AES-GCM (A4624) KAT
+AES-GCM (A4625) KAT
+AES-GCM (A4626) KAT
+AES-GCM (A4627) KAT
+AES-GCM (A4614) KAT
+AES-ECB (A4605)
+KAT
+AES-ECB (A4606)
+KAT
+AES-ECB (A4607)
+KAT
+AES-ECB (A4609)
+KAT
+AES-ECB (A4610)
+KAT
+AES-ECB (A4611)
+KAT
+AES-ECB (A4635)
+KAT
+AES-ECB (A4636)
+KAT
+AES-ECB (A4637)
+KAT
+AES-ECB (A4638)
+KAT
+AES-ECB (A4639)
+KAT
+KDF SP800-108
+KAT
+(A4640)
+KDA OneStep
+KAT
+SP800-56Cr2
+(A4641)
+KDA HKDF Sp800- KAT
+56Cr1 (A4603)
+KDF ANS 9.42
+KAT
+(A4613)
+KDF ANS 9.42
+KAT
+(A4612)
+KDF ANS 9.42
+KAT
+(A4618)
+KDF ANS 9.42
+KAT
+(A4619)
+KDF ANS 9.42
+KAT
+(A4629)
+
+Test Type
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Period
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Periodic Method
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 59 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm or Test
+Test Method
+KDF ANS 9.42
+KAT
+(A4630)
+KDF ANS 9.42
+KAT
+(A4631)
+KDF ANS 9.42
+KAT
+(A4632)
+KDF ANS 9.63
+KAT
+(A4618)
+KDF SSH (A4635)
+KAT
+KDF SSH (A4636)
+KAT
+KDF SSH (A4637)
+KAT
+KDF SSH (A4638)
+KAT
+KDF SSH (A4639)
+KAT
+TLS v1.2 KDF
+KAT
+RFC7627 (A4612)
+TLS v1.2 KDF
+KAT
+RFC7627 (A4618)
+TLS v1.2 KDF
+KAT
+RFC7627 (A4629)
+TLS v1.2 KDF
+KAT
+RFC7627 (A4630)
+TLS v1.2 KDF
+KAT
+RFC7627 (A4631)
+TLS v1.2 KDF
+KAT
+RFC7627 (A4632)
+TLS v1.3 KDF
+KAT
+(A4603)
+PBKDF (A4612)
+KAT
+PBKDF (A4613)
+KAT
+PBKDF (A4618)
+KAT
+PBKDF (A4619)
+KAT
+PBKDF (A4629)
+KAT
+PBKDF (A4630)
+KAT
+PBKDF (A4631)
+KAT
+PBKDF (A4632)
+KAT
+Counter DRBG
+KAT
+(A4604)
+Hash DRBG
+KAT
+(A4604)
+HMAC DRBG
+KAT
+(A4604)
+KAS-FFC-SSC
+KAT
+Sp800-56Ar3
+(A4642)
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4612)
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4618)
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4629)
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4630)
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4631)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Type
+CAST
+
+Period
+On demand
+
+Periodic Method
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 60 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm or Test
+Test Method
+KAS-ECC-SSC
+KAT
+Sp800-56Ar3
+(A4632)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4612)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4613)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4618)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4619)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4629)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4630)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4631)
+RSA SigGen
+KAT
+(FIPS186-5)
+(A4632)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4612)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4613)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4618)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4619)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4629)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4630)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4631)
+RSA SigVer
+KAT
+(FIPS186-5)
+(A4632)
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4612)
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4618)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Type
+CAST
+
+Period
+On demand
+
+Periodic Method
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 61 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+Algorithm or Test
+Test Method
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4629)
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4630)
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4631)
+RSA SigVer
+KAT
+(FIPS186-4)
+(A4632)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4612)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4613)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4618)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4619)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4629)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4630)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4631)
+ECDSA SigGen
+KAT
+(FIPS186-5)
+(A4632)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4618)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4619)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4629)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4630)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4631)
+ECDSA SigVer
+KAT
+(FIPS186-5)
+(A4632)
+Safe Primes Key
+PCT
+Generation (A4642)
+RSA KeyGen
+PCT
+(FIPS186-5)
+(A4612)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Type
+CAST
+
+Period
+On demand
+
+Periodic Method
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+CAST
+
+On demand
+
+Manually
+
+PCT
+
+On demand
+
+Manually
+
+PCT
+
+On demand
+
+Manually
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 62 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or Test
+Test Method
+Test Type
+Period
+RSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4618)
+RSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4629)
+RSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4630)
+RSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4631)
+RSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4632)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4612)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4618)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4629)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4630)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4631)
+ECDSA KeyGen
+PCT
+PCT
+On demand
+(FIPS186-5)
+(A4632)
+ECDSA SigVer
+KAT
+CAST
+On demand
+(FIPS186-5)
+(A4613)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4613)
+ECDSA SigVer
+KAT
+CAST
+On demand
+(FIPS186-5)
+(A4612)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4612)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4619)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4629)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4630)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4631)
+KDF ANS 9.63
+KAT
+CAST
+On demand
+(A4632)
+KDA TwoStep
+KAT
+CAST
+On demand
+SP800-56Cr2
+(A4641)
+KDF SP800-108
+KAT
+CAST
+On demand
+(A4608)
+Table 23: Conditional Periodic Information
+
+Periodic Method
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 63 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+10.4 Error States
+Name
+Description
+Conditions
+Recovery Method
+Indicator
+Error The module immediately Software integrity Re-initialization of Module will not load; Module
+stops functioning
+test failure
+the module
+is aborted for PCT failure
+CAST failure
+PCT failure
+Table 24: Error States
+If the module fails any of the self-tests, the module enters the error state. In the error state, the
+module immediately stops functioning and ends the application process. Consequently, the data
+output interface is inhibited, and the module no longer accepts inputs or requests (as the module is no
+longer running).
+
+10.5 Operator Initiation of Self-Tests
+The software integrity tests and cryptographic algorithm self-tests can be invoked on demand by
+unloading and subsequently re-initializing the module. The pair-wise consistency tests can be invoked
+on demand by requesting the key pair generation service.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 64 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+The module is distributed as a part of the Amazon Linux 2023 packages in the form of the openssl3.0.8-1.amzn2023.0.17 RPM package.
+Before the openssl-3.0.8-1.amzn2023.0.17 RPM package is installed, the Amazon Linux 2023 systems
+must operate in the FIPS validated configuration. This can be achieved by switching the system into
+the FIPS validated configuration after the installation. Execute the openssl list -providers command.
+Restart the system. More information can be found at the vendor documentation.
+The Crypto Officer must verify the Amazon Linux 2023 systems operates in the FIPS validated
+configuration by executing the fips-mode-setup –check command, which should output “FIPS mode is
+enabled.”
+
+11.2 Administrator Guidance
+After installation of the openssl-3.0.8-1.amzn2023.0.17 RPM package, the Crypto Officer must verify
+the module name and version by executing the openssl list -providers command. The Crypto Officer
+must ensure that the f i p s provider is listed in the output as follows:
+fips
+name: Amazon Linux 2023 - OpenSSL FIPS Provider
+version: 3.0.8-d694bfa693b76001
+status: active
+The cryptographic boundary consists only of the FIPS provider as listed. If any other OpenSSL or thirdparty provider is invoked, the user is not interacting with the module specified in this Security Policy.
+
+11.3 Non-Administrator Guidance
+There is no administrator guidance.
+
+11.6 End of Life
+As the module does not persistently store SSPs, secure sanitization of the module consists of unloading
+the module. This will zeroize all SSPs in volatile memory. Then, if desired, the openssl-3.0.81.amzn2023.0.9 RPM package can be uninstalled from the Amazon Linux 2023 systems.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 65 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+12 Mitigation of Other Attacks
+12.1 Attack List
+Certain cryptographic subroutines and algorithms are vulnerable to timing analysis. The module
+mitigates this vulnerability by using constant-time implementations. This includes, but is not limited to:
+•
+•
+•
+
+Big number operations: computing GCDs, modular inversion, multiplication, division, and
+modular exponentiation (using Montgomery multiplication)
+Elliptic curve point arithmetic: addition and multiplication (using the Montgomery ladder)
+Vector-based AES implementations
+
+RSA, ECDSA, ECDH, and DH employ blinding techniques to further impede timing and power analysis.
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 66 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Appendix A. Glossary and Abbreviations
+AES
+
+Advanced Encryption Standard
+
+AES-NI
+
+Advanced Encryption Standard New Instructions
+
+API
+
+Application Programming Interface
+
+CAST
+
+Cryptographic Algorithm Self-Test
+
+CAVP
+
+Cryptographic Algorithm Validation Program
+
+CBC
+
+Cipher Block Chaining
+
+CCM
+
+Counter with Cipher Block Chaining-Message Authentication Code
+
+CE
+
+Cryptography Extensions
+
+CFB
+
+Cipher Feedback
+
+CKG
+
+Cryptographic Key Generation
+
+CMAC
+
+Cipher-based Message Authentication Code
+
+CMVP
+
+Cryptographic Module Validation Program
+
+CPACF
+
+CP Assist for Cryptographic Functions
+
+CSP
+
+Critical Security Parameter
+
+CTR
+
+Counter
+
+CTS
+
+Ciphertext Stealing
+
+DH
+
+Diffie-Hellman
+
+DRBG
+
+Deterministic Random Bit Generator
+
+ECB
+
+Electronic Code Book
+
+ECC
+
+Elliptic Curve Cryptography
+
+ECDH
+
+Elliptic Curve Diffie-Hellman
+
+ECDSA
+
+Elliptic Curve Digital Signature Algorithm
+
+EVP
+
+Envelope
+
+FFC
+
+Finite Field Cryptography
+
+FIPS
+
+Federal Information Processing Standards
+
+GCM
+
+Galois Counter Mode
+
+GMAC
+
+Galois Counter Mode Message Authentication Code
+
+HKDF
+
+HMAC-based Key Derivation Function
+
+HMAC
+
+Keyed-Hash Message Authentication Code
+
+IKE
+
+Internet Key Exchange
+
+KAS
+
+Key Agreement Scheme
+
+KAT
+
+Known Answer Test
+
+KBKDF
+
+Key-based Key Derivation Function
+
+KW
+
+Key Wrap
+
+KWP
+
+Key Wrap with Padding
+
+MAC
+
+Message Authentication Code
+
+NIST
+
+National Institute of Science and Technology
+
+OFB
+
+Output Feedback
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 67 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+PAA
+
+Processor Algorithm Acceleration
+
+PCT
+
+Pair-wise Consistency Test
+
+PBKDF2
+
+Password-based Key Derivation Function v2
+
+PSS
+
+Probabilistic Signature Scheme
+
+RSA
+
+Rivest, Shamir, Adleman
+
+SHA
+
+Secure Hash Algorithm
+
+SSC
+
+Shared Secret Computation
+
+SSH
+
+Secure Shell
+
+SSP
+
+Sensitive Security Parameter
+
+TLS
+
+Transport Layer Security
+
+XOF
+
+Extendable Output Function
+
+XTS
+
+XEX-based Tweaked-codebook mode with cipher text Stealing
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 68 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Appendix B. References
+ANS X9.42-2001
+
+Public Key Cryptography for the Financial Services Industry:
+Agreement of Symmetric Keys Using Discrete Logarithm
+Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9422001
+
+ANS X9.63-2001
+
+Public Key Cryptography for the Financial Services Industry, Key
+Agreement and Key Transport Using Elliptic Curve Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9632001
+
+FIPS 140-3
+
+FIPS PUB 140-3 - Security Requirements for Cryptographic Modules
+March 2019
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-3.pdf
+
+FIPS 140-3 IG
+
+Implementation Guidance for FIPS PUB 140-3 and the Cryptographic
+Module Validation Program
+January 2024
+https://csrc.nist.gov/Projects/cryptographic-module-validation-program/fips140-3-ig-announcements
+
+FIPS 180-4
+
+Secure Hash Standard (SHS)
+March 2012
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS 186-4
+
+Digital Signature Standard (DSS)
+July 2013
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+
+FIPS 186-5
+
+Digital Signature Standard (DSS)
+February 2023
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
+
+FIPS 197
+
+Advanced Encryption Standard
+November 2001
+https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS 198-1
+
+The Keyed Hash Message Authentication Code (HMAC)
+July 2008
+https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+FIPS 202
+
+SHA-3 Standard: Permutation-Based Hash and Extendable-Output
+Functions
+August 2015
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+
+RFC 3526
+
+More Modular Exponential (MODP) Diffie-Hellman groups for
+Internet Key Exchange (IKE)
+May 2003
+https://www.ietf.org/rfc/rfc3526.txt
+
+RFC 5288
+
+AES Galois Counter Mode (GCM) Cipher Suites for TLS
+August 2008
+https://www.ietf.org/rfc/rfc5288.txt
+
+RFC 7919
+
+Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for
+Transport Layer Security (TLS)
+August 2016
+https://www.ietf.org/rfc/rfc7919.txt
+
+RFC 8446
+
+The Transport Layer Security (TLS) Protocol Version 1.3
+August 2018
+https://www.ietf.org/rfc/rfc8446.txt
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 69 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+SP 800-38A
+
+Recommendation for Block Cipher Modes of Operation Methods and
+Techniques
+December 2001
+https://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP 800-38A
+Addendum
+
+Recommendation for Block Cipher Modes of Operation: Three
+Variants of Ciphertext Stealing for CBC Mode
+October 2010
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38aadd.pdf
+
+SP 800-38B
+
+Recommendation for Block Cipher Modes of Operation: The CMAC
+Mode for Authentication
+May 2005
+https://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+SP 800-38C
+
+Recommendation for Block Cipher Modes of Operation: the CCM
+Mode for Authentication and Confidentiality
+May 2004
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+SP 800-38D
+
+Recommendation for Block Cipher Modes of Operation:
+Galois/Counter Mode (GCM) and GMAC
+November 2007
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication80038d.pdf
+
+SP 800-38E
+
+Recommendation for Block Cipher Modes of Operation: The XTS AES
+Mode for Confidentiality on Storage Devices
+January 2010
+https://csrc.nist.gov/publications/nistpubs/800-38E/nist-sp-800-38E.pdf
+
+SP 800-38F
+
+Recommendation for Block Cipher Modes of Operation: Methods for
+Key Wrapping
+December 2012
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP 800-52r2
+
+Guidelines for the Selection, Configuration, and Use of Transport
+Layer Security (TLS) Implementations
+August 2019
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+
+SP 800-56Ar3
+
+Recommendation for Pair-Wise Key Establishment Schemes Using
+Discrete Logarithm Cryptography
+April 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+SP 800-56Cr1
+
+Recommendation for Key-Derivation Methods in Key-Establishment
+Schemes
+April 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr1.pdf
+
+SP 800-56Cr2
+
+Recommendation for Key-Derivation Methods in Key-Establishment
+Schemes
+August 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr2.pdf
+
+SP 800-90Ar1
+
+Recommendation for Random Number Generation Using
+Deterministic Random Bit Generators
+June 2015
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+SP 800-90B
+
+Recommendation for the Entropy Sources Used for Random Bit
+Generation
+January 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 70 of 71
+
+Amazon Linux 2023 OpenSSL FIPS Provider
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+SP 800-108r1
+
+NIST Special Publication 800-108 - Recommendation for Key
+Derivation Using Pseudorandom Functions
+August 2022
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1.pdf
+
+SP 800-132
+
+Recommendation for Password-Based Key Derivation - Part 1:
+Storage Applications
+December 2010
+https://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
+
+SP 800-133r2
+
+Recommendation for Cryptographic Key Generation
+June 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+SP 800-135r1
+
+Recommendation for Existing Application-Specific Key Derivation
+Functions
+December 2011
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800135r1.pdf
+
+© 2025 Amazon Web Services, Inc./atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+Page 71 of 71
+
+

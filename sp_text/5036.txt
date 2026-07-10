@@ -1,0 +1,5281 @@
+FIPS 140-3 Non-Proprietary Security Policy
+Oracle Corporation
+Oracle Linux 9 Kernel Crypto API Cryptographic Module
+
+Software Version: kernel: 5.14.0-362.24.1.0.4.el9_3
+libkcapi: 1.3.1-3.0.1.el9
+
+Prepared by:
+atsec information security corporation
+4516 Seton Center Parkway, Suite 250
+Austin, TX 78759
+www.atsec.com
+
+Document Version 1.1
+
+©Oracle Corporation
+This document may be reproduced whole and intact including the Copyright notice.
+
+Title: Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Date: June 30th, 2025
+Contributing Authors:
+Oracle Linux Engineering
+Security Evaluations – Global Product Security
+atsec information security
+Oracle Corporation
+World Headquarters
+2300 Oracle Way
+Austin, TX 78741
+U.S.A.
+Worldwide Inquiries:
+Phone: +1.650.506.7000
+Fax: +1.650.506.7200
+www.oracle.com
+
+Copyright © 2025, Oracle and/or its affiliates. All rights reserved. This document is provided for information purposes only and the contents
+hereof are subject to change without notice. This document is not warranted to be error-free, nor subject to any other warranties or
+conditions, whether expressed orally or implied in law, including implied warranties and conditions of merchantability or fitness for a
+particular purpose. Oracle specifically disclaim any liability with respect to this document and no contractual obligations are formed either
+directly or indirectly by this document. This document may reproduced or distributed whole and intact including this copyright notice.
+Oracle and Java are registered trademarks of Oracle and/or its affiliates. Other names may be trademarks of their respective owners.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+i
+
+Table of Contents
+Table of Contents................................................................................................................................................... ii
+List of Tables ......................................................................................................................................................... iv
+List of Figures ......................................................................................................................................................... v
+1 General ............................................................................................................................................................... 1
+1.1 Overview .............................................................................................................................................................1
+1.1.1 How This Security Policy was prepared .......................................................................................................1
+1.2 Security Levels .....................................................................................................................................................1
+2 Cryptographic Module Specification ................................................................................................................... 2
+2.1 Description ..........................................................................................................................................................2
+2.2 Tested and Vendor Affirmed Module Version and Identification .......................................................................3
+2.3 Excluded Components .........................................................................................................................................3
+2.4 Modes of Operation ............................................................................................................................................3
+2.5 Algorithms ...........................................................................................................................................................4
+2.6 Security Function Implementations ....................................................................................................................6
+2.7 Algorithm Specific Information ...........................................................................................................................8
+2.7.1 AES GCM IV ..................................................................................................................................................8
+2.7.2 AES XTS.........................................................................................................................................................9
+2.7.3 SP 800-56Arev3 Assurances .........................................................................................................................9
+2.7.4 RSA ...............................................................................................................................................................9
+2.8 RBG and Entropy .................................................................................................................................................9
+2.9 Key Generation ..................................................................................................................................................10
+2.10 Key Establishment ...........................................................................................................................................10
+2.11 Industry Protocols ...........................................................................................................................................10
+3 Cryptographic Module Interfaces ...................................................................................................................... 11
+3.1 Ports and Interfaces ..........................................................................................................................................11
+4 Roles, Services, and Authentication .................................................................................................................. 12
+4.1 Authentication Methods ...................................................................................................................................12
+4.2 Roles ..................................................................................................................................................................12
+4.3 Approved Services .............................................................................................................................................12
+4.4 Non-Approved Services .....................................................................................................................................14
+4.5 External Software/Firmware Loaded ................................................................................................................14
+5 Software/Firmware Security ............................................................................................................................. 15
+5.1 Integrity Techniques ..........................................................................................................................................15
+5.2 Initiate on Demand............................................................................................................................................15
+6 Operational Environment ................................................................................................................................. 16
+6.1 Operational Environment Type and Requirements ..........................................................................................16
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+ii
+
+6.2 Configuration Settings and Restrictions ............................................................................................................16
+7 Physical Security ............................................................................................................................................... 17
+8 Non-Invasive Security ....................................................................................................................................... 18
+9 Sensitive Security Parameters Management ..................................................................................................... 19
+9.1 Storage Areas ....................................................................................................................................................19
+9.2 SSP Input-Output Methods ...............................................................................................................................19
+9.3 SSP Zeroization Methods...................................................................................................................................19
+9.4 SSPs ...................................................................................................................................................................19
+9.5 Transitions .........................................................................................................................................................21
+10 Self-Tests ........................................................................................................................................................ 22
+10.1 Pre-Operational Self-Tests ..............................................................................................................................22
+10.2 Conditional Self-Tests ......................................................................................................................................22
+10.3 Periodic Self-Test Information.........................................................................................................................29
+10.4 Error States ......................................................................................................................................................32
+10.5 Operator Initiation of Self-Tests ......................................................................................................................32
+11 Life-Cycle Assurance........................................................................................................................................ 33
+11.1 Installation, Initialization, and Startup Procedures .........................................................................................33
+11.2 Administrator Guidance ..................................................................................................................................33
+11.3 Non-Administrator Guidance ..........................................................................................................................33
+11.4 End of Life ........................................................................................................................................................33
+12 Mitigation of Other Attacks ............................................................................................................................ 34
+Appendix A. Glossary and Abbreviations ............................................................................................................. 35
+Appendix B. References ....................................................................................................................................... 36
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+iii
+
+List of Tables
+Table 1: Security Levels..................................................................................................................................................1
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) .....................................3
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid....................................................................3
+Table 4: Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid ...................................................3
+Table 5: Modes List and Description .............................................................................................................................3
+Table 6: Approved Algorithms .......................................................................................................................................5
+Table 7: Non-Approved, Not Allowed Algorithms .........................................................................................................6
+Table 8: Security Function Implementations .................................................................................................................8
+Table 9: Entropy Certificates .........................................................................................................................................9
+Table 10: Entropy Sources .............................................................................................................................................9
+Table 11: Ports and Interfaces .....................................................................................................................................11
+Table 12: Roles .............................................................................................................................................................12
+Table 13: Approved Services .......................................................................................................................................14
+Table 14: Non-Approved Services................................................................................................................................14
+Table 15: Storage Areas ...............................................................................................................................................19
+Table 16: SSP Input-Output Methods ..........................................................................................................................19
+Table 17: SSP Zeroization Methods .............................................................................................................................19
+Table 18: SSP Table 1 ...................................................................................................................................................20
+Table 19: SSP Table 2 ...................................................................................................................................................21
+Table 20: Pre-Operational Self-Tests ...........................................................................................................................22
+Table 21: Conditional Self-Tests ..................................................................................................................................29
+Table 22: Pre-Operational Periodic Information .........................................................................................................29
+Table 23: Conditional Periodic Information.................................................................................................................32
+Table 24: Error States ..................................................................................................................................................32
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+iv
+
+List of Figures
+Figure 1: Block Diagram .................................................................................................................................................2
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+v
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for Oracle Linux 9 Kernel Crypto API Cryptographic
+Module versions:
+•
+
+kernel: 5.14.0-362.24.1.0.4.el9_3
+
+•
+
+libkcapi: 1.3.1-3.0.1.el9
+
+It contains the security rules under which the module must operate and describes how this module meets the
+requirements as specified in FIPS PUB 140-3 (Federal Information Processing Standards Publication 140-3) for an
+overall Security Level 1 module.
+This Non-Proprietary Security Policy may be reproduced and distributed, but only whole and intact and including
+this notice. Other documentation is proprietary to their authors.
+
+1.1.1 How This Security Policy was prepared
+In preparing the Security Policy document, the laboratory formatted the vendor-supplied documentation for
+consolidation without altering the technical statements therein contained. The further refining of the Security
+Policy document was conducted iteratively throughout the conformance testing, wherein the Security Policy was
+submitted to the vendor, who would then edit, modify, and add technical contents. The vendor would also supply
+additional documentation, which the laboratory formatted into the existing Security Policy, and resubmitted to the
+vendor for their final editing.
+
+1.2 Security Levels
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Section
+
+Title
+
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+
+Security Level
+1
+1
+1
+1
+1
+1
+N/A
+N/A
+1
+1
+1
+N/A
+1
+
+Table 1: Security Levels
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 1 of 41
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The Oracle Linux 9 Kernel Crypto API Cryptographic Module (hereafter referred to as “the module”) provides a C
+language application program interface (API) for use by other (kernel space and user space) processes that require
+cryptographic functionality. The module operates on a general-purpose computer as part of the Linux kernel. Its
+cryptographic functionality can be accessed using the Linux Kernel Crypto API.
+Module Type: Software
+Module Embodiment: MultiChipStand
+Cryptographic Boundary:
+The cryptographic boundary of the module is defined as the kernel binary and the loadable kernel crypto object
+files, the libkcapi library, and the sha512hmac binary, which is used to verify the integrity of the software
+components. In addition, the cryptographic boundary contains the .hmac files which store the expected integrity
+values for each of the software components.
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The TOEPP of the module is defined as the general-purpose computer on which the module is installed.
+
+Figure 1: Block Diagram
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 2 of 41
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+Package or File Name
+
+Software/ Firmware
+Version
+
+/boot/vmlinuz-5.14.0-362.24.1.0.4.el9_3.x86_64; 5.14.0-362.24.1.0.4.el9_3;
+*.ko and *.ko.xz files in /usr/lib/modules/5.14.01.3.1-3.0.1.el9
+362.24.1.0.4.el9_3.x86_64/kernel/crypto *.ko and
+*.ko.xz files in /usr/lib/modules/5.14.0362.24.1.0.4.el9_3.x86_64/kernel/arch/x86/crypto;
+/usr/lib64/libkcapi.so.1.3.1, /usr/bin/sha512hmac
+
+Features
+N/A
+
+Integrity Test
+HMAC-SHA-512; RSA
+signature verification
+
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+
+Hardware
+Platform
+
+Processors
+
+PAA/PAI
+
+Oracle Linux 9 ORACLE SERVER X9-2c Intel Xeon Platinum 8358 Yes
+Oracle Linux 9 ORACLE SERVER E4-2c AMD EPYC 7J13
+Yes
+
+Hypervisor or
+Host OS
+
+Version(s)
+
+KVM on Oracle Linux 8 5.14.0-362.24.1.0.4.el9_3; 1.3.1-3.0.1.el9
+KVM on Oracle Linux 8 5.14.0-362.24.1.0.4.el9_3; 1.3.1-3.0.1.el9
+
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+
+Hardware
+Platform
+
+Oracle Linux 9 Oracle X Series Servers
+Oracle Linux 9 Oracle E Series Servers
+
+Table 4: Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid
+
+CMVP makes no statement as to the correct operation of the module or the security strengths of the generated
+keys when so ported if the specific operational environment is not listed on the validation certificate.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary excluded from the FIPS 140-3 requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode
+Name
+
+Approved
+mode
+Nonapproved
+mode
+
+Description
+Automatically entered
+whenever an approved
+service is requested.
+Automatically entered
+whenever a non-approved
+service is requested.
+
+Type
+
+Status Indicator
+
+Approved Mapped to approved service indicator in section 4.3 for all approved algorithms
+except GCM: respective approved service function returns indicator 0. For GCM:
+crypto_aead_get_flags(tfm) has the CRYPTO_TFM_ FIPS_COMPLIANCE flag set
+NonNo service indicator required for non-approved services per IG 2.4.C
+Approved
+
+Table 5: Modes List and Description
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 3 of 41
+
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed on start-up, the module
+automatically transitions to the approved mode.
+Mode Change Instructions and Status:
+The module automatically switches between the approved and non-approved modes depending on the services
+requested by the operator. The status indicator of the mode of operation is equivalent to the indicator of the
+service that was requested.
+Degraded Mode Description:
+The module does not implement a degraded mode of operation.
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+
+CAVP Cert
+
+AES-CBC
+
+A5278, A5285, A5288
+
+AES-CBC-CS3
+
+A5282, A5293
+
+AES-CCM
+AES-CFB128
+
+A5278, A5288
+A5280, A5291
+
+AES-CMAC
+
+A5278, A5288
+
+AES-CTR
+
+A5278, A5285, A5288
+
+AES-ECB
+AES-GCM
+
+A5277, A5278, A5283, A5284, A5285, A5286,
+A5287, A5288, A5289, A5290
+A5278, A5284, A5285, A5287, A5288, A5290
+
+AES-GCM
+
+A5283, A5286, A5289
+
+AES-GMAC
+
+A5278, A5288
+
+AES-OFB
+
+A5281, A5292
+
+AES-XTS Testing
+Revision 2.0
+Counter DRBG
+
+A5278, A5285, A5288
+
+Hash DRBG
+
+A5277, A5278, A5283, A5284, A5285, A5286,
+A5287, A5288, A5289, A5290, A5294, A5295,
+A5296
+A5277, A5278, A5283, A5284, A5285, A5286,
+A5287, A5288, A5289, A5290, A5294, A5295,
+A5296
+A5277, A5278, A5294, A5295, A5296, A5297
+A5277, A5278, A5294, A5295, A5296, A5297
+A5277, A5278, A5294, A5295, A5296, A5297
+A5277, A5278, A5294, A5295, A5296
+A5277, A5278, A5294, A5295, A5296
+
+HMAC DRBG
+HMAC-SHA-1
+HMAC-SHA2-224
+HMAC-SHA2-256
+HMAC-SHA2-384
+HMAC-SHA2-512
+
+A5277, A5278, A5283, A5284, A5285, A5286,
+A5287, A5288, A5289, A5290
+
+Properties
+
+Reference
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Generation, Verification
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External
+Key Length - 128, 192, 256
+Direction - Encrypt
+IV Generation - Internal
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 256
+Prediction Resistance - No, Yes
+Mode - AES-128, AES-192, AES-256
+Derivation Function Enabled - Yes
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+
+SP 800-38A
+
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+
+SP 800-90A Rev.
+1
+
+Key Length - Key Length: 112-524288 Increment 8
+Key Length - Key Length: 112-524288 Increment 8
+Key Length - Key Length: 112-524288 Increment 8
+Key Length - Key Length: 112-524288 Increment 8
+Key Length - Key Length: 112-524288 Increment 8
+
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+
+SP 800-38A
+SP 800-38C
+SP 800-38A
+SP 800-38B
+SP 800-38A
+SP 800-38A
+SP 800-38D
+SP 800-38D
+
+SP 800-38D
+SP 800-38A
+SP 800-38E
+SP 800-90A Rev.
+1
+SP 800-90A Rev.
+1
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 4 of 41
+
+Algorithm
+
+HMAC-SHA3-224
+A5279
+HMAC-SHA3-256
+A5279
+HMAC-SHA3-384
+A5279
+HMAC-SHA3-512
+A5279
+KAS-FFC-SSC Sp800- A5277
+56Ar3
+
+CAVP Cert
+
+Properties
+
+RSA SigVer
+(FIPS186-4)
+RSA SigVer
+(FIPS186-5)
+Safe Primes Key
+Generation
+SHA-1
+
+A5278, A5294, A5295, A5296
+
+SHA2-224
+
+A5277, A5278, A5294, A5295, A5296, A5297
+
+SHA2-256
+
+A5277, A5278, A5294, A5295, A5296, A5297
+
+SHA2-384
+
+A5277, A5278, A5294, A5295, A5296
+
+SHA2-512
+
+A5277, A5278, A5294, A5295, A5296
+
+SHA3-224
+
+A5279
+
+SHA3-256
+
+A5279
+
+SHA3-384
+
+A5279
+
+SHA3-512
+
+A5279
+
+A5278, A5294, A5295, A5296
+A5277
+A5277, A5278, A5294, A5295, A5296, A5297
+
+Reference
+
+Key Length - Key Length: 112-524288 Increment 8
+FIPS 198-1
+Key Length - Key Length: 112-524288 Increment 8
+FIPS 198-1
+Key Length - Key Length: 112-524288 Increment 8
+FIPS 198-1
+Key Length - Key Length: 112-524288 Increment 8
+FIPS 198-1
+Domain Parameter Generation Methods - ffdhe2048, SP 800-56A Rev.
+ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192
+3
+Scheme dhEphem KAS Role - initiator, responder
+Signature Type - PKCS 1.5
+FIPS 186-4
+Modulo - 2048, 3072, 4096
+Modulo - 2048, 3072, 4096
+FIPS 186-5
+Signature Type - pkcs1v1.5
+Safe Prime Groups - ffdhe2048, ffdhe3072,
+SP 800-56A Rev.
+ffdhe4096, ffdhe6144, ffdhe8192
+3
+Message Length - Message Length: 0-65536
+FIPS 180-4
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 180-4
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 180-4
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 180-4
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 180-4
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2
+Message Length - Message Length: 0-65536
+FIPS 202
+Increment 8
+Large Message Sizes - 1, 2
+
+Table 6: Approved Algorithms
+
+Vendor-Affirmed Algorithms:
+N/A for this module.
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 5 of 41
+
+Name
+
+Use and Function
+
+AES GCM with external IV
+Encryption
+KBKDF (libkcapi)
+Key derivation
+HKDF (libkcapi)
+Key derivation
+PBKDF2 (libkcapi)
+Password-based key derivation
+RSA
+Encryption primitive; Decryption primitive
+RSA with PKCS#1 v1.5 padding Signature generation (pre-hashed message); Signature verification (pre-hashed message)
+
+Table 7: Non-Approved, Not Allowed Algorithms
+
+2.6 Security Function Implementations
+Name
+
+KAS-FFC-SSC
+
+KAS-SSC
+
+Type
+
+Safe Primes Key Generation CKG
+Encryption with AES
+
+BC-UnAuth
+
+Decryption with AES
+
+BC-UnAuth
+
+Hashing
+
+SHA
+
+Description
+
+Properties
+
+Algorithms
+
+Shared Secret Computation Keys:ffdhe2048, ffdhe3072, KAS-FFC-SSC Sp800-56Ar3:
+ffdhe4096, ffdhe6144,
+(A5277)
+ffdhe8192 bit keys with
+112-200 bits of key
+strength
+Compliance:Compliant with
+IG D.F scenario 2(1)
+Key Generation
+Groups:ffdhe2048,
+Safe Primes Key
+ffdhe3072, ffdhe4096,
+Generation: (A5277)
+ffdhe6144, ffdhe8192
+Encrypt a plaintext with
+Key size(s):128, 192, 256
+AES-CBC: (A5278, A5285,
+AES
+bits (XTS mode 128 and 256 A5288)
+bits only)
+AES-CBC-CS3: (A5282,
+A5293)
+AES-CFB128: (A5280,
+A5291)
+AES-CTR: (A5278, A5285,
+A5288)
+AES-ECB: (A5277, A5278,
+A5283, A5284, A5285,
+A5286, A5287, A5288,
+A5289, A5290)
+AES-OFB: (A5281, A5292)
+AES-XTS Testing Revision
+2.0: (A5278, A5285, A5288)
+Decrypt a ciphertext with Key size(s):128, 192, 256
+AES-CBC: (A5278, A5285,
+AES
+bits (XTS mode 128 and 256 A5288)
+bits only)
+AES-CBC-CS3: (A5282,
+A5293)
+AES-CFB128: (A5280,
+A5291)
+AES-CTR: (A5278, A5285,
+A5288)
+AES-ECB: (A5278, A5283,
+A5284, A5285, A5286,
+A5287, A5288, A5289,
+A5290)
+AES-OFB: (A5281, A5292)
+AES-XTS Testing Revision
+2.0: (A5278, A5285, A5288)
+Compute a message digest SHA-1:N/A
+SHA-1: (A5277, A5278,
+SHA2-224:N/A
+A5294, A5295, A5296,
+SHA2-256:N/A
+A5297)
+SHA2-384:N/A
+SHA2-224: (A5277, A5278,
+SHA2-512:N/A
+A5294, A5295, A5296,
+SHA3-224:N/A
+A5297)
+SHA3-256:N/A
+SHA2-256: (A5277, A5278,
+SHA3-384:N/A
+A5294, A5295, A5296,
+SHA3-512:N/A
+A5297)
+SHA2-384: (A5277, A5278,
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 6 of 41
+
+Name
+
+Type
+
+Description
+
+Properties
+
+Message authentication
+
+MAC
+
+Compute a MAC tag for
+authentication
+
+Random number
+generation with DRBGs
+
+DRBG
+
+Generate random numbers Counter DRBG:128, 192,
+from DRBGs
+256 bits
+HMAC DRBG:128, 256 bits
+Hash DRBG:128, 256 bits
+
+Signature verification with DigSig-SigVer
+RSA
+
+HMAC key size(s):112524288 bits (112-256 bits)
+AES key size(s):128, 192,
+256 bits
+
+Verify a signature with RSA Padding:PKCS#1 v1.5
+Hashes:SHA1, SHA-224,
+SHA-256, SHA-384, SHA512
+Key size(s):2048, 3072,
+4096 bits (112, 128, 150
+bits)
+Encrypt and authenticate a Key size(s):128, 192, 256
+plaintext with AES
+bits
+
+Authenticated encryption
+with AES
+
+BC-Auth
+
+Authenticated decryption
+with AES
+
+BC-Auth
+
+Decrypt and authenticate a Key size(s):128, 192, 256
+ciphertext with AES
+bits
+
+Key wrapping
+
+KTS-Wrap
+
+Key wrapping
+
+Key size(s):128, 192, 256
+bits
+
+Algorithms
+
+A5294, A5295, A5296)
+SHA2-512: (A5277, A5278,
+A5294, A5295, A5296)
+SHA3-224: (A5279)
+SHA3-256: (A5279)
+SHA3-384: (A5279)
+SHA3-512: (A5279)
+AES-CMAC: (A5278, A5288)
+AES-GMAC: (A5278, A5288)
+HMAC-SHA-1: (A5277,
+A5278, A5294, A5295,
+A5296, A5297)
+HMAC-SHA2-224: (A5277,
+A5278, A5294, A5295,
+A5296, A5297)
+HMAC-SHA2-256: (A5277,
+A5278, A5294, A5295,
+A5296, A5297)
+HMAC-SHA2-384: (A5277,
+A5278, A5294, A5295,
+A5296, A5297)
+HMAC-SHA2-512: (A5277,
+A5278, A5294, A5295,
+A5296, A5297)
+HMAC-SHA3-224: (A5279)
+HMAC-SHA3-256: (A5279)
+HMAC-SHA3-384: (A5279)
+HMAC-SHA3-512: (A5279)
+Counter DRBG: (A5277,
+A5278, A5283, A5284,
+A5285, A5286, A5287,
+A5288, A5289, A5290)
+Hash DRBG: (A5277, A5278,
+A5283, A5284, A5285,
+A5286, A5287, A5288,
+A5289, A5290, A5294,
+A5295, A5296)
+HMAC DRBG: (A5277,
+A5278, A5283, A5284,
+A5285, A5286, A5287,
+A5288, A5289, A5290,
+A5294, A5295, A5296)
+RSA SigVer (FIPS186-4):
+(A5278, A5294, A5295,
+A5296)
+RSA SigVer (FIPS186-5):
+(A5278, A5294, A5295,
+A5296)
+AES-CCM: (A5278, A5288)
+AES-GCM: (A5278, A5283,
+A5284, A5285, A5286,
+A5287, A5288, A5289,
+A5290)
+AES-CCM: (A5278, A5288)
+AES-GCM: (A5278, A5285,
+A5287, A5288, A5290,
+A5283, A5284, A5286,
+A5289)
+AES-CCM: (A5278, A5288)
+AES-GCM: (A5283, A5285,
+A5286, A5289)
+AES-CBC: (A5278, A5285,
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 7 of 41
+
+Name
+
+Key unwrapping
+
+Type
+
+KTS-Wrap
+
+Description
+
+Key unwrapping
+
+Properties
+
+Key sizes(s):128, 192, 256
+bits
+
+Algorithms
+
+A5288)
+HMAC-SHA-1: (A5277,
+A5294, A5295, A5296,
+A5278)
+HMAC-SHA2-256: (A5294,
+A5295, A5296, A5278)
+HMAC-SHA2-384: (A5294,
+A5295, A5296, A5278)
+HMAC-SHA2-512: (A5294,
+A5295, A5296, A5278)
+AES-CTR: (A5278, A5285,
+A5288)
+AES-CCM: (A5278, A5288)
+AES-GCM: (A5278, A5284,
+A5287, A5288, A5290)
+AES-CBC: (A5278, A5285,
+A5288)
+HMAC-SHA-1: (A5277,
+A5295, A5296, A5278,
+A5294)
+HMAC-SHA2-256: (A5295,
+A5296, A5278, A5294)
+HMAC-SHA2-384: (A5295,
+A5296, A5278, A5294)
+HMAC-SHA2-512: (A5295,
+A5296, A5278, A5294)
+AES-CTR: (A5278, A5285,
+A5288)
+
+Table 8: Security Function Implementations
+
+2.7 Algorithm Specific Information
+Legacy use:
+Digital Signature Verification with SHA-1 is allowed for legacy use only.
+
+2.7.1 AES GCM IV
+The Crypto Officer shall consider the following requirements and restrictions when using the module.
+For IPsec, the module offers the AES GCM implementation and uses the context of Scenario 1 of FIPS 140-3 IG C.H.
+The mechanism for IV generation is compliant with RFC 4106. IVs generated using this mechanism may only be
+used in the context of AES GCM encryption within the IPsec protocol.
+The module does not implement IPsec. The module’s implementation of AES GCM is used together with an
+application that runs outside the module’s cryptographic boundary. This application must use RFC 7296 compliant
+IKEv2 to establish the shared secret SKEYSEED from which the AES GCM encryption keys are derived.
+The design of the IPsec protocol implicitly ensures that the counter (the nonce_explicit part of the IV) does not
+exhaust the maximum number of possible values for a given session key.
+In the event the module’s power is lost and restored, the consuming application must ensure that a new key for
+use with the AES GCM key encryption or decryption under this scenario shall be established.
+The module also provides a non-approved AES GCM encryption service which accepts arbitrary external IVs from
+the operator. This service can be requested by invoking the crypto_aead_encrypt API function with an AES GCM
+handle. When this is the case, the API will not set an approved service indicator, as described in section 4.3.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 8 of 41
+
+2.7.2 AES XTS
+The length of a single data unit encrypted or decrypted with AES XTS shall not exceed 220 AES blocks, that is 16MB,
+of data per XTS instance. An XTS instance is defined in Section 4 of SP 800-38E. To meet the requirement stated in
+IG C.I, the module implements a check to ensure that the two AES keys used in AES XTS mode are not identical.
+The XTS mode shall only be used for the cryptographic protection of data on storage devices. It shall not be used
+for other purposes, such as the encryption of data in transit.
+
+2.7.3 SP 800-56Arev3 Assurances
+To comply with the assurances found in Section 5.6.2 of SP 800-56Ar3, the operator must use Diffie-Hellman
+shared secret computation algorithm with NVMe protocol. Additionally, the module’s approved key pair
+generation service (see section 2.9) must be used to generate ephemeral Diffie-Hellman key pairs, or the key pairs
+must be obtained from another FIPS-validated module. As part of this service, the module will internally perform
+the full public key validation of the generated public key.
+The module’s shared secret computation service will internally perform the full public key validation of the peer
+DH public key, complying with Section 5.6.2.2.2 of SP 800-56Ar3. The module is compliant to IG D.F scenario 2 path
+(1).
+
+2.7.4 RSA
+For RSA signature verification, the module supports modulus sizes 2048, 3072, and 4096 bits compliant to IG C.F.
+All supported modulus sizes have been CAVP tested.
+
+2.8 RBG and Entropy
+Cert Vendor Name
+Number
+E151
+
+Oracle Corporation
+
+Table 9: Entropy Certificates
+
+Name
+
+Type
+
+Oracle Linux 9 Kernel CPU NonTime Jitter RNG Entropy Physical
+Source
+
+Operational Environment
+
+Sample Entropy
+Size
+per
+Sample
+
+Oracle Linux 9 on KVM on Oracle Linux 8 on Oracle SERVER 64 bits
+X9-2c; Oracle Linux 9 on KVM on Oracle Linux 8 on ORACLE
+SERVER E4-2c
+
+Conditioning
+Component
+
+57.46 bits Linear-Feedback Shift
+Register (LFSR)
+
+Table 10: Entropy Sources
+
+The module implements three different Deterministic Random Bit Generator (DRBG) implementations based on SP
+800-90Ar1: CTR_DRBG, Hash_DRBG, and HMAC_DRBG. Each of these DRBG implementations can be instantiated
+by the operator of the module. When instantiated, these DRBGs can be used to generate random numbers for
+external usage.
+Additionally, the module employs a specific HMAC-SHA2-512 DRBG implementation for internal purposes (e.g. to
+generate initialization vectors). This DRBG is initially seeded with 384 output bits from the entropy source (344 bits
+of entropy) and reseeded with 256 output bits from the entropy source (229 bits of entropy).
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 9 of 41
+
+2.9 Key Generation
+The module implements Cryptographic Key Generation (CKG, vendor affirmed), compliant with SP 800-133r2.
+When random values are required, they are obtained from the SP 800-90Ar1 approved DRBG, compliant with
+Section 4 of SP 800-133r2. The module implements safe primes key pair generation: compliant with SP 800-133r2,
+Section 5.2, which maps to SP 800-56Ar3. The method described in Section 5.6.1.1.4 of SP 800-56Ar3 (“Testing
+Candidates”) is used. Intermediate key generation values are not output from the module and are explicitly
+zeroized after processing the service.
+
+2.10 Key Establishment
+The module provides DH shared secret computation. Additionally, as permitted by IG D.G, the module provides key
+transport either by using an approved authenticated encryption mode or by a combination of any approved
+symmetric encryption mode and an approved authentication method.
+
+2.11 Industry Protocols
+AES GCM with internal IV generation in the approved mode is compliant with RFC 4106 and shall only be used in
+conjunction with the IPsec protocol. No parts of this protocol, other than the AES GCM implementation, have been
+tested by the CAVP and CMVP.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 10 of 41
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical Logical
+Port Interface(s)
+N/A
+N/A
+N/A
+N/A
+
+Data That Passes
+
+Data Input
+API data input parameters, AF_ALG type sockets
+Data Output API output parameters, AF_ALG type sockets
+Control Input API function calls, API control input parameters, AF_ALG type sockets, kernel command line
+Status Output API return values, AF_ALG type sockets, kernel logs
+
+Table 11: Ports and Interfaces
+
+The logical interfaces are the APIs through which the applications request services. These logical interfaces are
+logically separated from each other by the API design.
+The module does not implement a control output interface.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 11 of 41
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+The module does not implement authentication.
+
+4.2 Roles
+Name
+
+Crypto Officer
+
+Role
+
+Type
+
+Operator Type Authentication Methods
+
+CO
+
+None
+
+Table 12: Roles
+
+The module supports the Crypto Officer role only. This sole role is implicitly and always assumed by the operator of
+the module. The module does not support multiple concurrent operators.
+
+4.3 Approved Services
+Name
+
+Description
+
+Indicator
+
+Message digest Compute a
+message digest
+Key wrapping Wrap a key
+
+crypto_shash_init returns 0
+
+Message
+
+Digest value
+
+crypto_skcipher_setkey returns 0;
+crypto_shash_init returns 0
+
+AES key, key
+to be
+wrapped
+
+wrapped key Key wrapping
+
+Key
+unwrapping
+
+Unwrap a key
+
+crypto_skcipher_setkey returns 0;
+crypto_shash_init returns 0
+
+AES key, key
+to be
+unwrapped
+
+unwrapped
+key
+
+Encrypt a
+plaintext
+Decryption
+Decrypt a
+ciphertext
+Authenticated Encrypt and
+encryption
+authenticate a
+plaintext
+
+crypto_skcipher_setkey returns 0
+
+AES key,
+plaintext
+AES key,
+ciphertext
+AES key,
+plaintext
+
+Ciphertext
+
+AES key,
+ciphertext,
+MAC tag
+
+Plaintext or
+failure
+
+Encryption
+
+crypto_skcipher_setkey returns 0
+
+For all modes except AES GCM:
+crypto_aead_setkey returns 0; For AES
+GCM: crypto_aead_get_flags(tfm) has the
+CRYPTO_TFM_ FIPS_COMPLIANCE flag set
+Authenticated Encrypt and
+For all modes except AES GCM:
+decryption
+authenticate a
+crypto_aead_setkey returns 0; For AES
+ciphertext
+GCM: crypto_aead_get_flags(tfm) has the
+CRYPTO_TFM_ FIPS_COMPLIANCE flag set
+Message
+Compute a MAC crypto_shash_init returns 0
+authentication tag
+Shared Secret
+Computation
+
+Compute a
+shared secret
+
+crypto_kpp_compute_shared_secret
+returns 0
+
+Key Pair
+Generation
+
+Key Pair
+Generation
+
+crypto_kpp_set_secret and
+crypto_kpp_generate_public_key return 0
+
+Inputs
+
+Outputs
+
+Plaintext
+Ciphertext,
+MAC tag
+
+Security
+Functions
+
+Hashing
+
+SSP Access
+Crypto Officer
+
+Crypto Officer
+- AES key: W,E
+- HMAC key:
+W,E
+Key unwrapping Crypto Officer
+- AES key: W,E
+- HMAC key:
+W,E
+Encryption with Crypto Officer
+AES
+- AES key: W,E
+Decryption with Crypto Officer
+AES
+- AES key: W,E
+Authenticated Crypto Officer
+encryption with - AES key: W,E
+AES
+Authenticated Crypto Officer
+decryption with - AES key: W,E
+AES
+
+AES: AES key, MAC tag
+Message
+message;
+authentication
+HMAC: HMAC
+key, message
+DH private
+Shared secret KAS-FFC-SSC
+key, DH
+remote public
+key
+
+Group
+
+Crypto Officer
+- AES key: W,E
+- HMAC key:
+W,E
+Crypto Officer
+- DH private
+key: W,E
+- DH remote
+public key:
+W,E
+- Shared
+secret: G,R
+DH private
+Safe Primes Key Crypto Officer
+key, DH
+Generation
+- DH private
+remote public
+key: G,R
+key
+- DH remote
+public key: G,R
+- Intermediate
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 12 of 41
+
+Name
+
+Random
+number
+generation
+
+Description
+
+Indicator
+
+Generate random crypto_rng_get_bytes returns 0
+bytes
+
+Inputs
+
+Outputs
+
+Output length Random
+bytes
+
+Security
+Functions
+
+SSP Access
+
+Key
+Generation
+Value: G
+Random
+Crypto Officer
+number
+- Entropy
+generation with input: W,E
+DRBGs
+- DRBG seed:
+G,E
+- DRBG
+Internal state
+(V, Key): G,E
+- DRBG
+Internal state
+(V, C): G,E
+None
+Crypto Officer
+
+Error detection Compute an EDC None
+code
+(crc32, crct10dif)
+Compression Compress data
+None
+(deflate, lz4,
+lz4hc, lzo,
+zlibdeflate, zstd)
+Generic system Use the kernel to None
+call
+perform various
+noncryptographic
+operations
+Show version Return the
+None
+module name
+and version
+information
+Show status
+Return the
+None
+module status
+Self-test
+Perform the
+None
+CASTs and
+integrity tests
+
+Message
+
+EDC
+
+Data
+
+Compressed
+data
+
+None
+
+Crypto Officer
+
+Identifier,
+various
+arguments
+
+Various
+None
+return values
+
+Crypto Officer
+
+N/A
+
+Module name None
+and version
+
+Crypto Officer
+
+N/A
+
+Crypto Officer
+
+N/A
+
+Module
+status
+Pass/fail
+
+Zeroization
+
+Any SSP
+
+N/A
+
+Zeroize all SSPs
+
+None
+
+None
+
+Encryption with Crypto Officer
+AES
+Decryption with
+AES
+Hashing
+Message
+authentication
+Random
+number
+generation with
+DRBGs
+Signature
+verification with
+RSA
+Authenticated
+encryption with
+AES
+Authenticated
+decryption with
+AES
+KAS-FFC-SSC
+None
+Crypto Officer
+- AES key: Z
+- HMAC key: Z
+- Entropy
+input: Z
+- DRBG
+Internal state
+(V, Key): Z
+- DRBG
+Internal state
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 13 of 41
+
+Name
+
+Description
+
+Indicator
+
+Inputs
+
+Outputs
+
+Security
+Functions
+
+SSP Access
+(V, C): Z
+- DRBG seed: Z
+- DH remote
+public key: Z
+- DH private
+key: Z
+
+Table 13: Approved Services
+
+The table above lists the approved services. The following convention is used to specify access rights to SSPs:
+•
+•
+•
+•
+•
+
+Generate (G): The module generates or derives the SSP.
+Read (R): The SSP is read from the module (e.g. the SSP is output).
+Write (W): The SSP is updated, imported, or written to the module.
+Execute (E): The module uses the SSP in performing a cryptographic operation.
+Zeroize (Z): The module zeroizes the SSP.
+
+4.4 Non-Approved Services
+Name
+
+AES GCM external IV encryption
+Key derivation
+Password-based key derivation
+RSA encryption primitive
+RSA decryption primitive
+RSA signature generation (pre-hashed
+message)
+RSA signature verification (pre-hashed
+message)
+
+Description
+
+Encrypt a plaintext using AES GCM with an external IV
+Derive a key from a key-derivation key or a shared
+secret
+Derive a key from a password
+Compute the raw RSA encryption of a plaintext
+Compute the raw RSA decryption of a cipertext
+Generate a digital signature for a pre-hashed message
+Verify a digital signature for a pre-hashed message
+
+Algorithms
+
+AES GCM with external IV
+KBKDF (libkcapi)
+HKDF (libkcapi)
+PBKDF2 (libkcapi)
+RSA
+RSA
+RSA with PKCS#1 v1.5
+padding
+RSA with PKCS#1 v1.5
+padding
+
+Role
+CO
+CO
+CO
+CO
+CO
+CO
+CO
+
+Table 14: Non-Approved Services
+
+4.5 External Software/Firmware Loaded
+The module does not load external software or firmware.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 14 of 41
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The Linux kernel binary is integrity tested using an HMAC-SHA2-512 calculation performed by the sha512hmac
+utility (which utilizes the module’s HMAC and SHA-512 implementations). An HMAC-SHA2-512 calculation is also
+performed on the sha512hmac utility and the libkcapi library to verify their integrity. The kernel crypto object files
+listed in section 2.2 are loaded on start-up by the module and verified using RSA signature verification with PKCS#1
+v1.5 padding, SHA-256, and a 3072-bit key.
+
+5.2 Initiate on Demand
+Integrity tests are performed as part of the pre-operational self-tests, which are executed when the module is
+initialized. The integrity tests can be invoked on demand by unloading and subsequently re-initializing the module,
+which will perform (among others) the software integrity tests.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 15 of 41
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+How Requirements are Satisfied:
+The operating system provides process isolation and memory protection mechanisms that ensure appropriate
+separation for memory access among the processes on the system. Each process has control over its own data and
+uncontrolled access to the data of other processes is prevented.
+
+6.2 Configuration Settings and Restrictions
+The module shall be installed as stated in Section 11.1.
+Instrumentation tools like the ptrace system call, gdb and strace, as well as other tracing mechanisms offered by
+the Linux environment such as ftrace or systemtap, shall not be used in the operational environment. The use of
+any of these tools implies that the cryptographic module is running in a non-validated operational environment.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 16 of 41
+
+7 Physical Security
+The module is comprised of software only, and therefore this section is not applicable.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 17 of 41
+
+8 Non-Invasive Security
+This module does not implement any non-invasive security mechanism and therefore this section is not applicable.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 18 of 41
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+Storage
+Area
+Name
+RAM
+
+Description
+
+Persistence
+Type
+
+Temporary storage for SSPs used by the module as part of service execution Dynamic
+
+Table 15: Storage Areas
+
+The module does not perform persistent storage of SSPs. The SSPs are temporarily stored in the RAM in plaintext
+form. SSPs are provided to the module by the calling process and are destroyed when released by the appropriate
+zeroization function calls.
+
+9.2 SSP Input-Output Methods
+Name
+
+From
+
+API input parameters; AF_ALG_type Operator calling
+sockets (input)
+application (TOEPP)
+API output parameters; AF_ALG
+Cryptographic module
+type sockets (output)
+
+To
+Cryptographic module
+Operator calling
+application (TOEPP)
+
+Format Distribution Entry
+SFI or
+Type
+Type
+Type Algorithm
+Plaintext Manual
+
+Electronic
+
+Plaintext Manual
+
+Electronic
+
+Table 16: SSP Input-Output Methods
+
+9.3 SSP Zeroization Methods
+Zeroization
+Method
+
+Description
+
+Rationale
+
+Operator Initiation
+
+Free cipher
+handle
+
+Zeroizes the SSPs
+contained within
+the cipher handle
+
+Memory occupied by SSPs is overwritten
+with zeroes, which renders the SSP values
+irretrievable. The completion of the
+zeroization routine indicates that the
+zeroization procedure succeeded.
+
+Power off
+
+De-allocates the
+Volatile memory used by the module is
+volatile memory
+overwritten within nanoseconds when
+used to store SSPs power is removed. Module power off
+indicates that the zeroization procedure
+succeeded. The successful removal of power
+implicitly indicates that the zeroization is
+complete.
+
+By calling the appropriate zeroization functions: AES key:
+crypto_free_skcipher and crypto_free_aead; HMAC key:
+crypto_free_shash and crypto_free_ahash; DRBG internal
+state: crypto_free_rng; DRBG seed: crypto_free_rng;
+Entropy input string: crypto_free_rng; DH remote public &
+private key: crypto_free_kpp
+By removing power
+
+Table 17: SSP Zeroization Methods
+
+All data output is inhibited during zeroization.
+
+9.4 SSPs
+Name
+AES key
+
+Description
+
+Size - Strength
+
+Type Category
+
+AES key used for
+128, 192, 256 bits - 128, 192, 256 Symmetric Key
+encryption,
+bits
+- CSP
+decryption, and
+computing MAC tags.
+
+Generated Established
+By
+By
+
+Used By
+Encryption with
+AES
+Decryption with
+AES
+Authenticated
+encryption with
+AES
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 19 of 41
+
+Name
+
+HMAC key
+
+Description
+
+HMAC key.
+
+Size - Strength
+
+112-524288 bits - 112-256 bits
+
+Type Category
+
+Generated Established
+By
+By
+
+Authentication
+key - CSP
+
+Entropy input
+
+Entropy input used to 128-384 bits - 117-357 bits
+Entropy input seed the DRBGs.
+CSP
+Compliant with IG D.L.
+DRBG seed
+DRBG seed derived
+CTR_DRBG: 128, 192, 256 bits;
+Seed - CSP
+Random number
+from entropy input.
+Hash_DRBG: 128, 256 bits;
+generation with
+Compliant with IG D.L. HMAC_DRBG: 128, 256 bits DRBGs
+CTR_DRBG: 128, 192, 256 bits;
+Hash_DRBG: 128, 256 bits;
+HMAC_DRBG: 128, 256 bits
+DRBG Internal Internal state of
+CTR_DRBG: 128, 192, 256 bits;
+Internal state - Random number
+state (V, Key) CTR_DRBG and
+HMAC_DRBG: 128, 256 bits CSP
+generation with
+HMAC_DRBG
+CTR_DRBG: 128, 192, 256 bits;
+DRBGs
+instances. Compliant HMAC_DRBG: 128, 256 bits
+with IG D.L.
+DRBG Internal Internal state of
+Hash_DRBG: 128, 256 bits Internal state - Random number
+state (V, C)
+Hash_DRBG instances. Hash_DRBG: 128, 256 bits
+CSP
+generation with
+Compliant with IG D.L.
+DRBGs
+Intermediate Temporary value
+ffdhe2048, ffdhe3072,
+Intermediate
+Safe Primes Key
+Key Generation generated during Key ffdhe4096, ffdhe6144,
+value - CSP
+Generation
+Value
+Pair Generation
+ffdhe8192, P-256, P-384 - 112services.
+200 bits
+DH remote
+Public key used for
+ffdhe2048, ffdhe3072,
+Public key - PSP Safe Primes Key
+public key
+Diffie-Hellman.
+ffdhe4096, ffdhe6144, ffdhe8192
+Generation
+- 112-200 bits
+DH private key Private key used for ffdhe2048, ffdhe3072,
+Private key Safe Primes Key
+Diffie-Hellman.
+ffdhe4096, ffdhe6144, ffdhe8192 CSP
+Generation
+- 112-200 bits
+Shared secret Shared secret
+ffdhe2048, ffdhe3072,
+Shared secret KAS-FFC-SSC
+generated by DH.
+ffdhe4096, ffdhe6144, ffdhe8192 CSP
+- 112-200 bits
+
+Used By
+Authenticated
+decryption with
+AES
+Key wrapping
+Key unwrapping
+Message
+authentication
+Key wrapping
+Key unwrapping
+Random number
+generation with
+DRBGs
+Random number
+generation with
+DRBGs
+
+Random number
+generation with
+DRBGs
+Random number
+generation with
+DRBGs
+Safe Primes Key
+Generation
+KAS-FFC-SSC
+Safe Primes Key
+Generation
+KAS-FFC-SSC
+Safe Primes Key
+Generation
+
+Table 18: SSP Table 1
+
+Name
+
+Input - Output
+
+Storage
+
+Storage Duration
+
+AES key
+
+API input parameters;
+AF_ALG_type sockets (input)
+
+RAM:Plaintext Until cipher handled is freed
+or module powered off
+
+HMAC key
+
+API input parameters;
+AF_ALG_type sockets (input)
+
+RAM:Plaintext Until cipher handled is freed
+or module powered off
+
+Zeroization
+
+Free cipher
+handle
+Power off
+Free cipher
+handle
+Power off
+Free cipher
+handle
+Power off
+Free cipher
+handle
+Power off
+
+Entropy input
+
+RAM:Plaintext From generation until DRBG
+seed/reseed
+
+DRBG seed
+
+RAM:Plaintext While the DRBG is being
+instantiated
+
+DRBG Internal state
+(V, Key)
+
+RAM:Plaintext From DRBG instantiation until Free cipher
+DRBG termination
+handle
+Power off
+
+Related SSPs
+
+DRBG seed:Derives
+Entropy input:Derived
+From
+DRBG Internal state (V,
+Key):Derives
+DRBG Internal state (V,
+C):Derives
+DRBG seed:Derived
+From
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 20 of 41
+
+Name
+
+DRBG Internal state
+(V, C)
+
+Input - Output
+
+Intermediate Key
+Generation Value
+DH remote public key API input parameters;
+AF_ALG_type sockets (input)
+API output parameters;
+AF_ALG type sockets (output)
+DH private key
+API input parameters;
+AF_ALG_type sockets (input)
+API output parameters;
+AF_ALG type sockets (output)
+Shared secret
+API input parameters;
+AF_ALG_type sockets (input)
+API output parameters;
+AF_ALG type sockets (output)
+
+Storage
+
+Storage Duration
+
+Zeroization
+
+RAM:Plaintext From DRBG instantiation until Free cipher
+DRBG termination
+handle
+Power off
+RAM:Plaintext Until key pair generation
+Free cipher
+service completes.
+handle
+Power off
+
+Related SSPs
+
+DRBG seed:Derived
+From
+
+DH private key:Derived
+From
+DH remote public
+key:Derived From
+DH private key:Used
+With
+
+RAM:Plaintext Until cipher handled is freed
+or module powered off
+
+Free cipher
+handle
+Power off
+
+RAM:Plaintext Until cipher handled is freed
+or module powered off
+
+Free cipher
+handle
+Power off
+
+DH remote public
+key:Used With
+
+RAM:Plaintext Until cipher handled is freed
+or module powered off
+
+Free cipher
+handle
+Power off
+
+DH private key:Used
+With
+DH remote public
+key:Used With
+
+Table 19: SSP Table 2
+
+9.5 Transitions
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes except signature
+verification, starting January 1, 2031.
+The RSA algorithm with SHA-1 as implemented by the module conforms to FIPS 186-4. FIPS 186-4 was withdrawn
+on February 3, 2024 but FIPS 140-3 IG C.K allows RSA signature verification with SHA-1 under FIPS 186-4 to still be
+approved.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 21 of 41
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+Algorithm or
+Test
+
+HMAC-SHA2-512
+(A5296)
+
+Test
+Properties
+
+128-bit key
+
+Test Method
+Message
+Authentication
+
+RSA SigVer
+3072-bit key with Signature
+(FIPS186-4) (A5278) SHA-256
+Verification
+
+Test
+Type
+
+SW/FW
+Integrity
+SW/FW
+Integrity
+
+Indicator
+
+Details
+
+Module becomes operational
+and services are available for
+use.
+Module becomes operational
+and services are available for
+use.
+
+Integrity test for vmlinuz, libkcapi
+components and sha512hmac
+binary
+Integrity test for kernel object files
+
+Table 20: Pre-Operational Self-Tests
+
+The pre-operational software integrity tests are performed automatically when the module is powered on, before
+the module transitions into the operational state. The algorithms used for the integrity test (i.e., HMAC-SHA2-512
+and RSA SigVer with 3072 bit key) run their CASTs before the integrity test is performed. While the module is
+executing the self-tests, services are not available, and data output (via the data output interface) is inhibited until
+the pre-operational software integrity self-tests are successfully completed. The module transitions to the
+operational state only after the pre-operational self-tests are passed successfully.
+
+10.2 Conditional Self-Tests
+Algorithm or
+Test
+
+Test Properties
+
+Safe Primes Key
+Generation
+(A5277)
+SHA-1 (A5278)
+
+N/A
+
+Test Test
+Method Type
+PCT
+
+PCT
+
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+CAST
+
+SHA-1 (A5294)
+
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+CAST
+
+SHA-1 (A5295)
+
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+CAST
+
+SHA-1 (A5296)
+
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+CAST
+
+SHA2-224 (A5278) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+SHA2-224 (A5294) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+SHA2-224 (A5295) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+SHA2-224 (A5296) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+SHA2-256 (A5278) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+SHA2-256 (A5294) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+CAST
+
+Indicator
+
+Details
+
+Conditions
+
+crypto_kpp_g
+enerate_publi c_key
+returns 0
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+Module becomes
+operational and services
+are available for use.
+
+SP 800-56Ar3
+Section 5.6.2.1.4
+
+Key pair generation
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 22 of 41
+
+Algorithm or
+Test
+
+Test Properties
+
+SHA2-256 (A5295) 0, 24, 448, 512 and 8184 bit
+messages
+SHA2-256 (A5296) 0, 24, 448, 512 and 8184 bit
+messages
+
+Test Test
+Method Type
+KAT
+KAT
+
+SHA2-384 (A5278) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-384 (A5294) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-384 (A5295) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-384 (A5296) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-512 (A5278) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-512 (A5294) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-512 (A5295) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-512 (A5296) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA3-224 (A5279) 0, 8, 448 and 8184 bit messages
+
+KAT
+
+SHA3-256 (A5279) 0, 8, 448 and 8184 bit messages
+
+KAT
+
+SHA3-384 (A5279) 0, 8, 448 and 8184 bit messages
+
+KAT
+
+SHA3-512 (A5279) 0, 8, 448 and 8184 bit messages
+
+KAT
+
+AES-ECB (A5278)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5283)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5284)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5285)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5286)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5287)
+
+128, 192, 256 bit keys
+
+KAT
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 23 of 41
+
+Algorithm or
+Test
+
+Test Properties
+
+Test Test
+Method Type
+
+AES-ECB (A5289)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5290)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5277)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-ECB (A5288)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CBC (A5278)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CBC (A5285)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CBC-CS3
+(A5293)
+
+128 bit keys
+
+KAT
+
+AES-OFB (A5292)
+
+128 bit keys
+
+KAT
+
+AES-CFB128
+(A5291)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CTR (A5278)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CTR (A5288)
+
+128, 192, 256 bit keys
+
+KAT
+
+AES-CCM (A5288)
+
+128, 192, 256 bit keys; 128-bit
+IVs
+
+KAT
+
+AES-GCM (A5278) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5283) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5284) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5285) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5286) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5287) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5288) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-GCM (A5289) 128, 192, 256 bit keys, 96-bit IVs KAT
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 24 of 41
+
+Algorithm or
+Test
+
+Test Properties
+
+Test Test
+Method Type
+
+AES-GCM (A5290) 128, 192, 256 bit keys, 96-bit IVs KAT
+AES-XTS Testing
+128 and 256 bit keys
+Revision 2.0
+(A5278)
+AES-XTS Testing
+128 and 256 bit keys
+Revision 2.0
+(A5288)
+AES-CMAC (A5288) 128 and 256 bit keys
+
+KAT
+
+HMAC-SHA-1
+(A5278)
+
+160, 200 and 640 bit keys
+
+KAT
+
+HMAC-SHA-1
+(A5294)
+
+160, 200 and 640 bit keys
+
+KAT
+
+HMAC-SHA-1
+(A5295)
+
+160, 200 and 640 bit keys
+
+KAT
+
+HMAC-SHA-1
+(A5296)
+
+160, 200 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5278)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5294)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5295)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5296)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5278)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5294)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5295)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5296)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-384
+(A5278)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-384
+(A5294)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-384
+(A5295)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-384
+(A5296)
+
+160 and 1048 bit keys
+
+KAT
+
+KAT
+KAT
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Encryption,
+Decryption
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 25 of 41
+
+Algorithm or
+Test
+
+Test Properties
+
+Test Test
+Method Type
+
+HMAC-SHA2-512
+(A5278)
+
+160 and 1048 bit keys
+
+HMAC-SHA2-512
+(A5294)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA3-224
+(A5279)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-512
+(A5295)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-512
+(A5296)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA3-256
+(A5279)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA3-384
+(A5279)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA3-512
+(A5279)
+
+160 and 1048 bit keys
+
+KAT
+
+KAS-FFC-SSC
+Sp800-56Ar3
+(A5277)
+Counter DRBG
+(A5278)
+
+ffdhe2048
+
+KAT
+
+Counter DRBG
+(A5283)
+Counter DRBG
+(A5284)
+Counter DRBG
+(A5285)
+Counter DRBG
+(A5286)
+Counter DRBG
+(A5287)
+Counter DRBG
+(A5288)
+Counter DRBG
+(A5289)
+Counter DRBG
+(A5290)
+Hash DRBG
+(A5278)
+Hash DRBG
+(A5283)
+
+KAT
+
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Message
+authentication
+
+Module initialization.
+Before integrity test.
+
+Message
+authentication
+
+Module initialization.
+Before integrity test.
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization.
+Before integrity test.
+
+Message
+authentication
+
+Module initialization.
+Before integrity test.
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Shared secret
+computation
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 26 of 41
+
+Algorithm or
+Test
+
+Hash DRBG
+(A5284)
+Hash DRBG
+(A5285)
+Hash DRBG
+(A5286)
+Hash DRBG
+(A5287)
+Hash DRBG
+(A5288)
+Hash DRBG
+(A5289)
+Hash DRBG
+(A5290)
+Hash DRBG
+(A5294)
+Hash DRBG
+(A5295)
+Hash DRBG
+(A5296)
+
+HMAC DRBG
+(A5278)
+HMAC DRBG
+(A5283)
+HMAC DRBG
+(A5284)
+HMAC DRBG
+(A5285)
+HMAC DRBG
+(A5286)
+HMAC DRBG
+(A5287)
+HMAC DRBG
+(A5288)
+HMAC DRBG
+(A5289)
+HMAC DRBG
+(A5290)
+HMAC DRBG
+(A5294)
+
+Test Properties
+
+Test Test
+Method Type
+
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 27 of 41
+
+Algorithm or
+Test
+
+HMAC DRBG
+(A5295)
+HMAC DRBG
+(A5296)
+
+RSA SigVer
+(FIPS186-5)
+(A5278)
+RSA SigVer
+(FIPS186-5)
+(A5294)
+RSA SigVer
+(FIPS186-5)
+(A5295)
+RSA SigVer
+(FIPS186-5)
+(A5296)
+Entropy Source
+(RCT Start-Up)
+
+Test Properties
+SHA-256, SHA512 With/without
+PR; Health test per section 11.3
+of SP 800-90Arev1
+SHA-256, SHA512 With/without
+PR; Health test per section 11.3
+of SP 800-90Arev1
+4096-bit key with SHA-256
+
+Test Test
+Method Type
+KAT
+KAT
+KAT
+
+4096-bit key with SHA-256
+
+KAT
+
+4096-bit key with SHA-256
+
+KAT
+
+4096-bit key with SHA-256
+
+KAT
+
+1024 samples
+
+RCT
+
+Entropy Source
+(APT Start-Up)
+
+1024 samples
+
+APT
+
+Entropy Source
+(RCT Runtime)
+Entropy Source
+(APT Runtime)
+Counter DRBG
+(A5277)
+
+Cutoff C = 61
+
+RCT
+
+Cutoff C = 355
+
+APT
+
+Hash DRBG
+(A5277)
+HMAC DRBG
+(A5277)
+HMAC-SHA-1
+(A5277)
+
+128, 192, 256 bit keys
+KAT
+With/without PR; Health test per
+section 11.3 of SP 800-90Arev1
+SHA-256 With/without PR;
+KAT
+Health test per section 11.3 of SP
+800-90Arev1
+SHA-256, SHA512 With/without KAT
+PR; Health test per section 11.3
+of SP 800-90Arev1
+160, 200 and 640 bit keys
+KAT
+
+HMAC-SHA-1
+(A5297)
+
+160, 200 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5277)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-224
+(A5297)
+
+160 and 1048 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5277)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-256
+(A5297)
+
+256, 296 and 640 bit keys
+
+KAT
+
+HMAC-SHA2-384
+(A5277)
+
+160 and 1048 bit keys
+
+KAT
+
+SHA-1 (A5277)
+
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+Indicator
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Entropy source is
+operational
+CAST Entropy source is
+operational
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Details
+
+Conditions
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Verify
+
+Module initialization.
+Before integrity test.
+
+Verify
+
+Module initialization.
+Before integrity test.
+
+Verify
+
+Module initialization.
+Before integrity test.
+
+Verify
+
+Module initialization.
+Before integrity test.
+
+Entropy source
+start-up test
+
+Entropy source
+initialization
+
+Entropy source
+start-up test
+
+Entropy source
+initialization
+
+Entropy source
+continuous test
+Entropy source
+continuous test
+Seed, Generate
+
+Continuously
+
+Seed, Generate
+
+Module initialization
+
+Seed, Generate
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Continuously
+Module initialization
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 28 of 41
+
+Algorithm or
+Test
+
+SHA-1 (A5297)
+
+Test Properties
+0, 24, 448, 512, 1304 and 8184
+bit messages
+
+Test Test
+Method Type
+KAT
+
+SHA2-224 (A5277) 0, 24, 448, 512, 1304 and 8184
+bit messages
+
+KAT
+
+SHA2-224 (A5297) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+SHA2-256 (A5277) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+SHA2-256 (A5297) 0, 24, 448, 512 and 8184 bit
+messages
+
+KAT
+
+SHA2-384 (A5277) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+SHA2-512 (A5277) 0, 24, 448, 832, 896 and 8184 bit KAT
+messages
+HMAC-SHA2-512
+(A5277)
+
+160 and 1048 bit keys
+
+KAT
+
+Indicator
+
+Details
+
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+CAST Module becomes
+operational and services
+are available for use.
+
+Conditions
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message digest
+
+Module initialization
+
+Message
+authentication
+
+Module initialization
+
+Table 21: Conditional Self-Tests
+
+The module performs self-tests on all approved cryptographic algorithms as part of the approved services
+supported in the approved mode of operation, using the tests shown in table above. Services are not available, and
+data output (via the data output interface) is inhibited during the self-tests. If any of these tests fails, the module
+transitions to the Error state.
+
+10.3 Periodic Self-Test Information
+Algorithm or Test
+
+HMAC-SHA2-512 (A5296)
+RSA SigVer (FIPS186-4)
+(A5278)
+
+Test Method
+
+Message Authentication
+Signature Verification
+
+Test Type
+
+SW/FW Integrity
+SW/FW Integrity
+
+Period
+
+On demand
+On demand
+
+Periodic Method
+
+Manually
+Manually
+
+Table 22: Pre-Operational Periodic Information
+
+Algorithm or Test
+
+Safe Primes Key Generation PCT
+(A5277)
+SHA-1 (A5278)
+KAT
+SHA-1 (A5294)
+KAT
+SHA-1 (A5295)
+KAT
+SHA-1 (A5296)
+KAT
+SHA2-224 (A5278)
+KAT
+SHA2-224 (A5294)
+KAT
+SHA2-224 (A5295)
+KAT
+SHA2-224 (A5296)
+KAT
+SHA2-256 (A5278)
+KAT
+SHA2-256 (A5294)
+KAT
+SHA2-256 (A5295)
+KAT
+SHA2-256 (A5296)
+KAT
+SHA2-384 (A5278)
+KAT
+SHA2-384 (A5294)
+KAT
+SHA2-384 (A5295)
+KAT
+
+Test Method
+
+PCT
+
+Test Type
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Period
+
+Periodic Method
+
+On demand
+
+Manually
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 29 of 41
+
+Algorithm or Test
+
+SHA2-384 (A5296)
+SHA2-512 (A5278)
+SHA2-512 (A5294)
+SHA2-512 (A5295)
+SHA2-512 (A5296)
+SHA3-224 (A5279)
+SHA3-256 (A5279)
+SHA3-384 (A5279)
+SHA3-512 (A5279)
+AES-ECB (A5278)
+AES-ECB (A5283)
+AES-ECB (A5284)
+AES-ECB (A5285)
+AES-ECB (A5286)
+AES-ECB (A5287)
+AES-ECB (A5289)
+AES-ECB (A5290)
+AES-ECB (A5277)
+AES-ECB (A5288)
+AES-CBC (A5278)
+AES-CBC (A5285)
+AES-CBC-CS3 (A5293)
+AES-OFB (A5292)
+AES-CFB128 (A5291)
+AES-CTR (A5278)
+AES-CTR (A5288)
+AES-CCM (A5288)
+AES-GCM (A5278)
+AES-GCM (A5283)
+AES-GCM (A5284)
+AES-GCM (A5285)
+AES-GCM (A5286)
+AES-GCM (A5287)
+AES-GCM (A5288)
+AES-GCM (A5289)
+AES-GCM (A5290)
+AES-XTS Testing Revision
+2.0 (A5278)
+AES-XTS Testing Revision
+2.0 (A5288)
+AES-CMAC (A5288)
+HMAC-SHA-1 (A5278)
+HMAC-SHA-1 (A5294)
+HMAC-SHA-1 (A5295)
+HMAC-SHA-1 (A5296)
+HMAC-SHA2-224 (A5278)
+HMAC-SHA2-224 (A5294)
+HMAC-SHA2-224 (A5295)
+HMAC-SHA2-224 (A5296)
+HMAC-SHA2-256 (A5278)
+HMAC-SHA2-256 (A5294)
+HMAC-SHA2-256 (A5295)
+HMAC-SHA2-256 (A5296)
+HMAC-SHA2-384 (A5278)
+HMAC-SHA2-384 (A5294)
+HMAC-SHA2-384 (A5295)
+HMAC-SHA2-384 (A5296)
+HMAC-SHA2-512 (A5278)
+HMAC-SHA2-512 (A5294)
+HMAC-SHA3-224 (A5279)
+HMAC-SHA2-512 (A5295)
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+Test Method
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Test Type
+
+Period
+
+Periodic Method
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 30 of 41
+
+Algorithm or Test
+
+HMAC-SHA2-512 (A5296)
+HMAC-SHA3-256 (A5279)
+HMAC-SHA3-384 (A5279)
+HMAC-SHA3-512 (A5279)
+KAS-FFC-SSC Sp800-56Ar3
+(A5277)
+Counter DRBG (A5278)
+Counter DRBG (A5283)
+Counter DRBG (A5284)
+Counter DRBG (A5285)
+Counter DRBG (A5286)
+Counter DRBG (A5287)
+Counter DRBG (A5288)
+Counter DRBG (A5289)
+Counter DRBG (A5290)
+Hash DRBG (A5278)
+Hash DRBG (A5283)
+Hash DRBG (A5284)
+Hash DRBG (A5285)
+Hash DRBG (A5286)
+Hash DRBG (A5287)
+Hash DRBG (A5288)
+Hash DRBG (A5289)
+Hash DRBG (A5290)
+Hash DRBG (A5294)
+Hash DRBG (A5295)
+Hash DRBG (A5296)
+HMAC DRBG (A5278)
+HMAC DRBG (A5283)
+HMAC DRBG (A5284)
+HMAC DRBG (A5285)
+HMAC DRBG (A5286)
+HMAC DRBG (A5287)
+HMAC DRBG (A5288)
+HMAC DRBG (A5289)
+HMAC DRBG (A5290)
+HMAC DRBG (A5294)
+HMAC DRBG (A5295)
+HMAC DRBG (A5296)
+RSA SigVer (FIPS186-5)
+(A5278)
+RSA SigVer (FIPS186-5)
+(A5294)
+RSA SigVer (FIPS186-5)
+(A5295)
+RSA SigVer (FIPS186-5)
+(A5296)
+Entropy Source (RCT StartUp)
+Entropy Source (APT StartUp)
+Entropy Source (RCT
+Runtime)
+Entropy Source (APT
+Runtime)
+Counter DRBG (A5277)
+Hash DRBG (A5277)
+HMAC DRBG (A5277)
+HMAC-SHA-1 (A5277)
+HMAC-SHA-1 (A5297)
+HMAC-SHA2-224 (A5277)
+
+KAT
+KAT
+KAT
+KAT
+KAT
+
+Test Method
+
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Test Type
+
+Period
+
+Periodic Method
+
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+RCT
+
+CAST
+
+On demand
+
+Manually
+
+APT
+
+CAST
+
+On demand
+
+Manually
+
+RCT
+
+CAST
+
+On demand
+
+Manually
+
+APT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 31 of 41
+
+Algorithm or Test
+
+HMAC-SHA2-224 (A5297)
+HMAC-SHA2-256 (A5277)
+HMAC-SHA2-256 (A5297)
+HMAC-SHA2-384 (A5277)
+SHA-1 (A5277)
+SHA-1 (A5297)
+SHA2-224 (A5277)
+SHA2-224 (A5297)
+SHA2-256 (A5277)
+SHA2-256 (A5297)
+SHA2-384 (A5277)
+SHA2-512 (A5277)
+HMAC-SHA2-512 (A5277)
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+Test Method
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Test Type
+
+Period
+
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+On demand
+
+Periodic Method
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+Table 23: Conditional Periodic Information
+
+10.4 Error States
+Name
+
+Description
+
+Conditions
+
+Recovery
+Method
+
+Indicator
+
+Error State The Linux kernel immediately stops executing Any self-test failure Restart of the module Kernel Panic
+
+Table 24: Error States
+
+In the Error State, the output interface is inhibited, and the module accepts no more inputs or requests (as the
+module is no longer running).
+
+10.5 Operator Initiation of Self-Tests
+The software integrity tests, cryptographic algorithm self-tests, and entropy source start-up tests can be invoked
+on demand by unloading and subsequently re-initializing the module. The pair-wise consistency tests can be
+invoked on demand by requesting the key pair generation service.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 32 of 41
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+The module is distributed as part of the Oracle Linux 9 (OL9) RPM packages in the form of kernel-5.14.0362.24.1.0.4.el9_3, libkcapi-1.3.1-3.0.1.el9 and libkcapi-hmaccalc-1.3.1-3.0.1.el9 packages that is located in the
+“Oracle Linux 9 Security Validation (Update 3)” yum repository (ol9_u3_security_validation).
+The operational environment needs to be set up in the FIPS validated configuration by installing the module as
+follows:
+•
+
+For installation, add the fips=1 option to the kernel command line during the system installation. During
+the software selection stage, do not install any third-party software.
+
+•
+
+Switching the system into the FIPS validated configuration after the installation, execute the fips-modesetup --enable command. Restart the system using the reboot command.
+
+In both cases, the Crypto Officer must verify the OL8 and OL9 systems operate in the approved mode by executing
+the fips-mode-setup --check command, which should output “FIPS mode is enabled.”
+More information can be found at the vendor’s documentation.
+
+11.2 Administrator Guidance
+After installation of the kernel-5.14.0-362.24.1.0.4.el9_3, libkcapi-1.3.1-3.0.1.el9 and libkcapi-hmaccalc-1.3.13.0.1.el9 RPM packages, the Crypto Officer must execute the “cat /proc/sys/crypto/fips_name” command. The
+Crypto Officer must ensure that the proper name is listed in the output as follows:
+Oracle Linux 9 Kernel Crypto API Cryptographic Module
+Then, the Crypto Officer must execute the “cat /proc/sys/crypto/fips_version” and “rpm -q libkcapi” commands.
+These commands must output the following (one line per output):
+5.14.0-362.24.1.0.4.el9_3.x86_64
+libkcapi-1.3.1-3.0.1.el9.x86_64
+
+11.3 Non-Administrator Guidance
+There is no non-administrator guidance.
+
+11.4 End of Life
+As the module does not persistently store SSPs, secure sanitization of the module consists of unloading the
+module. This will zeroize all SSPs in volatile memory. Then, if desired, the kernel-5.14.0-362.24.1.0.4.el9_3,
+libkcapi-1.3.1-3.0.1.el9 and libkcapi-hmaccalc-1.3.1-3.0.1.el9 RPM packages can be uninstalled from the Oracle
+Linux 9 systems.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 33 of 41
+
+12 Mitigation of Other Attacks
+The module does not offer mitigation of other attacks and therefore this section is not applicable.
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 34 of 41
+
+Appendix A. Glossary and Abbreviations
+AES
+AES-NI
+API
+CAST
+CAVP
+CBC
+CCM
+CFB
+CMAC
+CMVP
+CSP
+CTR
+DH
+DRBG
+ECB
+ECDH
+ECDH
+ENT (NP)
+FIPS
+GCM
+GMAC
+HKDF
+HMAC
+IPsec
+KAT
+KBKDF
+MAC
+NIST
+PAA
+PBKDF2
+PKCS
+RSA
+SHA
+SSC
+SSP
+XTS
+
+Advanced Encryption Standard
+Advanced Encryption Standard New Instructions
+Application Programming Interface
+Cryptographic Algorithm Self-Test
+Cryptographic Algorithm Validation Program
+Cipher Block Chaining
+Counter with Cipher Block Chaining-Message Authentication Code
+Cipher Feedback
+Cipher-based Message Authentication Code
+Cryptographic Module Validation Program
+Critical Security Parameter
+Counter
+Diffie-Hellman
+Deterministic Random Bit Generator
+Electronic Code Book
+Elliptic Curve Diffie-Hellman
+Elliptic Curve Diffie-Hellman
+Non-physical Entropy Source
+Federal Information Processing Standards
+Galois Counter Mode
+Galois Counter Mode Message Authentication Code
+HMAC-based Key Derivation Function
+Keyed-Hash Message Authentication Code
+Internet Protocol Security
+Known Answer Test
+Key-based Key Derivation Function
+Message Authentication Code
+National Institute of Science and Technology
+Processor Algorithm Acceleration
+Password-based Key Derivation Function v2
+Public-Key Cryptography Standards
+Rivest, Shamir, Adleman
+Secure Hash Algorithm
+Shared Secret Computation
+Sensitive Security Parameter
+XEX-based Tweaked-codebook mode with cipher text Stealing
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 35 of 41
+
+Appendix B. References
+ANS X9.42-2001
+
+Public Key Cryptography for the Financial Services Industry: Agreement of Symmetric Keys
+Using Discrete Logarithm Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9422001
+
+ANS X9.63-2001
+
+Public Key Cryptography for the Financial Services Industry, Key Agreement and Key Transport
+Using Elliptic Curve Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9632001
+
+FIPS 140-3
+
+FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+March 2019
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-3.pdf
+
+FIPS 140-3 IG
+
+Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module Validation
+Program
+https://csrc.nist.gov/Projects/cryptographic-module-validation-program/fips-140-3-igannouncements
+
+FIPS 180-4
+
+Secure Hash Standard (SHS)
+March 2012
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS 186-4
+
+Digital Signature Standard (DSS)
+July 2013
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf
+
+FIPS 197
+
+Advanced Encryption Standard
+November 2001
+https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS 198-1
+
+The Keyed Hash Message Authentication Code (HMAC)
+July 2008
+https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+FIPS 202
+
+SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions
+August 2015
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+
+PKCS#1
+
+Public Key Cryptography Standards (PKCS) #1: RSA Cryptography Specifications Version 2.1
+February 2003
+https://www.ietf.org/rfc/rfc3447.txt
+
+RFC 3526
+
+More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)
+May 2003
+https://www.ietf.org/rfc/rfc3526.txt
+
+RFC 5288
+
+AES Galois Counter Mode (GCM) Cipher Suites for TLS
+August 2008
+https://www.ietf.org/rfc/rfc5288.txt
+
+RFC 7919
+
+Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for Transport Layer Security
+(TLS)
+August 2016
+https://www.ietf.org/rfc/rfc7919.txt
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 36 of 41
+
+RFC 8446
+
+The Transport Layer Security (TLS) Protocol Version 1.3
+August 2018
+https://www.ietf.org/rfc/rfc8446.txt
+
+SP 800-38A
+
+Recommendation for Block Cipher Modes of Operation Methods and Techniques
+December 2001
+https://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP 800-38A
+Addendum
+
+Recommendation for Block Cipher Modes of Operation: Three Variants of Ciphertext Stealing
+for CBC Mode
+October 2010
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a-add.pdf
+
+SP 800-38B
+
+Recommendation for Block Cipher Modes of Operation: The CMAC Mode for Authentication
+May 2005
+https://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+SP 800-38C
+
+Recommendation for Block Cipher Modes of Operation: the CCM Mode for Authentication
+and Confidentiality
+May 2004
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38c.pdf
+
+SP 800-38D
+
+Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and
+GMAC
+November 2007
+https://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+
+SP 800-38E
+
+Recommendation for Block Cipher Modes of Operation: The XTS AES Mode for Confidentiality
+on Storage Devices
+January 2010
+https://csrc.nist.gov/publications/nistpubs/800-38E/nist-sp-800-38E.pdf
+
+SP 800-38F
+
+Recommendation for Block Cipher Modes of Operation: Methods for Key Wrapping
+December 2012
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP 800-52r2
+
+Guidelines for the Selection, Configuration, and Use of Transport Layer Security (TLS)
+Implementations
+August 2019
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+
+SP 800-56Ar3
+
+Recommendation for Pair-Wise Key Establishment Schemes Using Discrete Logarithm
+Cryptography
+April 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+SP 800-56Cr2
+
+Recommendation for Key-Derivation Methods in Key-Establishment Schemes
+August 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr2.pdf
+
+SP 800-90Ar1
+
+Recommendation for Random Number Generation Using Deterministic Random Bit
+Generators
+June 2015
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 37 of 41
+
+SP 800-90B
+
+Recommendation for the Entropy Sources Used for Random Bit Generation
+January 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+SP 800-108r1
+
+NIST Special Publication 800-108 - Recommendation for Key Derivation Using Pseudorandom
+Functions
+August 2022
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1.pdf
+
+SP 800-131Ar2
+
+Transitioning the Use of Cryptographic Algorithms and Key Lengths
+March 2019
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar2.pdf
+
+SP 800-132
+
+Recommendation for Password-Based Key Derivation - Part 1: Storage Applications
+December 2010
+https://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
+
+SP 800-133r2
+
+Recommendation for Cryptographic Key Generation
+June 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+SP 800-135r1
+
+Recommendation for Existing Application-Specific Key Derivation Functions
+December 2011
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-135r1.pdf
+
+SP 800-140Br1
+
+CMVP Security Policy Requirements
+November 2023
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140Br1.pdf
+
+Oracle Linux 9 Kernel Crypto API Cryptographic Module Security Policy
+Page 38 of 41
+
+

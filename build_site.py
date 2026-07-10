@@ -269,7 +269,13 @@ POLICY_SKIN = (
 
 def build_policy(r):
     cert = r["cert"]
-    doc = render_html.render(r, [])
+    # render_html needs the FULL raw record (certificate + securityPolicy sections
+    # and tables), not the analyzer's projection. page_texts drive the page-anchored
+    # prose; both are committed, so this needs no PDFs at build time.
+    raw = json.load(open(f"corpus140_3/records/{cert}.json", encoding="utf-8"))
+    ptf = f"sp_text/{cert}.txt"
+    page_texts = open(ptf, encoding="utf-8", errors="replace").read().split("\f") if os.path.exists(ptf) else []
+    doc = render_html.render(raw, page_texts)
     nav = ("<nav class='sitenav'><div class='sitenav-in'>"
            "<a class='brand' href='../index.html'>FIPS&nbsp;140-3<span class='dot'>&nbsp;/</span>&nbsp;corpus</a>"
            "<a href='../index.html'>Overview</a><a href='../report.html'>Report</a>"

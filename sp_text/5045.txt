@@ -1,0 +1,5444 @@
+F5, Inc.
+
+FIPS 140-3 Non-Proprietary Security Policy
+F5, Inc.
+F5OS-A Cryptographic Module
+Module Version: 1.7.0
+FIPS Security Level 2
+Document Version 1.1
+Last update: 05-06-2025
+
+Prepared by:
+atsec information security corporation
+4516 Seton Center Parkway, Suite 250
+Austin, TX 78759
+www.atsec.com
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+2 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Table of Contents
+Copyrights and Trademarks .................................................................................................. 7
+1 General .............................................................................................................................. 8
+1.1 Overview ..................................................................................................................... 8
+1.2 Security Levels ............................................................................................................. 8
+2 Cryptographic Module Specification ................................................................................... 9
+2.1 Description................................................................................................................... 9
+2.2 Tested and Vendor Affirmed Module Version and Identification ............................................10
+2.3 Excluded Components ...................................................................................................10
+2.4 Modes of Operation ......................................................................................................10
+2.5 Algorithms ..................................................................................................................11
+2.6 Security Function Implementations .................................................................................15
+2.7 Algorithm Specific Information .......................................................................................17
+2.7.1 AES GCM IV ..........................................................................................................17
+2.8 RBG and Entropy .........................................................................................................17
+2.9 Key Generation ............................................................................................................18
+2.10 Key Establishment ......................................................................................................18
+2.11 Industry Protocols ......................................................................................................18
+3 Cryptographic Module Interfaces ..................................................................................... 20
+3.1 Ports and Interfaces .....................................................................................................20
+4 Roles, Services, and Authentication ................................................................................. 21
+4.1 Authentication Methods .................................................................................................21
+4.2 Roles ..........................................................................................................................22
+4.3 Approved Services .......................................................................................................22
+4.4 Non-Approved Services .................................................................................................36
+4.5 External Software/Firmware Loaded ................................................................................37
+5 Software/Firmware Security ............................................................................................ 38
+5.1 Integrity Techniques .....................................................................................................38
+5.2 Initiate on Demand ......................................................................................................38
+6 Operational Environment ................................................................................................. 39
+6.1 Operational Environment Type and Requirements .............................................................39
+7 Physical Security .............................................................................................................. 40
+7.1 Mechanisms and Actions Required ..................................................................................40
+7.2 User Placed Tamper Seals .............................................................................................40
+8 Non-Invasive Security ...................................................................................................... 42
+9 Sensitive Security Parameters Management .................................................................... 43
+9.1 Storage Areas..............................................................................................................43
+9.2 SSP Input-Output Methods ............................................................................................43
+9.3 SSP Zeroization Methods ...............................................................................................43
+9.4 SSPs ..........................................................................................................................44
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+3 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9.5 Transitions ..................................................................................................................48
+10 Self-Tests ....................................................................................................................... 49
+10.1 Pre-Operational Self-Tests ...........................................................................................49
+10.2 Conditional Self-Tests .................................................................................................49
+10.3 Periodic Self-Test Information ......................................................................................53
+10.4 Error States ...............................................................................................................55
+10.5 Operator Initiation of Self-Tests ....................................................................................55
+11 Life-Cycle Assurance ...................................................................................................... 56
+11.1 Installation, Initialization, and Startup Procedures ...........................................................56
+11.1.1
+
+Delivery and Operation ......................................................................................56
+
+11.1.2
+
+Installing F5OS .................................................................................................56
+
+11.1.3 Version Confirmation ............................................................................................57
+11.1.4 License Confirmation ............................................................................................57
+11.2 Administrator Guidance ...............................................................................................57
+11.3 Non-Administrator Guidance ........................................................................................57
+12 Mitigation of Other Attacks ............................................................................................ 58
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+4 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+List of Tables
+Table 1: Security Levels .......................................................................................................... 8
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) ............10
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid .......................................10
+Table 4: Modes List and Description .........................................................................................11
+Table 5: Approved Algorithms .................................................................................................13
+Table 6: Non-Approved, Not Allowed Algorithms ........................................................................14
+Table 7: Security Function Implementations .............................................................................17
+Table 8: Entropy Certificates ..................................................................................................17
+Table 9: Entropy Sources .......................................................................................................17
+Table 10: Ports and Interfaces ................................................................................................20
+Table 11: Authentication Methods ...........................................................................................21
+Table 12: Roles ....................................................................................................................22
+Table 13: Approved Services ..................................................................................................35
+Table 14: Non-Approved Services............................................................................................37
+Table 15: Mechanisms and Actions Required .............................................................................40
+Table 16: Storage Areas ........................................................................................................43
+Table 17: SSP Input-Output Methods .......................................................................................43
+Table 18: SSP Zeroization Methods..........................................................................................44
+Table 19: SSP Table 1 ...........................................................................................................45
+Table 20: SSP Table 2 ...........................................................................................................48
+Table 21: Pre-Operational Self-Tests........................................................................................49
+Table 22: Conditional Self-Tests ..............................................................................................53
+Table 23: Pre-Operational Periodic Information .........................................................................53
+Table 24: Conditional Periodic Information ................................................................................55
+Table 25: Error States ...........................................................................................................55
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+5 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+List of Figures
+Figure 1: r12900 Platform Front View ....................................................................................... 9
+Figure 2: Block Diagram ........................................................................................................10
+Figure 3 - Tamper labels on r12900 .........................................................................................41
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+6 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Copyrights and Trademarks
+F5®, BIG-IP® are registered trademarks of F5, Inc.
+Intel®, Atom® and Xeon® are registered trademarks of Intel Corporation.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+7 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for the F5OS-A
+Cryptographic Module with firmware version 1.7.0. The document contains the security rules
+under which the module must operate and describes how this module meets the
+requirements as specified in FIPS PUB 140-3 (Federal Information Processing Standards
+Publication 140-3) for a Security Level 2 module.
+
+1.2 Security Levels
+Section
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+
+Security Level
+2
+2
+2
+2
+N/A
+N/A
+2
+N/A
+2
+2
+2
+N/A
+2
+
+Table 1: Security Levels
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+8 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use: The F5OS-A Cryptographic Module (hereafter referred to as “the
+module”) is a microservices-based, proprietary platform layer that provides an interface
+between the BIG-IP ADC and the rSeries hardware.
+Module Type: Firmware
+Module Embodiment: MultiChipStand
+Cryptographic Boundary:
+The module cryptographic boundary is defined by the red dotted line in Figure 2. The TOEPP
+is defined by the tested platform listed in the Tested Operational Environments - Software,
+Firmware, Hybrid table and delineated by the black rectangle in Figure 2. Figure 2 also
+depicts the flow of status output (SO), control input (CI), data input (DI) and data output
+(DO) interfaces. Description of the ports and interfaces can be found in the Ports and
+Interfaces table.
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The figure below shows the platform on which the module was tested.
+
+Figure 1: r12900 Platform Front View
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+9 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Figure 2: Block Diagram
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code
+Sets):
+Package or File Name Software/ Firmware
+Version
+F5OS-A
+1.7.0
+
+Features
+
+Integrity Test
+
+N/A
+
+HMAC-SHA-384
+
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+The executable code is defined by the firmware version 1.7.0. All code belonging to this
+firmware version is the executable code of the module.
+Tested Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+F5OS-A
+1.7.0
+
+Hardware
+Platform
+rSeries
+r12900
+
+Processors
+
+PAA/PAI Hypervisor Version(s)
+or Host OS
+Intel(R) Xeon(R) Platinum 8531N Ice Yes
+N/A
+1.7.0
+Lake-SP
+
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+2.3 Excluded Components
+The module does not claim any excluded components.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode
+Name
+Approved
+
+Description
+
+Type
+
+Status Indicator
+
+Automatically entered whenever an
+approved service is requested
+
+Approved
+
+Equivalent to the indicator of the
+requested service as defined in section
+4.3
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+10 of 58
+
+F5OS-A Cryptographic Module
+
+Mode
+Name
+NonApproved
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Type
+
+Status Indicator
+
+Automatically entered whenever a
+non-approved service is requested
+
+NonApproved
+
+Equivalent to the indicator of the
+requested service as defined in section
+4.3
+
+Table 4: Modes List and Description
+
+The module supports two modes of operation:
+•
+•
+
+In Approved mode of operation only approved or vendor affirmed security functions
+can be used.
+In non-Approved mode of operation only non-approved security functions can be
+used.
+
+The module enters the Approved Mode after the pre-operational self-tests and cryptographic
+algorithms self-tests (CASTs) have completed successfully.
+Mode Change Instructions and Status:
+The module automatically switches between the approved and non-approved modes
+depending on the services requested by the operator. The status indicator of the mode of
+operation is equivalent to the indicator of the service that was requested. SSPs used or
+stored in the Approved mode are not used in the non-Approved mode, and vice versa.
+Degraded Mode Description:
+Not applicable.
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+AES-CBC
+
+CAVP Cert
+A4985
+
+AES-CBC
+
+A5261
+
+AES-CTR
+
+A4985
+
+AES-CTR
+
+A5261
+
+AES-ECB
+
+A4985
+
+AES-ECB
+
+A5261
+
+AES-GCM
+
+A4985
+
+AES-GCM
+
+A5261
+
+AES-GMAC
+
+A4985
+
+Properties
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - Internal
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - Internal
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - Internal
+
+Reference
+SP 800-38A
+SP 800-38A
+SP 800-38A
+SP 800-38A
+SP 800-38A
+SP 800-38A
+SP 800-38D
+
+SP 800-38D
+
+SP 800-38D
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+11 of 58
+
+F5OS-A Cryptographic Module
+
+Algorithm
+
+CAVP Cert
+
+AES-GMAC
+
+A5261
+
+Counter DRBG
+
+A4985
+
+Counter DRBG
+
+A5261
+
+ECDSA KeyGen
+(FIPS186-5)
+ECDSA KeyGen
+(FIPS186-5)
+ECDSA KeyVer
+(FIPS186-5)
+ECDSA KeyVer
+(FIPS186-5)
+ECDSA SigGen
+(FIPS186-5)
+
+A4985
+
+ECDSA SigGen
+(FIPS186-5)
+
+A5261
+
+ECDSA SigVer
+(FIPS186-5)
+ECDSA SigVer
+(FIPS186-5)
+HMAC-SHA-1
+
+A4985
+
+HMAC-SHA-1
+
+A5261
+
+HMAC-SHA2-256
+
+A4985
+
+HMAC-SHA2-256
+
+A5261
+
+HMAC-SHA2-384
+
+A4985
+
+HMAC-SHA2-384
+
+A5261
+
+KAS-ECC-SSC Sp80056Ar3
+
+A4985
+
+KAS-ECC-SSC Sp80056Ar3
+
+A5261
+
+KDF SSH (CVL)
+
+A4985
+
+KDF SSH (CVL)
+
+A5261
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Reference
+
+A4985
+
+Properties
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - Internal
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Prediction Resistance - No, Yes
+Mode - AES-256
+Derivation Function Enabled - No, Yes
+Prediction Resistance - No, Yes
+Mode - AES-256
+Derivation Function Enabled - No, Yes
+Curve - P-256, P-384
+Secret Generation Mode - testing candidates
+Curve - P-256, P-384
+Secret Generation Mode - testing candidates
+Curve - P-256, P-384
+
+A5261
+
+Curve - P-256, P-384
+
+FIPS 186-5
+
+A4985
+
+Curve - P-256, P-384
+Hash Algorithm - SHA2-256, SHA2-384
+Component - No
+Curve - P-256, P-384
+Hash Algorithm - SHA2-256, SHA2-384
+Component - No
+Curve - P-256, P-384
+Hash Algorithm - SHA2-256, SHA2-384
+Curve - P-256, P-384
+Hash Algorithm - SHA2-256, SHA2-384
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Key Length - Key Length: 8, 16, 64, 128,
+1024
+Domain Parameter Generation Methods - P256, P-384
+Scheme ephemeralUnified KAS Role - initiator, responder
+Domain Parameter Generation Methods - P256, P-384
+Scheme ephemeralUnified KAS Role - initiator, responder
+Cipher - AES-128, AES-256
+Hash Algorithm - SHA2-256, SHA2-384
+Cipher - AES-128, AES-256
+Hash Algorithm - SHA2-256, SHA2-384
+
+FIPS 186-5
+
+A5261
+
+A5261
+A4985
+
+SP 800-38D
+
+SP 800-90A
+Rev. 1
+SP 800-90A
+Rev. 1
+FIPS 186-5
+FIPS 186-5
+FIPS 186-5
+
+FIPS 186-5
+FIPS 186-5
+FIPS 186-5
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+SP 800-56A
+Rev. 3
+
+SP 800-56A
+Rev. 3
+
+SP 800-135
+Rev. 1
+SP 800-135
+Rev. 1
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+12 of 58
+
+F5OS-A Cryptographic Module
+
+Algorithm
+CAVP Cert
+RSA KeyGen (FIPS186- A4985
+5)
+RSA KeyGen (FIPS186- A5261
+5)
+RSA SigGen (FIPS186- A4985
+5)
+RSA SigGen (FIPS186- A5261
+5)
+RSA SigVer (FIPS186-5) A4985
+RSA SigVer (FIPS186-5) A5261
+SHA-1
+
+A4985
+
+SHA-1
+
+A5261
+
+SHA2-256
+
+A4985
+
+SHA2-256
+
+A5261
+
+SHA2-384
+
+A4985
+
+SHA2-384
+
+A5261
+
+TLS v1.2 KDF RFC7627 A4985
+(CVL)
+TLS v1.2 KDF RFC7627 A5261
+(CVL)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Properties
+Key Generation Mode - probable
+Modulo - 2048, 3072, 4096
+Primality Tests - 2powSecStr
+Private Key Format - standard
+Key Generation Mode - probable
+Modulo - 2048, 3072, 4096
+Primality Tests - 2powSecStr
+Private Key Format - standard
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Hash Algorithm - SHA2-256, SHA2-384
+Hash Algorithm - SHA2-256, SHA2-384
+
+Reference
+FIPS 186-5
+
+FIPS 186-5
+
+FIPS 186-5
+FIPS 186-5
+FIPS 186-5
+FIPS 186-5
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+SP 800-135
+Rev. 1
+SP 800-135
+Rev. 1
+
+Table 5: Approved Algorithms
+
+Vendor-Affirmed Algorithms:
+N/A for this module.
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+Name
+AES-CCM
+AES-CFB
+AES-OFB
+AES-KW
+DES
+RC4
+Triple-DES
+SM2
+
+Use and Function
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+Symmetric Encryption, Symmetric Decryption
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+13 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+SM4
+RSA Asymmetric Encryption and Decryption
+RSA Key Generation with modulus sizes other
+than 2048, and 4096-bits
+DSA
+
+Use and Function
+Symmetric Encryption, Symmetric Decryption
+Asymmetric Encryption, Asymmetric Decryption
+Key generation
+Domain Parameter Generation, Domain Parameter
+Verification, Key Pair Generation, Digital Signature
+Generation, Digital Signature Verification
+Digital Signature Generation, Digital Signature
+Verification
+Key Generation, Key Verification
+
+EdDSA Signature Generation and Verification
+using Ed25519
+ECDSA Key Generation and Verification with
+curves other than P-256 and P-384
+Safe Primes Key Generation and Verification for Key Generation, Key Verification
+Diffie-Hellman
+RSA PKCS#1 v1.5 Signature Generation and
+Digital Signature Generation, Digital Signature
+Verification using 2048, 3072 or 4096-bits
+Verification
+modulus with SHA-1, SHA2-224, SHA2-512
+RSA PKCS #1 v1.5 Signature Generation and
+Digital Signature Generation, Digital Signature
+Verification with modulus other than 2048,
+Verification
+3072 or 4096 bits, for all SHA sizes
+RSA PSS Signature Generation and Verification Digital Signature Generation, Digital Signature
+using 2048, 3072 or 4096-bits modulus
+Verification
+ECDSA Signature Generation and Verification
+Digital Signature Generation, Digital Signature
+using curves other than P-256 and P-384, all
+Verification
+SHA sizes
+ECDSA Signature Generation using curves PDigital Signature Generation
+256 and P-384 with SHA-1, SHA2-224, SHA2512, SHA3
+ECDSA Signature Verification using curves PDigital Signature Verification
+256 and P-384 with SHA2-224, SHA2-512,
+SHA3
+SHA2-224
+Message Digest
+SHA2-512
+Message Digest
+SM3
+Message Digest
+MD5
+Message Digest
+HMAC-SHA2-224
+Message Authentication
+HMAC-SHA2-512
+Message Authentication
+AES-CMAC
+Message Authentication
+Triple-DES
+Message Authentication
+Diffie-Hellman using all Diffie-Hellman Groups Key Agreement
+EC Diffie-Hellman using curves other than PKey Agreement
+256 and P-384
+EC Diffie-Hellman using curves P-256 and PKey Agreement
+384 Static Unified and OnePassDh schemes
+TLS KDF using MD5, SHA-1, SHA2-224, SHA2- Key Derivation
+512, SHA3
+SNMP KDF
+Key Derivation
+IKEv1 KDF
+Key Derivation
+IKEv2 KDF
+Key Derivation
+Table 6: Non-Approved, Not Allowed Algorithms
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+14 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+2.6 Security Function Implementations
+Name
+AES-CBC
+
+Type
+BC-UnAuth
+
+Description
+Encryption/Decryption
+
+Properties
+Algorithms
+Keys:128, 192, 256- AES-CBC:
+bit keys with 128,
+(A4985,
+192, 256 bits of key
+A5261)
+strength
+AES-CTR
+BC-UnAuth
+Encryption/Decryption
+Keys:128, 192, 256- AES-CTR:
+bit keys with 128,
+(A4985,
+192, 256 bits of key
+A5261)
+strength
+AES-ECB
+BC-UnAuth
+Encryption/Decryption
+Keys:128, 192, 256- AES-ECB:
+bit keys with 128,
+(A4985,
+192, 256 bits of key
+A5261)
+strength
+AES-GCM
+BC-Auth
+Authenticated
+Keys:128, 192, 256- AES-GCM:
+(Authenticated
+Encryption/Authenticated bit keys with 128,
+(A4985,
+Encryption/Decryption)
+192, 256 bits of key
+A5261)
+Decryption
+strength
+AES-GMAC
+MAC
+Message authentication Keys:128, 192, 256- AES-GMAC:
+code (MAC)
+bit keys with 128,
+(A4985,
+192, 256 bits of key
+A5261)
+strength
+AES-GCM (Key
+KTS-Wrap
+Key Wrapping, Key
+Keys:128, 256-bit
+AES-GCM:
+Wrapping/Unwrapping)
+Unwrapping
+keys with 128 and
+(A4985,
+256 bits of key
+A5261)
+strength
+Compliance:Compliant
+with IG D.G
+AES-CBC with HMAC
+KTS-Wrap
+Key Wrapping, Key
+Keys:128, 256-bit
+AES-CBC:
+Unwrapping
+keys with 128 and
+(A4985,
+256 bits of key
+A5261)
+strength
+HMAC-SHA2256: (A4985,
+A5261)
+HMAC-SHA2384: (A4985,
+A5261)
+Counter DRBG
+DRBG
+Random Number
+Compliance:Compliant Counter
+Generation
+with SP800-90ARev1 DRBG:
+Properties:with /
+(A4985,
+without derivation
+A5261)
+function, prediction
+resistance disabled /
+enabled
+RSA Signature
+DigSigSignature Generation
+Keys:2048, 3072 and RSA SigGen
+Generation
+SigGen
+4096-bit keys with
+(FIPS186-5):
+112 to 150 bits of key (A4985,
+A5261)
+strength
+Hashes:SHA2-256,
+SHA2-384
+Schemes:PKCS#1v1.5
+RSA Signature
+DigSig-SigVer Signature Verification
+Keys: 2048, 3072 and RSA SigVer
+Verification
+4096-bit keys with
+(FIPS186-5):
+112 to 150 bits of key (A4985,
+A5261)
+strength
+Hashes:SHA2-256,
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+15 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Type
+
+Description
+
+RSA Key Generation
+
+AsymKeyPair- Key Generation
+KeyGen
+CKG
+
+ECDSA Signature
+Generation
+
+DigSigSigGen
+
+ECDSA Signature
+Verification
+
+DigSig-SigVer Signature Verification
+
+Signature Generation
+
+ECDSA Key Generation AsymKeyPair- Key Generation
+KeyGen
+CKG
+
+ECDSA Key Verification AsymKeyPair- Key Verification
+KeyVer
+
+SHA
+
+SHA
+
+Message Digest
+
+HMAC
+
+MAC
+
+Message authentication
+code (MAC)
+
+TLS Handshake
+
+KAS-Full
+
+Key agreement
+
+Properties
+Algorithms
+SHA2-384
+Schemes:PKCS#1v1.5
+Keys:2048, 3072 and RSA KeyGen
+4096-bit keys with
+(FIPS186-5):
+112 to 150 bits of key (A4985,
+A5261)
+strength
+Schemes:A.1.3
+Random Probable
+Primes
+Compliance:IG D.H;
+SP800-133Rev2
+section 5.1
+Curves:P-256, P-384 ECDSA
+with 128 and 192 bits SigGen
+of strength
+(FIPS186-5):
+Hashes:SHA2-256,
+(A4985,
+SHA2-384
+A5261)
+Curves:P-256, P-384 ECDSA SigVer
+with 128 and 192 bits (FIPS186-5):
+of strength
+(A4985,
+Hashes:SHA2-256,
+A5261)
+SHA2-384
+Curves: P-256, P-384 ECDSA
+with 128 and 192 bits KeyGen
+of strength
+(FIPS186-5):
+Schemes:FIPS 186-5, (A4985,
+A.2.2 Rejection
+A5261)
+Sampling
+Compliance:IG D.H;
+SP800-133Rev2
+sections 5.1 and 5.2
+Curves:P-256, P-384 ECDSA
+with 128 and 192 bits KeyVer
+of strength
+(FIPS186-5):
+(A4985,
+A5261)
+SHA-1:
+(A4985,
+A5261)
+SHA2-256:
+(A4985,
+A5261)
+SHA2-384:
+(A4985,
+A5261)
+Hashes:SHA-1, SHA2- HMAC-SHA-1:
+256, SHA2-384
+(A4985,
+Keys:112 bits to
+A5261)
+1024-bit keys with
+HMAC-SHA2112 to 256 bits of key 256: (A4985,
+A5261)
+strengths
+HMAC-SHA2384: (A4985,
+A5261)
+Curves: P-256, P-384 KAS-ECC-SSC
+with 128 and 192 bits Sp800-56Ar3:
+of key strength
+(A4985,
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+16 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Type
+
+Description
+
+SSH Handshake
+
+KAS-Full
+
+Key agreement
+
+AES-CTR with HMAC
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+Properties
+Compliance:IG D.F
+Scenario 2 (path 2)
+
+Algorithms
+A5261)
+TLS v1.2 KDF
+RFC7627:
+(A4985,
+A5261)
+EC Curves:P-256, P- KDF SSH:
+384 with 128 and 192 (A4985,
+A5261)
+bits of key strength
+KAS-ECC-SSC
+Compliance:IG D.F
+Scenario 2 (path 2)
+Sp800-56Ar3:
+(A4985,
+A5261)
+Keys:128, 256-bit
+AES-CTR:
+keys with 128 and
+(A4985,
+256 bits of key
+A5261)
+strength
+HMAC-SHA-1:
+(A4985,
+A5261)
+HMAC-SHA2256: (A4985,
+A5261)
+
+Table 7: Security Function Implementations
+
+2.7 Algorithm Specific Information
+2.7.1 AES GCM IV
+The User shall consider the following requirements and restrictions when using the module.
+AES-GCM IV is constructed in accordance with SP800-38D in compliance with IG C.H
+scenario 1a. The implementation of the nonce_explicit management logic inside the module
+ensures that when the IV exhausts the maximum number of possible values for a given
+session key, the module triggers a new handshake request to establish a new key. In case
+the module’s power is lost and then restored, the key used for the AES GCM encryption or
+decryption shall be re-distributed. The AES GCM IV generation follows [RFC 5288] and shall
+only be used for the TLS protocol version 1.2 to be compliant with [FIPS140-3_IG] IG C.H
+scenario 1a; thus, the module is compliant with [SP800-52Rev2] section 3.3.1.
+
+2.8 RBG and Entropy
+Cert
+Vendor
+Number Name
+E85
+F5, Inc.
+Table 8: Entropy Certificates
+Name
+
+Type
+
+Operational Environment
+
+CPU Jitter RNG
+version 3.4.1
+entropy source
+
+NonPhysical
+
+F5OS-A 1.7.0 on rSeries r12900
+with Intel(R) Xeon(R) Platinum
+8531N Ice Lake-SP
+
+Sample Entropy Conditioning
+Size
+per
+Component
+Sample
+256 bits 256 bits SHA3-256 (CAVP
+cert. #A3769)
+
+Table 9: Entropy Sources
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+17 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+The module employs a Deterministic Random Bit Generator (DRBG) based on [SP80090ARev1] for the generation of random value used in asymmetric keys. The Approved DRBG
+provided by the module is the CTR_DRBG with AES-256. The module uses the SP800-90B
+compliant entropy source specified in the Entropy Sources table to seed the DRBG.
+The operator does not have the ability to modify the F5 entropy source (ES) configuration
+settings (see details in Public Use Document referenced in section 11.2). The F5 entropy
+source is tested in the OE listed in the Tested Operational Environments - Software,
+Firmware, Hybrid table.
+
+2.9 Key Generation
+The module implements the following key generation methods:
+•
+
+RSA, ECDSA asymmetric key generation, for digital signature schemes, compliant
+with [FIPS186-5], using an [SP800-90ARev1] DRBG for the generation of random
+values. These key generation services are compliant with section 5.1 of [SP800133Rev2], according to IG D.H.
+
+•
+
+EC Diffie-Hellman key generation using an [SP800-90ARev1] DRBG for the
+generation of random values. This key generation scheme is compliant with section
+5.2 of [SP800-133Rev2], according to IG D.H.
+
+The module does not implement symmetric key generation as an explicit service. The HMAC
+and AES symmetric keys are derived from shared secrets by applying [SP 800-135] as part
+of the TLS/ SSH protocols. The scenario maps to the [SP 800-133Rev2] section 6.2.1.
+
+2.10 Key Establishment
+The module provides the following key establishment services:
+•
+
+•
+•
+•
+
+EC Diffie-Hellman key agreement scheme compliant with SP800-56ARev3 and FIPS
+140-3 IG D.F scenario 2 (path 2) is used as part of the TLS and SSH Protocols. The
+full EC Diffie-Hellman KAS implements a shared secret computation with the key
+derivation implemented by TLS v1.2 KDF RFC7627 (CVL) [SP 800-135] and KDF SSH
+(CVL) [SP 800-135]. EC Diffie-Hellman key agreement with P-256 and P-384 curves
+provides 128 and 192 bits of strength respectively.
+AES-GCM in the context of TLS protocol, with 128 and 256-bit keys, with 128 and
+256 bits of key strength; compliant with IG D.G.
+AES-CBC or AES-CTR with HMAC in the context of SSH protocol, with 128 and 256bit keys, with 128 and 256 bits of key strength; compliant with IG D.G.
+AES-CBC with HMAC in the context of TLS protocol, with 128 and 256-bit keys, with
+128 and 256 bits of key strength; compliant with IG D.G.
+
+2.11 Industry Protocols
+The module implements the SSH key derivation function for use in the SSH protocol (RFC
+4253 and RFC 6668).
+GCM with internal IV generation in the approved mode is compliant with version 1.2 of the
+TLS protocol (RFC 5288) and shall only be used in conjunction with the TLS protocol.
+Additionally, the module implements the TLS 1.2 key derivation function for use in the TLS
+protocol.
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+18 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+No parts of the SSH, TLS, other than those mentioned above, have been tested by the CAVP
+and CMVP.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+19 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical Logical
+Data That Passes
+Port
+Interface(s)
+N/A
+Data Input
+TLS/SSH protocol input messages Configuration commands for interface
+management
+N/A
+Data Output TLS/SSH protocol output messages Status log
+N/A
+Control Input API which control system state (e.g., reset system, power-off system)
+N/A
+Status
+API which provides system status information
+Output
+Table 10: Ports and Interfaces
+
+The logical interfaces are the commands through which users of the module request
+services. There are no external input or output devices to the module that can be used for
+data input, data output, status output or control input. The module does not implement a
+control output interface.
+For the purpose of the FIPS 140-3 validation, the physical ports are interpreted to be the
+physical ports of the hardware platform on which the module runs.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+20 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+Method Name
+
+Description
+
+Security
+Mechanism
+
+Role-based
+authentication
+with Password
+(CLI or WebUI)
+
+Strength
+Strength per
+Each
+Minute
+Attempt
+1/676,000,000 3/676,000,000
+
+The password must consist of a
+Passwordminimum of 8 characters with at
+based
+least one from each of the threeauthentication
+character classes. Character classes
+are defined as: digits (0-9), ASCII
+lowercase letters (a-z), ASCII
+uppercase letters (A-Z) Assuming a
+worst-case scenario where the
+password contains six numerical
+digits, one ASCII lowercase letter
+and one ASCII uppercase letter. The
+probability of guessing every
+character successfully is (1/10)^6 *
+(1/26)^1 * (1/26)^1 =
+1/676,000,000. Note: this is less
+than 1/1,000,000. The maximum
+number of login attempts is limited
+to 3 after which the account is
+locked. This means that, in the
+worst case, an attacker has the
+probability of guessing the password
+in one minute as 3/676,000,000.
+Note: This is less than 1/100,000.
+Role-based
+The ECDSA using P-256 or P-384
+ECDSA
+1/(2^128)
+authentication
+curves for key based authentication Signature
+with SSH ECDSA yields a minimum security-strength Verification
+key-pair (CLI
+of 128 bits. The chance of a random
+only)
+authentication attempt falsely
+succeeding is at most 1/(2^128)
+that is less than 1/1,000,000. The
+maximum number of login attempts
+is limited to 1 after which the
+account switch to password
+authentication. Then the attacker
+probability of succeeding to establish
+the connection depends on the
+probability of guessing the password
+and it is, as above, 3/676,000,000
+less than 1/100,000.
+
+3/676,000,000
+
+Table 11: Authentication Methods
+
+The module supports role-based authentication. The module supports concurrent operators
+belonging to different roles (one CO role and one User role) which create different
+authenticated sessions, while achieving the separation between the concurrent operators.
+Two interfaces are used to access the module:
+•
+
+CLI: The module offers a CLI which is accessed remotely using the SSHv2 secured
+session over the Ethernet connection.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+21 of 58
+
+F5OS-A Cryptographic Module
+
+•
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Web Utility Interface (WebUI): The Web interface consists of HTTPS over TLSenabled web browser which provides a graphical interface for system management
+tools.
+
+The CO role and User role can access the module through Command Line Interface (CLI) or
+Web Interface. However, the CO can restrict User role access to have the User accessing
+through Web Interface only. At initialization, the CO is the only available role and only the
+CO can create the User role.
+The module does not maintain authenticated sessions upon power cycling. Power-cycling
+the system requires the authentication credentials to be re-entered. When entering
+password authentication data through the WebUI, any character entered will be obfuscated
+(i.e., replace the character entered with a dot on the entry box). When entering password
+authentication data through the CLI, the module does not display any character entered by
+the operator in stdin (e.g. keyboard).
+
+4.2 Roles
+Name
+Administrator
+
+Type
+Role
+
+Operator Type
+CO
+
+Resource Admin
+
+Role
+
+User
+
+Operator
+
+Role
+
+User
+
+Tenant-console
+
+Role
+
+User
+
+Authentication Methods
+Role-based authentication
+with Password (CLI or WebUI)
+Role-based authentication
+with SSH ECDSA key-pair
+(CLI only)
+Role-based authentication
+with Password (CLI or WebUI)
+Role-based authentication
+with SSH ECDSA key-pair
+(CLI only)
+Role-based authentication
+with Password (CLI or WebUI)
+Role-based authentication
+with SSH ECDSA key-pair
+(CLI only)
+Role-based authentication
+with Password (CLI or WebUI)
+Role-based authentication
+with SSH ECDSA key-pair
+(CLI only)
+
+Table 12: Roles
+
+The CO and User roles are selected via the authentication credentials that are entered.
+
+4.3 Approved Services
+Name
+
+Description
+
+Indicato Inputs
+r
+None
+None
+
+List users
+
+Display list of
+all user
+accounts
+
+Create
+additional
+User
+
+Create
+None
+additional user
+
+Outputs
+
+Security Functions SSP Access
+
+List of user
+accounts
+
+None
+
+Username / Confirmation None
+password
+of account
+creation
+
+Administrat
+or
+Resource
+Admin
+Operator
+Administrat
+or
+- Password:
+W
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+22 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Indicato Inputs
+Outputs
+Security Functions
+r
+Modify
+Modify existing None
+Username / Confirmation None
+existing Users users
+modification of account
+modification
+(new
+username,
+role,
+password
+expiry
+date/tally
+count)
+Delete User
+Delete existing None
+Username Confirmation None
+user
+of deletion
+Unlock User Remove lock
+None
+Username Confirmation None
+from user who
+of unlock
+has exceeded
+login attempts
+Update own Update own
+None
+Own
+Confirmation None
+password
+password
+password
+of update of
+password
+
+Update others Update others None
+password
+password
+
+Username / Confirmation None
+password
+of update
+
+Configure
+Password
+Policy
+
+Set password None
+policy features
+
+New
+password
+policy
+
+Create TLS
+Certificate
+
+Self-signed
+certificate
+creation
+
+Create TLS
+Key
+
+Create key for Service
+Key
+Confirmation Counter DRBG
+the SSL
+Indicator: identificatio of key
+RSA Key Generation
+Certificate key Approved n
+creation
+ECDSA Key
+file
+information
+Generation
+
+Confirmation None
+of
+configuratio
+n change
+Service
+Certificate Confirmation RSA Signature
+Indicator: identificatio of certificate Generation
+ECDSA Signature
+Approved n
+creation
+information
+Generation
+
+SSP Access
+Administrat
+or
+
+Administrat
+or
+Administrat
+or
+Administrat
+or
+- Password:
+W
+Resource
+Admin
+- Password:
+W
+Operator
+- Password:
+W
+Administrat
+or
+- Password:
+W
+Administrat
+or
+Administrat
+or
+- TLS RSA
+public key:
+W,E
+- TLS RSA
+private key:
+W,E
+- TLS
+ECDSA
+public key:
+W,E
+- TLS
+ECDSA
+private key:
+W,E
+Administrat
+or
+- TLS RSA
+public key:
+G
+- TLS RSA
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+23 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Delete TLS
+Certificate /
+Key
+
+Self-signed
+certificate /
+key deletion
+
+List
+Certificate
+
+Display / log
+None
+expiration data
+of installed
+certificates
+List private
+None
+keys
+
+List private
+keys
+
+View System Display
+Audit Log
+logs/files of
+configuration
+changes
+Export
+Export
+Analytics
+analytics logs
+Logs System system
+Create
+Create tenant
+Tenant
+deployment
+
+Tenant SSH
+establish
+connection
+
+None
+
+Outputs
+
+Security Functions SSP Access
+
+Key
+Confirmation None
+identificatio of key
+n
+deletion
+information
+
+List of
+certificates
+to display
+
+Certificate
+expiration
+information
+
+List of
+None
+private keys
+
+None
+
+List of
+private
+keys to
+display
+None
+
+None
+
+None
+
+None
+
+Connecting to None
+tenant-console
+via SSH
+
+None
+
+Display of
+None
+system audit
+logs
+
+Exported
+None
+system audit
+logs
+password / Confirmation None
+tenant
+of the
+console role tenantconsole role
+
+F5 rSeries Confirmation None
+platform
+of Access to
+manageme the tenantnt address / console
+remotely
+tenantover SSH
+console /
+password
+
+private key:
+G
+- TLS
+ECDSA
+public key:
+G
+- TLS
+ECDSA
+private key:
+G
+Administrat
+or
+- TLS RSA
+public key:
+None
+- TLS RSA
+private key:
+None
+- TLS
+ECDSA
+public key:
+None
+- TLS
+ECDSA
+private key:
+None
+Administrat
+or
+Resource
+Admin
+Administrat
+or
+Resource
+Admin
+Administrat
+or
+Resource
+Admin
+Administrat
+or
+Administrat
+or
+- Password:
+W,E
+Resource
+Admin
+- Password:
+W,E
+Tenantconsole
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+24 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+Tenant SSH
+close
+connection
+
+Closing the
+tenant-console
+SSH session
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+None
+None
+
+Configure
+SSH access
+options
+
+Enable /
+None
+Disable SSH
+access,
+configure IP
+address allow
+list
+Configure
+Update ssh/
+None
+SSH user
+authorized_ke
+configuration ys file for user
+authentication
+
+Reboot
+System
+
+Restart the
+cryptographic
+module
+
+Module
+reboots
+
+Outputs
+
+Security Functions SSP Access
+
+Confirmation None
+of tenantconsole SSH
+session
+closure
+SSH access Confirmation None
+/ IP address of
+list
+configuratio
+n of SSH
+access
+options
+SSH ECDSA Confirmation None
+key pair
+of
+(public)
+configuratio
+n of SSH
+user
+configuratio
+n
+
+None
+
+Confirmation None
+of system
+reboot
+
+Tenantconsole
+
+Administrat
+or
+Resource
+Admin
+Administrat
+or
+- SSH
+ECDSA
+private key:
+W
+- SSH
+ECDSA
+public key :
+W
+Administrat
+or
+- TLS EC
+DiffieHellman
+public key:
+Z
+- TLS EC
+DiffieHellman
+private key:
+Z
+- TLS preprimary
+secret : Z
+- TLS
+primary
+secret: Z
+- TLS
+derived
+session key
+:Z
+- SSH EC
+DiffieHellman
+public key:
+Z
+- SSH EC
+DiffieHellman
+private key:
+Z
+- SSH
+shared
+secret: Z
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+25 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+Secure Erase Full system
+zeroization
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+
+Module
+Selection
+end of life option
+
+Confirmation None
+of full
+system
+zeroization
+
+- SSH
+derived
+session key
+:Z
+- Entropy
+input string
+:Z
+- DRBG
+seed : Z
+- DRBG
+internal
+state (V and
+key values):
+Z
+Intermediat
+e key
+generation
+value: Z
+Administrat
+or
+- TLS RSA
+public key:
+Z
+- TLS RSA
+private key:
+Z
+- TLS
+ECDSA
+public key:
+Z
+- TLS
+ECDSA
+private key:
+Z
+- TLS EC
+DiffieHellman
+public key:
+Z
+- TLS EC
+DiffieHellman
+private key:
+Z
+- TLS preprimary
+secret : Z
+- TLS
+primary
+secret: Z
+- TLS
+derived
+session key
+:Z
+- SSH
+ECDSA
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+26 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+Establish SSH SSH key
+session
+exchange
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+
+SSH
+Password; EC public
+ECDSA Signature
+connectio SSH ECDSA key,
+Generation
+n
+public key Confirmation ECDSA Signature
+successfu or SSH
+Verification
+of SSH
+l
+ECDSA Key
+ECDSA
+session
+private key establishme Generation
+ECDSA Key
+nt
+Verification
+SSH Handshake
+
+public key :
+Z
+- SSH
+ECDSA
+private key:
+Z
+- SSH EC
+DiffieHellman
+public key:
+Z
+- SSH EC
+DiffieHellman
+private key:
+Z
+- SSH
+shared
+secret: Z
+- SSH
+derived
+session key
+:Z
+- Password:
+Z
+Intermediat
+e key
+generation
+value: Z
+- Entropy
+input string
+:Z
+- DRBG
+seed : Z
+- DRBG
+internal
+state (V and
+key values):
+Z
+Administrat
+or
+- SSH EC
+DiffieHellman
+public key:
+G,R,W,E
+- SSH EC
+DiffieHellman
+private key:
+G,R,W,E
+- SSH
+shared
+secret: G
+Intermediat
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+27 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+e key
+generation
+value: G,E,Z
+- SSH
+ECDSA
+public key :
+E
+- SSH
+ECDSA
+private key:
+E
+- Password:
+Resource
+Admin
+- SSH EC
+DiffieHellman
+public key:
+G,R,W,E
+- SSH EC
+DiffieHellman
+private key:
+G,R,W,E
+- SSH
+shared
+secret: G
+Intermediat
+e key
+generation
+value: G,E,Z
+- SSH
+ECDSA
+public key :
+E
+- SSH
+ECDSA
+private key:
+E
+- Password:
+W,E
+Operator
+- SSH EC
+DiffieHellman
+public key:
+G,R,W,E
+- SSH EC
+DiffieHellman
+private key:
+G,R,W,E
+- SSH
+shared
+secret: G
+-
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+28 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+
+Maintain SSH SSH data
+Session (data encryption
+encryption)
+
+SSH
+Plaintext
+connectio
+n
+successfu
+l
+
+Ciphertext
+
+AES-CBC
+AES-CTR
+AES-CBC with HMAC
+AES-CTR with HMAC
+
+Maintain SSH SSH data
+Session (data decryption
+decryption)
+
+SSH
+Ciphertext
+connectio
+n
+successfu
+l
+
+Plaintext
+
+AES-CBC
+AES-CTR
+AES-CBC with HMAC
+AES-CTR with HMAC
+
+Maintain SSH SSH data
+Session (data integrity
+integrity)
+
+SSH
+Message
+connectio
+n
+successfu
+l
+
+MAC tag
+
+HMAC
+
+Intermediat
+e key
+generation
+value: G,E,Z
+- SSH
+ECDSA
+public key :
+E
+- SSH
+ECDSA
+private key:
+E
+- Password:
+W,E
+Administrat
+or
+- SSH
+derived
+session key
+:E
+Resource
+Admin
+- SSH
+derived
+session key
+:E
+Operator
+- SSH
+derived
+session key
+:E
+Administrat
+or
+- SSH
+derived
+session key
+:E
+Resource
+Admin
+- SSH
+derived
+session key
+:E
+Operator
+- SSH
+derived
+session key
+:E
+Administrat
+or
+- SSH
+derived
+session key
+:E
+Resource
+Admin
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+29 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Close SSH
+Session
+
+Description
+
+Close SSH
+session
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+
+SSH
+None
+connectio
+n closed
+
+Confirmation None
+of SSH
+session
+closure
+
+- SSH
+derived
+session key
+:E
+Operator
+- SSH
+derived
+session key
+:E
+Administrat
+or
+- SSH EC
+DiffieHellman
+public key:
+Z
+- SSH EC
+DiffieHellman
+private key:
+Z
+- SSH
+shared
+secret: Z
+- SSH
+derived
+session key
+:Z
+Resource
+Admin
+- SSH EC
+DiffieHellman
+public key:
+Z
+- SSH EC
+DiffieHellman
+private key:
+Z
+- SSH
+shared
+secret: Z
+- SSH
+derived
+session key
+:Z
+Operator
+- SSH EC
+DiffieHellman
+public key:
+Z
+- SSH EC
+DiffieHellman
+private key:
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+30 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Security Functions SSP Access
+
+Establish TLS Key exchange Service
+Ciphersuite TLS EC
+RSA Signature
+Session (key in TLS
+Indicator: s
+DiffieGeneration
+exchange)
+Approved
+Hellman
+RSA Signature
+public key, Verification
+Confirmation ECDSA Signature
+Generation
+of
+establishme ECDSA Signature
+Verification
+nt of TLS
+TLS Handshake
+session
+
+Z
+- SSH
+shared
+secret: Z
+- SSH
+derived
+session key
+:Z
+Administrat
+or
+- TLS EC
+DiffieHellman
+public key:
+E
+- TLS EC
+DiffieHellman
+private key:
+E
+- TLS preprimary
+secret : G,E
+- TLS
+primary
+secret: G,E
+- TLS
+derived
+session key
+:G
+- TLS RSA
+public key:
+E
+- TLS RSA
+private key:
+E
+- TLS
+ECDSA
+public key:
+E
+- TLS
+ECDSA
+private key:
+E
+Resource
+Admin
+- TLS EC
+DiffieHellman
+public key:
+E
+- TLS EC
+DiffieHellman
+private key:
+E
+- TLS pre-
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+31 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+Maintain TLS TLS data
+Session
+encryption
+(authenticate
+d data
+encryption)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+Service
+Ciphersuite Ciphertext
+Indicator: s, plaintext
+Approved
+
+Security Functions SSP Access
+primary
+secret : G,E
+- TLS
+primary
+secret: G,E
+- TLS
+derived
+session key
+:G
+- TLS RSA
+public key:
+E
+- TLS RSA
+private key:
+E
+Operator
+- TLS preprimary
+secret : G,E
+- TLS
+primary
+secret: G,E
+- TLS
+derived
+session key
+:G
+- TLS
+ECDSA
+public key:
+E
+- TLS
+ECDSA
+private key:
+E
+- TLS RSA
+public key:
+E
+- TLS RSA
+private key:
+E
+AES-GCM
+Administrat
+(Authenticated
+or
+Encryption/Decryptio - TLS
+n)
+derived
+AES-CBC with HMAC session key
+HMAC
+:E
+Resource
+Admin
+- TLS
+derived
+session key
+:E
+Operator
+- TLS
+derived
+session key
+:E
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+32 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+Maintain TLS TLS data
+Session
+decryption
+(authenticate
+d data
+decryption)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+Outputs
+r
+Service
+Ciphersuite Plaintext
+Indicator: s,
+Approved ciphertext
+
+Security Functions SSP Access
+
+AES-GCM
+Administrat
+(Authenticated
+or
+Encryption/Decryptio - TLS
+n)
+derived
+AES-CBC with HMAC session key
+:E
+Resource
+Admin
+- TLS
+derived
+session key
+:E
+Operator
+- TLS
+derived
+session key
+:E
+Maintain TLS TLS data
+Service
+Ciphersuite MAC tag
+HMAC
+Administrat
+Session (data authentication Indicator: s, message
+or
+- TLS
+authenticatio
+Approved
+derived
+n)
+session key
+:E
+Resource
+Admin
+- TLS
+derived
+session key
+:E
+Operator
+- TLS
+derived
+session key
+:E
+Close TLS
+Close TLS
+TLS
+None
+Confirmation None
+Administrat
+session
+session
+connectio
+of TLS
+or
+n closed
+session
+- TLS EC
+closure
+DiffieHellman
+public key:
+Z
+- TLS EC
+DiffieHellman
+private key:
+Z
+- TLS preprimary
+secret : Z
+- TLS
+primary
+secret: Z
+- TLS
+derived
+session key
+:Z
+Resource
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+33 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+None
+
+None
+
+Version
+None
+information,
+and module
+name
+
+Show license Return license None
+indication
+
+None
+
+FIPS license None
+information
+
+Show status
+
+None
+
+Status of the None
+specific
+service
+passed in
+
+Show version Return the
+module name
+and version
+
+Return the
+None
+module status
+
+Security Functions SSP Access
+Admin
+- TLS EC
+DiffieHellman
+public key:
+Z
+- TLS EC
+DiffieHellman
+private key:
+Z
+- TLS preprimary
+secret : Z
+- TLS
+primary
+secret: Z
+- TLS
+derived
+session key
+:Z
+Operator
+- TLS EC
+DiffieHellman
+public key:
+Z
+- TLS EC
+DiffieHellman
+private key:
+Z
+- TLS preprimary
+secret : Z
+- TLS
+primary
+secret: Z
+- TLS
+derived
+session key
+:Z
+Administrat
+or
+Resource
+Admin
+Operator
+Administrat
+or
+Resource
+Admin
+Operator
+Administrat
+or
+Resource
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+34 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Description
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Indicato Inputs
+r
+
+Outputs
+
+AES-CBC
+Administrat
+AES-CTR
+or
+AES-ECB
+Resource
+AES-GCM
+Admin
+(Authenticated
+Operator
+Encryption/Decryptio
+n)
+AES-GMAC
+AES-GCM (Key
+Wrapping/Unwrappin
+g)
+AES-CBC with HMAC
+Counter DRBG
+RSA Signature
+Generation
+RSA Signature
+Verification
+RSA Key Generation
+ECDSA Signature
+Generation
+ECDSA Signature
+Verification
+ECDSA Key
+Generation
+ECDSA Key
+Verification
+SHA
+HMAC
+TLS Handshake
+SSH Handshake
+AES-CTR with HMAC
+Lists tenant None
+Administrat
+information
+or
+Resource
+Admin
+Operator
+
+Self-test
+
+Execute
+integrity test;
+Execute the
+CASTs
+
+None
+
+None
+
+Show tenant
+
+Lists tenant
+information
+
+None
+
+None
+
+Security Functions SSP Access
+
+the show
+status
+command
+Pass/ fail
+results of
+self-tests
+
+Admin
+Operator
+
+Table 13: Approved Services
+
+The environment variable SECURITY_FIPS140_CIPHER_STRICT is exported with the cipher
+restriction status. If the cipher_restricted status is enabled, the status output from the
+service indicator is returned in the /var/log/audit.log file. Using an approved service will
+provide an indicator which shows which approved algorithms were used. If the
+cipher_restricted status is disabled, there is no service indicator output.
+For the SSH services, the service indicator is implicit: when the SSH connection is
+established the service with the selected cipher is approved.
+The following variables are used in the Access rights to keys or SSPs column:
+•
+•
+•
+
+G = Generate: The module generates or derives the SSP.
+R = Read: The SSP is read from the module (e.g. the SSP is output).
+W = Write: The SSP is updated, imported, or written to the module.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+35 of 58
+
+F5OS-A Cryptographic Module
+
+•
+•
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+E = Execute: The module uses the SSP in performing a cryptographic operation.
+Z = Zeroise: The module zeroises the SSP.
+
+4.4 Non-Approved Services
+Name
+Establish TLS session
+(signature generation and
+verification)
+
+Description
+Signature
+generation and
+verification
+
+Algorithms
+Role
+DSA
+User/CO
+EdDSA Signature Generation and
+Verification using Ed25519
+RSA PKCS#1 v1.5 Signature Generation
+and Verification using 2048, 3072 or 4096bits modulus with SHA-1, SHA2-224, SHA2512
+RSA PKCS #1 v1.5 Signature Generation
+and Verification with modulus other than
+2048, 3072 or 4096 bits, for all SHA sizes
+RSA PSS Signature Generation and
+Verification using 2048, 3072 or 4096-bits
+modulus
+ECDSA Signature Generation and
+Verification using curves other than P-256
+and P-384, all SHA sizes
+ECDSA Signature Generation using curves
+P-256 and P-384 with SHA-1, SHA2-224,
+SHA2-512, SHA3
+ECDSA Signature Verification using curves
+P-256 and P-384 with SHA2-224, SHA2512, SHA3
+Establish TLS session (key Key exchange
+RSA Asymmetric Encryption and Decryption User/CO
+exchange)
+Diffie-Hellman using all Diffie-Hellman
+Groups
+EC Diffie-Hellman using curves other than
+P-256 and P-384
+EC Diffie-Hellman using curves P-256 and
+P-384 Static Unified and OnePassDh
+schemes
+TLS KDF using MD5, SHA-1, SHA2-224,
+SHA2-512, SHA3
+Maintain TLS session (data Data encryption
+AES-CCM
+User/CO
+encryption)
+AES-CFB
+AES-OFB
+AES-KW
+DES
+RC4
+Triple-DES
+SM2
+SM4
+Maintain TLS session (data Data authentication HMAC-SHA2-224
+User/CO
+authentication)
+HMAC-SHA2-512
+AES-CMAC
+Triple-DES
+Create TLS key
+Key generation
+RSA Key Generation with modulus sizes
+User/CO
+other than 2048, and 4096-bits
+ECDSA Key Generation and Verification with
+curves other than P-256 and P-384
+Safe Primes Key Generation and Verification
+for Diffie-Hellman
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+36 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+Message digest
+
+Description
+Message digest
+
+Key derivation
+
+Key derivation
+
+Algorithms
+SHA2-224
+SHA2-512
+SM3
+MD5
+SNMP KDF
+IKEv1 KDF
+IKEv2 KDF
+
+Role
+User/CO
+
+User/CO
+
+Table 14: Non-Approved Services
+
+4.5 External Software/Firmware Loaded
+Not applicable.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+37 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The integrity of the module is verified using the approved integrity technique HMAC-SHA384, as listed in the section 10.1, by comparing the HMAC-SHA-384 checksum values of the
+installed binaries calculated at run time with the stored values computed at build time. If
+the values do not match, the module enters the Error state.
+
+5.2 Initiate on Demand
+The on demand pre-operational self-tests, including the integrity test on demand, are
+performed by rebooting the module.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+38 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Non-Modifiable
+How Requirements are Satisfied:
+Once the module is operational, it does not allow the loading of any additional firmware.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+39 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+Mechanism
+
+Inspection Inspection Guidance
+Frequency
+N/A
+N/A
+
+Production
+grade enclosure
+(SL1)
+Opaque
+N/A
+enclosure (SL2)
+Tamper Evident Once per
+Seals (SL2)
+month
+
+N/A
+The CO checks the quality of the tamper evident labels for any sign of
+removal, replacement, tearing. If the tamper evident labels require
+replacement, a kit providing 25 tamper labels is available for purchase
+(P/N: F5-ADD-BIG-FIPS140). The Crypto Officer shall be responsible
+for the storage of the label kits.
+Table 15: Mechanisms and Actions Required
+
+The module tested on the platform listed in the Tested Operational Environments Software, Firmware, Hybrid table is enclosed in a hard-metallic production grade enclosure
+that provides opacity and prevents visual inspection of internal components. Each test
+platform is fitted with tamper evident labels to provide physical evidence of attempts to gain
+access inside the enclosure. The tamper evident labels shall be installed for the module to
+operate in approved mode of operation.
+
+7.2 User Placed Tamper Seals
+Number: 5
+Placement: Shown in Figure 3
+Surface Preparation: The following steps should be taken when installing or replacing the
+tamper evident labels on the test platform on which the module runs. The instructions are
+also included in F5 Platforms: FIPS Kit Installation provided with the hardware platform.
+•
+•
+•
+
+Use the provided alcohol wipes to clean the chassis cover and components of dirt,
+grease, or oil before you apply the tamper evidence seals.
+After applying the seal, run your finger over the seal multiple times using extra high
+pressure.
+The seals completely cure within 48 hours.
+
+Operator Responsible for Securing Unused Seals: Crypto Officer
+Part Numbers: F5-ADD-BIG-FIPS140
+The pictures below show the location of all tamper-evident labels for the platform.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+40 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Figure 3 - Tamper labels on r12900
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+41 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+8 Non-Invasive Security
+Per IG 12.A: Until requirements of SP 800-140F are defined, non-invasive mechanisms fall
+under ISO / IEC 19790:2012 Section 7.12 Mitigation of other attacks.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+42 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+Storage Description
+Area
+Name
+SSD
+The static SSPs remain on the system across power cycle. SSPs are only
+accessible to the authenticated operator, to which the SSPs are associated.
+RAM
+The memory occupied by SSPs is allocated by regular memory allocation
+operating system calls.
+
+Persistence
+Type
+Static
+Dynamic
+
+Table 16: Storage Areas
+
+SSPs are only accessible to the authenticated operator, to which the SSPs are associated.
+
+9.2 SSP Input-Output Methods
+Name
+
+From
+
+To
+
+TLS/SSH
+CM Software
+GPC EXT using a
+Protocol Output
+network port
+Service Input
+CM Software via CM Software
+EXT Path
+
+Format Distribution Entry
+SFI or
+Type
+Type
+Type
+Algorithm
+Plaintext Automated Electronic TLS
+Handshake
+Plaintext Automated Electronic
+
+Table 17: SSP Input-Output Methods
+
+During the TLS handshake, the keys that are entered or output to the module over the
+network includes RSA/ECDSA public keys. For TLS with EC Diffie-Hellman key exchange, the
+TLS pre-primary secret is established during key agreement and is not output from the
+module. Once the TLS session is established, any key or data transfer performed thereafter
+is protected by authenticated encryption mode using AES-GCM or by AES encryption and
+HMAC authentication through a mutually agreed AES and HMAC session keys derived by
+applying TLS v1.2 KDF RFC7627 (CVL) [SP800-135].
+For SSH with EC Diffie-Hellman key exchange, the SSH shared secret is established during
+key agreement and is not output from the module. SSH ECDSA public keys can be imported
+into the module by the CO using the "Configure SSH user configuration" service. Once the
+SSH session is established, any key or data transfer performed thereafter is protected by
+AES encryption and HMAC authentication through a mutually agreed AES and HMAC session
+keys derived by applying KDF SSH (CVL) [SP800-135].
+There are no encrypted SSPs that are directly entered.
+
+9.3 SSP Zeroization Methods
+Zeroization
+Method
+Secure Erase
+
+Description
+
+Rationale
+
+Single pass
+zeroization erasing
+the entire module
+
+All SSPs present in the module The Crypto Officer calling the
+are erased including the one
+Secure Erase service which can
+in the non-volatile memory
+only be triggered during reboot
+of the test platform
+Volatile memory used by the The Crypto Officer calling Reboot
+module is overwritten within
+System service
+nanoseconds when power is
+removed
+
+Reboot System Clear the SSPs
+present in RAM
+memory
+
+Operator Initiation
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+43 of 58
+
+F5OS-A Cryptographic Module
+
+Zeroization
+Method
+Closing
+TLS/SSH
+Connection
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Rationale
+
+Operator Initiation
+
+Zeroization of
+temporary values
+
+SSP temporary values
+generated during key
+generation services are
+zeroized by the module
+
+Closing TLS/SSH Connection
+
+Table 18: SSP Zeroization Methods
+
+The zeroization methods listed in the SSP Zeroization Methods table, overwrite the memory
+occupied by keys with “zeros” or pre-defined values.
+
+9.4 SSPs
+Name
+TLS RSA
+public key
+
+Description
+
+Size - Strength Type Generated Established Used By
+Category
+By
+By
+2048, 3072,
+Asymmetric - RSA Key
+RSA
+4096 bits - 112- PSP
+Generation
+Signature
+150 bits
+Verification
+
+RSA public key
+used for Digital
+signature
+verification in
+TLS protocol
+TLS RSA
+RSA private key 2048, 3072,
+Asymmetric - RSA Key
+private key
+pair used for
+4096 bits - 112- CSP
+Generation
+digital signature 150 bits
+generation in TLS
+protocol
+TLS ECDSA
+ECDSA public
+P-256, P-384 - Asymmetric - ECDSA Key
+public key
+key used for
+128 and 192
+PSP
+Generation
+digital signature bits
+verification in
+TLS protocol
+TLS ECDSA
+ECDSA private
+P-256, P-384 - Asymmetric - ECDSA Key
+private key
+key used for
+128 and 192
+CSP
+Generation
+digital signature bits
+generation in TLS
+protocol
+TLS EC Diffie- ECDH public key P-256, P-384 - Asymmetric - ECDSA Key
+Hellman
+used in TLS
+128 and 192
+PSP
+Generation
+public key
+protocol key
+bits
+exchange
+TLS EC Diffie- ECDH private key P-256, P-384 - Asymmetric - ECDSA Key
+Hellman
+used in TLS
+128 and 192
+CSP
+Generation
+private key
+protocol key
+bits
+exchange
+TLS preTLS pre-primary P-256, P-384 - Asymmetric TLS
+primary
+secret used for
+128 and 192
+CSP
+Handshake
+secret
+deriving the TLS bits
+primary secret
+TLS primary TLS primary
+256 bits - 256
+Pre-primary
+TLS
+secret
+secret derived
+bits
+secret - CSP
+Handshake
+from TLS preprimary secret
+TLS derived TLS derived
+AES: 128 and
+Symmetric - TLS
+session key
+session key
+256 bits; HMAC: CSP
+Handshake
+derived from TLS 112-256 bits primary secret
+112-256 its
+
+RSA
+Signature
+Generation
+ECDSA
+Signature
+Verification
+ECDSA
+Signature
+Generation
+TLS
+Handshake
+TLS
+Handshake
+TLS
+Handshake
+TLS
+Handshake
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+44 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Size - Strength Type Generated Established Used By
+Category
+By
+By
+SSH ECDSA ECDSA public
+P-256, P-384 - Asymmetric ECDSA
+public key
+key used for SSH 128 and 192
+PSP
+Signature
+bits
+Verification
+key-based
+authentication
+SSH ECDSA ECDSA private
+P-256, P-384 - Asymmetric ECDSA
+private key
+key used for SSH 128 and 192
+CSP
+Signature
+bits
+Generation
+key-based
+authentication
+SSH EC
+EC DiffieP-256, P-384 - Asymmetric - ECDSA Key
+SSH
+DiffieHellman public
+128 and 192
+PSP
+Generation
+Handshake
+Hellman
+key used for SSH bits
+public key
+handshake
+SSH EC
+EC DiffieP-256, P-384 - Asymmetric - ECDSA Key
+SSH
+DiffieHellman private 128 and 192
+CSP
+Generation
+Handshake
+Hellman
+key used for SSH bits
+private key
+handshake
+SSH shared
+SSH shared
+P-256, P-384 - Shared
+SSH
+SSH
+secret
+secret
+128 and 192
+secret - CSP
+Handshake Handshake
+established
+bits
+during SSH
+shared secret
+computation
+SSH derived SSH derived
+AES: 128 and
+Symmetric - SSH
+session key
+session key
+256 bits; HMAC: CSP
+Handshake
+derived from
+112-256 bits SSH shared
+112-256 bits
+secret
+Password
+Password input
+8 characters Password by the User or
+1/676,000,000 CSP
+CO during
+creation of a new
+user or updating
+an existing
+password
+Entropy input Entropy obtained 256 bits - 256 Entropy Counter
+string
+from the nonbits
+CSP
+DRBG
+physical entropy
+source
+DRBG seed
+DRBG seed
+256 bits - 256
+Seed - CSP Counter
+Counter
+derived from the bits
+DRBG
+DRBG
+entropy input
+string
+DRBG
+DRBG internal
+256 bits - 256
+Internal
+Counter
+Counter
+internal state state derived
+bits
+state - CSP DRBG
+DRBG
+(V and key
+from the DRBG
+values)
+seed
+Intermediate Temporary value 256-4096 bits - Intermediate RSA Key
+RSA Key
+key
+generated during 112-256 bits
+value - CSP Generation
+Generation
+generation
+ECDSA Key
+ECDSA Key
+key pair
+value
+Generation
+Generation
+generation
+TLS
+services
+Handshake
+SSH
+Handshake
+Table 19: SSP Table 1
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+45 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+TLS RSA public
+key
+
+Input Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+SSD
+:Plaintext
+
+Storage
+Zeroization
+Duration
+From service
+Secure Erase
+invoked to service
+completed or
+module reboot
+
+TLS RSA private
+key
+
+SSD
+:Plaintext
+
+From service
+Secure Erase
+invoked to service
+completed or
+module reboot
+
+TLS ECDSA
+public key
+
+SSD
+:Plaintext
+
+From service
+Secure Erase
+invoked to service
+completed or
+module reboot
+
+TLS ECDSA
+private key
+
+SSD
+:Plaintext
+
+From service
+Secure Erase
+invoked to service
+completed or
+module reboot
+
+TLS EC DiffieHellman public
+key
+
+TLS/SSH
+Protocol
+Output
+
+TLS EC DiffieHellman private
+key
+
+TLS pre-primary
+secret
+
+TLS primary
+secret
+
+TLS derived
+session key
+
+SSH ECDSA
+public key
+
+Service
+Input
+
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+completed or
+System
+module reboot
+Closing
+TLS/SSH
+Connection
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+SSD
+From service
+Secure Erase
+:Plaintext
+invoked to service
+completed or
+module reboot
+
+Related SSPs
+TLS RSA private
+key:Paired With
+Intermediate key
+generation
+value:Derived From
+TLS RSA public
+key:Paired With
+Intermediate key
+generation
+value:Derived From
+TLS RSA private
+key:Paired With
+Intermediate key
+generation
+value:Derived From
+TLS ECDSA public
+key:Paired With
+Intermediate key
+generation
+value:Derived From
+TLS EC Diffie-Hellman
+private key:Paired
+With
+Intermediate key
+generation
+value:Derived From
+TLS EC Diffie-Hellman
+public key:Paired With
+Intermediate key
+generation
+value:Derived From
+TLS primary
+secret:Derives
+
+TLS pre-primary secret
+:Derived From
+TLS derived session
+key :Derives
+TLS primary
+secret:Derived From
+
+SSH ECDSA private
+key:Paired With
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+46 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+SSH ECDSA
+private key
+SSH EC DiffieHellman public
+key
+
+Input Output
+
+TLS/SSH
+Protocol
+Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+Storage
+Zeroization
+Duration
+SSD
+From service
+Secure Erase
+:Plaintext
+invoked to service
+completed or
+module reboot
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+
+SSH EC DiffieHellman private
+key
+
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+
+SSH shared
+secret
+
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+completed or
+System
+module reboot
+Closing
+TLS/SSH
+Connection
+
+SSH derived
+session key
+
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+System
+completed or
+Closing
+module reboot
+TLS/SSH
+Connection
+SSD
+N/A
+Secure Erase
+:Plaintext
+RAM:Plaintext Storage duration Secure Erase
+during the usage Reboot
+of the CSP
+System
+RAM:Plaintext Storage duration Secure Erase
+during the usage Reboot
+of the CSP
+System
+
+Password
+Entropy input
+string
+DRBG seed
+
+DRBG internal
+state (V and key
+values)
+Intermediate
+key generation
+value
+
+Service
+Input
+
+RAM:Plaintext Storage duration Secure Erase
+during the usage Reboot
+of the CSP
+System
+RAM:Plaintext From service
+Secure Erase
+invoked to service Reboot
+completed or
+System
+module reboot
+
+Related SSPs
+SSH ECDSA public key
+:Paired With
+SSH EC Diffie-Hellman
+private key:Paired
+With
+SSH shared
+secret:Establishes
+Intermediate key
+generation
+value:Derived From
+SSH EC Diffie-Hellman
+public key:Paired With
+SSH shared
+secret:Establishes
+Intermediate key
+generation
+value:Derived From
+SSH EC Diffie-Hellman
+public key:Established
+By
+SSH EC Diffie-Hellman
+private
+key:Established By
+SSH derived session
+key :Derives
+SSH shared
+secret:Derived From
+
+DRBG seed :Derives
+Entropy input string
+:Derived From
+DRBG internal state (V
+and key
+values):Derives
+DRBG seed :Derived
+From
+TLS RSA public
+key:Derives
+TLS RSA private
+key:Derives
+TLS ECDSA public
+key:Derives
+TLS ECDSA private
+key:Derives
+SSH EC Diffie-Hellman
+public key:Derives
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+47 of 58
+
+F5OS-A Cryptographic Module
+
+Name
+
+Input Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+Storage
+Duration
+
+Zeroization
+
+Related SSPs
+SSH EC Diffie-Hellman
+private key:Derives
+TLS EC Diffie-Hellman
+public key:Derives
+TLS EC Diffie-Hellman
+private key:Derives
+
+Table 20: SSP Table 2
+
+9.5 Transitions
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes,
+starting January 1, 2030.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+48 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+Algorithm or
+Test
+HMAC-SHA2384 (A4985)
+
+Test
+Test Method
+Properties
+SHA2-384 Message
+authentication
+
+Test Type Indicator
+
+Details
+
+SW/FW
+Integrity
+
+HMAC-SHA2384 (A5261)
+
+SHA2-384
+
+SW/FW
+Integrity
+
+Integrity test for
+F5OS-A version
+1.7.0
+Integrity test for
+F5OS-A version
+1.7.0
+
+Message
+authentication
+
+Module is operational
+and services are
+available for use
+Module is operational
+and services are
+available for use
+
+Table 21: Pre-Operational Self-Tests
+
+The pre-operational self-test is performed automatically when the module is powered on. At
+initialization, the module performs pre-operational self-test (integrity test) and the CASTs.
+Services are not available, and the data output is inhibited during the pre-operational selftest. Upon successful completion of the pre-operational self-tests and CASTs, the module
+becomes operational and cryptographic services are available for use. If the module fails
+any of the self-tests, the module returns an error code, and transitions to the Error state.
+Both, the pre-operational tests, and conditional tests are performed without operator
+intervention, without any external controls, externally provided test vectors, output results
+and the determination of pass of fail is done by the module.
+
+10.2 Conditional Self-Tests
+Algorithm
+or Test
+AES-GCM
+(A4985)
+
+AES-GCM
+(A5261)
+
+AES-GCM
+(A4985)
+
+AES-GCM
+(A5261)
+
+AES-ECB
+(A4985)
+
+Test Properties Test
+Test Indicator
+Method
+Type
+256-bit key
+Encrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+256-bit key
+Encrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+256-bit key
+Decrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+256-bit key
+Decrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+128 bit-key
+Encrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+
+Details
+
+Conditions
+
+Encryption
+
+Module
+initialization
+
+Encryption
+
+Module
+initialization
+
+Decryption
+
+Module
+initialization
+
+Decryption
+
+Module
+initialization
+
+Encryption
+
+Module
+initialization
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+49 of 58
+
+F5OS-A Cryptographic Module
+
+Algorithm
+or Test
+AES-ECB
+(A5261)
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Properties Test
+Test Indicator
+Method
+Type
+128 bit-key
+Encrypt KAT CAST Module is
+operational
+and services
+are available
+for use
+AES-ECB
+128 bit-key
+Decrypt KAT CAST Module is
+(A4985)
+operational
+and services
+are available
+for use
+AES-ECB
+128 bit-key
+Decrypt KAT CAST Module is
+(A5261)
+operational
+and services
+are available
+for use
+RSA SigGen PKCS#1 v1.5 with Sign KAT
+CAST Module is
+(FIPS186-5) 2048 bit key and
+operational
+(A4985)
+SHA2-256
+and services
+are available
+for use
+RSA SigGen PKCS#1 v1.5 with Sign KAT
+CAST Module is
+(FIPS186-5) 2048 bit key and
+operational
+(A5261)
+SHA2-256
+and services
+are available
+for use
+RSA SigVer PKCS#1 v1.5 with Verify KAT
+CAST Module is
+(FIPS186-5) 2048 bit key and
+operational
+(A4985)
+SHA2-256
+and services
+are available
+for use
+RSA SigVer PKCS#1 v1.5 with Verify KAT
+CAST Module is
+(FIPS186-5) 2048 bit key and
+operational
+(A5261)
+SHA2-256
+and services
+are available
+for use
+ECDSA
+P-256 and SHA2- Sign KAT
+CAST Module is
+SigGen
+256
+operational
+(FIPS186-5)
+and services
+(A4985)
+are available
+for use
+ECDSA
+P-256 and SHA2- Sign KAT
+CAST Module is
+SigGen
+256
+operational
+(FIPS186-5)
+and services
+(A5261)
+are available
+for use
+ECDSA
+P-256 and SHA2- Verify KAT
+CAST Module is
+SigVer
+256
+operational
+(FIPS186-5)
+and services
+(A4985)
+are available
+for use
+ECDSA
+P-256 and SHA2- Verify KAT
+CAST Module is
+SigVer
+256
+operational
+(FIPS186-5)
+and services
+(A5261)
+are available
+for use
+
+Details
+
+Conditions
+
+Encryption
+
+Module
+initialization
+
+Decryption
+
+Module
+initialization
+
+Decryption
+
+Module
+initialization
+
+Signature
+generation
+
+Module
+initialization
+
+Signature
+generation
+
+Module
+initialization
+
+Signature
+verification
+
+Module
+initialization
+
+Signature
+verification
+
+Module
+initialization
+
+Signature
+generation
+
+Module
+initialization
+
+Signature
+generation
+
+Module
+initialization
+
+Signature
+verification
+
+Module
+initialization
+
+Signature
+verification
+
+Module
+initialization
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+50 of 58
+
+F5OS-A Cryptographic Module
+
+Algorithm Test Properties
+or Test
+KAS-ECCP-256
+SSC Sp80056Ar3
+(A4985)
+KAS-ECCP-256
+SSC Sp80056Ar3
+(A5261)
+HMAC-SHA- SHA-1
+1 (A4985)
+
+HMAC-SHA- SHA-1
+1 (A5261)
+
+HMACSHA2-256
+(A4985)
+
+SHA2-256
+
+HMACSHA2-256
+(A5261)
+
+SHA2-256
+
+HMACSHA2-384
+(A4985)
+
+SHA2-384
+
+HMACSHA2-384
+(A5261)
+
+SHA2-384
+
+KDF SSH
+(A4985)
+
+SHA2-256
+
+KDF SSH
+(A5261)
+
+SHA2-256
+
+KDF TLS
+(A4985)
+
+SHA2-256
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test
+Test Indicator
+Method
+Type
+Shared
+CAST Module is
+secret
+operational
+computation
+and services
+are available
+for use
+Shared
+CAST Module is
+secret
+operational
+computation
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+HMAC KAT
+CAST Module is
+operational
+and services
+are available
+for use
+SSH KDF
+CAST Module is
+KAT
+operational
+and services
+are available
+for use
+SSH KDF
+CAST Module is
+KAT
+operational
+and services
+are available
+for use
+TLS 1.2 KDF CAST Module is
+KAT
+operational
+and services
+are available
+for use
+
+Details
+
+Conditions
+
+Shared secret
+computation
+
+Module
+initialization
+
+Shared secret
+computation
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Message
+authentication
+
+Module
+initialization
+
+Key derivation
+
+Module
+initialization
+
+Key derivation
+
+Module
+initialization
+
+Key derivation
+
+Module
+initialization
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+51 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm
+or Test
+TLS v1.2
+KDF
+RFC7627
+(A5261)
+
+Test Properties Test
+Test Indicator
+Method
+Type
+SHA2-256
+TLS 1.2 KDF CAST Module is
+KAT
+operational
+and services
+are available
+for use
+ECDSA
+SHA2-256 and
+ECDSA PCT PCT Successful
+KeyGen
+respective curve
+key pair
+(FIPS186-5)
+generation
+(A4985)
+ECDSA
+SHA2-256 and
+ECDSA PCT PCT Successful
+KeyGen
+respective curve
+key pair
+(FIPS186-5)
+generation
+(A5261)
+RSA KeyGen SHA2-256 and
+RSA PCT
+PCT Successful
+(FIPS186-5) respective keys
+key pair
+(A4985)
+generation
+
+Details
+
+Conditions
+
+Key derivation
+
+Module
+initialization
+
+RSA KeyGen SHA2-256 and
+(FIPS186-5) respective keys
+(A5261)
+
+RSA PCT
+
+PCT
+
+Successful
+key pair
+generation
+
+ECDSA
+SHA2-256 and
+KeyGen
+respective curve
+(FIPS186-5)
+(A4985)
+
+ECDH PCT
+
+PCT
+
+Successful
+key pair
+generation
+
+ECDSA
+SHA2-256 and
+KeyGen
+respective curve
+(FIPS186-5)
+(A5261)
+
+ECDH PCT
+
+PCT
+
+Successful
+key pair
+generation
+
+Counter
+DRBG
+(A4985)
+
+AES-256
+with/without
+derivation
+function; Health
+test per section
+11.3 of SP 80090ARev1
+AES-256
+with/without
+derivation
+function; Health
+test per section
+11.3 of SP 80090ARev1
+Health Test
+
+CTR_DRBG
+KAT
+
+CAST Module is
+operational
+and services
+are available
+for use
+
+Signature
+Key pair
+Generation &
+generation
+Signature
+Verification
+Signature
+Key pair
+Generation &
+generation
+Signature
+Verification
+Signature
+Key pair
+Generation &
+generation
+Signature
+Verification
+Signature
+Key pair
+Generation &
+generation
+Signature
+Verification
+Signature
+Key pair
+generation &
+generation
+signature
+verification PCT that
+covers key pair
+generation for EC
+Diffie-Hellman
+Signature
+Key pair
+generation &
+generation
+signature
+verification PCT that
+covers key pair
+generation for EC
+Diffie-Hellman
+KAT CTR_DRBG with Module
+AES with 256-bit
+initialization
+key with and
+without prediction
+resistnace
+
+CTR_DRBG
+KAT
+
+CAST Module is
+operational
+and services
+are available
+for use
+
+KAT CTR_DRBG with Module
+AES with 256-bit
+initialization
+key with and
+without prediction
+resistnace
+
+RCT
+
+Health test at start- Module
+up: performed on
+initialization
+1,024 consecutive
+samples
+
+Health Test
+
+RCT
+
+CAST Module is
+operational
+and services
+are available
+for use
+CAST Module is
+operational
+
+Counter
+DRBG
+(A5261)
+
+Entropy
+Source
+
+Entropy
+Source
+
+Health test during
+Continuously
+runtime: performed
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+52 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm
+or Test
+
+Test Properties Test
+Method
+
+Entropy
+Source
+
+Health Test
+
+APT
+
+Entropy
+Source
+
+Health Test
+
+APT
+
+Test Indicator
+Type
+and services
+are available
+for use
+CAST Module is
+operational
+and services
+are available
+for use
+CAST Module is
+operational
+and services
+are available
+for use
+
+Details
+
+Conditions
+
+on 1,024
+consecutive samples
+Health test during
+Module
+start-up: performed initialization
+on 512 consecutive
+samples
+Health test during
+Continuously
+runtime: performed
+on 512 consecutive
+samples
+
+Table 22: Conditional Self-Tests
+
+During the conditional self-tests, services are not available and the data output interface is
+inhibited.
+
+10.3 Periodic Self-Test Information
+Algorithm or Test Test Method
+HMAC-SHA2-384
+Message
+(A4985)
+authentication
+HMAC-SHA2-384
+Message
+(A5261)
+authentication
+
+Test Type
+SW/FW Integrity
+
+Period
+On Demand
+
+Periodic Method
+Manually
+
+SW/FW Integrity
+
+On Demand
+
+Manually
+
+Table 23: Pre-Operational Periodic Information
+Algorithm or Test Test Method
+AES-GCM (A4985) Encrypt KAT
+AES-GCM (A5261) Encrypt KAT
+AES-GCM (A4985) Decrypt KAT
+AES-GCM (A5261) Decrypt KAT
+AES-ECB (A4985) Encrypt KAT
+AES-ECB (A5261) Encrypt KAT
+AES-ECB (A4985) Decrypt KAT
+AES-ECB (A5261) Decrypt KAT
+RSA SigGen
+Sign KAT
+(FIPS186-5)
+(A4985)
+RSA SigGen
+Sign KAT
+(FIPS186-5)
+(A5261)
+RSA SigVer
+Verify KAT
+(FIPS186-5)
+(A4985)
+RSA SigVer
+Verify KAT
+(FIPS186-5)
+(A5261)
+ECDSA SigGen
+Sign KAT
+(FIPS186-5)
+(A4985)
+
+Test Type
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+Period
+On Demand
+On Demand
+On Demand
+On Demand
+On Demand
+On Demand
+On Demand
+On Demand
+On Demand
+
+Periodic Method
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+53 of 58
+
+F5OS-A Cryptographic Module
+
+Algorithm or Test Test Method
+ECDSA SigGen
+Sign KAT
+(FIPS186-5)
+(A5261)
+ECDSA SigVer
+Verify KAT
+(FIPS186-5)
+(A4985)
+ECDSA SigVer
+Verify KAT
+(FIPS186-5)
+(A5261)
+KAS-ECC-SSC
+Shared secret
+Sp800-56Ar3
+computation
+(A4985)
+KAS-ECC-SSC
+Shared secret
+Sp800-56Ar3
+computation
+(A5261)
+HMAC-SHA-1
+HMAC KAT
+(A4985)
+HMAC-SHA-1
+HMAC KAT
+(A5261)
+HMAC-SHA2-256
+HMAC KAT
+(A4985)
+HMAC-SHA2-256
+HMAC KAT
+(A5261)
+HMAC-SHA2-384
+HMAC KAT
+(A4985)
+HMAC-SHA2-384
+HMAC KAT
+(A5261)
+KDF SSH (A4985) SSH KDF KAT
+KDF SSH (A5261) SSH KDF KAT
+KDF TLS (A4985)
+TLS 1.2 KDF KAT
+TLS v1.2 KDF
+TLS 1.2 KDF KAT
+RFC7627 (A5261)
+ECDSA KeyGen
+ECDSA PCT
+(FIPS186-5)
+(A4985)
+ECDSA KeyGen
+ECDSA PCT
+(FIPS186-5)
+(A5261)
+RSA KeyGen
+RSA PCT
+(FIPS186-5)
+(A4985)
+RSA KeyGen
+RSA PCT
+(FIPS186-5)
+(A5261)
+ECDSA KeyGen
+ECDH PCT
+(FIPS186-5)
+(A4985)
+ECDSA KeyGen
+ECDH PCT
+(FIPS186-5)
+(A5261)
+Counter DRBG
+CTR_DRBG KAT
+(A4985)
+Counter DRBG
+CTR_DRBG KAT
+(A5261)
+Entropy Source
+RCT
+Entropy Source
+RCT
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Type
+CAST
+
+Period
+On Demand
+
+Periodic Method
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+CAST
+CAST
+CAST
+
+On Demand
+On Demand
+On Demand
+On Demand
+
+Manually
+Manually
+Manually
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+PCT
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+
+On Demand
+
+Manually
+
+CAST
+CAST
+
+On Demand
+Continuously
+
+Manually
+Manually
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+54 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Algorithm or Test Test Method
+Entropy Source
+APT
+Entropy Source
+APT
+
+Test Type
+CAST
+CAST
+
+Period
+On Demand
+Continuously
+
+Periodic Method
+Manually
+Manually
+
+Table 24: Conditional Periodic Information
+
+10.4 Error States
+Name Description
+Error
+State
+
+Conditions
+
+Recovery
+Indicator
+Method
+Module is no longer HMAC-SHA2-384
+The module must Module will not load after failing
+operational. The
+KAT failure or
+reboot or be re- any of the CASTs, the integrity
+data output is
+HMAC-SHA2-384
+loaded with a
+test or APT/RCT at restart (power
+inhibited.
+integrity test failure fresh image
+on); Module will reboot after
+Failure of any of the
+failing a PCT or APT/RCT at
+CAST
+runtime
+Failure of any of the
+PCTs
+Failure of the APT,
+RCT at runtime
+Failure of the APT,
+RCT at restart
+(power on)
+Table 25: Error States
+
+All data output and cryptographic operations are inhibited when the module is in the Error
+State.
+
+10.5 Operator Initiation of Self-Tests
+The software integrity tests, and cryptographic algorithm self-tests can be invoked on
+demand by rebooting the module. During the execution of the periodic and on-demand selftests, crypto services are not available, and no data output or input is possible. The PCTs
+are executed on demand during the key generation functions invocation.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+55 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+11.1.1 Delivery and Operation
+•
+
+The hardware devices are shipped directly from the hardware
+manufacturer/authorized subcontractor via trusted carrier and tracked by that
+carrier.
+
+•
+
+The hardware is shipped in a sealed box that includes a packing slip with a list of
+components inside, and with labels outside printed with the product nomenclature,
+sales order number, and product serial number. Upon receipt of the hardware, the
+customer is required to perform the following verifications:
+o
+
+Ensure that the shipping label exactly identifies the correct customer’s name
+and address as well as the hardware model.
+
+o
+
+Ensure that the external labels match the expected delivery and the shipped
+product.
+
+o
+
+Ensure that the components in the box match those on the documentation
+shipped with the product.
+
+o
+
+Verify the hardware model with the model number given on the shipping label
+and marked on the hardware platform itself.
+
+The Crypto Officer must verify that the following specific configuration rules are followed in
+order to operate the module in the approved mode validated configuration.
+The ESV Public Use Document (PUD) reference for non-physical entropy source is as
+follows: https://csrc.nist.gov/projects/cryptographic-module-validation-program/entropyvalidations/certificate/85.
+The information regarding installing tamper evident labels is specified in section 7 of this
+document.
+11.1.2 Installing F5OS
+Follow the instructions in the "Initial Configuration" guide for the initial setup and
+configuration of the hardware module.
+•
+
+•
+•
+
+Install the FIPS validated F5OS iso onto the device. Guidance on installing or
+upgrading the ISO can be found here: https://techdocs.f5.com/en-us/f5os-a-1-00/f5-rseries-systems-installation-upgrade/title-install-upgrade-software.html#installupgrade-options).
+Run the Setup wizard "appliance-setup-wizard" using the CLI with the CO account
+and default credentials. The system will prompt you to change the password.
+License the system from the WebUI. Guidance on Licensing the F5OS system can be
+found in https://techdocs.f5.com/en-us/hardware/f5-rseries-systems-gettingstarted/gs-system-initial-config.html#run-setup-wizard) and summarized as
+followed: Before you can activate the license for the F5OS system, you must obtain a
+base registration key. The base registration key is pre-installed on new F5OS
+systems. When you power up the product and connect through the WebUI, you can
+open the SYSTEM SETTINGS > Licensing page to display the registration key. Select
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+56 of 58
+
+F5OS-A Cryptographic Module
+
+•
+•
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+"Automatic" for the license Activation Method to communicate with the F5 License
+Server. The F5 product generates a dossier which is an encrypted list of key
+characteristics used to identify the platform and activates the license.
+After rebooting the F5OS system, it will then be in the approved mode and is now
+ready for additional system configuration.
+Once the module is installed, licensed and configured, the Crypto Officer should
+confirm that the system is installed and licensed correctly.
+
+11.1.3 Version Confirmation
+The Crypto Officer should call the show version service (with command "show system
+image"), then confirm that the provided version matches the validated version shown in the
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) table.
+Any firmware loaded into the module other than version 1.7.0 is out of the scope of this
+validation and will mean that the module is not operating as a FIPS validated module.
+11.1.4 License Confirmation
+The FIPS validated module activation requires installation of the license referred as ‘FIPS
+license’. The Crypto Officer should call the show license service (with command "show
+system licensing"), then verify that the list of license flags includes "FIPS 140 License”.
+
+11.2 Administrator Guidance
+The Crypto Officer should verify that the following specific configuration rules are followed to
+operate the module in the FIPS validated configuration.
+•
+•
+•
+
+The integrity check must not be disabled. The CO can verify whether this is enabled
+by using the command "show system security integrity-check".
+Management of the module via the platform's LCD display is not allowed.
+Serial port console and USB port should be disabled after the initial power on and
+communications setup of the hardware.
+
+The Approved and non-Approved modes of operation are specified in section 2.4. The
+administrative functions are specified in the Approved Services table. All the physical ports
+and logical interfaces are specified in section 3.1.
+
+11.3 Non-Administrator Guidance
+The approved and non-approved security functions available to users are listed in section 2,
+the physical ports, and logical interfaces available to users are specified in section 3.1. The
+Approved and non-Approved modes of operation are specified in section 2.4. The algorithmspecific information is listed in section 2.7.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+57 of 58
+
+F5OS-A Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+12 Mitigation of Other Attacks
+The module does not implement security mechanisms to mitigate other attacks.
+
+© 2024 F5, Inc. / atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+
+58 of 58
+
+

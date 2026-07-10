@@ -1,0 +1,5214 @@
+Google, LLC.
+OpenSK Cryptographic Module
+FIPS 140-3 Non-Proprietary Security Policy
+
+Document Version 1.0
+October 15th, 2025
+
+Prepared by:
+
+www.lightshipsec.com
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 1 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Table of Contents
+1 General .................................................................................................................................... 5
+1.1 Overview ............................................................................................................................ 5
+1.2 Security Levels..................................................................................................................... 5
+2 Cryptographic Module Specification............................................................................................ 6
+2.1 Description ......................................................................................................................... 6
+2.2 Tested and Vendor Affirmed Module Version and Identification ............................................... 7
+2.3 Excluded Components .......................................................................................................... 8
+2.4 Modes of Operation ............................................................................................................. 8
+2.5 Algorithms .......................................................................................................................... 8
+2.6 Security Function Implementations ......................................................................................10
+2.7 Algorithm Specific Information .............................................................................................11
+2.8 RBG and Entropy ................................................................................................................11
+2.9 Key Generation ..................................................................................................................12
+2.10 Key Establishment.............................................................................................................12
+2.11 Industry Protocols .............................................................................................................12
+3 Cryptographic Module Interfaces ...............................................................................................13
+3.1 Ports and Interfaces ............................................................................................................13
+4 Roles, Services, and Authentication ...........................................................................................14
+4.1 Authentication Methods......................................................................................................14
+4.2 Roles .................................................................................................................................14
+4.3 Approved Services ..............................................................................................................14
+4.4 Non-Approved Services .......................................................................................................27
+4.5 External Software/Firmware Loaded .....................................................................................27
+5 Software/Firmware Security .....................................................................................................28
+5.1 Integrity Techniques ...........................................................................................................28
+5.2 Initiate on Demand .............................................................................................................28
+6 Operational Environment..........................................................................................................29
+6.1 Operational Environment Type and Requirements .................................................................29
+7 Physical Security ......................................................................................................................30
+7.1 Mechanisms and Actions Required .......................................................................................30
+7.2 EFP/EFT Information ...........................................................................................................30
+7.3 Hardness Testing Temperature Ranges .................................................................................30
+8 Non-Invasive Security ...............................................................................................................31
+9 Sensitive Security Parameters Management ...............................................................................32
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 2 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9.1 Storage Areas .....................................................................................................................32
+9.2 SSP Input-Output Methods ..................................................................................................32
+9.3 SSP Zeroization Methods .....................................................................................................32
+9.4 SSPs ..................................................................................................................................33
+9.5 Transitions .........................................................................................................................44
+10 Self-Tests ...............................................................................................................................45
+10.1 Pre-Operational Self-Tests .................................................................................................45
+10.2 Conditional Self-Tests ........................................................................................................45
+10.3 Periodic Self-Test Information ............................................................................................47
+10.4 Error States ......................................................................................................................48
+11 Life-Cycle Assurance ...............................................................................................................50
+11.1 Installation, Initialization, and Startup Procedures ................................................................50
+11.2 Administrator Guidance .....................................................................................................50
+11.3 Non-Administrator Guidance..............................................................................................50
+12 Mitigation of Other Attacks .....................................................................................................51
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 3 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+List of Tables
+Table 1: Security Levels ............................................................................................................. 5
+Table 2: Tested Module Identification – Hardware ..................................................................... 8
+Table 3: Modes List and Description .......................................................................................... 8
+Table 4: Approved Algorithms .................................................................................................... 9
+Table 5: Vendor-Affirmed Algorithms ......................................................................................... 9
+Table 6: Non-Approved, Allowed Algorithms .............................................................................. 9
+Table 7: Non-Approved, Allowed Algorithms with No Security Claimed ...................................... 9
+Table 8: Security Function Implementations..............................................................................11
+Table 9: Entropy Certificates .....................................................................................................11
+Table 10: Entropy Sources ........................................................................................................11
+Table 11: Ports and Interfaces ..................................................................................................13
+Table 12: Roles .........................................................................................................................14
+Table 13: Approved Services ....................................................................................................26
+Table 14: Mechanisms and Actions Required ...........................................................................30
+Table 15: EFP/EFT Information.................................................................................................30
+Table 16: Hardness Testing Temperatures ...............................................................................30
+Table 17: Storage Areas ...........................................................................................................32
+Table 18: SSP Input-Output Methods........................................................................................32
+Table 19: SSP Zeroization Methods ..........................................................................................33
+Table 20: SSP Table 1 ..............................................................................................................39
+Table 21: SSP Table 2 ..............................................................................................................44
+Table 22: Pre-Operational Self-Tests ........................................................................................45
+Table 23: Conditional Self-Tests ...............................................................................................47
+Table 24: Pre-Operational Periodic Information.........................................................................47
+Table 25: Conditional Periodic Information ................................................................................48
+Table 26: Error States ...............................................................................................................49
+
+List of Figures
+Figure 1: OpenSK Cryptographic Module (Block Diagram).................................................................. 7
+Figure 2: OpenSK Cryptographic Module (Front and Back) ................................................................. 7
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 4 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+1 General
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for the Google, LLC. OpenSK Cryptographic Module
+(running firmware version 4.0.2), hereafter referred to as, “the module”. It contains the security rules under which
+the module must operate and describes how the module meets the requirements as specified in FIPS PUB 140-3 for
+an overall Security Level 1 cryptographic module.
+
+1.2 Security Levels
+The table below describes the individual security areas of FIPS 140-3, as well as the Security Levels of those individual
+areas.
+
+Section
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+
+Security Level
+1
+1
+1
+1
+1
+1
+3
+N/A
+1
+1
+1
+1
+1
+
+Table 1: Security Levels
+The Module has an overall security level of 1.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 5 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The module is a USB 1.1/2.0 compliant Client To Authenticator Protocol (CTAP) 2.1 token, instantiated as a single
+chip hardware module, used for first or second factor authentication. It is also backwards compatible with Universal
+2nd Factor (U2F, also known as CTAP1). CTAP standardizes how request and response messages are sent over the
+USB transport to the CTAP key.
+After registration, a user can use their Security Key with an origin-specific key pair across all online services that
+implement WebAuthn. CTAP and WebAuthn are both part of FIDO2, a set of standards for online authentication.
+The Security Key performs two operations that focus on authentication (with a backwards compatible alternative):
+MakeCredential (or U2F Register) associates a key pair (or credential) with an origin, google.com here, while
+GetAssertion (or U2F Authenticate), verifies that signature with the Titan Security Key, Chip Boundary to prove
+physical possession of the hardware second factor. Then, and only then, is the User able to authenticate to Google
+services.
+In addition, CTAP 2.1 provides functionality related to this process: GetInfo lists information about the Security Key.
+ClientPin allows setting up a PIN to unlock some of the Security Key commands. Reset performs a factory reset by
+deleting all stored user data, including credentials. CredentialManagement allows listing and deleting existing
+credentials. Selection performs a user presence check, so users can indicate what device they want to use.
+LargeBlobs lets you read and write a binary string to store inside the security key.
+There are two custom commands that are not part of the CTAP specification. Both are used for upgrading the
+firmware: One that provides detailed information about the running firmware version, and the other to send the
+new, signed firmware binary.
+The chip runs a version of OpenSK that manages all access control, cryptographic algorithms and the life cycle of all
+keys. OpenSK is an app running on top of a version of TockOS, which manages all low-level resources.
+
+Module Type: Hardware
+Module Embodiment: SingleChip
+Module Characteristics:
+Cryptographic Boundary:
+The cryptographic boundary of the module is the outer perimeter of the chip, as shown in the figures below.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 6 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Figure 1: OpenSK Cryptographic Module (Block Diagram)
+
+Figure 2: OpenSK Cryptographic Module (Front and Back)
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+The module is a single-chip module as defined by FIPS 140-3. The hardware version of the module is H1B2G.
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+Model and/or Part Number
+
+Hardware Firmware
+Processors Features
+Version
+Version
+OpenSK Cryptographic Module H1B2G
+OpenSK 4.0.2 N/A
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 7 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Table 2: Tested Module Identification – Hardware
+
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+N/A for this module.
+Tested Module Identification – Hybrid Disjoint Hardware:
+N/A for this module.
+Tested Operational Environments - Software, Firmware, Hybrid:
+N/A for this module.
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+N/A for this module.
+CMVP makes no statement as to the correct operation of the module or the security strengths of the generated keys
+when so ported if the specific operational environment is not listed on the validation certificate.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary that are excluded from the FIPS 140-3 security
+requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+The table below details the Modes of Operation supported by the module.
+
+Mode
+Name
+Approved
+Mode
+
+Description
+
+Type
+
+Status Indicator
+
+Operation mode where the module
+executes approved services
+
+Approved The module always
+operates in the approved
+mode
+
+Table 3: Modes List and Description
+
+Mode Change Instructions and Status:
+The module implements only one mode of operation, the approved mode, in which the approved services are
+available. No configuration is necessary for the module to operate and remain in the approved mode.
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed on start-up, the module
+automatically transitions to the approved mode.
+
+2.5 Algorithms
+Approved Algorithms:
+The table below lists all the Approved Algorithms supported by the module.
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 8 of 51
+
+OpenSK Cryptographic Module
+
+Algorithm
+AES-CBC
+AES-ECB
+ECDSA KeyGen (FIPS186-4)
+ECDSA KeyVer (FIPS186-4)
+ECDSA SigGen (FIPS186-4)
+ECDSA SigVer (FIPS186-4)
+HMAC DRBG
+HMAC-SHA2-256
+HMAC-SHA2-256
+KAS-ECC-SSC Sp800-56Ar3
+KDA HKDF SP800-56Cr2
+SHA2-256
+SHA2-256
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+CAVP Cert
+A5101
+A5101
+A5101
+A5101
+A5101
+A5101
+A5101
+A2352
+A5101
+A5101
+A5101
+A2352
+A5101
+
+Properties
+-
+
+Reference
+SP 800-38A
+SP 800-38A
+FIPS 186-4
+FIPS 186-4
+FIPS 186-4
+FIPS 186-4
+SP 800-90A Rev. 1
+FIPS 198-1
+FIPS 198-1
+SP 800-56A Rev. 3
+SP 800-56C Rev. 2
+FIPS 180-4
+FIPS 180-4
+
+Table 4: Approved Algorithms
+
+Vendor-Affirmed Algorithms:
+The table below lists all the Vendor-Affirmed Algorithms supported by the module.
+
+Name Properties
+CKG
+CKG:Cryptographic Key
+Generation
+Publication:NIST SP 800-133r2
+Sections 4, 5, and 6
+
+Implementation
+Titan OpenSK Gnubby
+cryptographic library
+
+Reference
+FIPS 140-3 IG
+D.H
+
+Table 5: Vendor-Affirmed Algorithms
+
+Non-Approved, Allowed Algorithms:
+The table below lists all the Non-Approved, Allowed Algorithms supported by the module.
+
+Name Properties
+KDF
+KDF:Asymmetric Key Derivation
+Method
+
+Implementation
+Titan OpenSK Gnubby
+cryptographic library
+
+Reference
+N/A
+
+Table 6: Non-Approved, Allowed Algorithms
+
+Non-Approved, Allowed Algorithms with No Security Claimed:
+The table below lists all the Non-Approved, Allowed Algorithms with No Security Claimed.
+
+Name
+Caveat
+Use and Function
+LargeBlobKey FIDO extension FIPS 140-3 IG 2.4.A Encoding up to 256 bits
+Table 7: Non-Approved, Allowed Algorithms with No Security Claimed
+
+The module supports largeBlobKey FIDO extension functionality where an external party can encode an arbitrary
+string of bits on the device. No security is claimed for this encoded arbitrary data is considered the equivalent to
+plaintext.
+
+Non-Approved, Not Allowed Algorithms:
+The module does not support any Non-Approved Algorithms that are not Allowed in the Approved Mode of
+Operation.
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 9 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+N/A for this module.
+
+2.6 Security Function Implementations
+The table below lists the Security Function Implementations supported by the module.
+
+Name
+Data
+Encryption/Decryptio
+n
+
+Type
+BC-UnAuth
+
+Description
+Symmetric
+Encryption/Decryptio
+n
+
+Properties
+Publication:NIS
+T SP 800-38A
+
+Asymmetric Key
+Generation
+
+AsymKeyPair Asymmetric Key Pair
+-KeyGen
+Generation and
+AsymKeyPair Verification
+-KeyVer
+
+Publication:FIP
+S 186-4
+Publication:
+NIST SP 800133r2
+
+Digital Signature
+
+DigSigSigGen
+DigSigSigVer
+
+Digital Signature
+Generation and
+Verification
+
+Publication:FIP
+S 186-4
+
+Deterministic
+Random Bit
+Generation
+Message
+Authentication FW
+
+DRBG
+
+Deterministic
+Random Bit
+Generation
+MAC Generation
+and Verification
+
+Publication:SP
+800-90Ar1
+
+Key Agreement ECC KAS-SSC
+
+Key Agreement
+
+Publication:NIS
+T SP 80056Ar3
+
+Key Derivation
+Function
+
+Key Derivation
+Function
+
+Publication:NIS
+T SP 80056Cr2
+
+MAC
+
+KBKDF
+
+Publication:FIP
+S 198-1
+
+Algorithms
+AES-CBC:
+(A5101)
+AES-ECB:
+(A5101)
+ECDSA
+KeyGen
+(FIPS186-4):
+(A5101)
+ECDSA
+KeyVer
+(FIPS186-4):
+(A5101)
+CKG: ()
+CKG:
+Cryptographi
+c Key
+Generation
+Publication:
+NIST SP
+800-133r2
+Sections 4,
+5, and 6
+ECDSA
+SigGen
+(FIPS186-4):
+(A5101)
+ECDSA
+SigVer
+(FIPS186-4):
+(A5101)
+HMAC
+DRBG:
+(A5101)
+HMACSHA2-256:
+(A5101)
+KAS-ECCSSC Sp80056Ar3:
+(A5101)
+KDA HKDF
+SP80056Cr2:
+(A5101)
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 10 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+Message Digest FW
+
+Type
+SHA
+
+Description
+Hashing
+
+Message
+Authentication
+
+MAC
+
+MAC Generation
+and Verification
+
+Message Digest
+
+SHA
+
+Hashing
+
+Key Transport
+
+KTS-Wrap
+
+Key Transport
+
+Symmetric Key
+Generation
+
+CKG
+
+Symmetric Key
+Generation
+
+Properties
+Publication:FIP
+S 180-4
+Publication:FIP
+S 198-1
+
+Algorithms
+SHA2-256:
+(A5101)
+HMACSHA2-256:
+(A2352)
+Publication:FIP SHA2-256:
+S 180-4
+(A2352)
+Publication:FIP AES-CBC:
+S 140-3 IG D.G (A5101)
+HMACSHA2-256:
+(A5101)
+Publication:NIS CKG: ()
+T SP 800-133r2 CKG:
+Cryptographi
+c Key
+Generation
+Publication:
+NIST SP
+800-133r2
+Sections 4,
+5, and 6
+
+Table 8: Security Function Implementations
+
+2.7 Algorithm Specific Information
+There is no algorithm specific information.
+
+2.8 RBG and Entropy
+The tables below detail the modules ESV information.
+
+Cert
+Vendor
+Number Name
+E147
+Google
+Table 9: Entropy Certificates
+
+Name
+Titan Security Key TRNG
+Implementation
+
+Type
+
+Operational
+Sample Entropy Conditioning
+Environment Size
+per
+Component
+Sample
+Physical Google H1B2 256 bits 256 bits A2352 (SHA2256)
+
+Table 10: Entropy Sources
+
+The module generates a minimum of 256 bits of entropy for key generation.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 11 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+2.9 Key Generation
+The module generates Keys and SSPs in accordance with FIPS 140-3 IG D.H. The cryptographic module performs
+Cryptographic Key Generation (CKG) for asymmetric keys as per SP 800-133r2 (vendor affirmed), compliant with FIPS
+186-4, and using DRBG compliant with SP 800-90A]. A seed (the random value) used in asymmetric key generation
+is obtained from SP 800-90A DRBG. The key generation service for ECDSA, as well as the SP 800-90A DRBG have been
+ACVP tested with algorithm certificates found in Approved Algorithms Table.
+
+2.10 Key Establishment
+The module provides SP 800-56Arev3 compliant key establishment according to FIPS 140-3 IG D.F scenario 2 path
+(1) with ECDH shared secret computation. A Hash-Based KDF specified in NIST SP 800-56Crev2 is used as the Key
+Derivation Algorithm.
+The module provides key transport according to FIPS 140-3 IG D.G using an approved key wrapping technique based
+on AES-CBC and HMAC-SHA2-256.
+
+2.11 Industry Protocols
+The module does not implement any industry protocols.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 12 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+The table below details the module Ports and Interfaces.
+
+Physical Port
+USB pins (D+ and
+D-)
+
+LED pins
+VDD pins
+GND pins
+RST pins
+BoardID pins
+CAPTOUCH pins
+NC (Not
+Connected)
+
+Logical
+Interface(s)
+Data Input
+Data Output
+Control Input
+Status
+Output
+Status
+Output
+Power
+Control Input
+Control Input
+Status
+Output
+Control Input
+None
+
+Data That Passes
+HID command and parameters for data, HID input
+parameters for control
+
+Signals (high/low)
+Power
+N/A
+N/A
+Status values
+Circuit (high/low)
+N/A
+
+Table 11: Ports and Interfaces
+
+All communication between the module and a host device is conducted in accordance with the U2F and CTAP
+protocol. The U2F protocol is based on a request-response mechanism, where a requester sends a request message
+to a U2F device, which always results in a response message being sent back from the U2F device to the requester.
+All request-response messages are framed in ISO7816-4:2005 APDU format. This specifies how to transport the raw
+message and any error codes if the command failed.
+The CTAP2 protocol supports longer messages using CTAPHID. The CTAPHID messages are encoded in CBOR.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 13 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+The module does not support authentication for roles.
+
+N/A for this module.
+
+4.2 Roles
+The module supports two roles that an operator may assume: Crypto Officer (CO) role and User role. Roles are
+assumed implicitly based on the service accessed. The table below lists the roles supported by the module.
+
+Name
+Crypto Officer
+User
+
+Type
+Role
+Role
+
+Operator Type
+CO
+User
+
+Authentication Methods
+None
+None
+
+Table 12: Roles
+
+4.3 Approved Services
+The table below lists all approved services supported by the module. The abbreviations of the access rights to keys
+and SSPs have the following interpretation:
+G = Generate: The module generates or derives the SSP.
+R = Read: The SSP is read from the module (e.g., the SSP is output).
+W = Write: The SSP is updated, imported, or written to the module.
+E = Execute: The module uses the SSP in performing a cryptographic operation.
+Z = Zeroise: The module zeroises the SSP.
+
+Name
+Initialization
+
+Wink Command
+
+FIDO U2F:
+U2F_Register
+
+Descrip
+tion
+Connect
+to host
+over
+USB
+Comma
+nd
+issued
+to
+device
+to blink
+LEDs
+Create a
+U2F
+credenti
+al
+
+Indicat
+or
+N/A
+
+Inputs
+
+N/A
+
+APDU
+over
+HID
+comma
+nd
+
+Status None
+output
+to LED
+pin
+
+Crypto
+Officer
+
+Succes
+s or
+Fail
+
+APDU
+over
+HID
+comma
+nd and
+parame
+ters
+
+APDU
+over
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed: E
+- DRBG
+V: E
+- DRBG
+Key: E
+-
+
+None
+
+Outpu
+ts
+None
+
+Security
+Functions
+None
+
+Asymmetric
+Key
+Generation
+Digital
+Signature
+Deterministic
+Random Bit
+Generation
+Message
+Digest FW
+Key Transport
+
+SSP
+Access
+Crypto
+Officer
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 14 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+Symmetric Key
+Generation
+
+SSP
+Access
+Individual
+Attestatio
+n
+Determini
+stic Seed:
+G,E
+Individual
+Attestatio
+n Signing
+(Private)
+Key: G,E
+- Batch
+Attestatio
+n
+Determini
+stic Seed:
+G,E
+- Batch
+Attestatio
+n Signing
+(Private)
+Key: G,E
+Personalit
+y
+Determini
+stic Seed:
+G,E
+- Key
+Handle
+Encryptio
+n Key: G
+- Key
+Handle
+Authentic
+ation
+Determini
+stic Seed:
+G,E
+- Key
+Handle
+Authentic
+ation Key:
+G
+U2F/Serv
+er-Side
+Determini
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 15 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO U2F:
+U2F_Authenticate
+
+Sign to
+Authenti
+cate
+
+Succes
+s or
+Fail
+
+APDU
+over
+HID
+comma
+nd and
+parame
+ters
+
+APDU
+over
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+Data
+Encryption/Dec
+ryption
+Digital
+Signature
+Deterministic
+Random Bit
+Generation
+Message
+Authentication
+FW
+Message
+Digest FW
+
+SSP
+Access
+stic Seed:
+W,E
+U2F/Serv
+er-Side
+Signing
+(Private)
+Keys
+(Legacy):
+G
+U2F/Serv
+er-Side
+Signing
+(Public)
+Keys
+(Legacy):
+G,R
+- Batch
+Attestatio
+n Signing
+(Public)
+Key: R
+Individual
+Attestatio
+n Signing
+(Public)
+Certificate
+:R
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed: E
+- DRBG
+V: E
+- DRBG
+Key: E
+- Key
+Handle
+Encryptio
+n Key: E
+- Key
+Handle
+Authentic
+ation Key:
+E
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 16 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO U2F:
+U2F_Version
+
+Show
+U2F
+version
+string
+
+Succes
+s or
+Fail
+
+APDU
+over
+HID
+comma
+nd
+
+None
+
+FIDO2_Make_Credent
+ial
+
+Create a
+FIDO2
+credenti
+al
+
+Succes
+s or
+Fail
+
+CTAP
+HID
+comma
+nd and
+parame
+ters
+
+APDU
+over
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+CTAP
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+Data
+Encryption/Dec
+ryption
+Asymmetric
+Key
+Generation
+Deterministic
+Random Bit
+Generation
+Key Transport
+
+SSP
+Access
+U2F/Serv
+er-Side
+Signing
+(Private)
+Keys
+(Legacy):
+E
+User
+
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed: E
+- DRBG
+V: E
+- DRBG
+Key: E
+- Resident
+Signing
+(Private)
+Keys: G
+- PIN UV
+Auth
+Token:
+R,E
+FIDO2/Se
+rver-Side
+Determini
+stic Seed:
+W,E
+FIDO2/Se
+rver-Side
+Signing
+(Private)
+Keys : G
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 17 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO2_Get_Assertion
+
+Sign to
+Authenti
+cate
+
+Succes
+s or
+Fail
+
+CTAP
+HID
+comma
+nd and
+parame
+ters
+
+CTAP
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+Data
+Encryption/Dec
+ryption
+Asymmetric
+Key
+Generation
+Digital
+Signature
+Deterministic
+Random Bit
+Generation
+Message
+Authentication
+FW
+Key Derivation
+Function
+Message
+Digest FW
+Key Transport
+Symmetric Key
+Generation
+
+SSP
+Access
+FIDO2/Se
+rver-Side
+Signing
+(Public)
+Keys: G,R
+- Resident
+Signing
+(Public)
+Keys: G,R
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed: E
+- DRBG
+V: E
+- DRBG
+Key: E
+- Key
+Handle
+Encryptio
+n Key: E
+- Key
+Handle
+Authentic
+ation Key:
+E
+U2F/Serv
+er-Side
+Signing
+(Private)
+Keys
+(Legacy):
+E
+- Resident
+Signing
+(Private)
+Keys: E
+- PIN UV
+Auth
+Token: E
+CredRand
+om
+Determini
+stic Seed:
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 18 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO2_Get_Next_Ass
+ertion
+
+Sign to
+Authenti
+cate a
+different
+credenti
+al
+
+Succes
+s or
+Fail
+
+CTAP
+HID
+comma
+nd
+
+CTAP
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+Data
+Encryption/Dec
+ryption
+Asymmetric
+Key
+Generation
+Digital
+Signature
+Deterministic
+Random Bit
+Generation
+Message
+Authentication
+FW
+Key Derivation
+Function
+Message
+Digest FW
+Key Transport
+Symmetric Key
+Generation
+
+SSP
+Access
+G,E
+CredRand
+om
+Deriving
+Keys
+(with and
+without
+UV): G,E
+CredRand
+om: G,E
+- FIDO2
+HMAC
+Secret
+Salts:
+W,E
+- FIDO2
+HMAC
+Secret
+Outputs:
+R
+FIDO2/Se
+rver-Side
+Signing
+(Private)
+Keys : E
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed:
+G,E
+- DRBG
+V: G,E
+- DRBG
+Key: G,E
+- Key
+Handle
+Encryptio
+n Key: E
+- Key
+Handle
+Authentic
+ation Key:
+E
+-
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 19 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO2_Get_Info
+
+Show
+device
+informati
+on
+
+Succes
+s or
+Fail
+
+CTAP
+HID
+comma
+nd
+
+CTAP None
+HID
+comm
+and
+respon
+
+SSP
+Access
+U2F/Serv
+er-Side
+Signing
+(Private)
+Keys
+(Legacy):
+E
+- Resident
+Signing
+(Private)
+Keys: E
+CredRand
+om
+Determini
+stic Seed:
+G,E
+CredRand
+om
+Deriving
+Keys
+(with and
+without
+UV): G,E
+CredRand
+om: G,E
+- FIDO2
+HMAC
+Secret
+Salts:
+W,E
+- FIDO2
+HMAC
+Secret
+Outputs:
+R
+FIDO2/Se
+rver-Side
+Signing
+(Private)
+Keys : E
+User
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 20 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+FIDO2_Client_Pin
+
+Setup /
+Change
+/ Use a
+PIN
+
+Succes
+s or
+Fail
+
+CTAP
+HID
+comma
+nd and
+parame
+ters
+
+Outpu
+ts
+se /
+Status
+output
+CTAP
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+Security
+Functions
+
+SSP
+Access
+
+Data
+Encryption/Dec
+ryption
+Asymmetric
+Key
+Generation
+Deterministic
+Random Bit
+Generation
+Message
+Authentication
+FW
+Key
+Agreement
+ECC
+Key Derivation
+Function
+Message
+Digest FW
+Key Transport
+
+User
+- DRBG
+Entropy
+Input: G,E
+- DRBG
+Seed: E
+- DRBG
+V: E
+- DRBG
+Key: E
+- PIN
+Protocol
+Agreeme
+nt Key:
+G,E
+- PIN
+Protocol
+Deriving
+Z: G,E
+- PIN
+Protocol
+Encryptio
+n Key:
+G,E
+- PIN
+Protocol
+Authentic
+ation Key:
+G,E
+- PIN UV
+Auth
+Token:
+G,R,E
+- PIN: W
+- PIN
+Hash: E
+- PIN
+Hash
+Attemp:
+W
+- Pin
+Protocol
+Agreeme
+nt (Public)
+Key: G,R
+- PIN
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 21 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+FIDO2_Reset
+
+Factory
+reset
+
+Module
+reset to
+factory
+
+CTAP
+HID
+comma
+nd
+
+CTAP None
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+SSP
+Access
+Protocol
+Deriving
+(Public)
+Key: W,E
+User
+- DRBG
+Entropy
+Input: Z
+- DRBG
+Seed: Z
+- DRBG
+V: Z
+- DRBG
+Key: Z
+Personalit
+y
+Determini
+stic Seed:
+Z
+Individual
+Attestatio
+n
+Determini
+stic Seed:
+Z
+- Batch
+Attestatio
+n
+Determini
+stic Seed:
+Z
+- Key
+Handle
+Authentic
+ation
+Determini
+stic Seed:
+Z
+- Batch
+Attestatio
+n Signing
+(Private)
+Key: Z
+Individual
+Attestatio
+n Signing
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 22 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+SSP
+Access
+(Private)
+Key: Z
+- Key
+Handle
+Encryptio
+n Key: Z
+- Key
+Handle
+Authentic
+ation Key:
+Z
+U2F/Serv
+er-Side
+Signing
+(Private)
+Keys
+(Legacy):
+Z
+FIDO2/Se
+rver-Side
+Signing
+(Private)
+Keys : Z
+- Resident
+Signing
+(Private)
+Keys: Z
+- PIN
+Protocol
+Agreeme
+nt Key: Z
+- PIN
+Protocol
+Deriving
+Z: Z
+- PIN
+Protocol
+Encryptio
+n Key: Z
+- PIN
+Protocol
+Authentic
+ation Key:
+Z
+- PIN UV
+Auth
+Token: Z
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 23 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+Security
+Functions
+
+SSP
+Access
+- PIN: Z
+- PIN
+Hash: Z
+- PIN
+Hash
+Attemp: Z
+CredRand
+om
+Determini
+stic Seed:
+Z
+CredRand
+om
+Deriving
+Keys
+(with and
+without
+UV): Z
+CredRand
+om: Z
+- FIDO2
+HMAC
+Secret
+Salts: Z
+- FIDO2
+HMAC
+Secret
+Outputs:
+Z
+- Pin
+Protocol
+Agreeme
+nt (Public)
+Key: Z
+- PIN
+Protocol
+Deriving
+(Public)
+Key: Z
+U2F/Serv
+er-Side
+Signing
+(Public)
+Keys
+(Legacy):
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 24 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Descrip
+tion
+
+Indicat
+or
+
+Inputs
+
+Outpu
+ts
+
+FIDO2_Credential_Ma
+nagement
+
+Enumer
+ate and
+delete
+credenti
+als
+
+Succes
+s or
+Fail
+
+Succes
+s or
+Fail
+
+CTAP None
+HID
+comm
+and
+respon
+se /
+Status
+output
+to LED
+pin
+
+FIDO2_Selection
+
+Touch to Succes
+choose
+s or
+device
+Fail
+
+FIDO2_Large_Blobs
+
+Store
+binary
+data
+
+CTAP
+HID
+comma
+nd
+CTAP
+HID
+comma
+nd and
+parame
+ters
+
+Status None
+output
+to LED
+pin
+CTAP None
+HID
+comm
+and
+respon
+se /
+Modul
+e
+status
+
+Succes
+s or
+Fail
+
+Security
+Functions
+
+SSP
+Access
+Z
+FIDO2/Se
+rver-Side
+Signing
+(Public)
+Keys: Z
+- Resident
+Signing
+(Public)
+Keys: Z
+U2F/Serv
+er-Side
+Determini
+stic Seed:
+Z
+FIDO2/Se
+rver-Side
+Determini
+stic Seed:
+Z
+User
+- PIN UV
+Auth
+Token:
+E,Z
+FIDO2/Se
+rver-Side
+Signing
+(Public)
+Keys: R
+User
+
+User
+- PIN UV
+Auth
+Token: E
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 25 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Descrip
+tion
+Firmwar
+e
+upgrade
+
+Indicat
+or
+Succes
+s or
+Fail
+
+Vendor_Sysinfo
+
+Show
+vendor
+specific
+informati
+on
+
+Return
+module
+version
+informa
+tion
+
+Show Status
+
+Return
+None
+the
+module
+status
+Initiate
+None
+ondemand
+selftests by
+reboot
+or power
+cycle
+
+Vendor_Upgrade
+
+On-Demand Self-test
+
+Inputs
+CTAP
+HID
+comma
+nd and
+parame
+ters
+CTAP
+HID
+comma
+nd
+
+None
+
+None
+
+Outpu
+ts
+Status
+Output
+
+Security
+Functions
+Digital
+Signature
+
+SSP
+Access
+Crypto
+Officer
+
+CTAP None
+HID
+comm
+and
+respon
+se /
+Modul
+e
+status
+Modul None
+e
+status
+
+Crypto
+Officer
+
+Pass
+or Fail
+
+Crypto
+Officer
+
+Data
+Encryption/Dec
+ryption
+Asymmetric
+Key
+Generation
+Digital
+Signature
+Deterministic
+Random Bit
+Generation
+Message
+Authentication
+FW
+Key
+Agreement
+ECC
+Key Derivation
+Function
+Message
+Digest FW
+Message
+Authentication
+Message
+Digest
+
+User
+
+Table 13: Approved Services
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 26 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+4.4 Non-Approved Services
+The module does not support any Non-Approved Services.
+
+N/A for this module.
+
+4.5 External Software/Firmware Loaded
+The module supports external firmware loaded for upgrades. An Approved ECDSA Signature Verification (P-256,
+SHA2-256) firmware load test operation is performed prior to a firmware upgrade.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 27 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The integrity of the executable firmware is verified by comparing a SHA2-256 digest calculated at boot time with the
+SHA2-256 digest value stored in the module that was computed at build time.
+
+5.2 Initiate on Demand
+The integrity test is performed as part of the pre-operational self-tests, which are executed when the module is
+initialized. The integrity test can be invoked on demand via reboot or power-cycle the module, which will perform
+(among others) the firmware integrity test.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 28 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Limited
+How Requirements are Satisfied:
+The limited modifiable operational environment of the module prevents users from accessing secret keys, private
+keys or SSPs which they are not authorized to access. There was no logical or physical access to the SSPs.
+The module is designed to accept only controlled firmware changes that successfully pass the software/firmware
+load test.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 29 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+The table below details the Physical Security Mechanisms supported by the module.
+
+Mechanism Inspection Inspection
+Frequency Guidance
+N/A
+N/A
+N/A
+Table 14: Mechanisms and Actions Required
+
+The module has a single-chip embodiment that employs standard passivation techniques and meets commercial
+grade specs regarding power and voltage ranges, temperature, reliability, and shock/vibration. The module is
+encased in an opaque, tamper-evident, removal-resistant IC packaging material which cannot be removed or
+penetrated without causing serious damage to the module (i.e. the module will not function).
+
+7.2 EFP/EFT Information
+The table below details the module Environmental Failure Testing information.
+
+Temp/Voltage
+Type
+
+Temperature EFP
+or Voltage
+or
+EFT
+LowTemperature -20° C
+EFT
+HighTemperature 85° C
+EFT
+LowVoltage
+2V
+EFT
+HighVoltage
+6V
+EFT
+
+Result
+Environmental Failure
+Environmental Failure
+Environmental Failure
+Environmental Failure
+
+Table 15: EFP/EFT Information
+
+7.3 Hardness Testing Temperature Ranges
+The table below details the module Hardness Testing Temperature Ranges.
+
+Temperature
+Temperature
+Type
+LowTemperature -5°C
+HighTemperature +70°C
+Table 16: Hardness Testing Temperatures
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 30 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+8 Non-Invasive Security
+Currently, the ISO/IEC 19790:2012 non-invasive security area is not required by FIPS 140-3 (see NIST SP 800-140F).
+The requirements of this area are not applicable to the module.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 31 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+The table below lists Sensitive Security Parameters (SSPs) storage areas for the module. Section 9.4 below selects
+from the storage areas listed and specifies the appropriate parameter in the “Storage” column if applicable to a
+specific SSP.
+
+Storage Description
+Area
+Name
+RAM
+Random Access Memory
+Flash
+Flash Memory
+
+Persistence
+Type
+Dynamic
+Static
+
+Table 17: Storage Areas
+
+9.2 SSP Input-Output Methods
+The table below lists SSP input and output methods for the module. Section 9.4 below selects from the input and
+output methods listed and specifies the appropriate parameter in the “Inputs/Outputs” column if applicable to a
+specific SSP.
+
+Name
+
+From To
+
+Format
+Type
+Outside Plaintext
+Outside Encrypted
+
+PSP Export
+PIN Protocol
+Output
+
+RAM
+RAM
+
+Distribution
+Type
+N/A
+Automated
+
+Entry
+SFI or
+Type
+Algorithm
+N/A
+Electronic Key Transport
+
+Table 18: SSP Input-Output Methods
+
+9.3 SSP Zeroization Methods
+The table below lists SSP zeroisation methods for this module. Section 9.4 below selects from the zeroisation
+methods listed and specifies the appropriate parameter in the “Zeroization” column if applicable to a specific SSP.
+
+Zeroization
+Method
+Reboot
+
+Description
+
+Rationale
+
+Operator Initiation
+
+Zeroisation when module
+is rebooted
+
+Crypto Officer by
+rebooting the host
+system
+
+Reset
+command
+
+Zeroisation when the
+module is reset
+
+Remove power
+
+Zeroisation when power
+is removed from the
+module
+
+Keys are procedurally
+zeroised by rebooting the
+module, which is
+acceptable at Security
+Level 1
+Keys are automatically
+zeroised by resetting the
+module, which is
+acceptable at Security
+Level 1
+Keys are procedurally
+zeroised by rebooting the
+module, which is
+acceptable at Security
+Level 1
+
+Crypto Officer or
+User by resetting
+the module
+Crypto Officer by
+removing power
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 32 of 51
+
+OpenSK Cryptographic Module
+
+Zeroization
+Method
+Environmental
+Failure
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Description
+
+Rationale
+
+Operator Initiation
+
+Zeroisation when the
+temperature or voltage
+falls outside the module's
+normal operating ranges
+
+Keys are automatically
+zeroised by a power
+cycle, which is acceptable
+at Security Level 1
+
+Automatically when
+an environmental
+failure occurs
+
+Table 19: SSP Zeroization Methods
+
+9.4 SSPs
+The following table summarizes the keys and Sensitive Security Parameters (SSPs) that are used by the cryptographic
+services implemented in the module:
+
+Name
+
+Descriptio
+n
+
+DRBG
+Entropy
+Input
+
+Input
+bitstring
+that
+provides an
+assessed
+minimum
+amount of
+unpredictab
+ility for the
+DRBG
+mechanism
+A string of
+bits that is
+used as
+input to a
+DRBG
+mechanism
+Secret
+value of the
+DRBG
+internal
+state
+Secret
+value of the
+DRBG
+internal
+state
+Parameter
+related to
+user
+credentials
+(key
+handle,
+user). Used
+to derive
+
+DRBG
+Seed
+
+DRBG V
+
+DRBG Key
+
+Personality
+Determinist
+ic Seed
+
+Size Strengt
+h
+256 256
+
+Type Category
+
+Generate
+d By
+
+DRBG
+Parameter
+- CSP
+
+Factory
+Loaded
+and
+Internal
+TRNG
+
+256 256
+
+Seed CSP
+
+Deterministic
+Random Bit
+Generation
+
+N/A N/A
+
+Internal
+Value CSP
+
+Deterministic
+Random Bit
+Generation
+
+N/A N/A
+
+Symmetric
+Key - CSP
+
+Deterministic
+Random Bit
+Generation
+
+256 256
+
+Determinis
+tic Seed CSP
+
+Allowed
+KDF
+Method
+
+Establis
+hed By
+
+Used By
+Deterministic
+Random Bit
+Generation
+
+Deterministic
+Random Bit
+Generation
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 33 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Individual
+Attestation
+Determinist
+ic Seed
+
+Batch
+Attestation
+Determinist
+ic Seed
+
+Key
+Handle
+Authenticat
+ion
+Determinist
+ic Seed
+Batch
+Attestation
+Signing
+(Private)
+Key
+
+Individual
+Attestation
+Signing
+(Private)
+Key
+
+Descriptio
+n
+the Key
+Handle
+Encryption
+Key
+Determinist
+ic seed
+used to
+derive the
+Individual
+Attestation
+Key
+Determinist
+ic seed
+used to
+derive the
+Batch
+Attestation
+Key
+Determinist
+ic seed
+used to
+derive the
+Key Handle
+Authenticati
+on Key
+Used for
+signature in
+U2F and
+FIDO2
+registration
+during
+batch
+attestation
+Used for
+signature in
+U2F and
+FIDO2
+registration
+during
+enterprise
+attestation
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+
+Type Category
+
+Generate
+d By
+
+Establis
+hed By
+
+Used By
+
+256 256
+
+Determinis
+tic Seed CSP
+
+Allowed
+KDF
+Method
+
+Deterministic
+Random Bit
+Generation
+
+256 256
+
+Determinis
+tic Seed CSP
+
+Allowed
+KDF
+Method
+
+Deterministic
+Random Bit
+Generation
+
+256 256
+
+Determinis
+tic Seed CSP
+
+Allowed
+KDF
+Method
+
+Deterministic
+Random Bit
+Generation
+
+256 256
+
+Private
+Key - CSP
+
+Digital Signature
+
+256 256
+
+Private
+Key - CSP
+
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+
+Digital Signature
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 34 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Descriptio
+n
+
+Key
+Handle
+Encryption
+Key
+
+Encrypt
+server-side
+credentials
+
+Key
+Handle
+Authenticat
+ion Key
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+256 256
+
+Type Category
+
+Generate
+d By
+
+Symmetric
+Key - CSP
+
+Authenticat
+e serverside
+credentials
+
+256 256
+
+Authentica
+tion Key CSP
+
+U2F/Serve
+r-Side
+Signing
+(Private)
+Keys
+(Legacy)
+
+Private key
+for core
+Legacy
+FIDO
+functionalit
+y
+
+256 256
+
+Private
+Key - CSP
+
+FIDO2/Ser
+ver-Side
+Signing
+(Private)
+Keys
+
+Private key
+for core
+FIDO2
+functionalit
+y
+
+256 256
+
+Private
+Key - CSP
+
+Resident
+Signing
+(Private)
+Keys
+
+Private key
+for core
+FIDO2
+functionalit
+y
+
+256 256
+
+Private
+Key - CSP
+
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Symmetri
+c Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Symmetri
+c Key
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+
+Establis
+hed By
+
+Used By
+Data
+Encryption/Decry
+ption
+
+Message
+Authentication
+FW
+
+Digital Signature
+
+Digital Signature
+
+Digital Signature
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 35 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Descriptio
+n
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+
+Type Category
+
+PIN
+Protocol
+Agreement
+Key
+
+Module's
+pin protocol
+agreement
+private key
+
+256 256
+
+Private
+Key - CSP
+
+PIN
+Protocol
+Deriving Z
+PIN
+Protocol
+Encryption
+Key
+PIN
+Protocol
+Authenticat
+ion Key
+PIN UV
+Auth
+Token
+
+Shared
+Secret for
+client PIN
+Derived
+shared
+encryption
+key
+Derived
+shared
+authenticati
+on key
+Short lived
+authenticati
+on token
+
+256 256
+
+Shared
+Secret CSP
+Symmetric
+Key - CSP
+
+PIN
+
+User
+verification
+knowledge
+factor
+
+PIN Hash
+
+Hash prefix
+of PIN
+
+PIN Hash
+Attemp
+
+User
+guessed
+PIN hash
+
+256 256
+
+Generate
+d By
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+
+Used By
+
+Key Agreement
+ECC
+
+Key
+Agreeme
+nt ECC
+
+Key Derivation
+Function
+
+Key
+Derivation
+Function
+
+Data
+Encryption/Decry
+ption
+Message
+Authentication
+FW
+
+256 256
+
+Authentica
+tion Key CSP
+
+Key
+Derivation
+Function
+
+256 256
+
+Authentica
+tion Token
+- CSP
+
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Symmetri
+c Key
+Generatio
+n
+
+Minimu
+m6
+charact
+ers - 48
+bits
+128 128
+
+PIN - CSP
+
+128 128
+
+Establis
+hed By
+
+Hash
+Value CSP
+Hash
+Value CSP
+
+Key
+Transport
+
+Data
+Encryption/Decry
+ption
+
+Key
+Transport
+
+Key
+Transport
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 36 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Descriptio
+n
+
+CredRand
+om
+Determinist
+ic Seed
+
+Determinist
+ic Seed
+used to
+derive the
+CredRando
+m Deriving
+Keys
+Derived
+keys used
+to derive
+the
+CredRando
+m
+
+CredRand
+om
+Deriving
+Keys (with
+and
+without
+UV)
+
+CredRand
+om
+
+FIDO2
+HMAC
+Secret
+Salts
+FIDO2
+HMAC
+Secret
+Outputs
+
+Pin
+Protocol
+Agreement
+(Public)
+Key
+
+Derived
+key used
+for hmacsecret
+extension
+Input for
+hmacsecret
+extension
+Outputs for
+hmacsecret
+extension,
+used to do
+offline
+encryption
+with
+arbitrary
+user data
+Module's
+pin protocol
+agreement
+public key
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+256 256
+
+Type Category
+
+Generate
+d By
+
+Determinis
+tic Seed CSP
+
+Allowed
+KDF
+
+Deterministic
+Random Bit
+Generation
+
+256 256
+
+Symmetric
+Key - CSP
+
+Key Derivation
+Function
+
+256 256
+
+Derived
+Symmetric
+Key - CSP
+
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Symmetri
+c Key
+Generatio
+n
+Key
+Derivation
+Function
+
+256 256
+
+Salt - CSP
+
+Key
+Transport
+
+Message
+Authentication
+FW
+
+256 256
+
+MAC
+Output CSP
+
+Key
+Transport
+
+Data
+Encryption/Decry
+ption
+
+256 256
+
+Public Key
+- PSP
+
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+
+Establis
+hed By
+
+Used By
+
+Message
+Authentication
+FW
+
+Key Agreement
+ECC
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 37 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Descriptio
+n
+
+Batch
+Attestation
+Signing
+(Public)
+Key
+PIN
+Protocol
+Deriving
+(Public)
+Key
+U2F/Serve
+r-Side
+Signing
+(Public)
+Keys
+(Legacy)
+
+Batch
+attestation
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+256 256
+
+Type Category
+
+Generate
+d By
+
+Public Key
+- PSP
+
+Factory
+Loaded
+
+Client PIN
+Protocol
+agreement
+public key
+
+256 256
+
+Public Key
+- PSP
+
+Public key
+for core
+Legacy
+FIDO
+functionalit
+y
+
+256 256
+
+Public Key
+- PSP
+
+FIDO2/Ser
+ver-Side
+Signing
+(Public)
+Keys
+
+Public key
+for core
+FIDO2
+functionalit
+y
+
+256 256
+
+Public Key
+- PSP
+
+Resident
+Signing
+(Public)
+Keys
+
+Public key
+for core
+FIDO2
+functionalit
+y
+
+256 256
+
+Public Key
+- PSP
+
+Individual
+Attestation
+Signing
+(Public)
+Certificate
+
+Used for
+signature in
+U2F and
+FIDO2
+registration
+during
+
+256 256
+
+Public
+Certificate
+- PSP
+
+Establis
+hed By
+
+Used By
+Digital Signature
+
+Key
+Agreeme
+nt ECC
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Asymmetr
+ic Key
+Generatio
+n
+Determini
+stic
+Random
+Bit
+Generatio
+n
+Factory
+Loaded
+
+Digital Signature
+
+Digital Signature
+
+Digital Signature
+
+Digital Signature
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 38 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+U2F/Serve
+r-Side
+Determinist
+ic Seed
+
+FIDO2/Ser
+ver-Side
+Determinist
+ic Seed
+
+Descriptio
+n
+enterprise
+attestation
+Determinist
+ic seed
+used to
+derive the
+U2F/Server
+-Side
+signing
+(Private)
+Keys
+(Legacy)
+Determinist
+ic seed
+used to
+derive the
+FIDO2/Ser
+ver-Side
+Signing
+(Private)
+Keys
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Size Strengt
+h
+
+Type Category
+
+256 256
+
+256 256
+
+Generate
+d By
+
+Establis
+hed By
+
+Used By
+
+Determinis
+tic Seed CSP
+
+Key
+Transport
+
+Deterministic
+Random Bit
+Generation
+
+Determinis
+tic Seed CSP
+
+Key
+Transport
+
+Deterministic
+Random Bit
+Generation
+
+Table 20: SSP Table 1
+
+Name
+
+Input Output
+
+Storage
+
+DRBG
+Entropy Input
+
+RAM:Plaintext
+
+DRBG Seed
+
+RAM:Plaintext
+
+DRBG V
+
+RAM:Plaintext
+
+Storage
+Duration
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+
+Zeroization
+
+Related SSPs
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+DRBG
+Seed:Used
+With
+DRBG V:Used
+With
+DRBG
+Key:Used With
+DRBG Entropy
+Input:Used
+With
+DRBG V:Used
+With
+DRBG
+Key:Used With
+DRBG Entropy
+Input:Used
+With
+DRBG
+Seed:Used
+With
+DRBG
+Key:Used With
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 39 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Input Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+Storage
+Duration
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+
+Zeroization
+
+Related SSPs
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+DRBG Entropy
+Input:Used
+With
+DRBG
+Seed:Used
+With
+DRBG V:Used
+With
+
+DRBG Key
+
+RAM:Plaintext
+
+Personality
+Deterministic
+Seed
+Individual
+Attestation
+Deterministic
+Seed
+Batch
+Attestation
+Deterministic
+Seed
+Key Handle
+Authentication
+Deterministic
+Seed
+Batch
+Attestation
+Signing
+(Private) Key
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+RAM:Plaintext
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Batch
+Attestation
+Deterministic
+Seed:Derived
+From
+
+Individual
+Attestation
+Signing
+(Private) Key
+
+RAM:Plaintext
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Individual
+Attestation
+Deterministic
+Seed:Derived
+From
+
+Key Handle
+Encryption
+Key
+
+RAM:Plaintext
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Personality
+Deterministic
+Seed:Derived
+From
+
+Key Handle
+Authentication
+Key
+
+RAM:Plaintext
+
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+
+Reboot
+Remove
+power
+
+Key Handle
+Authentication
+Deterministic
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 40 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+Input Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+U2F/ServerSide Signing
+(Private) Keys
+(Legacy)
+
+RAM:Plaintext
+
+FIDO2/Server
+-Side Signing
+(Private) Keys
+
+RAM:Plaintext
+
+Resident
+Signing
+(Private) Keys
+
+RAM:Plaintext
+
+PIN Protocol
+Agreement
+Key
+
+RAM:Plaintext
+
+PIN Protocol
+Deriving Z
+
+RAM:Plaintext
+
+PIN Protocol
+Encryption
+Key
+
+RAM:Plaintext
+
+PIN Protocol
+Authentication
+Key
+
+RAM:Plaintext
+
+Storage
+Duration
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+
+Zeroization
+
+Related SSPs
+
+Environmenta
+l Failure
+
+Seed:Derived
+From
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+U2F/ServerSide
+Deterministic
+Seed:Derived
+From
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+FIDO2/ServerSide
+Deterministic
+Seed:Derived
+From
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+PIN Protocol
+Deriving
+(Private)
+Key:Derived
+From
+
+Reboot
+Remove
+power
+
+PIN Protocol
+Deriving
+(Private)
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 41 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+PIN UV Auth
+Token
+
+Input Output
+
+PIN
+Protoco
+l Output
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+RAM:Plaintext
+
+PIN
+
+RAM:Plaintext
+
+PIN Hash
+
+Flash:Encrypte
+d
+RAM:Plaintext
+
+PIN Hash
+Attemp
+
+CredRandom
+Deterministic
+Seed
+CredRandom
+Deriving Keys
+(with and
+without UV)
+
+Flash:Plaintext
+
+CredRandom
+
+RAM:Plaintext
+
+FIDO2 HMAC
+Secret Salts
+
+RAM:Plaintext
+
+RAM:Plaintext
+
+Storage
+Duration
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+N/A
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+N/A
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+
+Zeroization
+
+Related SSPs
+
+Environmenta
+l Failure
+
+Key:Derived
+From
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reset
+command
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reset
+command
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+CredRandom
+Deterministic
+Seed:Derived
+From
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+CredRandom
+Deriving Keys
+(with and
+without
+UV):Derived
+From
+
+Reboot
+Remove
+power
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 42 of 51
+
+OpenSK Cryptographic Module
+
+Name
+
+FIDO2 HMAC
+Secret
+Outputs
+
+Input Output
+
+PIN
+Protoco
+l Output
+
+Pin Protocol
+Agreement
+(Public) Key
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Storage
+
+RAM:Plaintext
+
+RAM:Plaintext
+
+Batch
+Attestation
+Signing
+(Public) Key
+PIN Protocol
+Deriving
+(Public) Key
+
+PSP
+Export
+
+Flash:Plaintext
+
+U2F/ServerSide Signing
+(Public) Keys
+(Legacy)
+
+PSP
+Export
+
+RAM:Plaintext
+
+FIDO2/Server
+-Side Signing
+(Public) Keys
+
+PSP
+Export
+
+RAM:Plaintext
+
+Resident
+Signing
+(Public) Keys
+
+PSP
+Export
+
+RAM:Plaintext
+
+RAM:Plaintext
+
+Storage
+Duration
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+N/A
+
+Zeroization
+
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+l failure
+occurs
+Until module
+loses
+power/reboot
+or
+environmenta
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Related SSPs
+
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+PIN Protocol
+Agreement
+Key:Paired
+With
+
+N/A
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+U2F/ServerSide Signing
+(Private) Keys
+(Legacy):Paire
+d With
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+FIDO2/ServerSide Signing
+(Private) Keys
+:Paired With
+
+Reboot
+Remove
+power
+Environmenta
+l Failure
+
+Resident
+Signing
+(Private)
+Keys:Paired
+With
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 43 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Name
+
+Input Output
+
+Storage
+
+Zeroization
+
+Flash:Plaintext
+
+Storage
+Duration
+l failure
+occurs
+N/A
+
+Individual
+Attestation
+Signing
+(Public)
+Certificate
+U2F/ServerSide
+Deterministic
+Seed
+FIDO2/Server
+-Side
+Deterministic
+Seed
+
+PSP
+Export
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+Flash:Plaintext
+
+N/A
+
+Reset
+command
+
+Related SSPs
+
+N/A
+
+Table 21: SSP Table 2
+
+9.5 Transitions
+Per FIPS 140-3, IG C.K FIPS 186-4 CAVP tests performed are mathematically identical to FIPS 186-5 CAVP tests,
+therefore the module can claim FIPS 186-5 compliance for these tests.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 44 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+10 Self-Tests
+This section specifies the pre-operational and conditional self-tests performed by the module. The pre-operational
+and conditional self-tests ensure that the module is not corrupted and that the cryptographic algorithms work as
+expected.
+
+10.1 Pre-Operational Self-Tests
+Pre-operational Self-Tests are run upon the power up/initialization of the module. The module transitions to the
+operational state only after the pre-operational self-tests (and the cryptographic algorithm self-tests (CASTs)) are
+passed successfully. The design of the module ensures that all data output, via the data output interface, is inhibited
+whenever the module is in a pre-operational self-test condition. The Pre-Operational Self-Tests are detailed in the
+table below.
+
+Algorithm or
+Test
+SHA2-256
+(A2352)
+
+Test
+Properties
+256-bit
+hash
+
+Test Method
+
+Test Type
+
+Indicator
+
+Details
+
+Firmware
+Integrity
+
+SW/FW
+Integrity
+
+Status
+Output
+
+Approved
+Hash
+
+Table 22: Pre-Operational Self-Tests
+
+10.2 Conditional Self-Tests
+Conditional Self-Tests are run when an applicable security function or process is invoked. The Conditional Self-Tests
+are detailed in the table below.
+
+Algorith
+m or Test
+
+Test
+Propertie
+s
+256-bit
+hash
+
+Test
+Method
+
+Test
+Type
+
+Indicator
+
+Details
+
+Condition
+s
+
+KAT
+
+CAST
+
+Hash
+
+Module
+Initializatio
+n
+
+HMACSHA2-256
+(A5101)
+
+256-bit
+key
+
+KAT
+
+CAST
+
+MAC
+
+Module
+Initializatio
+n
+
+ECDSA
+SigGen
+(FIPS1864)
+(A5101)
+ECDSA
+SigVer
+(FIPS1864)
+(A5101)
+KASECC-SSC
+Sp800-
+
+NIST P256
+
+KAT
+
+CAST
+
+Signature
+Generation
+
+Module
+Initializatio
+n
+
+NIST P256
+
+KAT
+
+CAST
+
+Signature
+Verification
+
+Module
+Initializatio
+n
+
+NIST P256
+
+KAT
+
+CAST
+
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+
+Ephemeral Unified
+
+Module
+Initializatio
+n
+
+SHA2-256
+(A5101)
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 45 of 51
+
+OpenSK Cryptographic Module
+
+Algorith
+m or Test
+56Ar3
+(A5101)
+HMAC
+DRBG
+(A5101)
+
+Test
+Propertie
+s
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test
+Method
+
+Test
+Type
+
+As
+specified
+in NIST
+SP 80090Ar1
+Section
+11.3
+HMACSHA2256
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+256-bit
+key
+
+KAT
+
+CAST
+
+ECDSA
+KeyGen
+(FIPS1864)
+(A5101)
+SHA2-256
+(A2352)
+
+NIST P256
+
+PCT
+
+PCT
+
+256-bit
+hash
+
+KAT
+
+CAST
+
+HMACSHA2-256
+(A2352)
+
+256-bit
+key
+
+KAT
+
+CAST
+
+Firmware
+Load Test
+
+ECDSA
+Signature
+Verificatio
+n with
+NIST P256
+Repetition
+Count
+Test
+(RCT)
+and
+Adaptativ
+e
+
+Firmware
+Load Test
+
+SW/F
+W
+Load
+
+Start-up
+Health
+Tests
+
+CAST
+
+KDA
+HKDF
+SP80056Cr2
+(A5101)
+AES-CBC
+(A5101)
+
+Entropy
+Source
+90B StartUp RCT
+and APT
+
+Indicator
+
+Details
+
+Condition
+s
+
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+
+Instantiate,
+Generate and
+Reseed
+
+Module
+Initializatio
+n
+
+Key Derivation
+
+Module
+Initializatio
+n
+
+Encryption/Decrypti
+on
+
+Module
+Initializatio
+n
+
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+Success
+or failure
+of service
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l
+initializatio
+n of the
+module
+Successfu
+l firmware
+update
+
+Successfu
+l
+initializatio
+n of the
+entropy
+source
+
+Key Pair Generation Key Pair
+Generatio
+n and Key
+Agreemen
+t
+Hash
+Module
+Initializatio
+n
+Hash
+
+Module
+Initializatio
+n
+
+N/A
+
+Firmware
+Update
+Request
+
+Entropy Generation
+
+Module
+Initializatio
+n
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 46 of 51
+
+OpenSK Cryptographic Module
+
+Algorith
+m or Test
+
+Entropy
+Source
+90B
+Continuou
+s RCT
+and APT
+
+Test
+Propertie
+s
+Proportio
+n Test
+(APT) as
+specified
+in NIST
+SP 80090B
+Sections
+4.4.1 and
+4.4.2
+Repetition
+Count
+Test
+(RCT)
+and
+Adaptativ
+e
+Proportio
+n Test
+(APT) as
+specified
+in NIST
+SP 80090B
+Sections
+4.4.1 and
+4.4.2
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test
+Method
+
+Test
+Type
+
+Indicator
+
+Details
+
+Condition
+s
+
+Continuou
+s Health
+Tests
+
+CAST
+
+Successfu
+ll output of
+entropy
+bits
+
+Entropy Generation
+
+Entropy
+Bits
+Request
+
+Table 23: Conditional Self-Tests
+
+The module performs self-tests on all approved cryptographic algorithms supported in the approved mode of
+operation, using the tests shown in the table above. To ensure all conditional CASTs are performed prior to the first
+operational use of the associated algorithm, all CASTs are performed during the module’s initial power-up sequence.
+The CASTs for algorithms used in the pre-operational firmware integrity test are performed prior to the integrity test
+itself; all other CASTs are executed immediately after the successful completion of the firmware integrity test.
+Services are not available, and data output (via the data output interface) is inhibited during the self-tests. If any of
+these tests fails, the module transitions to the error state.
+
+10.3 Periodic Self-Test Information
+Pre-operational self-tests can be run on-demand, for periodic testing, by rebooting the module.
+
+Algorithm or
+Test
+SHA2-256
+(A2352)
+
+Test Method
+
+Test Type
+
+Period
+
+Firmware
+Integrity
+
+SW/FW Integrity
+
+On Demand
+
+Periodic
+Method
+Reboot, reset or
+power cycle
+
+Table 24: Pre-Operational Periodic Information
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 47 of 51
+
+OpenSK Cryptographic Module
+
+Algorithm or
+Test
+SHA2-256
+(A5101)
+HMAC-SHA2256 (A5101)
+ECDSA SigGen
+(FIPS186-4)
+(A5101)
+ECDSA SigVer
+(FIPS186-4)
+(A5101)
+KAS-ECC-SSC
+Sp800-56Ar3
+(A5101)
+HMAC DRBG
+(A5101)
+KDA HKDF
+SP800-56Cr2
+(A5101)
+AES-CBC
+(A5101)
+ECDSA KeyGen
+(FIPS186-4)
+(A5101)
+SHA2-256
+(A2352)
+HMAC-SHA2256 (A2352)
+Firmware Load
+Test
+Entropy Source
+90B Start-Up
+RCT and APT
+Entropy Source
+90B Continuous
+RCT and APT
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Test Method
+
+Test Type
+
+Period
+
+Periodic
+Method
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+
+KAT
+
+CAST
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+Reboot, reset or
+power cycle
+
+KAT
+
+CAST
+
+On Demand
+
+Reboot, reset or
+power cycle
+
+KAT
+
+CAST
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+
+KAT
+
+CAST
+
+On Demand
+
+PCT
+
+PCT
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+KAT
+
+CAST
+
+On Demand
+
+Firmware Load
+Test
+Start-up Health
+Tests
+
+SW/FW Load
+
+On Demand
+
+CAST
+
+On Demand
+
+Continuous
+Health Tests
+
+CAST
+
+Entropy
+Generation
+
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+Reboot, reset or
+power cycle
+Firmware
+Update Request
+Reboot, reset or
+power cycle
+Entropy Bits
+Request
+
+Table 25: Conditional Periodic Information
+
+10.4 Error States
+If any of the Pre-operational Self-Tests or Conditional Self-Tests fail, the module will output an error status and enter
+an error state, where all data output is inhibited. Upon entering an error state, an operator can attempt to clear the
+error state by removing the module from the USB port and reinserting it to restart the module. If the error state
+cannot be cleared, the module must be returned to the manufacturer. The table below shows the different causes
+that lead to the Error States and the status indicators reported.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 48 of 51
+
+OpenSK Cryptographic Module
+
+Name Description
+Error The module's error
+state
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Conditions
+POST, CAST or PCT
+Failure
+
+Recovery Method
+Module reboot and
+power cycle
+
+Indicator
+Error
+Code
+
+Table 26: Error States
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 49 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+No configuration of the module or installation steps are required from the operator. When the module is powered
+on its power-up self-tests are executed without any operator intervention. The module enters in approved mode
+automatically if the power-up self-test completes successfully. If any of the self-tests fail during power-up, the
+module transitions to an Error state.
+The operator can verify that the module is in the Approved mode of operation and that the FIPS validated version is
+being used, by checking the version output using the "Vendor_Sysinfo" command and comparing it against the
+versioning information on the module certificate.
+The status of the module can be determined by the availability of the module or by executing the “Show Status”
+service. If the module is available, it has passed all self-tests. If it is unavailable, it is in the error state.
+
+11.2 Administrator Guidance
+None.
+
+11.3 Non-Administrator Guidance
+None.
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 50 of 51
+
+OpenSK Cryptographic Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+12 Mitigation of Other Attacks
+The module is protected against the following non-invasive attacks:
+Fault Injection:
+-
+
+Code signing
+Execution gating
+Storage parity
+Transmission parity
+Power On Self-Test
+Voltage monitoring
+Temperature monitoring
+Internal clock
+Active Security Shield
+
+Side-Channel Attacks:
+-
+
+Constant-time (data-independent) code execution
+Random insertion of wait states
+Jittery clock
+Power masking
+Data blinding
+TRNG Entropy Churning
+Computation Throttling
+
+Google, LLC. 2025
+This document may be reproduced and distributed only in its original entirety without revision.
+Page 51 of 51
+
+

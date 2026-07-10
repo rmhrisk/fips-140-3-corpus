@@ -1,0 +1,10966 @@
+Ezurio
+Summit Linux FIPS Core Crypto Module
+
+FIPS 140-3 Non-Proprietary Security Policy
+
+Document Version: 1.1
+Last Modified: 04/04/2025
+
+Prepared by:
+atsec information security corporation
+4516 Seton Center Pkwy, Suite 250
+Austin, TX 78759
+www.atsec.com
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 1 of 90
+
+Table of Contents
+1 General ................................................................................................................................... 5
+
+1.1 Overview .......................................................................................................................... 5
+1.1.1 How this Security Policy was prepared ........................................................................ 5
+1.2 Security Levels ................................................................................................................ 5
+
+2 Cryptographic Module Specification ...................................................................................... 6
+
+2.1 Description....................................................................................................................... 6
+2.2 Tested and Vendor Affirmed Module Version and Identification ..................................... 8
+
+2.3 Excluded Components ..................................................................................................... 9
+
+2.4 Modes of Operation ......................................................................................................... 9
+2.5 Algorithms ....................................................................................................................... 9
+
+2.6 Security Function Implementations ............................................................................... 15
+
+2.7 Algorithm Specific Information ...................................................................................... 25
+2.7.1 AES GCM IV ................................................................................................................. 25
+2.7.1.1 TLS version 1.2 ........................................................................................................ 25
+2.7.1.2 TLS version 1.3 ........................................................................................................ 26
+
+2.7.1.3 IEEE 802.11 GCMP ................................................................................................... 26
+2.7.2 AES XTS ...................................................................................................................... 26
+2.7.3
+
+Key derivation using SP 800-132 PBKDF2 ............................................................. 26
+
+2.7.4 SP 800-56Ar3 Assurances........................................................................................... 27
+2.7.5 RSA Key Encapsulation ............................................................................................... 27
+2.7.6 RSA Key Agreement ................................................................................................... 28
+2.7.7 RSA SigGen and SigVer compliance ........................................................................... 28
+2.7.8 SHA-3 compliance ...................................................................................................... 28
+2.8 RBG and Entropy ........................................................................................................... 28
+2.9 Key Generation .............................................................................................................. 29
+
+2.10 Key Establishment ....................................................................................................... 29
+2.11 Industry Protocols ........................................................................................................ 30
+
+3 Cryptographic Module Interfaces ......................................................................................... 31
+3.1 Ports and Interfaces....................................................................................................... 31
+
+4 Roles, Services, and Authentication .................................................................................... 32
+
+4.1 Roles .............................................................................................................................. 32
+4.2 Approved Services ......................................................................................................... 32
+
+4.3 Non-Approved Services ................................................................................................. 49
+4.4 External Software/Firmware Loaded ............................................................................. 49
+
+5 Software/Firmware Security ................................................................................................. 50
+5.1 Integrity Techniques ...................................................................................................... 50
+5.2 Initiate on Demand ........................................................................................................ 50
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 2 of 90
+
+6 Operational Environment ..................................................................................................... 51
+
+6.1 Operational Environment Type and Requirements ....................................................... 51
+6.2 Configuration Settings and Restrictions ........................................................................ 51
+
+7 Physical Security .................................................................................................................. 52
+7.1 Mechanisms and Actions Required ................................................................................ 52
+
+8 Non-Invasive Security .......................................................................................................... 53
+8.1 Mitigation Techniques ................................................................................................... 53
+
+9 Sensitive Security Parameters Management ....................................................................... 54
+9.1 Storage Areas ................................................................................................................ 54
+
+9.2 SSP Input-Output Methods ............................................................................................ 54
+
+9.3 SSP Zeroization Methods ............................................................................................... 54
+9.4 SSPs ............................................................................................................................... 55
+
+9.5 Transitions ..................................................................................................................... 76
+
+10 Self-Tests ............................................................................................................................ 77
+
+10.1 Pre-Operational Self-Tests ........................................................................................... 77
+10.2 Conditional Self-Tests .................................................................................................. 77
+
+10.3 Periodic Self-Test Information ..................................................................................... 81
+10.4 Error States .................................................................................................................. 84
+10.5 Operator Initiation of Self-Tests .................................................................................. 84
+
+11 Life-Cycle Assurance .......................................................................................................... 85
+11.1 Installation, Initialization, and Startup Procedures ..................................................... 85
+11.2 Administrator Guidance ............................................................................................... 85
+11.3 Non-Administrator Guidance ....................................................................................... 85
+11.4 End of Life .................................................................................................................... 85
+
+12 Mitigation of Other Attacks ................................................................................................ 86
+12.1 Attack List .................................................................................................................... 86
+
+Appendix A. Glossary and Abbreviations ................................................................................ 87
+Appendix B. References .......................................................................................................... 88
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 3 of 90
+
+List of Tables
+Table 1: Security Levels ............................................................................................................ 5
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) . 8
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid ............................... 9
+Table 4: Modes List and Description ......................................................................................... 9
+Table 5: Approved Algorithms ................................................................................................. 14
+Table 6: Vendor-Affirmed Algorithms ...................................................................................... 15
+Table 7: Non-Approved, Not Allowed Algorithms .................................................................... 15
+Table 8: Security Function Implementations .......................................................................... 25
+Table 9: Entropy Certificates ................................................................................................... 28
+Table 10: Entropy Sources ...................................................................................................... 29
+Table 11: Ports and Interfaces ................................................................................................ 31
+Table 12: Roles ........................................................................................................................ 32
+Table 13: Approved Services .................................................................................................. 48
+Table 14: Non-Approved Services ........................................................................................... 49
+Table 15: Storage Areas .......................................................................................................... 54
+Table 16: SSP Input-Output Methods ...................................................................................... 54
+Table 17: SSP Zeroization Methods......................................................................................... 55
+Table 18: SSP Table 1.............................................................................................................. 68
+Table 19: SSP Table 2.............................................................................................................. 76
+Table 20: Pre-Operational Self-Tests....................................................................................... 77
+Table 21: Conditional Self-Tests.............................................................................................. 81
+Table 22: Pre-Operational Periodic Information ...................................................................... 82
+Table 23: Conditional Periodic Information ............................................................................. 84
+Table 24: Error States ............................................................................................................. 84
+
+List of Figures
+Figure 1: Physical configurations of the tested platform (top and bottom in order). ............... 7
+Figure 2: Block Diagram ............................................................................................................ 8
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 4 of 90
+
+1 General
+
+1.1 Overview
+This document is the non-proprietary FIPS 140-3 Security Policy for the Summit Linux FIPS
+Core Crypto Module, firmware version 11.0. It contains the security rules under which the
+module must be operated and describes how this module meets the requirements as
+specified in FIPS 140-3 (Federal Information Processing Standards Publication 140-3) for a
+Security Level 1 module.
+This Security Policy contains non-proprietary information. All other documentation submitted
+for FIPS 140-3 conformance testing and validation is proprietary and is releasable only under
+appropriate non-disclosure agreements.
+
+1.1.1 How this Security Policy was prepared
+The vendor has provided the non-proprietary Security Policy of the cryptographic module,
+which was further consolidated into this document by atsec information security together
+with other vendor-supplied documentation. In preparing the Security Policy document, the
+laboratory formatted the vendor-supplied documentation for consolidation without altering
+the technical statements therein contained. The further refining of the Security Policy
+document was conducted iteratively throughout the conformance testing, wherein the
+Security Policy was submitted to the vendor, who would then edit, modify, and add technical
+contents. The vendor would also supply additional documentation, which the laboratory
+formatted into the existing Security Policy, and resubmitted to the vendor for their final
+editing.
+
+1.2 Security Levels
+Section
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+Table 1: Security Levels
+
+Security Level
+1
+1
+1
+1
+1
+1
+1
+N/A
+1
+1
+1
+1
+1
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 5 of 90
+
+2 Cryptographic Module Specification
+2.1 Description
+
+Purpose and Use:
+The Summit Linux FIPS Core Crypto Module (hereafter referred to as the “module”) is a
+firmware module supporting FIPS 140-3 Approved cryptographic algorithms. The module is
+composed by firmware components comprised of a kernel and OpenSSL library. These
+firmware components provide a C language application program interface (API) for use by
+other processes that require cryptographic functionality.
+The module offers approved cryptographic functions in the approved mode for, among other
+uses:
+• Algorithms for use in the Wi-Fi protocols CCMP and GCMP.
+• Algorithms for use in the TLS protocol.
+• Encryption and decryption for data at rest.
+Module Type: Firmware
+
+Module Embodiment: MultiChipStand
+Cryptographic Boundary:
+The Summit Linux FIPS Core Crypto Module is defined as a firmware, Multi-Chip Standalone
+module per the requirements within FIPS 140-3. The cryptographic boundary of the module
+consists of the firmware component files (kernel, FIPS Provider, and the fipscheck integrity
+test tool) and the integrity test HMAC files. For easier readability in the rest of the document
+“OpenSSL FIPS provider” has been shortened to “FIPS provider”.
+
+Tested Operational Environment’s Physical Perimeter (TOEPP):
+Figure 1 below depicts the physical representations of the tested platforms as the top and
+bottom view of the circuit board. The tested environments are further described in Section 6.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 6 of 90
+
+Figure 1: Physical configurations of the tested platform (top and bottom in order).
+Figure 2 below shows the block diagram of the module. The cryptographic boundary is
+indicated with yellow blocks, distributed among firmware components. Blocks of another
+color do not belong to the cryptographic boundary. Users of the module interact through the
+API that are the logical interfaces data input, data output, control input, status output. A
+dotted line encompasses the module’s components that interface through the API.
+In Figure 2, users of the module are exemplified by applications. These applications may
+reside within the NAND Flash memory or may reside outside (but still within the physical
+perimeter), always interacting with the module’s API.
+The physical perimeter of the module is defined as the perimeter of the circuit board on
+which the module is installed. The filesystem and operating system reside on NAND Flash
+memory within the physical perimeter.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 7 of 90
+
+Figure 2: Block Diagram
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Software, Firmware, Hybrid (Executable
+Code Sets):
+Package or File
+Software/
+Features
+Integrity Test
+Name
+Firmware Version
+Image.Izma,
+11.0
+N/A
+HMAC-SHA-256
+fipscheck
+(application and
+library), fips.so
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+Summit
+Linux 11.0
+
+Hardware
+Platform
+Laird WB5NBT
+wireless
+bridge
+
+Processors
+
+PAA/PAI
+
+Microchip
+AT91SAM9G
+(ARM926EJ-S),
+ARMv5-based
+
+No
+
+Hypervisor
+or Host OS
+N/A
+
+Version(s)
+11.0
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 8 of 90
+
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+CMVP makes no statement as to the correct operation of the module or the security
+strengths of the generated keys when so ported if the specific operational environment is
+not listed on the validation certificate.
+
+2.3 Excluded Components
+There are no components within the cryptographic boundary excluded from the FIPS 140-3
+requirements.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode
+Name
+Approved
+mode
+
+Description
+
+Automatically entered
+whenever an approved
+service is requested
+NonAutomatically entered
+approved
+whenever a non-approved
+mode
+service is requested
+Table 4: Modes List and Description
+
+Type
+
+Status Indicator
+
+Approved
+
+Equivalent to the indicator of
+the requested service as
+defined in section 4.3
+
+NonApproved
+
+After passing all pre-operational self-tests and cryptographic algorithm self-tests executed
+on start-up, the module automatically transitions to the approved mode.
+
+Mode Change Instructions and Status:
+The module automatically switches between the approved and non-approved modes
+depending on the services requested by the operator. The status indicator of the mode of
+operation is equivalent to the indicator of the service that was requested.
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+AES-CBC
+AES-CBC-CS1
+AES-CBC-CS2
+AES-CBC-CS3
+
+CAVP Cert
+A4712, A4716,
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A4714, A4718,
+A5002, A5003,
+A5004
+
+Properties
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+
+Reference
+SP 800-38A
+
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+
+SP 800-38A
+SP 800-38A
+SP 800-38A
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 9 of 90
+
+Algorithm
+AES-CCM
+AES-CFB1
+AES-CFB128
+AES-CFB8
+AES-CMAC
+AES-CTR
+AES-ECB
+
+AES-GCM
+
+CAVP Cert
+A4712, A4716,
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A4712, A4716,
+A5002, A5003,
+A5004
+A4712, A4716,
+A5002, A5003,
+A5004
+A4711, A4712,
+A4715, A4716,
+A4717, A5002,
+A5003, A5004,
+A5019
+A4712, A4715,
+A4717
+
+AES-GCM
+
+A5005, A5006,
+A5007, A5008
+
+AES-GMAC
+
+A4712, A5005,
+A5006, A5007,
+A5008
+
+AES-KW
+
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A5002, A5003,
+A5004
+A4712, A4716,
+A5002, A5003,
+A5004
+A4711, A4712,
+A4715, A4717
+
+AES-KWP
+AES-OFB
+AES-XTS
+Testing
+Revision 2.0
+Counter
+DRBG
+Counter
+DRBG
+
+A5015
+
+ECDSA
+KeyGen
+(FIPS186-5)
+ECDSA
+KeyGen
+(FIPS186-5)
+
+A4711
+A5009, A5018
+
+Properties
+Key Length - 128, 192, 256
+
+Reference
+SP 800-38C
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Generation, Verification
+Key Length - 128, 192, 256
+
+SP 800-38A
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+
+SP 800-38A
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+
+SP 800-38A
+
+Direction - Decrypt, Encrypt
+IV Generation - External
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External, Internal
+IV Generation Mode - 8.2.1, 8.2.2
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External
+IV Generation Mode - 8.2.1
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 256
+
+SP 800-38D
+
+Prediction Resistance - No, Yes
+Mode - AES-128, AES-192, AES-256
+Derivation Function Enabled - Yes
+Prediction Resistance - No, Yes
+Mode - AES-128, AES-192, AES-256
+Derivation Function Enabled - No, Yes
+Curve - P-256, P-384
+Secret Generation Mode - testing
+candidates
+Curve - P-224, P-256, P-384, P-521
+Secret Generation Mode - testing
+candidates
+
+SP 800-90A
+Rev. 1
+
+SP 800-38A
+SP 800-38A
+SP 800-38B
+
+SP 800-38D
+
+SP 800-38D
+
+SP 800-38F
+SP 800-38F
+SP 800-38A
+SP 800-38E
+
+SP 800-90A
+Rev. 1
+FIPS 186-5
+FIPS 186-5
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 10 of 90
+
+Algorithm
+ECDSA
+KeyVer
+(FIPS186-5)
+ECDSA
+SigGen
+(FIPS186-5)
+
+CAVP Cert
+A5009, A5018
+
+Properties
+Curve - P-224, P-256, P-384, P-521
+
+Reference
+FIPS 186-5
+
+A5009, A5018
+
+FIPS 186-5
+
+ECDSA
+SigGen
+(FIPS186-5)
+
+A5011, A5020
+
+ECDSA
+SigVer
+(FIPS186-5)
+
+A5009, A5018
+
+ECDSA
+SigVer
+(FIPS186-5)
+EDDSA
+KeyGen
+EDDSA
+SigGen
+EDDSA
+SigVer
+Hash DRBG
+
+A5011, A5020
+A5016
+
+Curve - P-224, P-256, P-384, P-521
+Hash Algorithm - SHA2-224, SHA2-256,
+SHA2-384, SHA2-512, SHA2-512/224,
+SHA2-512/256
+Component - No
+Curve - P-224, P-256, P-384, P-521
+Hash Algorithm - SHA3-224, SHA3-256,
+SHA3-384, SHA3-512
+Component - No
+Curve - P-224, P-256, P-384, P-521
+Hash Algorithm - SHA2-224, SHA2-256,
+SHA2-384, SHA2-512, SHA2-512/224,
+SHA2-512/256
+Curve - P-224, P-256, P-384, P-521
+Hash Algorithm - SHA3-224, SHA3-256,
+SHA3-384, SHA3-512
+Curve - ED-25519, ED-448
+
+A5016
+
+Curve - ED-25519, ED-448
+
+FIPS 186-5
+
+A5016
+
+Curve - ED-25519, ED-448
+
+FIPS 186-5
+
+A5015
+
+HMAC DRBG
+
+A5015
+
+HMAC-SHA-1
+
+A5009, A5018
+
+SP 800-90A
+Rev. 1
+SP 800-90A
+Rev. 1
+FIPS 198-1
+
+HMAC-SHA2224
+HMAC-SHA2256
+HMAC-SHA2384
+HMAC-SHA2512
+HMAC-SHA2512/224
+HMAC-SHA2512/256
+HMAC-SHA3224
+HMAC-SHA3256
+HMAC-SHA3384
+HMAC-SHA3512
+KAS-ECC-SSC
+Sp800-56Ar3
+
+A5009, A5018
+
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Key Length - Key Length: 112-524288
+Increment 8
+Domain Parameter Generation Methods - P256, P-384
+
+A5009, A5010,
+A5018
+A5009, A5018
+A5009, A5018
+A5009, A5018
+A5009, A5018
+A5011, A5020
+A5011, A5020
+A5011, A5020
+A5011, A5020
+A4711
+
+FIPS 186-5
+
+FIPS 186-5
+
+FIPS 186-5
+FIPS 186-5
+
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+SP 800-56A
+Rev. 3
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 11 of 90
+
+Algorithm
+
+CAVP Cert
+
+KAS-ECC-SSC
+Sp800-56Ar3
+
+A5009, A5018
+
+KAS-FFC-SSC
+Sp800-56Ar3
+
+A5014
+
+KAS-IFC-SSC
+
+A5009, A5018
+
+KDA HKDF
+Sp800-56Cr1
+
+A5013
+
+KDA OneStep
+SP800-56Cr2
+
+A5012
+
+KDA TwoStep
+SP800-56Cr2
+
+A5012
+
+KDF ANS
+9.42 (CVL)
+
+A5009, A5018
+
+KDF ANS
+9.42 (CVL)
+
+A5011, A5020
+
+KDF ANS
+9.63 (CVL)
+
+A5009, A5018
+
+Properties
+Scheme ephemeralUnified KAS Role - initiator, responder
+Domain Parameter Generation Methods - P224, P-256, P-384, P-521
+Scheme ephemeralUnified KAS Role - initiator, responder
+Domain Parameter Generation Methods ffdhe2048, ffdhe3072, ffdhe4096,
+ffdhe6144, ffdhe8192, MODP-2048, MODP3072, MODP-4096, MODP-6144, MODP8192
+Scheme dhEphem KAS Role - initiator, responder
+Modulo - 2048, 3072, 4096, 6144, 8192
+Key Generation Methods - rsakpg1-basic,
+rsakpg1-crt, rsakpg1-prime-factor,
+rsakpg2-basic, rsakpg2-crt, rsakpg2-primefactor
+Scheme KAS1 KAS Role - initiator, responder
+Derived Key Length - 2048
+Shared Secret Length - Shared Secret
+Length: 224-2048 Increment 8
+HMAC Algorithm - SHA-1, SHA2-224, SHA2256, SHA2-384, SHA2-512, SHA2-512/224,
+SHA2-512/256, SHA3-224, SHA3-256,
+SHA3-384, SHA3-512
+Derived Key Length - 2048
+Shared Secret Length - Shared Secret
+Length: 224-2048 Increment 8
+MAC Salting Methods - default, random
+KDF Mode - feedback
+Derived Key Length - 2048
+Shared Secret Length - Shared Secret
+Length: 224-2048 Increment 8
+KDF Type - DER
+Hash Algorithm - SHA-1, SHA2-224, SHA2256, SHA2-384, SHA2-512, SHA2-512/224,
+SHA2-512/256
+Key Data Length - Key Data Length: 8-4096
+Increment 8
+KDF Type - DER
+Hash Algorithm - SHA3-224, SHA3-256,
+SHA3-384, SHA3-512
+Key Data Length - Key Data Length: 8-4096
+Increment 8
+Hash Algorithm - SHA2-224, SHA2-256,
+SHA2-384, SHA2-512, SHA2-512/224,
+SHA2-512/256
+
+Reference
+
+SP 800-56A
+Rev. 3
+
+SP 800-56A
+Rev. 3
+
+SP 800-56A
+Rev. 3
+
+SP 800-56C
+Rev. 2
+
+SP 800-56C
+Rev. 2
+SP 800-56C
+Rev. 2
+
+SP 800-135
+Rev. 1
+
+SP 800-135
+Rev. 1
+
+SP 800-135
+Rev. 1
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 12 of 90
+
+Algorithm
+
+CAVP Cert
+
+KDF KMAC
+Sp800-108r1
+KDF SP800108
+
+A5017
+
+KDF SSH
+(CVL)
+
+A5019
+
+KDF TLS
+(CVL)
+KMAC-128
+
+A5009, A5018
+
+KMAC-256
+
+A5011, A5020
+
+KTS-IFC
+
+A5009, A5018
+
+PBKDF
+
+A5009, A5011,
+A5018, A5020
+
+RSA KeyGen
+(FIPS186-5)
+
+A5009, A5018
+
+RSA SigGen
+(FIPS186-5)
+RSA SigVer
+(FIPS186-5)
+Safe Primes
+Key
+Generation
+
+A5009, A5018
+
+Safe Primes
+Key
+Verification
+
+A5014
+
+SHA-1
+
+A5009, A5018
+
+A5017
+
+A5011, A5020
+
+A5009, A5018
+A5014
+
+Properties
+Key Data Length - Key Data Length: 1284096 Increment 8
+Derived Key Length - Derived Key Length:
+112-4096 Increment 8
+KDF Mode - Counter, Feedback
+Supported Lengths - Supported Lengths:
+112, 128, 776, 3456, 4096
+Cipher - AES-128, AES-192, AES-256, TDES
+Hash Algorithm - SHA-1, SHA2-256, SHA2384, SHA2-512
+TLS Version - v1.0/1.1
+Message Length - Message Length: 065536 Increment 8
+Key Data Length - Key Data Length: 1281024 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Key Data Length - Key Data Length: 1281024 Increment 8
+Modulo - 2048, 3072, 4096, 6144, 8192
+Key Generation Methods - rsakpg1-basic,
+rsakpg1-crt, rsakpg1-prime-factor,
+rsakpg2-basic, rsakpg2-crt, rsakpg2-primefactor
+Scheme KTS-OAEP-basic KAS Role - initiator, responder
+Key Transport Method Key Length - 768
+Iteration Count - Iteration Count: 100010000 Increment 1
+Password Length - Password Length: 14128 Increment 1
+Key Generation Mode probableWithProbableAux
+Modulo - 2048, 3072, 4096
+Primality Tests - 2powSecStr
+Private Key Format - standard
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5, pss
+Modulo - 2048, 3072, 4096
+Signature Type - pkcs1v1.5, pss
+Safe Prime Groups - ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144, ffdhe8192, MODP2048, MODP-3072, MODP-4096, MODP6144, MODP-8192
+Safe Prime Groups - ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144, ffdhe8192, MODP2048, MODP-3072, MODP-4096, MODP6144, MODP-8192
+Message Length - Message Length: 065536 Increment 8
+
+Reference
+SP 800-108
+Rev. 1
+SP 800-108
+Rev. 1
+SP 800-135
+Rev. 1
+SP 800-135
+Rev. 1
+SP 800-185
+
+SP 800-185
+
+SP 800-56B
+Rev. 2
+
+SP 800-132
+
+FIPS 186-5
+
+FIPS 186-5
+FIPS 186-5
+SP 800-56A
+Rev. 3
+SP 800-56A
+Rev. 3
+FIPS 180-4
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 13 of 90
+
+Algorithm
+SHA2-224
+SHA2-256
+SHA2-384
+SHA2-512
+SHA2512/224
+SHA2512/256
+SHA3-224
+
+CAVP Cert
+A4711, A4712,
+A4716, A5009,
+A5018
+A4711, A4712,
+A4716, A5009,
+A5010, A5018
+A4711, A4712,
+A4716, A5009,
+A5018
+A4711, A4712,
+A4716, A5009,
+A5018
+A5009, A5018
+A5009, A5018
+
+SHAKE-128
+
+A4713, A5011,
+A5020
+A4713, A5011,
+A5020
+A4713, A5011,
+A5020
+A4713, A5011,
+A5020
+A5011, A5020
+
+SHAKE-256
+
+A5011, A5020
+
+SHA3-256
+SHA3-384
+SHA3-512
+
+TLS v1.2 KDF A5009, A5018
+RFC7627
+(CVL)
+TLS v1.3 KDF A5013
+(CVL)
+Table 5: Approved Algorithms
+
+Properties
+Message Length - Message Length: 065536 Increment 8
+
+Reference
+FIPS 180-4
+
+Message Length - Message Length: 065536 Increment 8
+
+FIPS 180-4
+
+Message Length - Message Length: 065536 Increment 8
+
+FIPS 180-4
+
+Message Length - Message Length: 065536 Increment 8
+
+FIPS 180-4
+
+Message Length - Message Length: 065536 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Message Length - Message Length: 065536 Increment 8
+Output Length - Output Length: 16-65536
+Increment 8
+Output Length - Output Length: 16-65536
+Increment 8
+Hash Algorithm - SHA2-256, SHA2-384,
+SHA2-512
+
+FIPS 180-4
+
+HMAC Algorithm - SHA2-256, SHA2-384
+KDF Running Modes - DHE, PSK, PSK-DHE
+
+SP 800-135
+Rev. 1
+
+FIPS 180-4
+FIPS 202
+FIPS 202
+FIPS 202
+FIPS 202
+FIPS 202
+FIPS 202
+SP 800-135
+Rev. 1
+
+Vendor-Affirmed Algorithms:
+Name
+Kernel ECDSA
+Key
+Generation
+FIPS provider
+Safe Primes
+Key
+Generation
+FIPS provider
+EDDSA Key
+Generation
+FIPS provider
+RSA Key
+Generation
+
+Properties
+Curves:P-256, P-384 (128, 192
+bits)
+
+Implementation
+Summit Linux
+(ECDH_C)
+
+Safe Primes:MODP-2048, MODP3072, MODP-4096, MODP-6144,
+ffdhe2048, ffdhe3072, ffdhe4096,
+ffdhe6144, ffdhe8192 with 112200 bits of key strength
+Curves:ED-25519, ED-448 (128,
+224 bits)
+
+FIPS provider
+(FFC_DH)
+
+Keys:2048, 3072, 4096 (112,
+128, 149 bits)
+
+FIPS provider
+(SHA_ASM)
+
+FIPS provider
+(EDDSA_3_2)
+
+Reference
+FIPS 186-5, SP
+800-133rev2
+Section 5.1, 5.2
+FIPS 186-5, SP
+800-133rev2
+Section 5.1, 5.2
+FIPS 186-5, SP
+800-133rev2
+Section 5.1
+FIPS 186-5, SP
+800-133rev2
+Section 5.1, 5.2
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 14 of 90
+
+Name
+Properties
+FIPS provider
+Curves:P-224, P-256, P-384, PECDSA Key
+512 (112, 128, 192, 256 bits)
+Generation
+Table 6: Vendor-Affirmed Algorithms
+
+Implementation
+FIPS provider
+(SSH_ASM)
+
+Reference
+FIPS 186-5, SP
+800-133rev2
+Section 5.1, 5.2
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+
+Non-Approved, Not Allowed Algorithms:
+Name
+FIPS provider PBKDF with salt length less than 128 bits
+FIPS provider TLSv1.0 and TLSv1.1 KDF using EMS
+FIPS provider TLSv1.2 KDF without using EMS
+Table 7: Non-Approved, Not Allowed Algorithms
+
+Use and
+Function
+Key derivation
+Key derivation
+Key derivation
+
+2.6 Security Function Implementations
+Name
+Kernel
+AES-CCM
+(KTS-Wrap)
+
+Type
+KTS-Wrap
+
+Description
+Key Unwrapping, Key
+Unwrapping
+
+Kernel
+AES-GCM
+(KTS-Wrap)
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+Kernel AES
+CBC with
+HMAC
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+Properties
+Keys: 128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+
+Algorithms
+AES-CCM:
+(A4712,
+A4716)
+
+AES-GCM:
+(A4712,
+A4715,
+A4717)
+AES-CBC:
+(A4712,
+A4716)
+HMACSHA2-256:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-384:
+(A4711,
+A4712,
+A4716)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 15 of 90
+
+Name
+
+Type
+
+Description
+
+Properties
+
+Kernel AES
+CTR with
+HMAC
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+
+Kernel
+KAS-ECCSSC
+
+KAS-SSC
+
+Shared Secret
+Computation
+
+Kernel
+AES-ECB
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Curves:Curves : P256, P-384 elliptic
+curves with 128 and
+192 bits of key
+strength Compliance :
+Compliant with IG D.F
+scenario 2(1)
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+Kernel
+AES-CTR
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Kernel
+AES-CBC
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Kernel
+AES-CBCCS3
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Kernel
+AES-XTS
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Keys:128, 256 bits
+with 128 and 256 bits
+of key strength
+
+Algorithms
+HMACSHA2-512:
+(A4711,
+A4712,
+A4716)
+AES-CTR:
+(A4712,
+A4716)
+HMACSHA2-256:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-384:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-512:
+(A4711,
+A4712,
+A4716)
+KAS-ECCSSC Sp80056Ar3:
+(A4711)
+
+AES-ECB:
+(A4711,
+A4712,
+A4715,
+A4716,
+A4717)
+AES-CTR:
+(A4712,
+A4716)
+AES-CBC:
+(A4712,
+A4716)
+AES-CBCCS3:
+(A4714,
+A4718)
+AES-XTS
+Testing
+Revision
+2.0: (A4712,
+A4716)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 16 of 90
+
+Name
+Kernel
+AES-CCM
+(BC-Auth)
+Kernel
+AES-GCM
+(BC-Auth)
+
+Type
+BC-Auth
+
+Description
+Authenticated
+Encryption/Decryption
+
+Properties
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+BC-Auth
+
+Authenticated
+Encryption/Decryption
+
+Kernel
+AES-CMAC
+
+MAC
+
+Kernel
+AES-GMAC
+
+MAC
+
+Kernel
+Counter
+DRBG
+
+DRBG
+
+Message
+authentication code
+(MAC)
+Message
+authentication code
+(MAC)
+Random Number
+Generation
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+Compliance:Compliant
+with SP800-90ARev1
+
+Kernel
+ECDSA Key
+Generation
+
+CKG
+
+Key Generation
+
+Curves:P-256, P-384
+
+Kernel
+HMAC
+
+MAC
+
+Message
+authentication code
+(MAC)
+
+Keys:112-256 bits
+with 112-256 bits of
+key strength
+
+Algorithms
+AES-CCM:
+(A4712,
+A4716)
+AES-GCM:
+(A4712,
+A4715,
+A4717)
+AES-CMAC:
+(A4712,
+A4716)
+AES-GMAC:
+(A4712)
+Counter
+DRBG:
+(A4711,
+A4712,
+A4715,
+A4717)
+ECDSA
+KeyGen
+(FIPS186-5):
+(A4711)
+HMACSHA2-224:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-256:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-384:
+(A4711,
+A4712,
+A4716)
+HMACSHA2-512:
+(A4711,
+A4712,
+A4716)
+HMACSHA3-224:
+(A4713)
+HMACSHA3-256:
+(A4713)
+HMACSHA3-384:
+(A4713)
+HMAC-
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 17 of 90
+
+Name
+
+Type
+
+Description
+
+Kernel
+Hashes
+
+SHA
+
+Hashing
+
+FIPS
+provider
+AES-CCM
+(KTS-Wrap)
+
+KTS-Wrap
+
+Key Unwrapping, Key
+Unwrapping
+
+FIPS
+provider
+AES-GCM
+(KTS-Wrap)
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+FIPS
+provider
+KAS-IFCSSC
+
+KAS-SSC
+
+Shared Secret
+Computation
+
+FIPS
+provider
+KTS-IFC
+
+KTS-Encap
+
+Key encapsulation,
+Key unencapsulation
+
+Properties
+
+Keys: 128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:2048, 3072,
+4096, 6144, 8192-bit
+keys with 112-200
+bits of key strength
+Compliance :
+Compliant with IG D.F
+scenario 1(1)
+Keys:2048, 3072,
+4096, 6144, 8192-bit
+keys with 112-200
+bits of key strength
+respectively
+Compliance:Compliant
+with IG D.G
+
+Algorithms
+SHA3-512:
+(A4713)
+SHA2-224:
+(A4711,
+A4712,
+A4716)
+SHA2-256:
+(A4711,
+A4712,
+A4716)
+SHA2-384:
+(A4711,
+A4712,
+A4716)
+SHA2-512:
+(A4711,
+A4712,
+A4716)
+SHA3-224:
+(A4713)
+SHA3-256:
+(A4713)
+SHA3-384:
+(A4713)
+SHA3-512:
+(A4713)
+AES-CCM:
+(A5002,
+A5003,
+A5004)
+AES-GCM:
+(A5005,
+A5006,
+A5007,
+A5008)
+KAS-IFCSSC:
+(A5009,
+A5018)
+
+KTS-IFC:
+(A5009,
+A5018)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 18 of 90
+
+Name
+FIPS
+provider
+Safe
+Primes Key
+Generation
+
+Type
+CKG
+
+Description
+Key Generation
+
+Properties
+Groups:MODP-2048,
+MODP-3072, MODP4096, MODP-6144,
+MODP-8192,
+ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144,
+ffdhe8192
+Groups:MODP-2048,
+MODP-3072, MODP4096, MODP-6144,
+MODP-8192,
+ffdhe2048, ffdhe3072,
+ffdhe4096, ffdhe6144,
+ffdhe8192
+Keys:2048, 3072,
+4096, 6144, 8192-bit
+keys with 112-200
+bits of key strength
+Compliance :
+Compliant with IG D.F
+scenario 2(1)
+Curves:P-224, P-256,
+P-384, P-521 elliptic
+curves with 112-256
+bits of key strength
+Compliance :
+Compliant with IG D.F
+scenario 2(1)
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:128, 192, 256bit keys with 128,
+192, 256 bits of key
+strength, respectively
+Compliance:Compliant
+with IG D.G
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+Safe
+Primes Key
+Verification
+
+AsymKeyPairKeyVer
+
+Key Verification
+
+FIPS
+provider
+KAS-FFCSSC
+
+KAS-SSC
+
+Shared Secret
+Computation
+
+FIPS
+provider
+KAS-ECCSSC
+
+KAS-SSC
+
+Shared Secret
+Computation
+
+FIPS
+provider
+AES KW
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+FIPS
+provider
+AES KWP
+
+KTS-Wrap
+
+Key Wrapping, Key
+Unwrapping
+
+FIPS
+provider
+AES-ECB
+
+BC-UnAuth
+
+Encryption/Decryption
+
+FIPS
+provider
+AES-CTR
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CBC
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+Algorithms
+Safe Primes
+Key
+Generation:
+(A5014)
+
+Safe Primes
+Key
+Verification:
+(A5014)
+
+KAS-FFCSSC Sp80056Ar3:
+(A5014)
+
+KAS-ECCSSC Sp80056Ar3:
+(A5009,
+A5018)
+AES-KW:
+(A5002,
+A5003,
+A5004)
+AES-KWP:
+(A5002,
+A5003,
+A5004)
+AES-ECB:
+(A5002,
+A5003,
+A5004,
+A5019)
+AES-CTR:
+(A5002,
+A5003,
+A5004)
+AES-CBC:
+(A5002,
+A5003,
+A5004)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 19 of 90
+
+Name
+FIPS
+provider
+AES-CBCCS1
+
+Type
+BC-UnAuth
+
+Description
+Encryption/Decryption
+
+Properties
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CBCCS2
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CBCCS3
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CFB1
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CFB8
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AESCFB128
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-XTS
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 256 bits
+with 128 and 256 bits
+of key strength
+
+FIPS
+provider
+AES-CCM
+(BC-Auth)
+FIPS
+provider
+AES-GCM
+(BC-Auth)
+
+BC-Auth
+
+Authenticated
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+BC-Auth
+
+Authenticated
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-OFB
+
+BC-UnAuth
+
+Encryption/Decryption
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+FIPS
+provider
+AES-CMAC
+
+MAC
+
+Message
+authentication code
+(MAC)
+
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+Algorithms
+AES-CBCCS1:
+(A5002,
+A5003,
+A5004)
+AES-CBCCS2:
+(A5002,
+A5003,
+A5004)
+AES-CBCCS3:
+(A5002,
+A5003,
+A5004)
+AES-CFB1:
+(A5002,
+A5003,
+A5004)
+AES-CFB8:
+(A5002,
+A5003,
+A5004)
+AESCFB128:
+(A5002,
+A5003,
+A5004)
+AES-XTS
+Testing
+Revision
+2.0: (A5002,
+A5003,
+A5004)
+AES-CCM:
+(A5002,
+A5003,
+A5004)
+AES-GCM:
+(A5005,
+A5006,
+A5007,
+A5008)
+AES-OFB:
+(A5002,
+A5003,
+A5004)
+AES-CMAC:
+(A5002,
+A5003,
+A5004)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 20 of 90
+
+Name
+FIPS
+provider
+AES-GMAC
+
+Type
+MAC
+
+Description
+Message
+authentication code
+(MAC)
+
+Properties
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+Algorithms
+AES-GMAC:
+(A5005,
+A5006,
+A5007,
+A5008)
+Counter
+DRBG:
+(A5015)
+
+FIPS
+provider
+Counter
+DRBG
+FIPS
+provider
+Hash
+DRBG
+FIPS
+provider
+HMAC
+DRBG
+FIPS
+provider
+ECDSA Key
+Generation
+
+DRBG
+
+Random Number
+Generation
+
+Compliance:Compliant
+with SP800-90ARev1
+
+DRBG
+
+Random Number
+Generation
+
+Compliance:Compliant
+with SP800-90ARev1
+
+Hash DRBG:
+(A5015)
+
+DRBG
+
+Random Number
+Generation
+
+Compliance:Compliant
+with SP800-90ARev1
+
+HMAC
+DRBG:
+(A5015)
+
+CKG
+
+Key Generation
+
+Curves:P-224, P-256,
+P-384, P-521
+
+FIPS
+provider
+ECDSA Key
+Verification
+
+AsymKeyPairKeyVer
+
+Key Verification
+
+Curves:P-224, P-256,
+P-384, P-521
+
+FIPS
+provider
+ECDSA
+Signature
+Generation
+
+DigSigSigGen
+
+Signature Generation
+
+Curves:P-224, P-256,
+P-384, P-521
+
+FIPS
+provider
+ECDSA
+Signature
+Verification
+
+DigSig-SigVer
+
+Signature Verification
+
+Curves:P-224, P-256,
+P-384, P-521
+
+FIPS
+provider
+EDDSA Key
+Generation
+FIPS
+provider
+EDDSA
+Signature
+Generation
+FIPS
+provider
+EDDSA
+
+CKG
+
+Key Generation
+
+Curves:Ed25519,
+Ed448
+
+ECDSA
+KeyGen
+(FIPS186-5):
+(A5009,
+A5018)
+ECDSA
+KeyVer
+(FIPS186-5):
+(A5009,
+A5018)
+ECDSA
+SigGen
+(FIPS186-5):
+(A5009,
+A5011,
+A5018,
+A5020)
+ECDSA
+SigVer
+(FIPS186-5):
+(A5009,
+A5011,
+A5018,
+A5020)
+EDDSA
+KeyGen:
+(A5016)
+
+DigSigSigGen
+
+Signature Generation
+
+Curves:Ed25519,
+Ed448
+
+EDDSA
+SigGen:
+(A5016)
+
+DigSig-SigVer
+
+Signature Verification
+
+Curves:Ed25519,
+Ed448
+
+EDDSA
+SigVer:
+(A5016)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 21 of 90
+
+Name
+Signature
+Verification
+FIPS
+provider
+RSA Key
+Generation
+
+Type
+
+Description
+
+Properties
+
+Algorithms
+
+CKG
+
+Key Generation
+
+Keys:2048, 3072,
+4096 keys with 112150 bits of key
+strength respectively
+
+FIPS
+provider
+RSA
+Signature
+Generation
+FIPS
+provider
+RSA
+Signature
+Verification
+FIPS
+provider
+HMAC
+
+DigSigSigGen
+
+Signature Generation
+
+Keys:2048, 3072,
+4096 keys with 112150 bits of key
+strength respectively
+
+RSA
+KeyGen
+(FIPS186-5):
+(A5009,
+A5018)
+RSA SigGen
+(FIPS186-5):
+(A5009,
+A5018)
+
+DigSig-SigVer
+
+Signature Verification
+
+Keys:2048, 3072,
+4096 keys with 112150 bits of key
+strength respectively
+
+RSA SigVer
+(FIPS186-5):
+(A5009,
+A5018)
+
+MAC
+
+Message
+authentication code
+(MAC)
+
+Keys:112-256 bits
+with 112-256 bits of
+key strength
+
+HMAC-SHA1: (A5009,
+A5018)
+HMACSHA2-224:
+(A5009,
+A5018)
+HMACSHA2-256:
+(A5009,
+A5010,
+A5018)
+HMACSHA2-384:
+(A5009,
+A5018)
+HMACSHA2-512:
+(A5009,
+A5018)
+HMACSHA2512/224:
+(A5009,
+A5018)
+HMACSHA2512/256:
+(A5009,
+A5018)
+HMACSHA3-224:
+(A5011,
+A5020)
+HMACSHA3-256:
+(A5011,
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 22 of 90
+
+Name
+
+Type
+
+Description
+
+Properties
+
+FIPS
+provider
+KMAC
+
+MAC
+
+Message
+authentication code
+(MAC)
+
+Keys:112-256 bits
+with 112-256 bits of
+key strength
+
+FIPS
+provider
+Hashes
+
+SHA
+
+Hashing
+
+Algorithms
+A5020)
+HMACSHA3-384:
+(A5011,
+A5020)
+HMACSHA3-512:
+(A5011,
+A5020)
+KMAC-128:
+(A5011,
+A5020)
+KMAC-256:
+(A5011,
+A5020)
+SHA-1:
+(A5009,
+A5018)
+SHA2-224:
+(A5009,
+A5018)
+SHA2-256:
+(A5009,
+A5010,
+A5018)
+SHA2-384:
+(A5009,
+A5018)
+SHA2-512:
+(A5009,
+A5018)
+SHA2512/224:
+(A5009,
+A5018)
+SHA2512/256:
+(A5009,
+A5018)
+SHA3-224:
+(A5011,
+A5020)
+SHA3-256:
+(A5011,
+A5020)
+SHA3-384:
+(A5011,
+A5020)
+SHA3-512:
+(A5011,
+A5020)
+SHAKE-128:
+(A5011,
+A5020)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 23 of 90
+
+Name
+
+Type
+
+Description
+
+Properties
+
+Algorithms
+SHAKE-256:
+(A5011,
+A5020)
+KDF ANS
+9.42:
+(A5009,
+A5011,
+A5018,
+A5020)
+KDF ANS
+9.63:
+(A5009,
+A5018)
+
+FIPS
+provider
+ANS 9.42
+Key
+Derivation
+(CVL)
+FIPS
+provider
+ANS 9.63
+Key
+Derivation
+(CVL)
+FIPS
+provider
+TLS 1.0
+and 1.1
+Key
+Derivation
+(CVL)
+FIPS
+provider
+TLS 1.2
+Key
+Derivation
+(CVL)
+FIPS
+provider
+TLS 1.3
+Key
+Derivation
+(CVL)
+FIPS
+provider
+HKDF Key
+Derivation
+FIPS
+provider
+Passwordbased Key
+Derivation
+FIPS
+provider
+OneStep
+Key
+Derivation
+FIPS
+provider
+TwoStep
+Key
+Derivation
+
+KAS-135KDF
+
+Key Derivation
+
+OID:AES-128-KW,
+AES-192-KW, AES256-KW with 128,
+192, 256 bits of key
+strength, respectively
+
+KAS-135KDF
+
+Key Derivation
+
+Key data length:1284096 bits
+
+KAS-135KDF
+
+Key Derivation
+
+Derived key:112-256
+bits with 112-256 bits
+of key strength
+
+KDF TLS:
+(A5009,
+A5018)
+
+KAS-135KDF
+
+Key Derivation
+
+Derived key:112-256
+bits with 112-256 bits
+of key strength
+
+TLS v1.2
+KDF
+RFC7627:
+(A5009,
+A5018)
+
+KAS-135KDF
+
+Key Derivation
+
+Derived key:112-256
+bits with 112-256 bits
+of key strength
+
+TLS v1.3
+KDF:
+(A5013)
+
+KAS-56CKDF
+
+Key Derivation
+
+Derived key:112-256
+bits with 112-256 bits
+of key strength
+
+PBKDF
+
+Key Derivation
+
+Derived key:112-4096
+bits with 112-150 bits
+of key strength
+
+KAS-56CKDF
+
+Key Derivation
+
+Derived key:2048 bits
+with 112 bits of key
+strength
+
+KAS-56CKDF
+
+Key Derivation
+
+Derived key:2048 bits
+with 112 bits of key
+strength
+
+KDA HKDF
+Sp80056Cr1:
+(A5013)
+PBKDF:
+(A5009,
+A5011,
+A5018,
+A5020)
+KDA
+OneStep
+SP80056Cr2:
+(A5012)
+KDA
+TwoStep
+SP80056Cr2:
+(A5012)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 24 of 90
+
+Name
+Type
+Description
+FIPS
+KBKDF
+Key Derivation
+provider
+KMAC Key
+Derivation
+FIPS
+KBKDF
+Key Derivation.
+provider
+KBKDF Key
+Derivation
+FIPS
+KAS-135KDF
+Key Derivation
+provider
+SSH Key
+Derivation
+Table 8: Security Function Implementations
+
+Properties
+Derived key:112-4096
+bits with 112-150 bits
+of key strength
+Derived key:112-4096
+bits with 112-150 bits
+of key strength
+Keys:128, 192, 256
+bits with 128-256 bits
+of key strength
+
+Algorithms
+KDF KMAC
+Sp800108r1:
+(A5017)
+KDF SP800108:
+(A5017)
+KDF SSH:
+(A5019)
+
+2.7 Algorithm Specific Information
+2.7.1 AES GCM IV
+AES-GCM encryption and decryption are used in the context of the TLS protocol version 1.2
+and 1.3 using the FIPS provider component (corresponding to Scenario 1 and 5 of IG C.H),
+and in the context of IEEE 802.11 GCMP using the kernel/hardware components
+(corresponding to Scenario 5 of IG C.H). For IPsec, the module offers the AES GCM
+implementation and uses the context of Scenario 1 of FIPS 140-3 IG C.H. The mechanism for
+IV generation is compliant with RFC 4106. IVs generated using this mechanism may only be
+used in the context of AES GCM encryption within the IPsec protocol.
+Alternatively, the Crypto Officer can use the module’s API to perform AES GCM encryption
+using internal IV generation. These IVs are always 96 bits and generated using the approved
+DRBG internal to the module’s boundary, compliant with Scenario 2 of FIPS 140-3 IG C.H.
+The module also provides a non-approved AES GCM encryption service which accepts
+arbitrary external IVs from the operator. This service can be requested by invoking the
+EVP_EncryptInit_ex2 API function with a non-NULL iv value. When this is the case, the API will
+set a non-approved service indicator.
+
+2.7.1.1 TLS version 1.2
+For TLS v1.2, the module uses the context of Scenario 1 of IG C.H. The module is compliant
+with SP 800-52 section 3.3.1 and the mechanism for IV generation is compliant with
+RFC5288. For this compliance, the module’s implementation of the AES-GCM shall be used
+together with an application that negotiates the protocol session’s keys and the 32-bit nonce
+value of the IV. The setting of the counter portion of the IV is performed within the
+cryptographic boundary.
+The nonce explicit part of the IV does not exhaust the maximum number of possible values
+for a given session key. This condition is implicitly ensured by the design of the TLS protocol,
+in which the nonce_explicit is denied exhaustion by the control exerted by the protocol’s
+management logic (wherein the nonce_explicit is incremented per each TLS record). This
+management logic also implies that the probability of an exhaustion of all 264 – 1 values of
+the nonce_explicit for the same TLS session in a realistic time frame is not significant.
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 25 of 90
+
+In the event the module’s power is lost and restored, the consuming application must ensure
+that a new key for use with the AES GCM key encryption or decryption under this scenario
+shall be established.
+
+2.7.1.2 TLS version 1.3
+For TLS 1.3, the AES GCM implementation uses the context of Scenario 5 of FIPS 140-3 IG
+C.H. The protocol that provides this compliance is TLS 1.3, defined in RFC8446 of August
+2018, using the cipher-suites that explicitly select AES GCM as the encryption/decryption
+cipher (Appendix B.4 of RFC8446). The module supports acceptable AES GCM cipher suites
+from Section 3.3.1 of SP800-52r2. TLS 1.3 employs separate 64-bit sequence numbers, one
+for protocol records that are received, and one for protocol records that are sent to a peer.
+These sequence numbers are set at zero at the beginning of a TLS 1.3 connection and each
+time when the AES-GCM key is changed. After reading or writing a record, the respective
+sequence number is incremented by one. The protocol specification determines that the
+sequence number should not wrap, and if this condition is observed, then the protocol
+implementation must either trigger a re-key of the session (i.e., a new key for AES-GCM), or
+terminate the connection.
+In the event the module’s power is lost and restored, the consuming application must ensure
+that a new key for use with the AES GCM key encryption or decryption under this scenario
+shall be established.
+
+2.7.1.3 IEEE 802.11 GCMP
+The kernel component is in compliance with FIPS 140-3 IG C.H scenario 5 for the WPA2
+protocol. Specifically, GCMP is defined in IEEE 802.11ac-2013. For IEEE 802.11 GCMP, the
+module implements an internal production unit logic that constructs the IV deterministically
+upon the initialization of a GCMP connection, and therefore the initialization of a GCM
+encryption context." and "In case the module's power is lost and then restored, the key used
+for AES GCM encryption or decryption shall be re-distributed.
+
+2.7.2 AES XTS
+The length of a single data unit encrypted or decrypted with AES XTS shall not exceed 220
+AES blocks, that is 16MB, of data per XTS instance. An XTS instance is defined in Section 4 of
+SP 800-38E. To meet the requirement stated in IG C.I, the module implements a check to
+ensure that the two AES keys used in AES XTS mode are not identical.
+The XTS mode shall only be used for the cryptographic protection of data on storage
+devices. It shall not be used for other purposes, such as the encryption of data in transit.
+
+2.7.3 Key derivation using SP 800-132 PBKDF2
+The module provides password-based key derivation (PBKDF2), compliant with SP 800-132.
+The module supports option 1a from Section 5.4 of SP 800-132, in which the Master Key
+(MK) or a segment of it is used directly as the Data Protection Key (DPK). In accordance to
+SP 800-132 and FIPS 140-3 IG D.N, the following requirements shall be met:
+• Derived keys shall only be used in storage applications. The MK shall not be used for
+other purposes. The length of the MK or DPK shall be of 112 bits or more.
+• Passwords or passphrases, used as an input for the PBKDF2, shall not be used as
+cryptographic keys.
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 26 of 90
+
+•
+
+•
+•
+
+The length of the password or passphrase shall be at least 8 characters. The
+probability of guessing the value, assuming a worst-case scenario of all digits, is
+estimated to be at most 10-8. Combined with the minimum iteration count as
+described below, this provides an acceptable trade-off between user experience and
+security against brute-force attacks.
+A portion of the salt, with a length of at least 128 bits, shall be generated randomly
+using the SP 800-90Ar1 DRBG provided by the module.
+The iteration count shall be selected as large as possible, as long as the time
+required to generate the key using the entered password is acceptable for the users.
+The minimum value is 1000.
+
+2.7.4 SP 800-56Ar3 Assurances
+Kernel Component: The module offers ECDH shared secret computation services
+compliant to the SP 800-56ARev3. In order to meet the required assurances listed in section
+5.6 of SP 800-56ARev3, the module shall be used together with an application that
+implements the "IPsec protocol" and the following steps shall be performed.
+1. The entity using the module, must use the module's "key pair generation" service for
+generating ECDH ephemeral keys. The key generation service performs full public
+key validation. This meets the assurances required by key pair owner defined in the
+section 5.6.2.1 of SP 800-56ARev3.
+2. The consumer using the module doesn't need to obtain assurance of the peer's
+possession of private key as the module only makes use of ephemeral keys.
+3. As part of the module’s shared secret computation service, the module internally
+performs the public key validation on the peer's public key passed in as input to the
+SSC function. This meets the public key validity assurance required by the sections
+5.6.2.2.1/5.6.2.2.2 of SP 800-56ARev3.
+FIPS provider Component: The module offers DH and ECDH shared secret computation
+services compliant to the SP 800-56ARev3. To comply with the assurances found in Section
+5.6.2 of SP 800-56Ar3, the operator must use the module together with an application that
+implements the TLS protocol. Additionally, the module’s approved key pair generation
+service must be used to generate ephemeral Diffie-Hellman or EC Diffie-Hellman key pairs,
+or the key pairs must be obtained from another FIPS-validated module. As part of this
+service, the module will internally perform the full public key validation of the generated
+public key. The module’s shared secret computation service will internally perform the full
+public key validation of the peer public key, complying with Sections 5.6.2.2.1 and 5.6.2.2.2
+of SP 800-56Ar3.
+
+2.7.5 RSA Key Encapsulation
+To comply with SP800-56Br2 assurances found in its Section 6 (specifically SP800-56Br2
+Section 6.4 Required Assurances) the entity using the module must obtain required
+assurances listed in section 6.4 of SP 800-56Br2 by performing the following steps:
+1. The entity requesting the RSA key un-encapsulation service from the module, shall
+only use an RSA private key that was generated by an active FIPS validated module
+that implements FIPS 186-5 compliant RSA key generation service and performs the
+key pair validity and the pairwise consistency as stated in section 6.4.1.1 of the SP
+800-56Br2. Additionally, the entity shall renew these assurances over time by using
+any method described in section 6.4.1.5 of the SP 800-56Br2.
+2. For use of an RSA key encapsulation service in the context of key transport per IG D.G
+the entity using the module shall:
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 27 of 90
+
+a. verify the validity of the peer’s public key using the public key validation service
+of the module (EVP_PKEY_check() API).
+b. confirm the peer’s possession of private key by using any method specified in
+section 6.4.2.3 of the SP 800-56Br2.
+Only after the above assurances are successfully met, shall the entity use the peer’s public
+key to perform the RSA key encapsulation service of the module.
+
+2.7.6 RSA Key Agreement
+To comply with the assurances found in Section 6.4 of SP 800-56Br2, the module’s approved
+RSA key pair generation service must be used to generate the RSA key pairs, or the key
+pairs must be obtained from another FIPS-validated module. As part of this service, the
+module will internally perform the key pair validity and the pairwise consistency according to
+section 6.4.1.1 of SP 800-56Br2.
+Additionally, the entity requesting the shared secret computation service shall verify the
+validity of the peer’s public key using the public key validation service of the module
+(EVP_PKEY_check() API). This service will perform the full public key validation of the peer’s
+public key, complying with Section 6.4.2.1 of SP 800-56Br2.
+
+2.7.7 RSA SigGen and SigVer compliance
+The module provides RSA signature generation and signature verification compliant with IG
+C.F.
+The module supports RSA modulus lengths of 2048, 3072, and 4096 bits for signature
+generation and 1024, 2048, 3072, and 4096 for signature verification.
+The RSA signature generation and signature verification implementations have been tested
+for all implemented RSA modulus lengths.
+The number of Miller-Rabin tests is consistent with the bit sizes of p and q from Table B.1 of
+FIPS 186-4.
+
+2.7.8 SHA-3 compliance
+The module provides SHA-3 hash functions compliant with IG C.C.
+Every implementation of each SHA-3 function was tested and validated on all of the
+module’s operating environments.
+SHAKE functions are not implemented.
+SHA-3 hash functions are also used as part of a higher-level algorithm for HMAC.
+
+2.8 RBG and Entropy
+
+Table 9: Entropy Certificates
+
+Cert
+Number
+E119
+
+Vendor
+Name
+Ezurio
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 28 of 90
+
+Name
+
+Type
+
+Summit CPU Time
+NonJitter RNG Entropy
+Physical
+Source
+Table 10: Entropy Sources
+
+Operational
+Environment
+
+Sample
+Size
+
+Summit Linux
+11.0
+
+64 bits
+
+Entropy
+per
+Sample
+64 bits
+
+Conditioning
+Component
+A4713 (SHA3256)
+
+The module provides DRBG’s compliant with SP800-90A for random number generation and
+the creation of key components of asymmetric keys. The kernel component DRBG
+implements a CTR_DRBG mechanism with AES-128, AES-192 or AES-256, with selectable
+enabling of derivation function and prediction resistance. The FIPS provider component
+DRBG’s implements a CTR_DRBG mechanism with AES-128, AES-192 or AES-256 with
+selectable enabling of derivation function and prediction resistance. Additionally, a
+Hash_DRBG and HMAC_DRBG mechanism with SHA-1, SHA-256 or SHA-512 with selectable
+enabling of derivation function and prediction resistance is implemented. Lastly the kernel
+and FIPS Provider DRBG’s are seeded with 320 bits and assessed to be full entropy in the
+ESV certificate #E119 at 1 bit/bit or 256 bits of entropy.
+
+2.9 Key Generation
+For generating RSA, ECDSA, Diffie-Hellman, EC Diffie-Hellman keys for the FIPS Provider
+component and ECDSA keys for Kernel component, the module implements asymmetric key
+generation services compliant with FIPS186-5 or SP800-56Arev3 as applicable and using a
+DRBG compliant with SP800-90A. The random value used in asymmetric key generation is
+obtained from the DRBG. In accordance with FIPS 140-3 IG D.H, the cryptographic module
+performs Cryptographic Key Generation (CKG) for asymmetric keys as per Section 4 of
+SP800-133rev2 (vendor affirmed).
+Additionally, the module implements the following key derivation methods according to
+section 6.2 of SP 800-133r2:
+•
+•
+•
+•
+•
+•
+•
+
+HKDF compliant with SP 800-56Cr1: derivation of secret keys in the context of an
+SP 800-56Ar3 and SP 800-56Br2 key agreement schemes.
+TLS KDF compliant with SP 800-135r1: derivation of secret keys in the context of
+the TLS 1.0/1.1, TLS 1.2 and TLS 1.3 protocols.
+PBKDF2: compliant with option 1a of SP 800-132: derivation of keys for use in
+storage applications.
+ANS 9.42 KDF compliant with SP 800-135r1: derivation of secret keys in the context
+of ANS X9.42-2001 key agreement schemes.
+ANS 9.63 KDF compliant with SP 800-135r1: derivation of secret keys in the context
+ANS X9.63-2001 key agreement schemes.
+KBKDF compliant with Sp800-108r1: derivation of secret keys.
+KDA OneStep and KDA TwoStep compliant with SP800-56Cr2: derivation of secret
+keys in the context of SP 800-56Ar3 and SP 800-56Br2 key agreement schemes.
+
+2.10 Key Establishment
+The module implements following key establishments methods that are listed in the Security
+Function Implementations table:
+- shared secret computation for KAS-IFC-SSC, KAS-FFC-SSC KAS-ECC-SSC
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 29 of 90
+
+- key transport for KTS-IFC and KTS-Wrap
+
+2.11 Industry Protocols
+For DH, the module supports the use of the safe primes defined in RFC 3526 (IKE) and RFC
+7919 (TLS) as listed in Approved Services table. Note that the module only implements key
+pair generation, key pair verification, and shared secret computation. No other part of the
+IKE or TLS protocols is implemented (with the exception of the TLS 1.2 and 1.3 KDFs).
+SSH KDF, TLS 1.0/1.1 KDF, TLS 1.2 KDF (RFC 7627), TLS 1.3 KDF implementations shall only
+be used to generate secret keys in the context of the SSH, TLS 1.0/1.1, TLS 1.2, or TLS 1.3
+protocols, respectively. Note that TLS 1.2 KDF must be compliant with RFC 7627 to be
+considered approved.
+ANS X9.42 KDF and ANS X9.63 KDF implementations shall only be used to generate secret
+keys in the context of an ANS X9.42-2001 resp. ANS X9.63-2001 key agreement scheme.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 30 of 90
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical
+Port
+N/A
+
+Logical
+Interface(s)
+Data Input
+
+Data That Passes
+
+API data input parameters, AF_ALG type sockets (kernel
+component)
+N/A
+Data Output
+API output parameters, AF_ALG type sockets (kernel
+component)
+N/A
+Control Input API function calls, API control input parameters, AF_ALG type
+sockets (kernel component), kernel command line (kernel
+component)
+N/A
+Status
+API return values, error queue, AF_ALG type sockets (kernel
+Output
+component), kernel logs (kernel component)
+N/A
+Power
+The hardware on which the module runs receives power from
+the circuit board on which the hardware resides.
+Table 11: Ports and Interfaces
+The logical interfaces are the APIs through which the applications request services. These
+logical interfaces are logically separated from each other by the API design.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 31 of 90
+
+4 Roles, Services, and Authentication
+4.1 Roles
+Name
+
+Type
+
+Operator Type
+
+Crypto Officer
+Table 12: Roles
+
+Role
+
+Crypto Officer
+
+Authentication
+Methods
+None
+
+The module supports the Crypto Officer role only. This sole role is implicitly and always
+assumed by the operator of the module. No support is provided for multiple concurrent
+operators.
+
+4.2 Approved Services
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Kernel
+Encryptio
+n
+
+Encrypti
+on
+
+crypto_skcipher_setkey
+returns 0
+
+AES
+key,
+plaintex
+t
+
+cipherte
+xt
+
+Kernel
+Decrypti
+on
+
+Decrypt
+ion
+
+crypto_skcipher_setkey
+returns 0
+
+AES
+key,
+cipherte
+xt
+
+plaintext
+
+Securi
+ty
+Functi
+ons
+Kernel
+AESECB
+Kernel
+AESCTR
+Kernel
+AESCBC
+Kernel
+AESCBCCS3
+Kernel
+AESXTS
+Kernel
+AESECB
+Kernel
+AESCTR
+Kernel
+AESCBC
+Kernel
+AESCBCCS3
+Kernel
+AESXTS
+
+SSP
+Access
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 32 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Kernel
+Authenti
+cated
+Encryptio
+n
+
+Encrypti
+on
+
+crypto_aead_setkey
+returns 0
+
+AES
+key, IV,
+plaintex
+t
+
+cipherte
+xt, MAC
+tag
+
+Kernel
+Authenti
+cated
+Decrypti
+on
+
+Decrypt
+ion
+
+crypto_aead_setkey
+returns 0
+
+AES
+key, IV,
+MAC
+tag,
+cipherte
+xt
+
+plaintext
+or fail
+
+Kernel
+key
+wrapping
+
+Wrap a
+key
+
+crypto_skcipher_setkey
+returns 0;
+crypto_aead_setkey
+returns 0;
+crypto_shash_init
+returns 0
+
+AES
+key, key
+to be
+wrappe
+d
+
+wrapped
+key
+
+Kernel
+key
+unwrappi
+ng
+
+unwrap
+a key
+
+crypto_skcipher_setkey
+returns 0;
+crypto_aead_setkey
+returns 0;
+crypto_shash_init
+returns 0
+
+AES
+key, key
+to be
+unwrap
+ped
+
+unwrapp
+ed key
+
+Securi
+ty
+Functi
+ons
+Kernel
+AESCCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+Kernel
+AESCCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+Kernel
+AESCCM
+(KTSWrap)
+Kernel
+AESGCM
+(KTSWrap)
+Kernel
+AES
+CBC
+with
+HMAC
+Kernel
+AES
+CTR
+with
+HMAC
+Kernel
+AESCCM
+(KTSWrap)
+Kernel
+AESGCM
+(KTSWrap)
+Kernel
+
+SSP
+Access
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 33 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Kernel
+AES
+Message
+Authenti
+cation
+
+comput
+e a MAC
+tag
+
+crypto_shash_init
+returns 0
+
+AES
+key,
+messag
+e
+
+MAC tag
+
+Kernel
+HMAC
+Message
+Authenti
+cation
+Kernel
+Message
+Digest
+
+comput
+e a MAC
+tag
+
+crypto_shash_init
+returns 0
+
+HMAC
+key,
+messag
+e
+
+MAC tag
+
+comput
+ea
+messag
+e digest
+comput
+ea
+shared
+secret
+
+crypto_shash_init
+returns 0
+
+messag
+e
+
+digest
+value
+
+Kernel
+Hashes
+
+crypto_kpp_compute_sh
+ared_secret returns 0
+
+EC
+public
+key, EC
+private
+key
+
+Shared
+Secret
+
+Kernel
+KASECCSSC
+
+generat
+e
+random
+bytes
+
+crypto_rng_get_bytes
+returns 0
+
+output
+length
+
+random
+data
+
+Kernel
+Counte
+r DRBG
+
+Kernel
+ECC
+Shared
+Secret
+Computa
+tion
+
+Kernel
+Random
+Number
+Generati
+on
+
+Securi
+ty
+Functi
+ons
+AES
+CBC
+with
+HMAC
+Kernel
+AES
+CTR
+with
+HMAC
+Kernel
+AESCMAC
+Kernel
+AESGMAC
+Kernel
+HMAC
+
+SSP
+Access
+
+Crypto
+Officer
+- Kernel
+AES key:
+W,E
+Crypto
+Officer
+- Kernel
+HMAC
+key: W,E
+Crypto
+Officer
+Crypto
+Officer
+- Kernel
+EC public
+key: W,E
+- Kernel
+EC private
+key: W,E
+- Kernel
+shared
+secret:
+W,E
+Crypto
+Officer
+- Entropy
+input: W,E
+- Kernel
+DRBG
+seed: G,E
+- DRBG
+Internal
+State (V,
+Key): W,E
+- DRBG
+Internal
+state (V,
+C): W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 34 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Kernel
+EC Key
+generati
+on
+
+generat
+e key
+pair
+
+crypto_kpp_set_secret
+and
+crypto_kpp_generate_pu
+blic_key return 0
+
+Curve
+
+EC keys
+
+FIPS
+provider
+Message
+Digest
+FIPS
+provider
+Encryptio
+n
+
+comput
+ea
+mesage
+digest
+Encrypt
+plaintex
+t
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+messag
+e
+
+digest
+value
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key,
+plaintex
+t
+
+cipherte
+xt
+
+Securi
+ty
+Functi
+ons
+Kernel
+ECDSA
+Key
+Genera
+tion
+
+FIPS
+provid
+er
+Hashes
+FIPS
+provid
+er AESCTR
+FIPS
+provid
+er AESCBC
+FIPS
+provid
+er AESECB
+FIPS
+provid
+er AESCBCCS1
+FIPS
+provid
+er AESCBCCS2
+FIPS
+provid
+er AESCBCCS3
+FIPS
+provid
+er AESCFB1
+FIPS
+provid
+
+SSP
+Access
+Crypto
+Officer
+- Kernel
+EC public
+key: G,R
+- Kernel
+EC private
+key: G,R
+- Kernel
+Intermedi
+ate Key
+Generatio
+n Value:
+G,E,Z
+Crypto
+Officer
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 35 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+FIPS
+provider
+Decrypti
+on
+
+Decrypt
+cipherte
+xt
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key,
+cipherte
+xt
+
+plaintext
+
+Securi
+ty
+Functi
+ons
+er AESCFB8
+FIPS
+provid
+er AESCFB12
+8
+FIPS
+provid
+er AESXTS
+FIPS
+provid
+er AESOFB
+FIPS
+provid
+er AESCTR
+FIPS
+provid
+er AESCBC
+FIPS
+provid
+er AESECB
+FIPS
+provid
+er AESCBCCS1
+FIPS
+provid
+er AESCBCCS2
+FIPS
+provid
+er AESCBCCS3
+FIPS
+provid
+er AESCFB1
+FIPS
+provid
+er AESCFB8
+FIPS
+
+SSP
+Access
+
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 36 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+FIPS
+provider
+Authenti
+cated
+Encryptio
+n
+
+Encrypt
+plaintex
+t
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key, IV,
+plaintex
+t
+
+cipherte
+xt, MAC
+tag
+
+FIPS
+provider
+Authenti
+cated
+Decrypti
+on
+
+Decrypt
+cipherte
+xt
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key, IV,
+MAC
+tag,
+cipherte
+xt
+
+plaintext
+
+FIPS
+provider
+AES
+Message
+Authenti
+cation
+
+comput
+e a MAC
+tag
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key,
+messag
+e
+
+MAC tag
+
+FIPS
+provider
+HMAC
+Message
+Authenti
+cation
+
+comput
+e a MAC
+tag
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+HMAC
+key,
+messag
+e
+
+MAC tag
+
+Securi
+ty
+Functi
+ons
+provid
+er AESCFB12
+8
+FIPS
+provid
+er AESXTS
+FIPS
+provid
+er AESOFB
+FIPS
+provid
+er AESCCM
+(BCAuth)
+FIPS
+provid
+er AESGCM
+(BCAuth)
+FIPS
+provid
+er AESCCM
+(BCAuth)
+FIPS
+provid
+er AESGCM
+(BCAuth)
+FIPS
+provid
+er AESCMAC
+FIPS
+provid
+er AESGMAC
+FIPS
+provid
+er
+HMAC
+
+SSP
+Access
+
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+Crypto
+Officer
+- FIPS
+provider
+HMAC
+key: W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 37 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+FIPS
+provid
+er KASFFCSSC
+
+FIPS
+provider
+FFC
+Shared
+Secret
+Computa
+tion
+
+comput
+ea
+shared
+secret
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+DH
+private
+key, DH
+public
+key
+
+Shared
+Secret
+
+FIPS
+provider
+ECC
+Shared
+Secret
+Computa
+tion
+
+comput
+ea
+shared
+secret
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+EC
+public
+key, EC
+private
+key
+
+Shared
+Secret
+
+FIPS
+provid
+er KASECCSSC
+
+FIPS
+provider
+IFC
+Shared
+Secret
+Computa
+tion
+
+comput
+ea
+shared
+secret
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+RSA
+public
+key,
+RSA
+private
+key
+
+Shared
+Secret
+
+FIPS
+provid
+er KASIFCSSC
+
+FIPS
+provider
+Key
+Derivatio
+n
+
+derive a
+key
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Shared
+secret
+
+derived
+key
+
+FIPS
+provid
+er ANS
+9.42
+Key
+Derivat
+ion
+(CVL)
+FIPS
+provid
+
+SSP
+Access
+Crypto
+Officer
+- FIPS
+provider
+DH public
+key: W,E
+- FIPS
+provider
+DH private
+key: W,E
+Crypto
+Officer
+- FIPS
+provider
+EC public
+key: W,E
+- FIPS
+provider
+EC private
+key: W,E
+- FIPS
+provider
+shared
+secret:
+W,E
+Crypto
+Officer
+- FIPS
+provider
+RSA public
+key: W,E
+- FIPS
+provider
+RSA
+private
+key: W,E
+- FIPS
+provider
+shared
+secret:
+W,E
+Crypto
+Officer
+- FIPS
+provider
+shared
+secret:
+W,E
+- FIPS
+provider
+derived
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 38 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+er ANS
+9.63
+Key
+Derivat
+ion
+(CVL)
+FIPS
+provid
+er TLS
+1.0
+and
+1.1
+Key
+Derivat
+ion
+(CVL)
+FIPS
+provid
+er TLS
+1.2
+Key
+Derivat
+ion
+(CVL)
+FIPS
+provid
+er TLS
+1.3
+Key
+Derivat
+ion
+(CVL)
+FIPS
+provid
+er
+HKDF
+Key
+Derivat
+ion
+FIPS
+provid
+er
+OneSte
+p Key
+Derivat
+ion
+FIPS
+provid
+er
+TwoSte
+p Key
+
+SSP
+Access
+key: G,R
+- FIPS
+provider
+keyderivation
+key: W,E
+- FIPS
+provider
+AES
+Derived
+Key: G,R
+- FIPS
+provider
+HMAC
+Derived
+Key : G,R
+- FIPS
+provider
+802.11
+Preshared
+key (PSK):
+W,E
+- FIPS
+provider
+802.11
+Pairwise
+Master
+Key
+(PMK):
+W,E
+- FIPS
+provider
+802.11
+KDF
+Internal
+State: R
+- FIPS
+provider
+802.11
+Temporal
+Keys: W,E
+- FIPS
+provider
+802.11
+MIC keys
+(KCK): W,E
+- FIPS
+provider
+802.11
+Key
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 39 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+FIPS
+provider
+Password
+-based
+key
+derivatio
+n
+
+derive a
+key
+from a
+passwor
+d
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+passwor
+d
+
+derived
+key
+
+FIPS
+provider
+SafePrim
+e key
+generati
+on
+
+generat
+e a key
+pair
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+DHGroup
+
+Module
+generat
+ed DH
+private
+key,
+Module
+generat
+ed DH
+public
+key
+
+Securi
+ty
+Functi
+ons
+Derivat
+ion
+FIPS
+provid
+er
+KMAC
+Key
+Derivat
+ion
+FIPS
+provid
+er
+KBKDF
+Key
+Derivat
+ion
+FIPS
+provid
+er SSH
+Key
+Derivat
+ion
+FIPS
+provid
+er
+Passw
+ordbased
+Key
+Derivat
+ion
+FIPS
+provid
+er Safe
+Primes
+Key
+Genera
+tion
+
+SSP
+Access
+Encryption
+Key (KEK):
+W,E
+- FIPS
+provider
+802.11
+Group
+Temporal
+Key (GTK):
+W,E
+
+Crypto
+Officer
+- FIPS
+provider
+derived
+key: G,R
+- FIPS
+provider
+Password:
+W,E
+Crypto
+Officer
+- FIPS
+provider
+module
+generated
+DH public
+key: G,R
+- FIPS
+provider
+module
+generated
+DH private
+key: G,R
+- FIPS
+provider
+Intermedi
+ate Key
+Generatio
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 40 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+
+FIPS
+provider
+EC Key
+generati
+on
+
+generat
+e a key
+pair
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Curve
+
+Module
+Generat
+ed EC
+Private
+Key,
+Module
+Generat
+ed EC
+Public
+Key
+
+FIPS
+provid
+er
+ECDSA
+Key
+Genera
+tion
+FIPS
+provid
+er
+EDDSA
+Key
+Genera
+tion
+
+FIPS
+provider
+RSA key
+generati
+on
+
+generat
+e a key
+pair
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Modulus
+
+Module
+Generat
+ed RSA
+Private
+Key,
+Module
+Generat
+ed RSA
+Public
+Key
+
+FIPS
+provid
+er RSA
+Key
+Genera
+tion
+
+FIPS
+provider
+SafePrim
+e Key
+Verificati
+on
+
+verify
+key pair
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+DH
+Private
+key, DH
+public
+key
+
+Pass/fail
+
+FIPS
+provid
+er Safe
+Primes
+Key
+
+SSP
+Access
+n Value:
+G,E,Z
+Crypto
+Officer
+- FIPS
+provider
+module
+generated
+EC public
+key: G,R
+- FIPS
+provider
+module
+generated
+EC private
+key: G,R
+- FIPS
+provider
+Intermedi
+ate Key
+Generatio
+n Value:
+G,E,Z
+Crypto
+Officer
+- FIPS
+provider
+module
+generated
+RSA
+private
+key: G,R
+- FIPS
+provider
+module
+generated
+RSA public
+key: G,R
+- FIPS
+provider
+Intermedi
+ate Key
+Generatio
+n Value:
+G,E,Z
+Crypto
+Officer
+- FIPS
+provider
+DH public
+key: W
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 41 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+Verific
+ation
+
+FIPS
+provider
+EC Key
+Verificati
+on
+
+verify
+key pair
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+EC
+public
+key, EC
+private
+key
+
+Pass/fail
+
+FIPS
+provid
+er
+ECDSA
+Key
+Verific
+ation
+
+FIPS
+provider
+Key
+wrapping
+
+wrap a
+key
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key, key
+to be
+wrappe
+d
+
+wrapped
+key
+
+FIPS
+provider
+Key
+unwrappi
+ng
+
+unwrap
+a key
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+AES
+key, key
+to be
+unwrap
+ped
+
+unwrapp
+ed key
+
+FIPS
+provid
+er AESCCM
+(KTSWrap)
+FIPS
+provid
+er AESGCM
+(KTSWrap)
+FIPS
+provid
+er AES
+KW
+FIPS
+provid
+er AES
+KWP
+FIPS
+provid
+er AESCCM
+(KTSWrap)
+FIPS
+provid
+er AESGCM
+(KTSWrap)
+FIPS
+provid
+er AES
+KW
+FIPS
+
+SSP
+Access
+- FIPS
+provider
+DH private
+key: W
+Crypto
+Officer
+- FIPS
+provider
+EC public
+key: W
+- FIPS
+provider
+EC private
+key: W
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+Crypto
+Officer
+- FIPS
+provider
+AES Key:
+W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 42 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+FIPS
+provider
+RSA
+Signatur
+e
+Verificati
+on
+FIPS
+provider
+EC
+Signatur
+e
+Verificati
+on
+
+verify
+digital
+signatur
+e
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Pass/fail
+
+verify
+digital
+signatur
+e
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+RSA
+public
+key,
+signatur
+e, hash
+algorith
+m
+Messag
+e, EC
+public
+key,
+signatur
+e, hash
+algorith
+m
+(ECDSA
+only)
+
+FIPS
+provider
+EC
+Signatur
+e
+Generati
+on
+
+generat
+e digital
+signatur
+e
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Messag
+e, EC
+public
+key,
+signatur
+e, hash
+algorith
+m
+(ECDSA
+only)
+
+signatur
+e
+
+FIPS
+provider
+RSA
+Signatur
+e
+Generati
+on
+
+generat
+e digital
+signatur
+e
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+Messag
+e,RSA
+public
+key,
+signatur
+e, hash
+algorith
+m
+
+signatur
+e
+
+Pass/fail
+
+Securi
+ty
+Functi
+ons
+provid
+er AES
+KWP
+FIPS
+provid
+er RSA
+Signat
+ure
+Verific
+ation
+FIPS
+provid
+er
+ECDSA
+Signat
+ure
+Verific
+ation
+FIPS
+provid
+er
+EDDSA
+Signat
+ure
+Verific
+ation
+FIPS
+provid
+er
+ECDSA
+Signat
+ure
+Genera
+tion
+FIPS
+provid
+er
+EDDSA
+Signat
+ure
+Genera
+tion
+FIPS
+provid
+er RSA
+Signat
+ure
+Genera
+tion
+
+SSP
+Access
+
+Crypto
+Officer
+- FIPS
+provider
+RSA public
+key: W,E
+Crypto
+Officer
+- FIPS
+provider
+EC public
+key: W,E
+
+Crypto
+Officer
+- FIPS
+provider
+EC private
+key: W,E
+
+Crypto
+Officer
+- FIPS
+provider
+RSA
+private
+key: W,E
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 43 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+FIPS
+provider
+Random
+Number
+Generati
+on
+
+generat
+e
+random
+bytes
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+output
+length
+
+random
+bytes
+
+FIPS
+provider
+key
+encapsul
+ation
+
+KTS
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+RSA
+public
+key
+
+Encapsu
+lated
+key
+
+FIPS
+provid
+er KTSIFC
+
+FIPS
+provider
+key unencapsul
+ation
+
+KTS
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+RSA
+private
+key
+
+Decapsu
+lated
+key
+
+FIPS
+provid
+er KTSIFC
+
+FIPS
+provider
+KMAC
+Message
+Authenti
+cation
+Show
+version
+
+MAC
+
+_SUMMIT_FIPS_INDICAT
+OR_APPROVED
+
+KMAC
+key
+
+Mac tag
+
+FIPS
+provid
+er
+KMAC
+
+Return
+the
+module
+name
+and
+version
+informa
+tion
+return
+module
+status
+perform
+CASTs
+and
+
+None
+
+N/A
+
+module
+name
+and
+version
+
+None
+
+None
+
+N/A
+
+module
+status
+
+None
+
+Unauthent
+icated
+
+None
+
+N/A
+
+Pass/Fail
+
+None
+
+Unauthent
+icated
+
+Show
+status
+SelfTests
+
+Securi
+ty
+Functi
+ons
+FIPS
+provid
+er
+Counte
+r DRBG
+FIPS
+provid
+er
+Hash
+DRBG
+FIPS
+provid
+er
+HMAC
+DRBG
+
+SSP
+Access
+Crypto
+Officer
+- Entropy
+input: W,E
+- FIPS
+provider
+DRBG
+seed: G,E
+- DRBG
+Internal
+State (V,
+Key):
+G,W,E
+- DRBG
+Internal
+state (V,
+C): G,W,E
+Crypto
+Officer
+- FIPS
+provider
+RSA public
+key: W,E
+Crypto
+Officer
+- FIPS
+provider
+RSA
+private
+key: W,E
+Crypto
+Officer
+- FIPS
+Provider
+KMAC
+Key: W,E
+Unauthent
+icated
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 44 of 90
+
+Name
+
+Zeroizati
+on
+
+Descri
+ption
+integrit
+y test
+zeroize
+all SSPs
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+
+SSP
+Access
+
+None
+
+Any SSP
+
+N/A
+
+None
+
+Crypto
+Officer
+- Kernel
+AES key: Z
+- FIPS
+provider
+AES Key:
+Z
+- Kernel
+shared
+secret: Z
+- Kernel
+HMAC
+key: Z
+- FIPS
+provider
+shared
+secret: Z
+- Entropy
+input: Z
+- Kernel
+DRBG
+seed: Z
+- DRBG
+Internal
+State (V,
+Key): Z
+- DRBG
+Internal
+state (V,
+C): Z
+- FIPS
+provider
+DH public
+key: Z
+- FIPS
+provider
+DH private
+key: Z
+- Kernel
+EC public
+key: Z
+- Kernel
+EC private
+key: Z
+- FIPS
+provider
+EC public
+key: Z
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 45 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+
+SSP
+Access
+- FIPS
+provider
+EC private
+key: Z
+- FIPS
+provider
+module
+generated
+DH public
+key: Z
+- FIPS
+provider
+module
+generated
+DH private
+key: Z
+- FIPS
+provider
+module
+generated
+EC public
+key: Z
+- FIPS
+provider
+module
+generated
+RSA public
+key: Z
+- FIPS
+provider
+RSA public
+key: Z
+- FIPS
+provider
+RSA
+private
+key: Z
+- FIPS
+provider
+module
+generated
+RSA public
+key: Z
+- FIPS
+provider
+module
+generated
+RSA
+private
+key: Z
+- FIPS
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 46 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+
+SSP
+Access
+provider
+Intermedi
+ate Key
+Generatio
+n Value: Z
+- FIPS
+provider
+derived
+key: Z
+- FIPS
+provider
+DRBG
+seed: Z
+- Kernel
+Intermedi
+ate Key
+Generatio
+n Value: Z
+- FIPS
+provider
+keyderivation
+key: Z
+- FIPS
+provider
+Password:
+Z
+- FIPS
+provider
+HMAC
+key: Z
+- FIPS
+Provider
+KMAC
+Key: Z
+- FIPS
+provider
+802.11
+Pairwise
+Master
+Key
+(PMK): Z
+- FIPS
+provider
+802.11
+Group
+Temporal
+Key (GTK):
+Z
+- FIPS
+provider
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 47 of 90
+
+Name
+
+Descri
+ption
+
+Indicator
+
+Table 13: Approved Services
+
+Inputs
+
+Output
+s
+
+Securi
+ty
+Functi
+ons
+
+SSP
+Access
+802.11
+KDF
+Internal
+State: Z
+- FIPS
+provider
+802.11
+Temporal
+Keys: Z
+- FIPS
+provider
+802.11
+MIC keys
+(KCK): Z
+- FIPS
+provider
+802.11
+Key
+Encryption
+Key (KEK):
+Z
+
+The table above lists the approved services. The following convention is used to specify
+access rights to SSPs:
+• Generate (G): The module generates or derives the SSP.
+• Read (R): The SSP is read from the module (e.g. the SSP is output).
+• Write (W): The SSP is updated, imported, or written to the module.
+• Execute (E): The module uses the SSP in performing a cryptographic operation.
+• Zeroize (Z): The module zeroizes the SSP.
+To interact with the FIPS provider component of the module, a calling application must use
+the EVP API layer provided by OpenSSL. This layer will delegate the request to the FIPS
+provider, which will in turn perform the requested service. The EVP_KDF_CTX_get_params()
+function can be used to determine whether an EVP API function is approved. After a
+cryptographic service was performed by the module, the API context associated with this
+request can contain a parameter (listed below) which represents the approved service
+indicator.
+• _SUMMIT_FIPS_INDICATOR_APPROVED (approved services)
+• _SUMMIT_FIPS_INDICATOR_NOT_APPROVED (non-approved services)
+The security function implementation “FIPS provider KBKDF Key Derivation” listed for the
+“FIPS provider Key Derivation” approved service in the table above is intended to derive
+keys for use of 802.11 protocols.
+The Kernel does not provide any non-approved services. The API for the Kernel services
+listed in the Indicator column, return the specified values that indicate that the services are
+approved.
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 48 of 90
+
+4.3 Non-Approved Services
+Name
+FIPS provider PBKDF with salt
+length less than 128 bits
+FIPS provider TLSv1.0 and
+TLSv1.1 KDF using EMS
+FIPS provider TLSv1.2 KDF
+without using EMS
+Table 14: Non-Approved Services
+
+Description
+Key
+derivation
+Key
+derivation
+Key
+derivation
+
+Algorithms
+FIPS provider PBKDF with salt
+length less than 128 bits
+FIPS provider TLSv1.0 and
+TLSv1.1 KDF using EMS
+FIPS provider TLSv1.2 KDF
+without using EMS
+
+Role
+CO
+CO
+CO
+
+4.4 External Software/Firmware Loaded
+The module does not load external software or firmware.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 49 of 90
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+
+The integrity of the module’s firmware components (the kernel, the FIPS Provider
+components and fipscheck application and library) is individually verified by the fipscheck
+integrity test tool using HMAC-SHA2-256 implemented in the FIPS Provider. The FIPS Provider
+component executes its CASTs (which include the KAT for the integrity technique using
+HMAC-SHA2-256) before the fipscheck integrity test tool executes to verify the integrity of
+the module. The HMAC value of each firmware component is computed at build time and
+stored in the .hmac file for each component. The value is recalculated at runtime for the
+image of the kernel, FIPS Provider binary and fipscheck application and library, and then
+compared against the stored value in the file. If the comparison succeeds, then the
+remaining CASTs (consisting of the Known Answer Tests) for the kernel are performed.
+
+5.2 Initiate on Demand
+Integrity tests are performed as part of the pre-operational self-tests, which are executed
+when the module is initialized. The integrity tests can be invoked on demand by unloading
+and subsequently re-initializing the module, which will perform (among others) the firmware
+integrity tests.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 50 of 90
+
+6 Operational Environment
+
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Limited
+How Requirements are Satisfied:
+The operating system provides process isolation and memory protection mechanisms that
+ensure appropriate separation for memory access among the processes on the system. Each
+process has control over its own data and uncontrolled access to the data of other processes
+is prevented.
+
+6.2 Configuration Settings and Restrictions
+The module shall be installed as stated in Section 11.1.
+Instrumentation tools like the ptrace system call, gdb and strace, as well as other tracing
+mechanisms offered by the Linux environment such as ftrace or systemtap, shall not be
+used in the operational environments. The use of any of these tools implies that the
+cryptographic module is running in a non-validated operational environment.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 51 of 90
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+N/A for this module.
+The module is enclosed within a production-grade enclosure with components that include
+standard passivation techniques (e.g., a conformal coating applied over the module's
+circuitry to protect against environmental or other physical damage) conformant to the
+Level 1 requirements for physical security.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 52 of 90
+
+8 Non-Invasive Security
+8.1 Mitigation Techniques
+
+This module does not implement any non-invasive security mechanism and therefore this
+section is not applicable.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 53 of 90
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+Storage
+Area
+Name
+RAM
+
+Description
+
+Persistence
+Type
+
+Temporary storage for SSPs used by the module as part of
+service execution. The module does not perform persistent
+storage of SSPs.
+Table 15: Storage Areas
+
+Dynamic
+
+The module does not perform persistent storage of SSPs. The SSPs are temporarily stored in
+the RAM in plaintext form. SSPs are provided to the module by the calling process and are
+destroyed when released by the appropriate zeroization function calls.
+
+9.2 SSP Input-Output Methods
+Name
+
+From
+
+To
+
+Format
+Type
+
+Distributio
+n Type
+
+Entry
+Type
+
+API input
+parameters
+
+Operating
+calling
+application
+(TOEPP)
+Operating
+calling
+application
+(TOEPP)
+Cryptographi
+c module
+
+Cryptographi
+c module
+
+Plaintex
+t
+
+Manual
+
+Electroni
+c
+
+Cryptographi
+c module
+
+Plaintex
+t
+
+Manual
+
+Electroni
+c
+
+Operator
+calling
+application
+(TOEPP)
+Operator
+calling
+application
+(TOEPP)
+
+Plaintex
+t
+
+Manual
+
+Electroni
+c
+
+Plaintex
+t
+
+Manual
+
+Electroni
+c
+
+Kernel
+AF_ALG_typ
+e sockets
+(input)
+API output
+parameters
+
+Kernel
+Cryptographi
+AF_ALG
+c module
+type
+sockets
+(output)
+Table 16: SSP Input-Output Methods
+
+SFI or
+Algorith
+m
+
+9.3 SSP Zeroization Methods
+Zeroization
+Method
+Kernel free
+cipher handle
+
+Description
+
+Rationale
+
+Operator Initiation
+
+Zeroizes the
+SSPs
+contained
+within the
+cipher handle
+
+Memory occupied by
+SSPs is overwritten
+with zeroes, which
+renders the SSP
+values irretrievable.
+The completion of
+
+By calling the appropriate
+zeroization functions:- AES key:
+crypto_free_skcipher and
+crypto_free_aead; - DRBG Internal
+state: crypto_free_rng; - EC public
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 54 of 90
+
+Zeroization
+Method
+
+Description
+
+Rationale
+
+Operator Initiation
+
+the zeroization
+routine(s) indicate
+that the zeroization
+procedure
+succeeded
+FIPS provider Zeroizes the
+Memory occupied by
+calling the
+SSPs
+SSPs is overwritten
+zeroization
+with zeroes, which
+API
+renders the SSP
+values irretrievable.
+All data output is
+inhibited during
+zeroization. The
+completion of the
+zeroization routine(s)
+indicate that the
+zeroization
+procedure
+succeeded
+FIPS provider Zeroizes the
+Memory occupied by
+Automatic
+SSPs
+SSPs is overwritten
+with zeroes, which
+renders the SSP
+values irretrievable.
+All data output is
+inhibited during
+zeroization.
+Remove
+De-allocates
+Volatile memory
+power from
+the volatile
+used by the module
+the module
+memory used is overwritten within
+to store SSPs
+nanoseconds when
+power is removed.
+Module power off
+indicates that the
+zeroization
+procedure
+succeeded.
+Table 17: SSP Zeroization Methods
+
+& private key: crypto_free_kpp
+and crypto_free_akcipher
+
+By calling the appropriate
+zeroization functions: EVP_CIPHER_CTX_free(): clears
+and frees symmetric cipher
+context; - EVP_MAC_CTX_free():
+clears and frees MAC context; EVP_KDF_CTX_free(): clears and
+frees KDF context; EVP_RAND_CTX_free(): clears and
+frees DRBG context; EVP_PKEY_free(): clears and frees
+asymmetric key pair structures
+Intermediate key generation
+value: zeroized automatically by
+the module (after the requested
+service completed)
+
+By removing power
+
+All data output is inhibited during zeroization.
+
+9.4 SSPs
+Name
+
+Description
+
+Kernel
+AES key
+
+AES key used for
+encryption,
+decryption, and
+computing MAC
+tags
+
+Size Strengt
+h
+128,
+192,
+256 bits
+- 128,
+
+Type Category
+Symmetric
+Key - CSP
+
+Generat
+ed By
+
+Establish
+ed By
+
+Used By
+Kernel
+AES-CCM
+(KTSWrap)
+Kernel
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 55 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+192,
+256 bits
+
+Type Category
+
+Kernel
+HMAC key
+
+HMAC key
+
+112-256
+bits 112-256
+bits
+
+Authenticat
+ion key CSP
+
+Kernel
+Intermedi
+ate Key
+
+Intermediate key
+generation value
+
+P-256,
+P-384 128,
+192 bits
+
+Intermediat
+e value CSP
+
+Generat
+ed By
+
+Kernel
+ECDSA
+Key
+
+Establish
+ed By
+
+Used By
+AESGCM
+(KTSWrap)
+Kernel
+AES CBC
+with
+HMAC
+Kernel
+AES CTR
+with
+HMAC
+Kernel
+AES-ECB
+Kernel
+AES-CTR
+Kernel
+AES-CBC
+Kernel
+AESCBC-CS3
+Kernel
+AES-XTS
+Kernel
+AES-CCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+Kernel
+AESCMAC
+Kernel
+AESGMAC
+Kernel
+AES CBC
+with
+HMAC
+Kernel
+AES CTR
+with
+HMAC
+Kernel
+HMAC
+Kernel
+ECDSA
+Key
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 56 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+
+Type Category
+
+P-256,
+P-384 128 and
+192 bits
+128,
+192,
+256 bits
+- 128,
+192,
+256 bits
+P-256,
+P-384 128,
+192 bits
+
+Shared
+secret CSP
+
+Generatio
+n Value
+Kernel
+shared
+secret
+
+Shared secret
+generated by
+ECDH
+
+Kernel
+DRBG
+seed
+
+DRBG seed
+derived from
+entropy input
+
+Kernel EC
+public key
+
+Public key used
+for ECDH
+
+Kernel EC
+private
+key
+
+Private key used
+for ECDH
+
+P-256,
+P-384 128,
+192 bits
+
+Private key
+- CSP
+
+Entropy
+input
+
+Entropy input
+used to seed the
+DRBGs
+
+320 bits
+- 256
+bits
+
+Entropy
+input - CSP
+
+DRBG
+Internal
+State (V,
+Key)
+
+Internal state of
+Counter DRBG
+
+Counter
+DRBG:
+128,
+192,
+256
+bits;
+HMAC
+DRBG:
+160-512
+bits 128-256
+bits
+
+DRBG
+Internal
+state - CSP
+
+Generat
+ed By
+Generati
+on
+
+Establish
+ed By
+
+Kernel
+KAS-ECCSSC
+
+Used By
+Generati
+on
+
+Seed - CSP
+
+Kernel
+Counter
+DRBG
+
+Kernel
+Counter
+DRBG
+
+Public key PSP
+
+Kernel
+ECDSA
+Key
+Generati
+on
+Kernel
+ECDSA
+Key
+Generati
+on
+
+Kernel
+KASECC-SSC
+
+Kernel
+Counter
+DRBG
+FIPS
+provider
+Counter
+DRBG
+FIPS
+provider
+HMAC
+DRBG
+
+Kernel
+KASECC-SSC
+Kernel
+Counter
+DRBG
+FIPS
+provider
+Counter
+DRBG
+FIPS
+provider
+Hash
+DRBG
+FIPS
+provider
+HMAC
+DRBG
+Kernel
+Counter
+DRBG
+FIPS
+provider
+Counter
+DRBG
+FIPS
+provider
+HMAC
+DRBG
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 57 of 90
+
+Name
+
+Description
+
+DRBG
+Internal
+state (V,
+C)
+FIPS
+provider
+AES Key
+
+Internal state of
+Hash and HMAC
+DRBG
+AES key used for
+encryption,
+decryption, and
+computing MAC
+tags
+
+Size Strengt
+h
+440,
+888 bits
+- 256
+bits
+128,
+192,
+256 bits
+- 128,
+192,
+256 bits
+
+Type Category
+
+Generat
+ed By
+
+DRBG
+Internal
+state - CSP
+
+FIPS
+provider
+Hash
+DRBG
+
+Symmetric
+Key - CSP
+
+Establish
+ed By
+
+Used By
+FIPS
+provider
+Hash
+DRBG
+FIPS
+provider
+AES-CCM
+(KTSWrap)
+FIPS
+provider
+AESGCM
+(KTSWrap)
+FIPS
+provider
+AES KWP
+FIPS
+provider
+AES-ECB
+FIPS
+provider
+AES-CTR
+FIPS
+provider
+AES-CBC
+FIPS
+provider
+AESCBC-CS1
+FIPS
+provider
+AESCBC-CS2
+FIPS
+provider
+AESCBC-CS3
+FIPS
+provider
+AESCFB1
+FIPS
+provider
+AESCFB8
+FIPS
+provider
+AES-XTS
+FIPS
+provider
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 58 of 90
+
+Name
+
+Description
+
+FIPS
+provider
+HMAC key
+
+HMAC key
+
+FIPS
+provider
+shared
+secret
+
+Shared secret
+generated by
+KAS-FFC-SSC,
+KAS-ECC-SSC, or
+KAS-IFC-SSC
+
+Size Strengt
+h
+
+Type Category
+
+112-256
+bits 112-256
+bits
+2248192
+bits 112-256
+bits
+
+Authenticat
+ion key CSP
+Shared
+secret CSP
+
+Generat
+ed By
+
+Establish
+ed By
+
+Used By
+AES-CCM
+(BCAuth)
+FIPS
+provider
+AESGCM
+(BCAuth)
+FIPS
+provider
+AES-OFB
+FIPS
+provider
+AESCMAC
+FIPS
+provider
+AESGMAC
+FIPS
+provider
+ANS 9.42
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+FIPS
+provider
+HMAC
+
+FIPS
+provider
+KTS-IFC
+FIPS
+provider
+KAS-FFCSSC
+FIPS
+provider
+KAS-ECCSSC
+
+FIPS
+provider
+ANS 9.42
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+ANS 9.63
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.0
+and 1.1
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 59 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+
+Type Category
+
+FIPS
+provider
+DRBG
+seed
+
+DRBG seed
+derived from
+entropy input
+
+128,192
+, 256
+bits 128,
+192,
+256 bits
+
+Seed - CSP
+
+FIPS
+provider
+
+Public key used
+for DH
+
+2048,
+3072,
+
+Public key PSP
+
+Generat
+ed By
+
+Establish
+ed By
+
+Used By
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.2
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.3
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+HKDF
+Key
+Derivatio
+n
+FIPS
+provider
+OneStep
+Key
+Derivatio
+n
+FIPS
+provider
+TwoStep
+Key
+Derivatio
+n
+FIPS
+provider
+SSH Key
+Derivatio
+n
+FIPS
+provider
+Counter
+DRBG
+FIPS
+provider
+Hash
+DRBG
+FIPS
+provider
+HMAC
+DRBG
+FIPS
+provider
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 60 of 90
+
+Name
+
+Description
+
+DH public
+key
+
+FIPS
+provider
+DH
+private
+key
+
+Private key used
+for DH
+
+FIPS
+provider
+EC public
+key
+
+Public key used
+for ECDH and
+ECDSA
+
+FIPS
+provider
+EC private
+key
+
+Private key used
+for ECDH and
+ECDSA
+
+Size Strengt
+h
+4096,
+6144,
+8192
+bits 112-200
+bits
+2048,
+3072,
+4096,
+6144,
+8192
+bits 112-200
+bits
+P-224,
+P-256,
+P-384,
+P-521;
+Ed2551
+9,
+Ed448 112,
+128,
+192,
+256 bits
+
+Type Category
+
+P-224,
+P-256,
+P-384,
+P-521;
+Ed2551
+9,
+Ed448 112,
+128,
+192,
+256 bits
+
+Private key
+- CSP
+
+Generat
+ed By
+
+Establish
+ed By
+
+Used By
+KAS-FFCSSC
+
+Private key
+- CSP
+
+FIPS
+provider
+KAS-FFCSSC
+
+Public key PSP
+
+FIPS
+provider
+KASECC-SSC
+FIPS
+provider
+ECDSA
+Key
+Verificati
+on
+FIPS
+provider
+ECDSA
+Signatur
+e
+Verificati
+on
+FIPS
+provider
+EDDSA
+Signatur
+e
+Verificati
+on
+FIPS
+provider
+KASECC-SSC
+FIPS
+provider
+ECDSA
+Signatur
+e
+Generati
+on
+FIPS
+provider
+EDDSA
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 61 of 90
+
+Name
+
+Description
+
+FIPS
+provider
+module
+generated
+DH public
+key
+
+DH public key
+generated by the
+module
+
+FIPS
+provider
+module
+generated
+DH
+private
+key
+
+DH private key
+generated by the
+module
+
+FIPS
+provider
+module
+generated
+EC public
+key
+
+EC public key
+generated by the
+module
+
+FIPS
+provider
+module
+generated
+EC private
+key
+
+EC private key
+generated by the
+module
+
+FIPS
+provider
+RSA
+public key
+
+Public key used
+for RSA signature
+generation
+
+Size Strengt
+h
+
+Type Category
+
+2048,
+3072,
+4096,
+6144,
+8192
+bits 112-200
+bits
+2048,
+3072,
+4096,
+6144,
+8192
+bits 112-200
+bits
+P-224,
+P-256,
+P-384,
+P-521;
+Ed2551
+9,
+Ed448 128-256
+bits
+
+Public key PSP
+
+FIPS
+provider
+Safe
+Primes
+Key
+Generati
+on
+
+Private key
+- CSP
+
+FIPS
+provider
+Safe
+Primes
+Key
+Generati
+on
+
+Public key PSP
+
+P-224,
+P-256,
+P-384,
+P-521;
+Ed2551
+9,
+Ed448
+(128,
+192
+bits) 128-256
+bits
+2048,
+3072,
+4096
+bits 112,
+128,
+150 bits
+
+Private key
+- CSP
+
+FIPS
+provider
+ECDSA
+Key
+Generati
+on
+FIPS
+provider
+EDDSA
+Key
+Generati
+on
+FIPS
+provider
+ECDSA
+Key
+Generati
+on
+FIPS
+provider
+EDDSA
+Key
+Generati
+on
+
+Public key PSP
+
+Generat
+ed By
+
+Establish
+ed By
+
+Used By
+Signatur
+e
+Generati
+on
+
+FIPS
+provider
+KAS-IFCSSC
+FIPS
+provider
+KTS-IFC
+FIPS
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 62 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+
+Type Category
+
+Generat
+ed By
+
+FIPS
+provider
+RSA
+private
+key
+
+Private key used
+for RSA signature
+generation
+
+2048,
+3072,
+4096
+bits 112,
+128,
+150 bits
+
+Private key
+- CSP
+
+FIPS
+provider
+module
+generated
+RSA
+public key
+
+RSA public key
+generated by the
+module
+
+Public key PSP
+
+FIPS
+provider
+RSA Key
+Generati
+on
+
+FIPS
+provider
+module
+generated
+RSA
+private
+key
+FIPS
+provider
+Intermedi
+ate Key
+Generatio
+n Value
+
+RSA private key
+generated by the
+module
+
+2048,
+3072,
+4096
+bits 112,
+128,
+150 bits
+2048,
+3072,
+4096
+bits 112,
+128,
+150 bits
+2244096
+bits 112-256
+bits
+
+Private key
+- CSP
+
+FIPS
+provider
+RSA Key
+Generati
+on
+
+Intermediat
+e value CSP
+
+FIPS
+provider
+Safe
+Primes
+Key
+Generati
+on
+FIPS
+provider
+ECDSA
+Key
+Generati
+on
+FIPS
+provider
+EDDSA
+Key
+Generati
+
+Intermediate key
+generation value
+
+Establish
+ed By
+
+Used By
+provider
+RSA
+Signatur
+e
+Verificati
+on
+FIPS
+provider
+KAS-IFCSSC
+FIPS
+provider
+KTS-IFC
+FIPS
+provider
+RSA
+Signatur
+e
+Generati
+on
+
+FIPS
+provider
+Safe
+Primes
+Key
+Generati
+on
+FIPS
+provider
+ECDSA
+Key
+Generati
+on
+FIPS
+provider
+EDDSA
+Key
+Generati
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 63 of 90
+
+Name
+
+FIPS
+provider
+derived
+key
+
+Description
+
+Symmetric key
+derived from a
+key-derivation
+key , shared
+secret, or
+password
+
+Size Strengt
+h
+
+Type Category
+
+1124096
+bits 112-256
+bits
+
+Symmetric
+key - CSP
+
+Generat
+ed By
+on
+FIPS
+provider
+RSA Key
+Generati
+on
+FIPS
+provider
+ANS 9.42
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+ANS 9.63
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.0
+and 1.1
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.2
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.3
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+HKDF
+Key
+Derivatio
+n
+FIPS
+provider
+Password
+-based
+Key
+Derivatio
+n
+FIPS
+provider
+
+Establish
+ed By
+
+Used By
+on
+FIPS
+provider
+RSA Key
+Generati
+on
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 64 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+
+Type Category
+
+FIPS
+provider
+keyderivation
+key
+
+Symmetric key
+used to derive
+symmetric keys
+
+1124096
+bits 112-256
+bits
+
+Symmetric
+key - CSP
+
+FIPS
+provider
+Password
+
+Password used to
+derive symmetric
+keys
+
+8-128
+charact
+ers N/A
+
+Password CSP
+
+FIPS
+provider
+AES
+Derived
+Key
+
+AES key used for
+encryption,
+decryption, and
+computing MAC
+tags
+
+128,
+192,
+256 bits
+- 128,
+192,
+256 bits
+
+Symmetric
+Key - CSP
+
+Generat
+ed By
+OneStep
+Key
+Derivatio
+n
+FIPS
+provider
+TwoStep
+Key
+Derivatio
+n
+FIPS
+provider
+KMAC
+Key
+Derivatio
+n
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+FIPS
+provider
+SSH Key
+Derivatio
+n
+
+FIPS
+provider
+TLS 1.0
+and 1.1
+Key
+Derivatio
+
+Establish
+ed By
+
+Used By
+
+FIPS
+provider
+KMAC
+Key
+Derivatio
+n
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+FIPS
+provider
+Passwor
+d-based
+Key
+Derivatio
+n
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 65 of 90
+
+Name
+
+Description
+
+Size Strengt
+h
+
+Type Category
+
+FIPS
+provider
+HMAC
+Derived
+Key
+
+HMAC key
+
+112-256
+bits 112-256
+bits
+
+Authenticat
+ion Key CSP
+
+FIPS
+provider
+802.11
+Preshared
+key (PSK)
+
+Used for preshared key
+authentication
+and session key
+establishment, as
+well as for 802.11
+KDF
+
+Up to
+256 bits
+of
+length Up to
+256 bits
+
+Pre-shared
+key - CSP
+
+Generat
+ed By
+n (CVL)
+FIPS
+provider
+TLS 1.2
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.3
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+FIPS
+provider
+TLS 1.0
+and 1.1
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.2
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+TLS 1.3
+Key
+Derivatio
+n (CVL)
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+
+Establish
+ed By
+
+Used By
+
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 66 of 90
+
+Name
+
+Description
+
+FIPS
+provider
+802.11
+Pairwise
+Master
+Key (PMK)
+
+Used for preshared key
+authentication
+and session key
+establishment, as
+well as for 802.11
+KDF
+Used for SP800108 KDF to
+calculate the
+WPA2 session
+keys
+
+FIPS
+provider
+802.11
+KDF
+Internal
+State
+FIPS
+provider
+802.11
+Temporal
+Keys
+
+FIPS
+provider
+802.11
+MIC keys
+(KCK)
+FIPS
+provider
+802.11
+Key
+Encryptio
+n Key
+(KEK)
+
+FIPS
+provider
+802.11
+Group
+Temporal
+Key (GTK)
+
+Size Strengt
+h
+256 or
+384 bits
+- 256
+bits
+
+Type Category
+
+Generat
+ed By
+
+Establish
+ed By
+
+N/A N/A
+
+Internal
+state - CSP
+
+AES-CCM or AESGCM keys used
+for session
+encryption/decry
+ption
+
+128 or
+256 bits
+- 128 or
+256 bits
+
+Temporal
+Keys - CSP
+
+Key confirmation
+keys (KCK) used
+for message
+authentication
+during session
+establishment
+Used for AES Key
+Wrapping of the
+802.11 Group
+Temporal Key
+(GTK)
+
+128 or
+192 bits
+- 128 or
+192 bits
+
+MIC keys CSP
+
+128 or
+256 bits
+- 128 or
+256 bits
+
+Key
+Encryption
+Key - CSP
+
+Kernel
+AES-CBC
+Kernel
+AES-CCM
+(BC-Auth)
+Kernel
+AES-GCM
+(BC-Auth)
+
+802.11 session
+key for broadcast
+communications
+
+128 to
+256 bits
+- 128 to
+256 bits
+
+Group
+Temporal
+Key - CSP
+
+Kernel
+AES-CBC
+Kernel
+AES-CCM
+(BC-Auth)
+Kernel
+AES-GCM
+(BC-Auth)
+
+Pairwise
+Master Key
+- CSP
+
+Used By
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+Kernel
+AES-CCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+FIPS
+provider
+KBKDF
+Key
+Derivatio
+n
+Kernel
+AES-CBC
+Kernel
+AES-CCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+Kernel
+AES-CBC
+Kernel
+AES-CCM
+(BCAuth)
+Kernel
+AESGCM
+(BCAuth)
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 67 of 90
+
+Name
+
+Description
+
+FIPS
+Provider
+KMAC Key
+
+KMAC key
+
+Table 18: SSP Table 1
+Name
+Kernel AES
+key
+
+Kernel
+HMAC key
+
+Kernel
+Intermediat
+e Key
+Generation
+Value
+Kernel
+shared
+secret
+
+Kernel
+DRBG seed
+
+Kernel EC
+public key
+
+Size Strengt
+h
+112-256
+bits 112-256
+bits
+
+Input Output
+API input
+parameters
+Kernel
+AF_ALG_typ
+e sockets
+(input)
+API input
+parameters
+Kernel
+AF_ALG_typ
+e sockets
+(input)
+
+Storage
+RAM:Plaintex
+t
+
+Type Category
+
+Generat
+ed By
+
+Establish
+ed By
+
+Authenticat
+ion key CSP
+
+Storage
+Duration
+For the
+duration of
+the service
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+API output
+parameters
+Kernel
+AF_ALG
+type
+sockets
+(output)
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+RAM:Plaintex
+t
+
+While the
+DRBG is
+being
+instantiated
+
+API input
+parameters
+Kernel
+AF_ALG_typ
+e sockets
+(input)
+API output
+parameters
+Kernel
+AF_ALG
+type
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+Used By
+FIPS
+provider
+KMAC
+
+Zeroizatio
+n
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+
+Related SSPs
+
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+
+Entropy
+input:Derived
+From
+DRBG Internal
+State (V,
+Key):Generates
+Kernel EC private
+key:Paired With
+Kernel
+Intermediate Key
+Generation
+Value:Generated
+from
+
+Kernel EC public
+key:Generates
+Kernel EC private
+key:Generates
+Kernel EC public
+key:Used With
+Kernel EC private
+key:Used With
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 68 of 90
+
+Name
+
+Storage
+
+Storage
+Duration
+
+Zeroizatio
+n
+
+Related SSPs
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+
+Kernel EC public
+key:Paired With
+Kernel
+Intermediate Key
+Generation
+Value:Generated
+from
+
+RAM:Plaintex
+t
+
+From
+generation
+until DRBG
+seed is
+created
+
+Kernel DRBG
+seed:Derives
+FIPS provider
+DRBG
+seed:Derives
+
+DRBG
+Internal
+State (V,
+Key)
+
+RAM:Plaintex
+t
+
+From DRBG
+instantiatio
+n until
+DRBG
+termination
+
+DRBG
+Internal
+state (V, C)
+
+RAM:Plaintex
+t
+
+From DRBG
+instantiatio
+n until
+DRBG
+termination
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+Kernel free
+cipher
+handle
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+Kernel EC
+private key
+
+Entropy
+input
+
+FIPS
+provider
+AES Key
+
+Input Output
+sockets
+(output)
+API input
+parameters
+Kernel
+AF_ALG_typ
+e sockets
+(input)
+API output
+parameters
+Kernel
+AF_ALG
+type
+sockets
+(output)
+
+API input
+parameters
+
+Kernel DRBG
+seed:Generated
+from
+FIPS provider
+DRBG
+seed:Generated
+from
+
+Kernel DRBG
+seed:Generated
+from
+FIPS provider
+DRBG
+seed:Generated
+from
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 69 of 90
+
+Name
+FIPS
+provider
+HMAC key
+
+FIPS
+provider
+shared
+secret
+
+Input Output
+API input
+parameters
+
+Storage
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+RAM:Plaintex
+t
+
+While the
+DRBG is
+being
+instantiated
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+
+FIPS
+provider
+DRBG seed
+
+FIPS
+provider DH
+public key
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+Storage
+Duration
+For the
+duration of
+the service
+
+Zeroizatio
+n
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+Related SSPs
+
+FIPS provider DH
+public
+key:Established
+by
+FIPS provider DH
+private
+key:Established
+by
+FIPS provider EC
+public
+key:Established
+by
+FIPS provider EC
+private
+key:Established
+by
+FIPS provider
+derived
+key:Derives
+FIPS provider
+RSA public
+key:Established
+by
+FIPS provider
+RSA private
+key:Established
+by
+Entropy
+input:Derived
+From
+DRBG Internal
+State (V,
+Key):Generates
+DRBG Internal
+state (V,
+C):Generates
+FIPS provider DH
+private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 70 of 90
+
+Name
+
+Input Output
+API input
+parameters
+
+Storage
+
+Storage
+Duration
+For the
+duration of
+the service
+
+Zeroizatio
+n
+FIPS
+provider
+calling the
+zeroization
+API
+
+FIPS
+provider EC
+public key
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+module
+generated
+DH public
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider EC
+private key
+
+FIPS
+provider
+module
+generated
+DH private
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+module
+generated
+EC public
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider DH
+private key
+
+RAM:Plaintex
+t
+
+Related SSPs
+FIPS provider DH
+public key:Paired
+With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider EC
+private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider EC
+public key:Paired
+With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+module
+generated DH
+private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+module
+generated DH
+public key:Paired
+With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+module
+generated EC
+private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 71 of 90
+
+Name
+
+Input Output
+
+Storage
+
+Storage
+Duration
+
+Zeroizatio
+n
+
+FIPS
+provider
+module
+generated
+EC private
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+RSA public
+key
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+RSA private
+key
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+module
+generated
+RSA public
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+module
+generated
+RSA private
+key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+
+Related SSPs
+Value:Generated
+from
+FIPS provider
+module
+generated EC
+public key:Paired
+With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+RSA private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+shared
+secret:Establishe
+s
+FIPS provider
+RSA public
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+shared
+secret:Establishe
+s
+FIPS provider
+module
+generated RSA
+private
+key:Paired With
+FIPS provider
+Intermediate Key
+Generation
+Value:Generated
+from
+FIPS provider
+module
+generated RSA
+public key:Paired
+With
+FIPS provider
+Intermediate Key
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 72 of 90
+
+Name
+
+FIPS
+provider
+Intermediat
+e Key
+Generation
+Value
+
+Input Output
+
+Storage
+
+RAM:Plaintex
+t
+
+Storage
+Duration
+
+Zeroizatio
+n
+power from
+the module
+
+For the
+duration of
+the service
+
+FIPS
+provider
+Automatic
+
+Related SSPs
+Generation
+Value:Generated
+from
+FIPS provider
+module
+generated DH
+public
+key:Generates
+FIPS provider DH
+private
+key:Generates
+FIPS provider
+module
+generated DH
+public
+key:Generates
+FIPS provider
+module
+generated DH
+private
+key:Generates
+FIPS provider EC
+public
+key:Generates
+FIPS provider EC
+private
+key:Generates
+FIPS provider
+module
+generated EC
+public
+key:Generates
+FIPS provider
+module
+generated EC
+private
+key:Generates
+FIPS provider
+RSA public
+key:Generates
+FIPS provider
+RSA private
+key:Generates
+FIPS provider
+module
+generated RSA
+public
+key:Generates
+FIPS provider
+module
+generated RSA
+private
+key:Generates
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 73 of 90
+
+Name
+
+Input Output
+API output
+parameters
+
+Storage
+
+Storage
+Duration
+For the
+duration of
+the service
+
+Zeroizatio
+n
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+keyderivation
+key
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+AES Derived
+Key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+HMAC
+Derived Key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+802.11 Preshared key
+(PSK)
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+FIPS
+provider
+Password
+
+FIPS
+provider
+derived key
+
+RAM:Plaintex
+t
+
+Related SSPs
+FIPS provider
+key-derivation
+key:Derived
+From
+FIPS provider
+shared
+secret:Derived
+From
+FIPS provider
+password:Derive
+d From
+FIPS provider
+derived
+key:Derives
+
+FIPS provider
+derived
+key:Derives
+
+FIPS provider
+derived
+key:Derives
+
+FIPS provider
+derived
+key:Derives
+
+FIPS provider
+derived key:Used
+With
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 74 of 90
+
+Name
+FIPS
+provider
+802.11
+Pairwise
+Master Key
+(PMK)
+
+Input Output
+API input
+parameters
+
+Storage
+RAM:Plaintex
+t
+
+FIPS
+provider
+802.11 KDF
+Internal
+State
+
+Storage
+Duration
+For the
+duration of
+the service
+
+For the
+duration of
+the service
+
+FIPS
+provider
+802.11
+Temporal
+Keys
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+802.11 MIC
+keys (KCK)
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+802.11 Key
+Encryption
+Key (KEK)
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+FIPS
+provider
+802.11
+Group
+Temporal
+Key (GTK)
+FIPS
+Provider
+KMAC Key
+
+API output
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+API input
+parameters
+
+RAM:Plaintex
+t
+
+For the
+duration of
+the service
+
+Zeroizatio
+n
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+Kernel free
+cipher
+handle
+Remove
+power from
+the module
+FIPS
+provider
+calling the
+zeroization
+API
+Remove
+power from
+the module
+
+Related SSPs
+FIPS provider
+derived key:Used
+With
+
+Kernel AES
+key:Encrypts
+Kernel AES
+key:Decrypts
+
+Kernel AES
+key:Encrypts
+
+Kernel AES
+key:Encrypts
+Kernel AES
+key:Decrypts
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 75 of 90
+
+Table 19: SSP Table 2
+
+9.5 Transitions
+The SHA-1 algorithm as implemented by the module will be non-approved for all purposes,
+starting January 1, 2030.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 76 of 90
+
+10 Self-Tests
+
+10.1 Pre-Operational Self-Tests
+Algorithm
+or Test
+HMACSHA2-256
+(A5009)
+
+Test
+Properties
+256-bit key
+
+Test Method
+Message
+Authentication
+
+Test
+Type
+SW/FW
+Integrity
+
+Indicator
+
+Details
+
+Module
+becomes
+operational
+and services
+are available
+for use
+
+Integrity test for
+fips.so; Integrity
+test for kernel
+binary; Integrity
+test for fipsheck
+binary; Integrity
+test for
+fipscheck library
+
+Table 20: Pre-Operational Self-Tests
+
+The pre-operational firmware integrity tests are performed automatically when the module
+is powered on, before the module transitions into the operational state. The algorithm used
+for the integrity test (i.e., HMAC-SHA2-256) is self-tested before the firmware integrity test is
+performed. While the module is executing the self-tests, services are not available, and data
+output (via the data output interface) is inhibited until the tests are successfully completed.
+The module transitions to the operational state only after the pre-operational self-tests are
+passed successfully.
+
+10.2 Conditional Self-Tests
+Algorith
+m or
+Test
+ECDSA
+KeyGen
+(FIPS1865)
+(A4711)
+SHA2-224
+(A4711)
+
+Test
+Propertie
+s
+N/A
+
+Test
+Metho
+d
+PCT
+
+Test
+Typ
+e
+PCT
+
+Indicator
+
+Details
+
+Condition
+s
+
+crypto_kpp_g
+enerate_public_k
+ey returns 0
+
+SP 80056Ar3
+Section
+5.6.2.1.4
+
+Key pair
+generation
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+SHA2-256
+(A4711)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+SHA2-384
+(A4711)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+SHA2-512
+(A4711)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+SHA3-224
+(A4713)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+SHA3-256
+(A4713)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 77 of 90
+
+Algorith
+m or
+Test
+SHA3-384
+(A4713)
+
+Test
+Propertie
+s
+0-8184 bit
+messages
+
+Test
+Metho
+d
+KAT
+
+Test
+Typ
+e
+CAS
+T
+
+Indicator
+
+Details
+
+Condition
+s
+
+Module is
+operational
+
+Message
+digest
+
+SHA3-512
+(A4713)
+
+0-8184 bit
+messages
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+digest
+
+AES-ECB
+(A4711)
+
+128, 192,
+256 bit
+keys
+128, 192,
+256 bit
+keys
+128, 192,
+256 bit
+keys
+128, 192,
+256 bit
+keys
+128, 192,
+256 bit
+keys
+128 and
+256 bit
+keys
+P-256, P384
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Encryption,
+Decryption
+(Separately)
+Message
+authenticatio
+n
+Message
+authenticatio
+n
+Shared
+secret
+computation
+
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+
+128, 192,
+256 bit
+keys
+with/witho
+ut PR;
+Health test
+per section
+11.3 of SP
+800-90A
+SHA2-256
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Seed
+Generate
+
+Module
+initializatio
+n
+
+PCT
+
+PCT
+
+Successful key
+generation
+
+Signature
+generation
+and
+verification
+
+EC key pair
+generation
+
+PKCS#1
+v1.5 with
+SHA2-256
+
+PCT
+
+PCT
+
+Successful key
+generation
+
+Signature
+generation
+and
+verification
+
+RSA key
+pair
+generation
+
+N/A
+
+PCT
+
+PCT
+
+Successful key
+generation
+
+Public key recomputation
+and
+
+Safe
+Primes key
+
+AES-CBC
+(A4712)
+AES-CTR
+(A4712)
+AES-CCM
+(A4712)
+AES-GCM
+(A4712)
+AESCMAC
+(A4712)
+KAS-ECCSSC
+Sp80056Ar3
+(A4711)
+Counter
+DRBG
+(A4711)
+
+ECDSA
+KeyGen
+(FIPS1865)
+(A5009)
+RSA
+KeyGen
+(FIPS1865)
+(A5018)
+Safe
+Primes
+Key
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 78 of 90
+
+Algorith
+m or
+Test
+Generatio
+n (A5014)
+
+Test
+Propertie
+s
+
+Test
+Metho
+d
+
+Test
+Typ
+e
+
+Indicator
+
+EDDSA
+KeyGen
+(A5016)
+
+ED25519
+and ED448
+
+PCT
+
+PCT
+
+Successful key
+generation
+
+SHA-1
+(A5009)
+
+24-bit
+message
+
+KAT
+
+CAS
+T
+
+SHA2-512
+(A5009)
+
+24-bit
+message
+
+KAT
+
+SHA3-256
+(A5011)
+
+32-bit
+message
+
+AES-ECB
+(A5002)
+AES-GCM
+(A5005)
+
+KDF
+SP800108
+(A5017)
+KDA
+OneStep
+SP80056Cr2
+(A5012)
+KDA HKDF
+Sp80056Cr1
+(A5013)
+KDF ANS
+9.42
+(A5009)
+
+Details
+
+Condition
+s
+pair
+generation
+
+Module is
+operational
+
+comparison
+with the
+existing
+public key
+(per SP 80056Ar3
+Section
+5.6.2.1.4)
+Signature
+generation
+and
+verification
+Message
+Digest
+
+CAS
+T
+
+Module is
+operational
+
+Message
+Digest
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Message
+Digest
+
+128-bit
+keys, 128bit
+ciphertext
+256-bit
+keys, 96bit IVs,
+128-bit
+plaintext,
+128-bit
+additional
+data
+Counter
+mode,
+HMACSHA2-256,
+128-bit
+input key
+SHA-224,
+392-bit
+input
+secret
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Decryption
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Encryption,
+Decryption
+(Separately)
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+SHA-256,
+48-bit
+input
+secret
+SHA-1 with
+AES-128,
+KW, 160-
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+EDDSA key
+pair
+generation
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 79 of 90
+
+Algorith
+m or
+Test
+
+Test
+Propertie
+s
+bit input
+secret
+SHA-256,
+192-bit
+input
+secret
+SHA-1,
+1056-bit
+input
+secret
+SHA-256,
+84-bit
+input
+secret
+Extract and
+expand
+modes,
+SHA-256
+SHA-256,
+24character
+password,
+288-bit
+salt,
+Iteration
+count:
+4096
+AES-128
+with
+prediction
+resistance
+
+Test
+Metho
+d
+
+Test
+Typ
+e
+
+Indicator
+
+Details
+
+Condition
+s
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Key
+Derivation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Module
+initializatio
+n
+
+HMAC
+DRBG
+(A5015)
+
+SHA-1 with
+prediction
+resistance
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Hash
+DRBG
+(A5015)
+
+SHA-256
+with
+prediction
+resistance
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Instantiate,
+Generate,
+Reseed,
+Generate
+(compliant
+with SP 80090Ar1
+Section 11.3)
+Instantiate,
+Generate,
+Reseed,
+Generate
+(compliant
+with SP 80090Ar1
+Section 11.3)
+Instantiate,
+Generate,
+Reseed,
+Generate
+(compliant
+with SP 80090Ar1
+Section 11.3)
+
+KDF ANS
+9.63
+(A5009)
+KDF SSH
+(A5019)
+TLS v1.2
+KDF
+RFC7627
+(A5009)
+TLS v1.3
+KDF
+(A5013)
+PBKDF
+(A5009)
+
+Counter
+DRBG
+(A5015)
+
+Module
+initializatio
+n
+
+Module
+initializatio
+n
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 80 of 90
+
+Algorith
+m or
+Test
+KAS-FFCSSC
+Sp80056Ar3
+(A5014)
+KAS-ECCSSC
+Sp80056Ar3
+(A5009)
+RSA
+SigGen
+(FIPS1865)
+(A5009)
+RSA
+SigVer
+(FIPS1865)
+(A5009)
+ECDSA
+SigGen
+(FIPS1865)
+(A5009)
+ECDSA
+SigVer
+(FIPS1865)
+(A5009)
+EDDSA
+SigGen
+(A5016)
+EDDSA
+SigVer
+(A5016)
+KTS-IFC
+(A5018)
+
+Test
+Propertie
+s
+ffdhe2048
+
+Test
+Metho
+d
+KAT
+
+Test
+Typ
+e
+CAS
+T
+
+Indicator
+
+Details
+
+Condition
+s
+
+Module is
+operational
+
+Shared
+Secret
+Computation
+
+Module
+initializatio
+n
+
+P-256
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Shared
+Secret
+Computation
+
+Module
+initializatio
+n
+
+PKCS#1
+v1.5 with
+SHA-256
+and 2048bit key
+PKCS#1
+v1.5 with
+SHA-256
+and 2048bit key
+SHA-256
+and P-224,
+P-256, P384, and P521
+SHA-256
+and P-224,
+P-256, P384, and P521
+ED25519
+and ED448
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Generation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Verification
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Generation
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Verification
+
+Module
+initializatio
+n
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Generation
+
+ED25519
+and ED448
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Signature
+Verification
+
+SHA-256,
+no padding
+
+KAT
+
+CAS
+T
+
+Module is
+operational
+
+Decryption
+
+Module
+initializatio
+n
+Module
+initializatio
+n
+Module
+initializatio
+n
+
+Table 21: Conditional Self-Tests
+
+The module performs self-tests on all approved cryptographic algorithms as part of the
+approved services supported in the approved mode of operation, using the tests shown in in
+the table above. Services are not available, and data output (via the data output interface) is
+inhibited during the self-tests. If any of these tests fails, the module transitions to the error
+state.
+
+10.3 Periodic Self-Test Information
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 81 of 90
+
+Algorithm or
+Test Method
+Test Type
+Test
+HMAC-SHA2Message
+SW/FW Integrity
+256 (A5009)
+Authentication
+Table 22: Pre-Operational Periodic Information
+
+Period
+
+Algorithm or
+Test
+ECDSA KeyGen
+(FIPS186-5)
+(A4711)
+SHA2-224
+(A4711)
+SHA2-256
+(A4711)
+SHA2-384
+(A4711)
+SHA2-512
+(A4711)
+SHA3-224
+(A4713)
+SHA3-256
+(A4713)
+SHA3-384
+(A4713)
+SHA3-512
+(A4713)
+AES-ECB
+(A4711)
+AES-CBC
+(A4712)
+AES-CTR
+(A4712)
+AES-CCM
+(A4712)
+AES-GCM
+(A4712)
+AES-CMAC
+(A4712)
+KAS-ECC-SSC
+Sp800-56Ar3
+(A4711)
+Counter DRBG
+(A4711)
+ECDSA KeyGen
+(FIPS186-5)
+(A5009)
+RSA KeyGen
+(FIPS186-5)
+(A5018)
+Safe Primes Key
+Generation
+(A5014)
+
+On-demand
+
+Periodic
+Method
+Manually
+
+Test Method
+
+Test Type
+
+Period
+
+PCT
+
+PCT
+
+On demand
+
+Periodic
+Method
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+PCT
+
+PCT
+
+On demand
+
+Manually
+
+PCT
+
+PCT
+
+On demand
+
+Manually
+
+PCT
+
+PCT
+
+On demand
+
+Manually
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 82 of 90
+
+Algorithm or
+Test
+EDDSA KeyGen
+(A5016)
+SHA-1 (A5009)
+SHA2-512
+(A5009)
+SHA3-256
+(A5011)
+AES-ECB
+(A5002)
+AES-GCM
+(A5005)
+KDF SP800-108
+(A5017)
+KDA OneStep
+SP800-56Cr2
+(A5012)
+KDA HKDF
+Sp800-56Cr1
+(A5013)
+KDF ANS 9.42
+(A5009)
+KDF ANS 9.63
+(A5009)
+KDF SSH
+(A5019)
+TLS v1.2 KDF
+RFC7627
+(A5009)
+TLS v1.3 KDF
+(A5013)
+PBKDF (A5009)
+Counter DRBG
+(A5015)
+HMAC DRBG
+(A5015)
+Hash DRBG
+(A5015)
+KAS-FFC-SSC
+Sp800-56Ar3
+(A5014)
+KAS-ECC-SSC
+Sp800-56Ar3
+(A5009)
+RSA SigGen
+(FIPS186-5)
+(A5009)
+RSA SigVer
+(FIPS186-5)
+(A5009)
+ECDSA SigGen
+(FIPS186-5)
+(A5009)
+
+Test Method
+
+Test Type
+
+Period
+
+PCT
+
+PCT
+
+On demand
+
+Periodic
+Method
+Manually
+
+KAT
+KAT
+
+CAST
+CAST
+
+On demand
+On demand
+
+Manually
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+KAT
+
+CAST
+CAST
+
+On demand
+On demand
+
+Manually
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+KAT
+
+CAST
+
+On demand
+
+Manually
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 83 of 90
+
+Algorithm or
+Test Method
+Test Type
+Test
+ECDSA SigVer
+KAT
+CAST
+(FIPS186-5)
+(A5009)
+EDDSA SigGen
+KAT
+CAST
+(A5016)
+EDDSA SigVer
+KAT
+CAST
+(A5016)
+KTS-IFC (A5018) KAT
+CAST
+Table 23: Conditional Periodic Information
+
+Period
+On demand
+
+Periodic
+Method
+Manually
+
+On demand
+
+Manually
+
+On demand
+
+Manually
+
+On demand
+
+Manually
+
+10.4 Error States
+Name
+Error
+State
+
+Description
+The module immediately
+stops functioning due to a
+self-test failure
+
+Table 24: Error States
+
+Conditions
+Integrity test
+failure
+CAST Failure
+PCT Failure
+
+Recovery Method
+Reboot and
+successful
+completion of selftests
+
+Indicator
+Module
+reboots
+
+In the error state, the output interface is inhibited, and the module accepts no more inputs
+or requests (as the module is no longer running).
+
+10.5 Operator Initiation of Self-Tests
+All self-tests, with the exception of the continuous health tests, can be invoked on demand
+by unloading and subsequently re-initializing the module.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 84 of 90
+
+11 Life-Cycle Assurance
+
+11.1 Installation, Initialization, and Startup Procedures
+Before deploying the module for usage, the Crypto Officer shall employ the following steps:
+1. Verify the HMAC values of each component of the module as listed in section 2.2.
+2. Verify that the kernel component command line is configured to run fipsInit.sh
+before any user mode application or init system.
+3. Verify that ‘fips=1’ parameter is present on the kernel command line for approved
+mode operation.
+
+11.2 Administrator Guidance
+The Crypto Officer must execute the “cat /proc/sys/crypto/fips_name” command. The Crypto
+Officer must ensure that the proper name is listed in the output as follows:
+Summit Linux
+
+This output maps to the module name “Summit Linux FIPS Core Crypto Module”.
+Next the Crypto Officer must execute “cat /proc/sys/crypto/fips_version”. This command
+must output the following:
+11.0
+The following are the HMAC values for each of the module components:
+•
+•
+•
+•
+
+wb45n/Image.lzma.hmac:3df472065e70a8c176c976c0588170e89b816d3ca1caee5f7
+34ea0b187696e13
+wb45n/libfipscheck.so.1.hmac:d193a7627cb9f9b7bae33a1bba2c57fdb52a42710a914
+ec57122590a5e63a65c
+wb45n/fipscheck.hmac:1e5bfd65b7a5d351e6cd1445df5cff7dddd62e8d9097ec065bc
+b877188a5271f
+wb45n/fips.so.hmac:f2eae64d2d5ae6b84995e671d25aba0672408f7b1b247c45a89cb
+817276c30f9
+
+11.3 Non-Administrator Guidance
+There is no non-administrator guidance.
+
+11.4 End of Life
+As the module does not persistently store SSPs, secure sanitization of the module consists of
+unloading the module. This will zeroize all SSPs in volatile memory.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 85 of 90
+
+12 Mitigation of Other Attacks
+12.1 Attack List
+
+For the FIPS Provider component, certain cryptographic subroutines and algorithms are
+vulnerable to timing analysis. The FIPS Provider component mitigates this vulnerability by
+using constant-time implementations. This includes, but is not limited to:
+•
+•
+•
+•
+
+Big number operations: computing GCDs, modular inversion, multiplication, division,
+and modular exponentiation (using Montgomery multiplication).
+Elliptic curve point arithmetic: addition and multiplication (using the Montgomery
+ladder).
+Vector-based AES implementations.
+In addition, RSA, ECDSA, ECDH, and DH employ blinding techniques to further
+impede timing and power analysis.
+
+No configuration is needed to enable the aforementioned countermeasures.
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 86 of 90
+
+Appendix A. Glossary and Abbreviations
+AES
+API
+CAST
+CAVP
+CBC
+CCM
+CFB
+CMAC
+CMVP
+CSP
+CTR
+CTS
+DH
+DRBG
+ECB
+ECC
+ECDH
+ECDSA
+EMS
+ENT (NP)
+FFC
+FIPS
+GCM
+GMAC
+HKDF
+HMAC
+IPsec
+KAT
+KBKDF
+MAC
+NIST
+PAA
+PBKDF2
+PKCS
+RSA
+SFI
+SHA
+SSC
+SSP
+TOEPP
+XTS
+
+Advanced Encryption Standard
+Application Programming Interface
+Cryptographic Algorithm Self-Test
+Cryptographic Algorithm Validation Program
+Cipher Block Chaining
+Counter with Cipher Block Chaining-Message Authentication Code
+Cipher Feedback
+Cipher-based Message Authentication Code
+Cryptographic Module Validation Program
+Critical Security Parameter
+Counter
+Ciphertext Stealing
+Diffie-Hellman
+Deterministic Random Bit Generator
+Electronic Code Book
+Elliptic Curve Cryptography
+Elliptic Curve Diffie-Hellman
+Elliptic Curve Digital Signature Algorithm
+Extended Master Secret
+Non-physical Entropy Source
+Finite Field Cryptography
+Federal Information Processing Standards
+Galois Counter Mode
+Galois Counter Mode Message Authentication Code
+HMAC-based Key Derivation Function
+Keyed-Hash Message Authentication Code
+Internet Protocol Security
+Known Answer Test
+Key-based Key Derivation Function
+Message Authentication Code
+National Institute of Science and Technology
+Processor Algorithm Acceleration
+Password-based Key Derivation Function v2
+Public-Key Cryptography Standards
+Rivest, Shamir, Addleman
+Security Function Implementation
+Secure Hash Algorithm
+Shared Secret Computation
+Sensitive Security Parameter
+Test Operational Environment’s Physical Perimeter
+XEX-based Tweaked-codebook mode with cipher text Stealing
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 87 of 90
+
+Appendix B. References
+ANS X9.422001
+
+Public Key Cryptography for the Financial Services Industry:
+Agreement of Symmetric Keys Using Discrete Logarithm
+Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9422001
+
+ANS X9.632001
+
+Public Key Cryptography for the Financial Services Industry, Key
+Agreement and Key Transport Using Elliptic Curve Cryptography
+2001
+https://webstore.ansi.org/standards/ascx9/ansix9632001
+
+FIPS 140-3
+
+FIPS PUB 140-3 - Security Requirements For Cryptographic Modules
+March 2019
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-3.pdf
+
+FIPS 140-3 IG
+
+Implementation Guidance for FIPS PUB 140-3 and the Cryptographic Module
+Validation Program
+https://csrc.nist.gov/Projects/cryptographic-module-validation-program/fips140-3-ig-announcements
+
+FIPS 180-4
+
+Secure Hash Standard (SHS)
+March 2012
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+FIPS 186-5
+
+Digital Signature Standard (DSS)
+February 3, 2023
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
+
+FIPS 197
+
+Advanced Encryption Standard
+November 2001
+https://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+
+FIPS 198-1
+
+The Keyed Hash Message Authentication Code (HMAC)
+July 2008
+https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+FIPS 202
+
+SHA-3 Standard: Permutation-Based Hash and Extendable-Output
+Functions
+August 2015
+https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+
+PKCS#1
+
+Public Key Cryptography Standards (PKCS) #1: RSA Cryptography
+Specifications Version 2.1
+February 2003
+https://www.ietf.org/rfc/rfc3447.txt
+
+RFC 3526
+
+More Modular Exponential (MODP) Diffie-Hellman groups for
+Internet Key Exchange (IKE)
+May 2003
+https://www.ietf.org/rfc/rfc3526.txt
+
+RFC 5288
+
+AES Galois Counter Mode (GCM) Cipher Suites for TLS
+August 2008
+https://www.ietf.org/rfc/rfc5288.txt
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 88 of 90
+
+RFC 7919
+
+Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for
+Transport Layer Security (TLS)
+August 2016
+https://www.ietf.org/rfc/rfc7919.txt
+
+RFC 8446
+
+The Transport Layer Security (TLS) Protocol Version 1.3
+August 2018
+https://www.ietf.org/rfc/rfc8446.txt
+
+SP 800-38A
+
+Recommendation for Block Cipher Modes of Operation Methods
+and Techniques
+December 2001
+https://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
+
+SP 800-38A
+Addendum
+
+Recommendation for Block Cipher Modes of Operation: Three
+Variants of Ciphertext Stealing for CBC Mode
+October 2010
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38aadd.pdf
+
+SP 800-38B
+
+Recommendation for Block Cipher Modes of Operation: The CMAC
+Mode for Authentication
+May 2005
+https://csrc.nist.gov/publications/nistpubs/800-38B/SP_800-38B.pdf
+
+SP 800-38C
+
+Recommendation for Block Cipher Modes of Operation: the CCM
+Mode for Authentication and Confidentiality
+May 2004
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication80038c.pdf
+
+SP 800-38D
+
+Recommendation for Block Cipher Modes of Operation: Galois/Counter
+Mode (GCM) and GMAC
+November 2007
+https://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+
+SP 800-38E
+
+Recommendation for Block Cipher Modes of Operation: The XTS
+AES Mode for Confidentiality on Storage Devices
+January 2010
+https://csrc.nist.gov/publications/nistpubs/800-38E/nist-sp-800-38E.pdf
+
+SP 800-38F
+
+Recommendation for Block Cipher Modes of Operation: Methods
+for Key Wrapping
+December 2012
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38F.pdf
+
+SP 800-52r2
+
+Guidelines for the Selection, Configuration, and Use of Transport
+Layer Security (TLS) Implementations
+August 2019
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r2.pdf
+
+SP 800-56Ar3
+
+Recommendation for Pair-Wise Key Establishment Schemes Using
+Discrete Logarithm Cryptography
+April 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf
+
+SP 800-56Cr2
+
+Recommendation for Key-Derivation Methods in Key-Establishment
+Schemes
+August 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Cr2.pdf
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 89 of 90
+
+SP 800-90Ar1
+
+Recommendation for Random Number Generation Using
+Deterministic Random Bit Generators
+June 2015
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+
+SP 800-90B
+
+Recommendation for the Entropy Sources Used for Random Bit
+Generation
+January 2018
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90B.pdf
+
+SP 800-108r1
+
+NIST Special Publication 800-108 - Recommendation for Key
+Derivation Using Pseudorandom Functions
+August 2022
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1.pdf
+
+SP 800131Ar2
+
+Transitioning the Use of Cryptographic Algorithms and Key
+Lengths
+March 2019
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800131Ar2.pdf
+
+SP 800-132
+
+Recommendation for Password-Based Key Derivation - Part 1:
+Storage Applications
+December 2010
+https://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf
+
+SP 800-133r2
+
+Recommendation for Cryptographic Key Generation
+June 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-133r2.pdf
+
+SP 800-135r1
+
+Recommendation for Existing Application-Specific Key Derivation
+Functions
+December 2011
+https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800135r1.pdf
+
+SP 800-140B
+
+CMVP Security Policy Requirements
+March 2020
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-140B.pdf
+
+© 2025 Ezurio/atsec information security.
+This document can be reproduced and distributed only whole and intact, including this copyright notice.
+Page 90 of 90
+
+

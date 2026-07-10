@@ -1,0 +1,4764 @@
+wolfSSL Inc.
+wolfCrypt
+
+FIPS 140-3 Non-Proprietary Security Policy
+Document Version 1.6
+5 Dec 2025
+
+wolfSSL Inc.
+10016 Edmonds Way, Suite C-300
+Edmonds, WA 98020
+wolfSSL.com
++1 425.245.8247
+
+Page 1 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Table of Contents
+1 – General ................................................................................................................................... 5
+1.1 Overview ............................................................................................................................. 5
+1.2 Security Levels .................................................................................................................... 5
+1.3 Additional Information .......................................................................................................... 5
+2 – Cryptographic Module Specification ....................................................................................... 6
+2.1 Description .......................................................................................................................... 6
+2.2 Tested and Vendor Affirmed Module Version and Identification ......................................... 7
+2.3 Excluded Components ...................................................................................................... 10
+2.4 Modes of Operation ........................................................................................................... 10
+2.5 Algorithms ......................................................................................................................... 12
+2.6 Security Function Implementations ................................................................................... 15
+2.7 Algorithm Specific Information ........................................................................................... 20
+2.8 RBG and Entropy .............................................................................................................. 21
+2.9 Key Generation ................................................................................................................. 21
+2.10 Key Establishment ........................................................................................................... 21
+2.11 Industry Protocols ............................................................................................................ 21
+2.12 Additional Information ...................................................................................................... 21
+3 Cryptographic Module Interfaces ............................................................................................. 22
+3.1 Ports and Interfaces .......................................................................................................... 22
+4 Roles, Services, and Authentication ........................................................................................ 22
+4.1 Authentication Methods ..................................................................................................... 22
+4.2 Roles ................................................................................................................................. 22
+4.3 Approved Services ............................................................................................................ 22
+4.4 Non-Approved Services .................................................................................................... 26
+5 Software/Firmware Security ..................................................................................................... 26
+5.1 Integrity Techniques .......................................................................................................... 26
+5.2 Initiate on Demand ............................................................................................................ 26
+5.3 Open-Source Parameters ................................................................................................. 26
+6 Operational Environment ......................................................................................................... 26
+6.1 Operational Environment Type and Requirements ........................................................... 26
+6.2 Configuration Settings and Restrictions ............................................................................ 27
+6.3 Additional Information ........................................................................................................ 27
+7 Physical Security...................................................................................................................... 27
+7.1 Mechanisms and Actions Required ................................................................................... 27
+7.5 EFP/EFT Information ......................................................................................................... 27
+Page 2 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+7.6 Hardness Testing Temperature Ranges ........................................................................... 27
+8 Non-Invasive Security .............................................................................................................. 27
+9 Sensitive Security Parameters Management ........................................................................... 27
+9.1 Storage Areas ................................................................................................................... 27
+9.2 SSP Input-Output Methods ............................................................................................... 28
+9.3 SSP Zeroization Methods .................................................................................................. 28
+9.4 SSPs ................................................................................................................................. 28
+10 Self-Tests ............................................................................................................................... 34
+10.1 Pre-Operational Self-Tests .............................................................................................. 34
+10.2 Conditional Self-Tests ..................................................................................................... 35
+10.3 Periodic Self-Test Information ......................................................................................... 40
+10.4 Error States ..................................................................................................................... 41
+10.5 Operator Initiation of Self-Tests ....................................................................................... 43
+11 Life-Cycle Assurance ............................................................................................................. 43
+11.1 Installation, Initialization, and Startup Procedures .......................................................... 43
+11.2 Administrator Guidance ................................................................................................... 45
+11.3 Non-Administrator Guidance ........................................................................................... 45
+11.7 Additional Information ...................................................................................................... 45
+12 Mitigation of Other Attacks ..................................................................................................... 45
+
+Page 3 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+List of Tables
+Table 1: Security Levels................................................................................................................ 5
+Table 2: Legend of Terms and references that appear in this document ..................................... 6
+Table 3: Source Files .................................................................................................................... 7
+Table 4: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)..... 8
+Table 5: Tested Operational Environments - Software, Firmware, Hybrid .................................. 10
+Table 6: Modes List and Description ........................................................................................... 11
+Table 7: Approved Algorithms ..................................................................................................... 14
+Table 8: Vendor-Affirmed Algorithms .......................................................................................... 15
+Table 9: Security Function Implementations ............................................................................... 20
+Table 10: Ports and Interfaces .................................................................................................... 22
+Table 11: Roles ........................................................................................................................... 22
+Table 12: Approved Services ...................................................................................................... 25
+Table 13: Storage Areas ............................................................................................................. 28
+Table 14: SSP Input-Output Methods ......................................................................................... 28
+Table 15: SSP Zeroization Methods ........................................................................................... 28
+Table 16: SSP Table 1 ................................................................................................................ 33
+Table 17: SSP Table 2 ................................................................................................................ 34
+Table 18: Pre-Operational Self-Tests ......................................................................................... 35
+Table 19: Conditional Self-Tests ................................................................................................. 39
+Table 20: Pre-Operational Periodic Information .......................................................................... 40
+Table 21: Conditional Periodic Information ................................................................................. 40
+Table 22: Periodic Method Descriptions ..................................................................................... 41
+Table 23: Error States ................................................................................................................. 42
+
+List of Figures
+Figure 1: Module Block Diagram ................................................................................................... 7
+Figure 2: Code Sample A ............................................................................................................ 45
+
+Page 4 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+1 – General
+1.1 Overview
+This document defines the Security Policy for wolfSSL Inc. wolfCrypt cryptographic module,
+hereafter denoted the Module. The Module meets FIPS 140-3 overall Level 1 requirements, with
+security levels as described in section 1.2 below.
+
+1.2 Security Levels
+Section
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+
+Table 1: Security Levels
+
+Security Level
+1
+1
+1
+1
+1
+1
+N/A
+N/A
+1
+1
+1
+N/A
+1
+
+1.3 Additional Information
+In accordance with AS02.05, [ISO19790] §7.7 Physical Security is optional and does not apply
+to the Module.
+Term/Ref
+[140-3]
+[OE]
+[186-4]
+[90Arev1]
+[56Arev3]
+[56Crev2]
+[135rev1]
+
+Description
+FIPS 140-3, Security Requirements for Cryptographic
+Modules
+The “Operating Environment”
+FIPS 186-4, Digital Signature Standard (DSS)
+NIST SP 800-90A Rev. 1, Recommendation for Random
+Number Generation Using Deterministic Random Bit
+Generators
+NIST SP 800-56A Rev. 3, Recommendation for Pair-Wise
+Key-Establishment Schemes Using Discrete Logarithm
+Cryptography
+NIST SP 800-56C Rev. 2, Recommendation for KeyDerivation Methods in Key-Establishment Schemes
+NIST SP 800-135 Rev. 1, Recommendation for Existing
+Application-Specific Key Derivation Functions
+
+Page 5 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Term/Ref
+[140Drev2]
+[UG]
+[COGM]
+[140-3 IG]
+[131Arev2]
+[56Brev2]
+
+Description
+NIST SP 800-140D revision 2, CMVP Approved Sensitive
+Parameter Generation and Establishment Methods: CMVP
+Validation Authority Updates to ISO/IEC 24759
+wolfCrypt FIPS 140-3 User Guide (sometimes referred to
+as the “Cryptographic Officer Guidance Manual” in
+documentation not produced by this vendor)
+Cryptographic Officer Guidance Manual (Another term for
+[UG] recognized by some in the Industry. Same meaning
+as [UG]
+FIPS 140-3, Implementation Guidance
+NIST SP 800-131A Rev. 2, Transitioning the Use of
+Cryptographic Algorithms and Key Lengths
+NIST SP 800-56B Rev. 2, Recommendation for Pair-Wise
+Key-Establishment Using Integer Factorization
+Cryptography
+
+Table 2: Legend of Terms and references that appear in this document
+
+2 – Cryptographic Module Specification
+2.1 Description
+TOEPP: The platform(s) used for testing are documented in Table 6: Tested Operational
+Environments - Software, Firmware, Hybrid. If the onboard CPU of a tested platform supported
+a known PAA [FIPS 140-3 IG 2.3.C] and was desirable for FIPS use, then in accordance with
+[FIPS 140-3 IG2.3.C] that platform was tested both with and without PAA unless an identical or
+similar platform had already been tested. When an identical or similar platform was already
+tested, the new platform was tested only with PAA. This is reflected by the column PAA/PAI in
+table 6 as marked with a Yes or No entry. The Intel and AMD AESNI (AES New Instructions)
+are known PAA(s).
+Purpose and Use:
+The Module is a cryptography software library. The Module is a Multi-Chip Stand Alone
+embodiment. The Module is intended for use by U.S. and Canadian Federal agencies in
+addition to any other markets that require FIPS 140-3 validated cryptographic functionality. The
+Module was originally designed with embedded and IoT in mind. As a side effect of this design,
+it also scales exceptionally well on larger desktop and server systems allowing more
+connections per box than similar competing solutions.
+The Module version under validation is Software Version v5.2.1.
+Module Type: Software
+Module Embodiment: MultiChipStand
+Module Characteristics:
+Cryptographic Boundary:
+Page 6 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Figure 1 depicts the Module operational environment, with the software module cryptographic
+boundary highlighted in red inclusive of all Module entry points (API calls). The Module is
+defined as a Software module per AS02.03. No components are excluded from [140-3]
+requirements. The pre-operational approved integrity test is performed over all components of
+the cryptographic boundary. Updates to the Module are provided as a complete replacement in
+accordance with AS04.27 – AS04.35.
+
+Source File
+Name
+aes.c
+aes_asm.s
+aes_asm.asm
+cmac.c
+dh.c
+ecc.c
+fips.c
+fips_test.c
+hmac.c
+kdf.c
+random.c
+rsa.c
+sha.c
+sha256.c
+sha256_asm.s
+sha512_asm.s
+sha3.c
+sha512.c
+wolfcrypt_first.c
+Figure 1: Module Block Diagram
+
+wolfcrypt_last.c
+
+Description
+AES algorithm
+AES assembler optimizations (Linux)
+AES assembler optimizations (Windows 10)
+CMAC algorithm
+Diffie-Hellman
+Elliptic curve cryptography
+Pre-operational entry point and API wrappers
+Power on self-tests
+HMAC algorithm
+TLS v1.2, v1.3 and SSH v2 KDFs
+DRBG algorithm
+RSA algorithm
+SHA algorithm
+SHA-256 algorithm
+SHA-256 assembler optimizations (Linux)
+SHA-512 assembler optimizations (Linux)
+SHA-3 algorithm
+SHA-512 algorithm
+First function and Read Only address marking start
+of cryptographic boundary
+Last function and Read Only address marking end
+of cryptographic boundary
+Table 3: Source Files
+
+The source code files listed in Table “Source Files” result in the corresponding object files that
+comprise the wolfCrypt module boundary on each supported operating environment; the
+extensions of the object file can differ across environments.
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+N/A for this module.
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+
+Page 7 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Package or File
+Name
+wolfssl-5.6.3commercial-fipslinuxv5.2.1.7z
+
+Software/ Firmware
+Version
+v5.2.1
+
+Features
+
+Integrity Test
+
+FIPS 140-3 module
+and SSL/TLS library
+
+HMAC-SHA256
+
+Table 4: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+Tested Module Identification – Hybrid Disjoint Hardware:
+N/A for this module.
+Tested Operational Environments - Software, Firmware, Hybrid:
+Operating
+System
+Linux 4.4
+(Ubuntu
+16.04 LTS)
+Linux 4.4
+(Ubuntu
+16.04 LTS)
+Android 13
+
+Hardware
+Platform
+Intel Ultrabook 2
+in 1
+
+Processors
+
+Intel Ultrabook 2
+in 1
+
+Intel Core i5-5300U
+CPU @2.30GHz x 4
+
+No
+
+v5.2.1
+
+Samsung Galaxy Exynos 9611 without
+XCover Pro
+PAA
+WTM 4100
+Broadcom
+BCM56260B0IFSBG
+- Saber2
+Precision 5820
+Intel® Xeon® WTower
+2255 @ 3.7GHz
+
+No
+
+v5.2.1
+
+No
+
+v5.2.1
+
+No
+
+v5.2.1
+
+Renesas
+R7FA6E10F
+
+No
+
+v5.2.1
+v5.2.1
+
+No
+
+v5.2.1
+
+Linux 4.14
+
+Ricoh IM C4510
+
+No
+
+v5.2.1
+
+NET+OS
+v7.6
+Yocto
+(kirkstone)
+4.0
+MQX 3.4
+
+Spectrum
+Infusion System
+Novum IQ
+Infusion Platform
+
+Freescale i.MX7
+Dual Arm Cortex A-7
+Intel® Atom® E3930
+@1.30GHz
+Intel® Atom® E3940
+@1.60GHz
+Digi International
+NS9210
+NXP i.MX6UL
+
+No
+
+Linux 4.14
+
+Network
+Interface Card
+for Aclara RF
+iSTAR physical
+access controller
+Ricoh IM C3010
+
+No
+
+v5.2.1
+
+No
+
+v5.2.1
+
+NXP PowerQUICC II
+MPC8313e 32bit
+
+No
+
+v5.2.1
+
+Linux 5.4
+RedHat
+Enterprise
+Linux
+Workstation
+8.9
+FreeRTOS
+v10.4
+Linux 5.15
+
+FEI-Zyfer Time
+and Frequency
+System
+
+Intel Core i5-5300U
+CPU @2.30GHz x 4
+
+Page 8 of 45
+
+PAA/PAI Hypervisor Version(s)
+or Host OS
+Yes
+v5.2.1
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Operating
+System
+CodeOS
+v1.4
+OpenRTOS
+v10.5
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Anyware
+Trusted
+Zero Client
+Firmware
+Kernel 6.1
+Anyware
+Trusted
+Zero Client
+Firmware
+Kernel 6.1
+Anyware
+Trusted
+Zero Client
+Firmware
+Kernel 6.1
+Fusion
+Embedded
+RTOS 5.0
+Linux 5.4
+
+Hardware
+Platform
+Series CR2700
+Code Reader(s)
+Teledyne Webb
+SOM Module
+EndaceProbe
+2144
+
+Processors
+CodeCorp CT8200
+(ARM FA626TE)
+STM32L4R5
+
+PAA/PAI Hypervisor Version(s)
+or Host OS
+No
+v5.2.1
+No
+
+v5.2.1
+
+Intel® Xeon® Silver
+4316 CPU
+@2.30GHz
+
+No
+
+v5.2.1
+
+EndaceProbe
+2144
+
+Intel® Xeon® Silver
+4316 CPU
+@2.30GHz
+
+Yes
+
+v5.2.1
+
+EndaceProbe
+2184
+
+Intel® Xeon® Gold
+6338N CPU
+@2.20GHz
+
+No
+
+v5.2.1
+
+EndaceProbe
+2184
+
+Intel® Xeon® Gold
+6338N CPU
+@2.20GHz
+
+Yes
+
+v5.2.1
+
+EndaceProbe
+94C8
+
+Intel® Xeon® Gold
+5418N CPU
+@1.80GHz
+
+Yes
+
+v5.2.1
+
+EndaceProbe
+92C8
+
+Intel® Xeon® Gold
+6230N CPU
+@2.30GHz
+
+Yes
+
+v5.2.1
+
+Anyware Trusted
+Zero Client
+
+AMD Ryzen
+Embedded R1305G
+
+No
+
+v5.2.1
+
+Anyware Trusted
+Zero Client
+
+AMD Ryzen
+Embedded R1305G
+
+Yes
+
+v5.2.1
+
+HP tz655
+Trusted Zero
+Client
+
+AMD Ryzen
+Embedded R2314
+
+Yes
+
+v5.2.1
+
+Classone ® IP
+Radio Gateway
+
+Analog Devices
+ADSP-BF516
+(Blackfin)
+NXP i.MX8M
+
+No
+
+v5.2.1
+
+No
+
+v5.2.1
+
+Harman MUSE
+MU Controller
+
+Page 9 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Operating
+System
+Linux 4.9
+Linux 5.10
+Red Hat
+Enterprise
+Linux
+Workstation
+8.10
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+Endace
+Crypto
+Firmware
+2.1
+
+Hardware
+Platform
+Harman N2612S
+Video
+encoder/decoder
+Harman N4321D
+audio transcoder
+Precision 5820
+Tower
+
+Processors
+ARM Cortex-A7
+
+PAA/PAI Hypervisor Version(s)
+or Host OS
+No
+v5.2.1
+
+NXP i.MX8
+
+No
+
+v5.2.1
+
+Intel® Xeon® W2255 @ 3.7GHz
+
+No
+
+v5.2.1
+
+EndaceProbe
+2144
+
+Intel® Xeon® Gold
+5411N @1.90GHz
+
+Yes
+
+v5.2.1
+
+EndaceProbe
+2184
+
+Intel® Xeon® Gold
+6438N @2.00GHz
+
+Yes
+
+v5.2.1
+
+EndaceProbe
+92C8
+
+Intel® Xeon® Gold
+6148 CPU
+@2.40GHz
+
+Yes
+
+v5.2.1
+
+Table 5: Tested Operational Environments - Software, Firmware, Hybrid
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+N/A for this module.
+The Module conforms to [140-3 IG] 2.3.C Processor Algorithm Accelerators (PAA) and
+Processor Algorithm Implementation (PAI). The Intel Processor AES-NI functions are identified
+by [140-3 IG] 2.3.C as a known PAA.
+No vendor affirmed operational environments are claimed for this validation of the module.
+
+2.3 Excluded Components
+N/A the module does not support excluded components.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode Name
+Approved
+mode of
+operation
+
+Description
+The Module supports an Approved
+mode of operation. In this mode all
+services are available.
+Page 10 of 45
+
+Type
+Status Indicator
+Approved FIPS_MODE_NORMAL (1)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Mode Name
+Degraded
+mode of
+operation
+
+Description
+The Module implements a Degraded
+Mode of operation: when a CAST
+fails, that CAST is marked as failed
+and the module will inhibit use of
+algorithms governed by that CAST
+
+Type
+Status Indicator
+Approved FIPS_MODE_DEGRADED
+(2)
+
+Table 6: Modes List and Description
+
+Mode Change Instructions and Status:
+Each time the module is power cycled or reloaded all CAST status are initialized to
+FIPS_CAST_STATE_INIT.
+Each algorithm invocation includes a check of the algorithms CAST status; if the CAST status is
+FIPS_CAST_STATE_INIT the module will automatically run the CAST and that algorithms
+CAST status will be updated to either FIPS_CAST_STATE_SUCCESS (if it passes) or
+FIPS_CAST_STATE_FAILURE (if it fails). See degraded mode for when a CAST status fails.
+To check the modules overall status at any time the cryptographic officer may use the Show
+Status service by calling wolfCrypt_GetMode_fips() this will return either:
+FIPS_MODE_INIT (0) - Module is currently running its’ pre-operational self-test in another
+thread (multi-threaded)
+FIPS_MODE_NORMAL (1) - Module in normal mode of operation without errors
+FIPS_MODE_DEGRADED (2) - Module in degraded mode of operation with some errors
+FIPS_MODE_FAILED (3) - Module failed the integrity check and is not usable
+To check the CAST state of any algorithm the cryptographic officer may use the Show Status
+Service by calling wc_GetCastStatus_fips(<algorithm type>) where algorithm type can be any of
+the following:
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+FIPS_CAST_AES_CBC
+FIPS_CAST_AES_GCM
+FIPS_CAST_HMAC_SHA1
+FIPS_CAST_HMAC_SHA2_256
+FIPS_CAST_HMAC_SHA2_512
+FIPS_CAST_HMAC_SHA3_256
+FIPS_CAST_DRBG
+FIPS_CAST_RSA_SIGN_PKCS1v15
+FIPS_CAST_ECC_PRIMITIVE_Z
+FIPS_CAST_DH_PRIMITIVE_Z
+FIPS_CAST_ECDSA
+FIPS_CAST_KDF_TLS12
+FIPS_CAST_KDF_TLS13
+FIPS_CAST_KDF_SSH
+
+The returned status indicator of wc_GetCastStatus_fips(<algorithm type>) may be checked
+against any of the following states:
+Page 11 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+•
+•
+•
+•
+
+FIPS_CAST_STATE_INIT (0) - CAST hasn't run yet
+FIPS_CAST_STATE_PROCESSING (1) - CAST is running
+FIPS_CAST_STATE_SUCCESS (2) - CAST has passed previously
+FIPS_CAST_STATE_FAILURE (3) - CAST has failed
+
+Degraded Mode Description:
+The Module implements a degraded mode of operation: when a CAST fails, the module enters
+an error state. The algorithm CAST status is set to FIPS_CAST_STATE_FAILED and the
+module runs all CASTS prior to the first operational use of any algorithm, regardless of the
+CAST having passed previously. Before exiting the error state, the module status (reported in
+the Show Status service) is set to FIPS_MODE_DEGRADED. Upon exiting the error state, the
+module enters the degraded mode of operation. This sequence of events is in accordance with
+AS02.26. The algorithm that failed its’ CAST initially triggering the error state will no longer be
+available for use in degraded mode of operation and any algorithms that depend on that
+algorithm will also be unavailable for use. See Table 16: Conditional Self-Tests in section 10.2,
+column Conditions to see if a CAST failure will affect use of another algorithm. To recover from
+degraded mode of operation CO shall power cycle or reload the module (equivalent to a power
+cycle).
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+AES-CBC
+
+CAVP
+Cert
+A4308
+
+AES-CCM
+AES-CMAC
+
+A4308
+A4308
+
+AES-CTR
+
+A4308
+
+AES-ECB
+
+A4308
+
+AES-GCM
+
+A4308
+
+AES-GMAC
+
+A4308
+
+AES-OFB
+
+A4308
+
+DSA KeyGen
+(FIPS186-4)
+
+A4308
+
+Properties
+
+Reference
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Key Length - 128, 192, 256
+Direction - Generation, Verification
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External, Internal
+IV Generation Mode - 8.2.1, 8.2.2
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External, Internal
+IV Generation Mode - 8.2.1, 8.2.2
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+L - 2048
+N - 256
+
+SP 800-38A
+
+Page 12 of 45
+
+SP 800-38C
+SP 800-38B
+SP 800-38A
+SP 800-38A
+SP 800-38D
+
+SP 800-38D
+
+SP 800-38A
+FIPS 186-4
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorithm
+ECDSA KeyGen
+(FIPS186-4)
+ECDSA KeyVer
+(FIPS186-4)
+ECDSA SigGen
+(FIPS186-4)
+
+CAVP
+Cert
+A4308
+A4308
+A4308
+
+ECDSA SigVer
+(FIPS186-4)
+
+A4308
+
+Hash DRBG
+
+A4308
+
+HMAC-SHA-1
+
+A4308
+
+HMAC-SHA2224
+HMAC-SHA2256
+HMAC-SHA2384
+HMAC-SHA2512
+HMAC-SHA3224
+HMAC-SHA3256
+HMAC-SHA3384
+HMAC-SHA3512
+KAS-ECC-SSC
+Sp800-56Ar3
+
+A4308
+
+KAS-FFC-SSC
+Sp800-56Ar3
+
+A4308
+
+KDF SSH (CVL)
+
+A4308
+
+A4308
+A4308
+A4308
+A4308
+A4308
+A4308
+A4308
+A4308
+
+Properties
+
+Reference
+
+Curve - P-224, P-256, P-384, P-521
+Secret Generation Mode - Extra Bits
+Curve - P-192, P-224, P-256, P-384, P-521
+
+FIPS 186-4
+
+Component - No
+Curve - P-224, P-256, P-384, P-521
+Hash Algorithm - SHA2-224, SHA2-256, SHA2384, SHA2-512, SHA3-224, SHA3-256, SHA3384, SHA3-512
+Component - No
+Curve - P-192, P-224, P-256, P-384, P-521
+Hash Algorithm - SHA-1, SHA2-224, SHA2-256,
+SHA2-384, SHA2-512, SHA3-224, SHA3-256,
+SHA3-384, SHA3-512
+Prediction Resistance - No
+Mode - SHA2-256
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Key Length - Key Length: 112-1024 Increment
+8
+Domain Parameter Generation Methods - P256, P-384, P-521
+Scheme ephemeralUnified KAS Role - initiator, responder
+Domain Parameter Generation Methods ffdhe2048
+Scheme dhEphem KAS Role - initiator, responder
+Cipher - AES-128, AES-192, AES-256
+Hash Algorithm - SHA-1, SHA2-256, SHA2-384,
+SHA2-512
+
+FIPS 186-4
+
+Page 13 of 45
+
+FIPS 186-4
+
+FIPS 186-4
+
+SP 800-90A
+Rev. 1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+SP 800-56A
+Rev. 3
+
+SP 800-56A
+Rev. 3
+
+SP 800-135
+Rev. 1
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorithm
+KDF TLS (CVL)
+
+CAVP
+Cert
+A4308
+
+RSA KeyGen
+(FIPS186-4)
+
+A4308
+
+RSA SigGen
+(FIPS186-4)
+RSA SigVer
+(FIPS186-4)
+SHA-1
+
+A4308
+
+SHA2-224
+
+A4308
+
+SHA2-256
+
+A4308
+
+SHA2-384
+
+A4308
+
+SHA2-512
+
+A4308
+
+SHA3-224
+
+A4308
+
+SHA3-256
+
+A4308
+
+SHA3-384
+
+A4308
+
+SHA3-512
+
+A4308
+
+TLS v1.2 KDF
+RFC7627 (CVL)
+TLS v1.3 KDF
+(CVL)
+
+A4308
+
+A4308
+A4308
+
+A4308
+
+Table 7: Approved Algorithms
+
+Properties
+
+Reference
+
+TLS Version - v1.2
+Hash Algorithm - SHA2-256, SHA2-384, SHA2512
+Key Generation Mode - B.3.3
+Modulo - 2048, 3072, 4096
+Primality Tests - Table C.2
+Private Key Format - Standard
+Signature Type - PKCS 1.5, PKCSPSS
+Modulo - 2048, 3072, 4096
+Signature Type - PKCS 1.5, PKCSPSS
+Modulo - 1024, 2048, 3072, 4096
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Hash Algorithm - SHA2-256, SHA2-384, SHA2512
+HMAC Algorithm - SHA2-256, SHA2-384
+KDF Running Modes - DHE, PSK, PSK-DHE
+
+SP 800-135
+Rev. 1
+FIPS 186-4
+
+FIPS 186-4
+FIPS 186-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 202
+FIPS 202
+FIPS 202
+FIPS 202
+SP 800-135
+Rev. 1
+SP 800-135
+Rev. 1
+
+NOTE: Only the algorithms specified in this section are supported by the module in approved
+mode of operation.
+No operational use of an algorithm may be performed until the corresponding CAST has
+passed.
+Vendor-Affirmed Algorithms:
+Name
+CKG1
+
+Properties
+Implementation Reference
+Asymmetric:RSA
+wolfCrypt
+SP800-133r2 5.1 "Key Pairs for Digital
+Asymmetric:ECDSA
+Signature Schemes"
+Page 14 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+CKG2
+CKG3
+
+Properties
+Asymmetric:ECC
+Asymmetric:FFC
+Symmetric:AES
+Symmetric:HMAC
+
+Implementation Reference
+wolfCrypt
+SP800-133r2 5.2 "Key Pairs for Key
+Establishment"
+wolfCrypt
+SP800-133r2 6.2 "Derivation of Symmetric
+Keys"
+
+Table 8: Vendor-Affirmed Algorithms
+
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+The Module does not implement non-approved algorithms. The services listed in this Security
+Policy include all cryptographic and non-cryptographic functionality.
+NOTE: For TLS 1.2 KDF Extended master-secret shall be used in approved mode of operation.
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+Non-Approved, Not Allowed Algorithms:
+N/A for this module.
+
+2.6 Security Function Implementations
+Name
+DRBG
+
+Type
+DRBG
+
+Description
+Deterministic
+Random Byte
+Generator
+
+Message
+Authentication
+
+MAC
+
+Hash-Based
+Message
+Authentication
+Codes,
+Generation and
+Verification
+
+Page 15 of 45
+
+Properties
+
+Algorithms
+SHA2-256
+A4308:
+Hash DRBG
+A4308:
+HMAC-SHA-1
+A4308:
+HMAC-SHA2224
+A4308:
+HMAC-SHA2256
+A4308:
+HMAC-SHA2384
+A4308:
+HMAC-SHA2512
+A4308:
+HMAC-SHA3224
+A4308:
+HMAC-SHA3-
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Type
+
+Description
+
+Secure Hash
+
+SHA
+
+Secure Hash
+Function
+
+TLS 1.3 Key
+Agreement
+
+KAS-56CKDF
+
+KDF: Extract
+then Expand
+(56C)
+
+Primitive Key
+Agreement
+
+KAS-KeyGen
+
+KDF Derived
+Key Agreement
+
+KAS-135KDF
+
+DH: Key
+agreement
+primitives
+KDF: Derive
+keying material
+from a shared
+secret (135);
+
+Page 16 of 45
+
+Properties
+
+Algorithms
+256
+A4308:
+HMAC-SHA3384
+A4308:
+HMAC-SHA3512
+A4308:
+SHA-1
+A4308:
+SHA2-224
+A4308:
+SHA2-256
+A4308:
+SHA2-384
+A4308:
+SHA2-512
+A4308:
+SHA3-224
+A4308:
+SHA3-256
+A4308:
+SHA3-384
+A4308:
+SHA3-512
+A4308:
+TLS v1.3 KDF
+A4308:
+HMAC-SHA2256
+A4308:
+HMAC-SHA2384
+A4308:
+HMAC-SHA2512
+A4308:
+KAS-FFC-SSC
+Sp800-56Ar3
+A4308:
+KDF SSH
+A4308:
+KDF TLS
+A4308:
+TLS v1.2 KDF
+RFC7627
+A4308:
+SHA-1
+A4308:
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Type
+
+Description
+
+KAS SSC
+Derived Key
+Agreement
+
+KAS-SSC
+
+Derived keying
+material from a
+shared secret
+
+133r2 5.1
+Asymmetric Key
+Generation
+
+CKG
+
+SP800-133r2
+5.1 "Key Pairs
+for Digital
+Signature
+Schemes"
+
+133r2 5.2
+Asymmetric Key
+Generation
+
+CKG
+
+SP800-133r2
+5.2 "Key Pairs
+for Key
+Establishment"
+
+Symmetric Key
+Generation
+
+CKG
+
+SP800-133r2
+6.2 "Derivation
+of Symmetric
+Keys"
+
+Page 17 of 45
+
+Properties
+
+Algorithms
+SHA2-256
+A4308:
+SHA2-384
+A4308:
+SHA2-512
+A4308:
+KAS-ECC-SSC
+Sp800-56Ar3
+A4308:
+KAS-FFC-SSC
+Sp800-56Ar3
+A4308:
+RSA KeyGen
+(FIPS186-4)
+A4308:
+ECDSA KeyGen
+(FIPS186-4)
+A4308:
+Hash DRBG
+A4308:
+CKG-1
+Vendor Affirmed:
+KAS-ECC-SSC
+Sp800-56Ar3
+A4308:
+KAS-FFC-SSC
+Sp800-56Ar3
+A4308:
+Hash DRBG
+A4308:
+CKG-2
+Vendor Affirmed:
+AES-CBC
+A4308:
+AES-CCM
+A4308:
+AES-CMAC
+A4308:
+AES-CTR
+A4308:
+AES-ECB
+A4308:
+AES-GCM
+A4308:
+AES-GMAC
+A4308:
+AES-OFB
+A4308:
+HMAC-SHA-1
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Type
+
+Description
+
+RSA
+Asymmetric
+Key-Pair
+Generation
+
+AsymKeyPairKeyGen
+
+Generate an
+RSA
+Asymmetric Key
+Pair
+
+DSA
+Asymmetric
+Key-Pair
+Generation
+
+AsymKeyPairKeyGen
+AsymKeyPairPubKeyVal
+AsymKeyPairDomPar
+
+ECC
+Asymmetric
+Key-Pair
+Generation
+
+AsymKeyPairKeyVer
+AsymKeyPairKeyGen
+AsymKeyPairDomPar
+
+Generate a DSA
+Asymmetric Key
+Pair, Validate a
+Public DSA Key
+and KAS-FFCSSC Domain
+Parameter
+Generation
+(SP800-56Ar3)
+Generate an
+ECC
+Asymmetric Key
+Pair, ECC
+KeyVer and
+KAS-ECC-SSC
+Page 18 of 45
+
+Properties
+
+Algorithms
+A4308:
+HMAC-SHA2224
+A4308:
+HMAC-SHA2256
+A4308:
+HMAC-SHA2384
+A4308:
+HMAC-SHA2512
+A4308:
+HMAC-SHA3224
+A4308:
+HMAC-SHA3256
+A4308:
+HMAC-SHA3384
+A4308:
+HMAC-SHA3512
+A4308:
+Hash DRBG
+A4308:
+CKG-3
+Vendor Affirmed:
+RSA KeyGen
+(FIPS186-4)
+A4308:
+Hash DRBG
+A4308:
+KAS-FFC-SSC
+Sp800-56Ar3
+A4308:
+DSA KeyGen
+(FIPS186-4)
+A4308:
+Hash DRBG
+A4308:
+KAS-ECC-SSC
+Sp800-56Ar3
+A4308:
+ECDSA KeyGen
+(FIPS186-4)
+A4308:
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Type
+
+Digital Signature
+Generation
+
+DigSig-SigGen
+
+Digital Signature
+Verification
+
+DigSig-SigVer
+
+Description
+Domain
+Parameter
+Generation
+(SP800-56Ar3)
+Digital Signature
+Generation
+
+Properties
+
+Digital Signature
+Verification
+
+DigSigSigVer:1024
+(verification
+only)
+DigSigSigVer:SHA-1
+(verification
+only)
+DigSigSigVer:P-192
+(Signature and
+Key Verification
+only)
+
+Page 19 of 45
+
+Algorithms
+Hash DRBG
+A4308:
+RSA SigGen
+(FIPS186-4)
+A4308:
+ECDSA SigGen
+(FIPS186-4)
+A4308:
+SHA2-224
+A4308:
+SHA2-256
+A4308:
+SHA2-384
+A4308:
+SHA2-512
+A4308:
+SHA3-224
+A4308:
+SHA3-256
+A4308:
+SHA3-384
+A4308:
+SHA3-512
+A4308:
+Hash DRBG
+A4308:
+RSA SigVer
+(FIPS186-4)
+A4308:
+ECDSA SigVer
+(FIPS186-4)
+A4308:
+ECDSA KeyVer
+(FIPS186-4)
+A4308:
+SHA-1
+A4308:
+SHA2-224
+A4308:
+SHA2-256
+A4308:
+SHA2-384
+A4308:
+SHA2-512
+A4308:
+SHA3-224
+A4308:
+SHA3-256
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Type
+
+Description
+
+Auth Block
+Cipher
+
+BC-Auth
+
+Authenticated
+Block Ciphers
+
+UnAuth Block
+Cipher
+
+BC-UnAuth
+
+Unauthenticated
+Block Ciphers
+
+Properties
+
+Table 9: Security Function Implementations
+
+Algorithms
+A4308:
+SHA3-384
+A4308:
+SHA3-512
+A4308:
+AES-GMAC
+A4308:
+AES-GCM
+A4308:
+AES-CMAC
+A4308:
+AES-CCM
+A4308:
+AES-CBC
+A4308:
+AES-ECB
+A4308:
+AES-OFB
+A4308:
+AES-CTR
+A4308:
+
+2.7 Algorithm Specific Information
+The conditions for using the Module in the Approved mode of operation are:
+1. The Module is a cryptographic library and it is intended to be used with a calling
+application. The calling application is responsible for the usage of the primitives in the
+correct sequence including the IVs and sessions.
+2. The keys used by the Module for cryptographic purposes are determined by the calling
+application. The calling application is required to provide keys in accordance with
+[140Drev2].
+3. With the Module installed and configured in accordance with [UG] instructions, only the
+algorithms listed in the table in Section 2.5 are available. The module is in the Approved
+mode if the following conditions for algorithm use are met. NOTE: All conditions and
+restrictions below are met when the executable binary is built in accordance with the UG
+instructions. Applications that would be at risk of violating any restriction in this section will
+fail to build and link successfully against the compliant module binary executable.
+a. Adherence to [140-3 IG] C.H Key/IV Pair Uniqueness Requirements from SP 800-38D.
+The Module supports both internal IV generation (for use with the [56Arev3] compliant
+KAS API entry points) and external IV generation (for TLS KAS usage). For internal IV
+generation, the Module complies with C.H 2, users MUST specify an IV length of
+GCM_NONCE_MID_SZ or greater for internal IV generation otherwise specifying any
+length less than 96-bits is rejected by the module. For internal IV generation, C.H
+requires the calling application to use the modules internal approved DRBG to
+generate the random IV For external IV generation, the Module complies with C.H 1
+(a), tested per option (ii) under C.H TLS protocol IV generation. The module
+Page 20 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+performs a check for nonce_explicit rollover, returning an error if that condition is
+encountered.
+b. ECDSA and RSA signature generation must be used with a SHA-2 or SHA-3 hash
+function.
+c. RSA signature generation and encryption primitives must use RSA keys with k = 2048,
+3072 or 4096 bits or greater.
+d. The calling process shall adhere to all current [131Arev2] algorithm usage restrictions.
+4. Manual key entry is not supported.
+5. Data output is inhibited during self-tests, zeroization, and error states.
+6. RSA Decrypt Primitive (RSADP) with k=2048-bit is the only CAVP testable aspect of
+[56Brev2]. The module implements the RSA primitive operations only, there are no claims
+of key transport. The module implements ‘RSA Encrypt Primitive’ (RSAEP) and RSADP.
+The vendor affirms conformance to [56Brev2] for RSAEP and RSADP with other key sizes
+since no CAVP test is available for key sizes other than 2048-bit.
+
+2.8 RBG and Entropy
+N/A for this module.
+N/A for this module.
+
+2.9 Key Generation
+2.10 Key Establishment
+2.11 Industry Protocols
+The Module conforms to [140-3 IG] D.C References to the Support of Industry Protocols: while
+the module provides [56A] conformant schemes and API entry points oriented to TLS and SSH
+usage, the Module does not contain the full implementation of TLS or SSH. The following
+statements are required per IG D.C case #2:
+No parts of the TLS protocol other than the approved cryptographic algorithms and the
+KDFs, have been tested by the CAVP and CMVP.
+No parts of the SSH protocol other than the approved cryptographic algorithms and the
+KDFs, have been tested by the CAVP and CMVP.
+
+2.12 Additional Information
+The Module design corresponds to the Module security rules. Security rules enforced by the
+Module are described in the appropriate context of this document.
+
+Page 21 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical Port
+N/A: Internal (call
+stack)
+N/A: Internal (call
+stack)
+N/A: Internal (call
+stack)
+N/A: Internal (call
+stack)
+N/A: Internal (call
+stack)
+
+Logical
+Interface(s)
+Control Input
+Control
+Output
+Data Input
+Data Output
+Status
+Output
+
+Table 10: Ports and Interfaces
+
+Data That Passes
+API entry point: stack frame including non-sensitive
+parameters
+API call parameters passed by reference for structures
+allocated by wolfCrypt
+API call parameters passed by reference or value for
+cryptographic service input
+API call parameters passed by reference for
+cryptographic service output
+API return value: enumerated status resulting from call
+execution
+
+Table 7 defines the Module’s [140-3] logical interfaces; the Module does not interact with
+physical ports.
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+N/A for this module.
+
+4.2 Roles
+Name
+CO
+
+Table 11: Roles
+
+Type
+Role
+
+Operator Type
+CO
+
+Authentication Methods
+
+The Module supports the Cryptographic Officer (CO) operator role, and does not support
+multiple concurrent operators, a maintenance role or bypass capability. The cryptographic
+module does not provide an authentication or identification method of its own. The CO role is
+implicitly identified by the service requested.
+
+4.3 Approved Services
+Name
+Digital
+Signature
+
+Descriptio
+n
+Generate
+or verify
+
+Indicator
+
+Inputs
+
+Outputs
+
+Successf
+ul
+
+Sign: Key
+Struct
+
+Sign: Status
+return;
+
+Page 22 of 45
+
+Security
+Functions
+Digital
+Signature
+
+SSP
+Access
+CO
+- DS_SGK:
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Descriptio
+n
+digital
+signatures.
+
+Indicator
+
+Inputs
+
+Outputs
+
+completi
+on of the
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+
+(DS_SGK);
+message;
+Verify:
+signature
+value;
+flags; sizes.
+FFC, ECC:
+curve
+identifier;
+RSA:
+modulus
+size;
+
+Signature
+value.
+Verify:
+Status
+return;
+
+Generate
+Key Pair
+
+Generate
+asymmetric
+key pairs.
+
+Status
+return; Key
+structure
+(GKP_Privat
+e)
+
+Key
+Agreeme
+nt
+
+DH key
+agreement
+primitives.
+
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+
+Key
+structures
+(KAS_Priva
+te and
+KAS_Publi
+c); flags;
+
+Status
+return;
+KAS_SSC;
+
+Key
+Derivatio
+n
+
+Derive
+keying
+material
+from a
+shared
+secret
+
+KAS_SSC;
+flags;
+
+Status
+return;
+KD_DKM;
+
+Keyed
+Hash
+
+Generate
+or verify
+message
+integrity
+
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+
+KH_Key
+
+Status
+return; Tag
+value;
+
+Page 23 of 45
+
+Security
+Functions
+Generation
+Digital
+Signature
+Verification
+
+SSP
+Access
+W,E,Z
+- DS_SVK:
+W,E,Z
+
+ECC
+Asymmetric
+Key-Pair
+Generation
+DSA
+Asymmetric
+Key-Pair
+Generation
+RSA
+Asymmetric
+Key-Pair
+Generation
+133r2 5.2
+Asymmetric
+Key
+Generation
+133r2 5.1
+Asymmetric
+Key
+Generation
+Primitive
+Key
+Agreement
+
+CO
+GKP_Privat
+e: G,R,Z
+GKP_Publi
+c: G,R,Z
+
+TLS 1.3 Key
+Agreement
+KDF
+Derived Key
+Agreement
+KAS SSC
+Derived Key
+Agreement
+Message
+Authenticati
+on
+
+CO
+KAS_Privat
+e: W,E,Z
+KAS_Public
+: W,E,Z
+KAS_SSC:
+G,R,Z
+CO
+KAS_SSC:
+R,E,Z
+
+CO
+- KH_Key:
+W,E
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Descriptio
+n
+
+Message
+Digest
+
+Generate a
+message
+digest
+
+Random
+
+Generate
+random bits
+using the
+DRBG
+
+Self-test
+
+Perform the
+designated
+self-test.
+
+Show
+Status
+
+Provide
+Module
+status
+
+Symmetri
+c cipher
+
+Encrypt or
+Decrypt
+data,
+including
+AEAD
+modes
+
+Indicator
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+
+Inputs
+
+Outputs
+
+Security
+Functions
+Auth Block
+Cipher
+
+SSP
+Access
+
+Message;
+flags;
+
+Status
+return; Hash
+value;
+
+Secure
+Hash
+
+CO
+
+DRBG
+structure
+(Internal
+State
+containing
+secret(s) C
+and V);
+Seed
+
+Status
+return;
+Random
+Value;
+
+DRBG
+
+Flags
+
+Status
+return
+
+Message
+Authenticati
+on
+
+CO
+- Seed:
+W,E,Z
+- Internal
+State: G,E
+- Secret C:
+G,E
+- Secret V:
+G,E
+- Entropy
+Input
+String:
+W,E,Z
+CO
+MOD_INT:
+G,Z
+- coreKey:
+E
+
+None
+
+Status
+return
+
+SC_EDK;
+flags;
+
+Status
+return.
+Plaintext or
+ciphertext
+data;
+
+Page 24 of 45
+
+CO
+
+Auth Block
+Cipher
+UnAuth
+Block
+Cipher
+Symmetric
+
+CO
+- SC_EDK:
+E,W
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Zeroise
+
+Show
+Version
+
+Descriptio
+n
+(CCM,
+GCM)
+FreeRng_fi
+ps destroys
+RNG
+CSPs. All
+functions
+zeroise
+CSPs using
+function
+ForceZero
+(overwriting
+with zeros)
+within the
+function
+scope after
+use. Caller
+stack
+cleanup is
+the duty of
+the
+application.
+Restarting
+the
+generalpurpose
+computer
+clears all
+CSPs in
+RAM.
+Provide
+Module
+Version
+
+Table 12: Approved Services
+
+Indicator
+code >=
+0)
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+
+Successf
+ul
+completi
+on of the
+service
+(status
+code >=
+0)
+
+Inputs
+
+Outputs
+
+DRBG
+struct (RBG
+State) or
+other
+structures
+containing
+SSPs
+
+Status
+return
+
+None
+
+Plaintext
+containing
+the module
+version
+
+Security
+Functions
+Key
+Generation
+
+SSP
+Access
+CO
+- DS_SGK:
+Z
+GKP_Privat
+e: Z
+KAS_Privat
+e: Z
+KAS_SSC:
+Z
+- KD_DKM:
+Z
+- KH_Key:
+Z
+- Seed: Z
+- Internal
+State: Z
+- Secret C:
+Z
+- Secret V:
+Z
+- SC_EDK:
+Z
+- Entropy
+Input
+String: Z
+CO
+
+All services implemented by the Module are listed in Table 16. The calling application may use
+the Show status service (wolfCrypt_GetStatus_fips call) to determine the status of the Module.
+A return code of FIPS_MODE_NORMAL means the Module is in a state without errors; Please
+see Section 2.4 for more information. In addition, as per [140-3 IG] 2.4.C the module supports
+an implicit indicator via the successful completion of a service, module does not support nonapproved services.
+
+Page 25 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+See the wolfCrypt FIPS 140-3 User Guide [UG] for additional information on the cryptographic
+services listed in this section.
+Note that the caller provides the KAS_Private and KAS_Public keys for shared secret
+computation; the caller’s exchange and assurance of PSPs with the remote participant is
+outside the scope of the Module.
+For services Generate Key Pair, Key Agreement and Key Derivation consistent with [140-3 IG]
+9.5.A, available only if the private_key_read_enable property is set to TRUE
+
+4.4 Non-Approved Services
+N/A for this module.
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The Module uses HMAC-SHA2-256 with a 256-bit key (HMAC Cert. #A4308) as the approved
+integrity technique. Before the integrity technique is executed the module performs an HMACSHA2-256 KAT.
+
+5.2 Initiate on Demand
+The operator can initiate the integrity test on demand by reloading the Module or by calling the
+API wolfCrypt_IntegrityTest_fips() at any time after power on. (See Section 10.5 “Operator
+Initiation of Self-Tests” later in this document for details of proper use of this API in an
+application).
+
+5.3 Open-Source Parameters
+While the module is not “open source” since it is only shipped under a commercial license, open
+source practice of source code delivery with a commercial license is standard for the module.
+As such the module (while not required to do so) will abide by ISO/IEC 19790:2012 B.2.5.
+Please see details in the wolfCrypt FIPS 140-3 User Guide [UG] for the [OE] listed on the FIPS
+certificate. Details will include information about compiler, compiler configuration settings and
+methods to compile the source code into an executable form in a FIPS validated manner. See
+also section 11.1 Installation, Initialization, and Startup Procedures later in this document.
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+
+Page 26 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+6.2 Configuration Settings and Restrictions
+Any setting that affects the module directly while compiling the executable binary shall not be
+used. If unsure contact wolfSSL Inc. by sending email to “support at wolfssl dot com”. A wolfSSL
+engineer will review the setting for impact on the FIPS validated sources and determine if the
+setting is allowed or disallowed for an approved mode of operation. NOTE: The User Guide
+[UG] will contain an exact list of allowed settings. CO should refer to the [UG] first before
+contacting wolfSSL support.
+
+6.3 Additional Information
+The operational environment for the Module is modifiable.
+Table 6 lists the operational environments on which the Module was tested.
+Specification of the security rules, settings or restrictions to the configuration of the operational
+environment are covered in the [UG]. The configure script provided with the package detects the
+environment and sets the required flags.
+There are no specific restrictions to the configuration of the operational environment unless
+stated in the [UG].
+
+7 Physical Security
+7.1 Mechanisms and Actions Required
+N/A for this module.
+
+7.5 EFP/EFT Information
+N/A for this module.
+
+7.6 Hardness Testing Temperature Ranges
+N/A for this module.
+
+8 Non-Invasive Security
+The Module does not implement non-invasive security mechanisms.
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+
+Page 27 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Storage Description
+Persistence
+Area
+Type
+Name
+S1
+RAM (Memory) Dynamic
+
+Table 13: Storage Areas
+
+9.2 SSP Input-Output Methods
+Name From
+
+To
+
+IE1
+
+INT
+
+IE2
+IE3
+
+EXT: Call stack (API) input
+parameters
+INT: Call stack (API) output
+parameters
+EXT: Loaded from external
+entropy source
+
+Format Distribution Entry
+SFI or
+Type
+Type
+Type
+Algorithm
+Plaintext Automated
+Electronic
+
+EXT Plaintext Automated
+
+Electronic
+
+INT
+
+Electronic
+
+Plaintext Automated
+
+Table 14: SSP Input-Output Methods
+
+9.3 SSP Zeroization Methods
+Zeroization Description
+Method
+Z1
+cleared immediately after use
+Z2
+
+Rationale
+
+Per ISO/IEC 19790:2012 section 7.9.7,
+parameters used solely for self-test purposes
+in 7.10 need not meet zeroisation
+requirements
+
+Module does not
+store SSPs
+persistently
+FIPS 140-3 IG
+9.7.B
+
+Operator
+Initiation
+Zeroise
+
+Table 15: SSP Zeroization Methods
+
+The module supports an implicit Zeroisation indicator. The implicit indicator is a successful
+completion of the service call.
+
+9.4 SSPs
+Name
+
+Description
+
+DS_SGK
+
+Digital
+Signature:
+Signature
+Generation
+using Private
+Key
+
+Size Strengt
+h
+RSA:
+2048,
+3072,
+4096;
+ECDSA:
+224,
+256,
+384,
+
+Type Category
+Private CSP
+
+Page 28 of 45
+
+Generated
+By
+
+Establishe
+d By
+
+Used By
+ECDSA
+SigGen
+(FIPS18
+6-4)
+(A4308)
+RSA
+SigGen
+(FIPS18
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Description
+
+DS_SVK
+
+Digital
+Signature
+Verification
+using Public
+Key
+
+GKP_Privat
+e
+
+Generated
+Key Pair
+(Private)
+
+Size Strengt
+h
+521; RSA:
+112,
+128;
+ECDSA:
+112,
+128,
+192,
+256;
+RSA:
+1024*,
+2048,
+3072,
+4096;
+ECDSA:
+192*,
+224,
+256,
+384,
+521; RSA:
+80*,
+112,
+128;
+ECDSA:
+80*,
+112,
+128,
+192,
+256;
+RSA:
+2048,
+3072,
+4096;
+ECDSA:
+224,
+256,
+384,
+521; RSA:
+112,
+128;
+ECDSA:
+112,
+128,
+192,
+256;
+
+Type Category
+
+Generated
+By
+
+Establishe
+d By
+
+Used By
+6-4)
+(A4308)
+
+Public - PSP
+
+Private CSP
+
+Page 29 of 45
+
+ECDSA
+SigVer
+(FIPS18
+6-4)
+(A4308)
+RSA
+SigVer
+(FIPS18
+6-4)
+(A4308)
+
+RSA
+Asymmetric
+Key-Pair
+Generation
+ECC
+Asymmetric
+Key-Pair
+Generation
+
+ECDSA
+KeyGen
+(FIPS18
+6-4)
+(A4308)
+RSA
+KeyGen
+(FIPS18
+6-4)
+(A4308)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Description
+
+GKP_Publi
+c
+
+Generated
+Key Pair
+(Public)
+
+KAS_Privat
+e
+
+Key pair
+component
+provided by
+the local
+participant,
+used for
+DiffieHellman
+shared
+secret
+generation.
+
+KAS_Publi
+c
+
+Key pair
+component
+provided by
+the local
+participant,
+used for
+DiffieHellman
+shared
+secret
+generation.
+
+Size Strengt
+h
+RSA:
+2048,
+3072,
+4096;
+ECDSA:
+224,
+256,
+384,
+521; RSA:
+112,
+128;
+ECDSA:
+112,
+128,
+192,
+256;
+FFC:
+2048;
+ECC:
+224,
+256,
+384,
+521; FFC:
+112;
+ECC:
+112,
+128,
+192,
+256;
+FFC:
+2048;
+ECC:
+224,
+256,
+384,
+521; FFC:
+112;
+ECC:
+112,
+128,
+192,
+256;
+
+Type Category
+
+Generated
+By
+
+Public - PSP
+
+RSA
+Asymmetric
+Key-Pair
+Generation
+ECC
+Asymmetric
+Key-Pair
+Generation
+
+ECDSA
+KeyGen
+(FIPS18
+6-4)
+(A4308)
+RSA
+KeyGen
+(FIPS18
+6-4)
+(A4308)
+
+Private CSP
+
+ECC
+Asymmetric
+Key-Pair
+Generation
+DSA
+Asymmetric
+Key-Pair
+Generation
+Primitive
+Key
+Agreement
+
+KASECCSSC
+Sp80056Ar3
+(A4308)
+KASFFCSSC
+Sp80056Ar3
+(A4308)
+
+Public - PSP
+
+ECC
+Asymmetric
+Key-Pair
+Generation
+DSA
+Asymmetric
+Key-Pair
+Generation
+Primitive
+Key
+Agreement
+
+KASECCSSC
+Sp80056Ar3
+(A4308)
+KASFFCSSC
+Sp80056Ar3
+(A4308)
+
+Page 30 of 45
+
+Establishe
+d By
+
+Used By
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Description
+
+KAS_SSC
+
+Shared
+secret
+calculation; z
+output value
+is expected
+to be used
+by a KDF
+
+KD_DKM
+
+Key
+Derivation
+derived
+keying
+material
+
+KH_Key
+
+Keyed Hash
+key
+
+Size Strengt
+h
+FFC:
+2048;
+ECC:
+224,
+256,
+384,
+521; FFC:
+112;
+ECC:
+112,
+128,
+192,
+256;
+
+Type Category
+
+TLS
+KDF
+v1.2
+RFC
+7627:
+1024;
+TLS
+KDF
+v1.3:
+256,
+384;
+KDF
+SSH:
+256,
+384,
+512 256-bit
+CMAC:
+128,
+192,
+256;
+GMAC:
+128,
+192,
+256;
+HMAC:
+160,
+256,
+512; CMAC:
+128,
+
+Establishe
+d By
+
+Used By
+
+Shared
+Secret CSP
+
+ECC
+Asymmetri
+c Key-Pair
+Generation
+DSA
+Asymmetri
+c Key-Pair
+Generation
+KAS SSC
+Derived
+Key
+Agreement
+
+Derived Key
+Material CSP
+
+TLS 1.3
+Key
+Agreement
+KDF
+Derived
+Key
+Agreement
+
+KASECCSSC
+Sp80056Ar3
+(A4308)
+KASFFCSSC
+Sp80056Ar3
+(A4308)
+KDF
+SSH
+(A4308)
+KDF TLS
+(A4308)
+KDF
+SSH
+(A4308)
+TLS v1.2
+KDF
+RFC762
+7
+(A4308)
+TLS v1.3
+KDF
+(A4308)
+
+Symmetric
+Key - CSP
+
+Page 31 of 45
+
+Generated
+By
+
+AESCMAC
+(A4308)
+AESGMAC
+(A4308)
+HMACSHA-1
+(A4308)
+HMACSHA2224
+(A4308)
+HMAC-
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Entropy
+Input String
+
+Seed
+
+Secret C
+
+Description
+
+Entropy
+input bit
+string loaded
+from the
+external
+entropy
+source
+DRBG
+Seed_materi
+al consisting
+of entropy
+input string
+(256-bit)
+concatenate
+d with the
+nonce (128bit)
+Hash DRBG
+Internal
+
+Size Strengt
+h
+192,
+256;
+GMAC:
+128,
+192,
+256;
+HMAC:
+128,
+256;
+
+Type Category
+
+256-bit 256-bit
+
+Entropy CSP
+
+384-bit 256-bit
+
+Entropy CSP
+
+DRBG
+
+Hash
+DRBG
+(A4308)
+
+440-bits
+- 256-bit
+
+Entropy CSP
+
+DRBG
+
+Hash
+DRBG
+(A4308)
+
+Page 32 of 45
+
+Generated
+By
+
+Establishe
+d By
+
+Used By
+SHA2256
+(A4308)
+HMACSHA2384
+(A4308)
+HMACSHA2512
+(A4308)
+HMACSHA3224
+(A4308)
+HMACSHA3256
+(A4308)
+HMACSHA3384
+(A4308)
+HMACSHA3512
+(A4308)
+Hash
+DRBG
+(A4308)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+Secret V
+
+Internal
+State
+
+SC_EDK
+
+MOD_INT
+
+coreKey
+
+Description
+State Secret
+C
+Hash DRBG
+Internal
+State Secret
+V
+Hash DRBG
+Internal
+State (SHA256) with
+secret
+values V and
+C. V is 440bits, C is
+440-bits.
+AES key
+used for
+symmetric
+encryption
+(including
+AES
+authenticate
+d
+encryption).
+Modes:
+CBC, CCM,
+CTR, ECB,
+GCM, OFB
+
+Module
+Integrity
+Value
+Computed at
+Run Time
+HMAC key
+for in-core
+integrity
+check selftest
+
+Size Strengt
+h
+
+Type Category
+
+Generated
+By
+
+440-bits
+- 256-bit
+
+Entropy CSP
+
+DRBG
+
+Hash
+DRBG
+(A4308)
+
+880-bit 256-bit
+
+Entropy CSP
+
+DRBG
+
+Hash
+DRBG
+(A4308)
+
+128,
+192 or
+256 bits
+- 128,
+192 or
+256 bits
+
+Symmetric
+Key - CSP
+
+32bytes 256-bit
+
+Message
+Authenticati
+on - CSP
+
+32bytes 256-bit
+
+Message
+Authenticati
+on - CSP
+
+Message
+Authenticati
+on
+
+Establishe
+d By
+
+Used By
+
+AESCBC
+(A4308)
+AESCCM
+(A4308)
+AESCTR
+(A4308)
+AESECB
+(A4308)
+AESGCM
+(A4308)
+AESOFB
+(A4308)
+HMACSHA2256
+(A4308)
+HMACSHA2256
+(A4308)
+
+Table 16: SSP Table 1
+
+Page 33 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+DS_SGK
+DS_SVK
+GKP_Private
+GKP_Public
+KAS_Private
+KAS_Public
+KAS_SSC
+
+Input - Storage
+Storage
+Output
+Duration
+IE1
+S1:Plaintext While in
+use
+IE1
+S1:Plaintext While in
+use
+IE2
+S1:Plaintext While in
+use
+IE2
+S1:Plaintext While in
+use
+IE1
+S1:Plaintext While in
+use
+IE2
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+
+KD_DKM
+KH_Key
+
+IE1
+
+Entropy Input
+String
+Seed
+
+IE3
+
+Secret C
+Secret V
+Internal State
+SC_EDK
+
+IE1
+
+MOD_INT
+coreKey
+Table 17: SSP Table 2
+
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+S1:Plaintext While in
+use
+
+Zeroization Related SSPs
+Z1
+Z1
+Z1
+Z1
+Z1
+
+GKP_Public:Paired
+With
+GKP_Private:Paired
+With
+
+Z1
+Z1
+
+Z1
+
+KAS_Public:Derived
+From
+KAS_Private:Derived
+From
+
+Z1
+Z1
+Z1
+Z1
+
+Seed:Derived From
+
+Z1
+
+Seed:Derived From
+
+Z1
+Z1
+Z1
+Z2
+
+* Per SP800-131Ar2 Section 3, Table 2, key sizes (1024-bit for RSA and 192-bit for ECC) are
+available for legacy use verification requirements when inter-oping with legacy systems. These
+key sizes shall not be used for signing operations.
+
+10 Self-Tests
+10.1 Pre-Operational Self-Tests
+Page 34 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorithm
+or Test
+HMACSHA2-256
+
+Test Properties
+hash type:
+SHA256, key
+length: 32-bytes.
+Please note this is
+the module integrity
+test
+
+Test
+Test
+Method Type
+KAT
+SW/FW
+Integrity
+
+Indicator
+
+Details
+
+FIPS_MODE_NORMAL or
+FIPS_MODE_FAILED
+
+MAC
+
+Table 18: Pre-Operational Self-Tests
+
+Each time the Module is powered on or loaded (equivalent to a power on) the integrity of the
+module is tested per ISO/IEC 19790:2012 Section 7.10.2.2. The very first step of the preoperational self-test (POST) is to force every Conditional Algorithm Self-Test to be in the
+FIPS_CAST_STATE_INIT mode meaning the CAST for a given algorithm has not run since
+power on and the CAST must run and pass prior to operational use of the algorithm.
+The integrity test uses HMAC-SHA2-256 to ensure the modules integrity therefore per AS 10.20
+HMAC CAST is triggered prior to the integrity check. The HMAC CAST uses a known answer
+test per ISO/IEC 19790-2012 Section 7.10.3.2. The POST executes outside user control as the
+module is powering on or being loaded.
+
+10.2 Conditional Self-Tests
+Algorit
+hm or
+Test
+AESCBC
+
+Test
+Properties
+
+AESCBC
+
+key length:
+32-bytes
+
+key length:
+32-bytes
+
+Test
+Meth
+od
+KAT
+
+Test
+Typ
+e
+CAS
+T
+
+Indicator
+
+Details
+
+Conditio
+ns
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Encrypt
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+
+Decrypt
+
+Before
+first use
+of
+algorithm(
+s) AESECB,
+AESCBC,
+AESCTR,
+AESOFB,
+AESGCM,
+AESGMAC,
+AESCCM or
+AESCMAC
+Before
+first use
+of
+
+Page 35 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorit
+hm or
+Test
+
+Test
+Properties
+
+Test
+Meth
+od
+
+Test
+Typ
+e
+
+Indicator
+
+AESGCM
+
+Details
+
+key length:
+32-bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Decrypt
+
+AESGCM
+
+key length:
+32-bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Encrypt
+
+HMACSHA1
+
+hash type:
+SHA1; key
+length: 20bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+MAC
+
+HMACSHA2256
+
+hash type:
+SHA256;
+key length:
+20-bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+MAC
+
+FIPS_CAST_STATE_FAI
+LURE
+
+Page 36 of 45
+
+Conditio
+ns
+algorithm(
+s) AESECB,
+AESCBC,
+AESCTR,
+AESOFB,
+AESGCM,
+AESGMAC,
+AESCCM or
+AESCMAC
+Before
+first use
+of
+algorithm(
+s) AESGCM or
+AESGMAC
+Before
+first use
+of
+algorithm(
+s) AESGCM or
+AESGMAC
+Before
+first use
+of
+algorithm(
+s) SHA1
+or HMACSHA1
+Before
+first use
+of
+algorithm(
+s)
+SHA224,
+SHA256,
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorit
+hm or
+Test
+
+Test
+Properties
+
+Test
+Meth
+od
+
+Test
+Typ
+e
+
+Indicator
+
+HMACSHA2512
+
+hash type:
+SHA2-512,
+key length:
+20-bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+MAC
+
+HMACSHA3256
+
+hash type:
+SHA3-256,
+key length:
+64-bytes
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+MAC
+
+RSAPKCSv
+1.5
+
+hash type:
+SHA256;
+key length:
+2048-bits
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Sign
+
+Page 37 of 45
+
+Details
+
+Conditio
+ns
+HMACSHA224
+or HMACSHA256
+Before
+first use
+of
+algorithm(
+s)
+SHA384,
+SHA512,
+HMACSHA384
+or HMACSHA512
+Before
+first use
+of
+algorithm(
+s) SHA3224,
+SHA3256,
+SHA3384 or
+SHA3512,
+HMACSHA3224,
+HMACSHA3256,
+HMACSHA3384 or
+HMACSHA3512
+Before
+first use
+of
+algorithm(
+s) RSA
+(PKCSv1.
+5) or RSA
+(PSS)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorit
+hm or
+Test
+RSAPKCSv
+1.5
+
+Test
+Properties
+
+Test
+Meth
+od
+KAT
+
+Test
+Typ
+e
+CAS
+T
+
+Indicator
+
+Details
+
+Conditio
+ns
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Verify
+
+hashType:
+SHA2-256;
+curve: P-256
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Computatio
+n Shared
+Secret Z
+
+FFC
+DiffieHellman
+
+hashType:
+SHA2-256;
+keySize:
+2048-bit;
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Computatio
+n Shared
+Secret Z
+
+ECDSA
+
+curve: P256;
+hashType:
+SHA2-256
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Sign
+
+ECDSA
+
+curve: P256;
+hashType:
+SHA2-256
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Verify
+
+TLSv1.
+2 KDF
+
+HMACSHA2-256
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Derive
+Keying
+Material
+
+TLSv1.
+3 KDF
+
+HMACSHA2-256
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Derive
+Keying
+Material
+
+Before
+first use
+of
+algorithm(
+s) RSA
+(PKCSv1.
+5) or RSA
+(PSS)
+Before
+first use
+of
+algorithm(
+s) ECC
+for shared
+secret
+generatio
+n
+Before
+first use
+of
+algorithm(
+s) FFC for
+shared
+secret
+generatio
+n
+Before
+first use
+of
+algorithm(
+s) ECDSA
+Before
+first use
+of
+algorithm(
+s) ECDSA
+Before
+first use
+of
+TLSv1.2
+KDF
+Before
+first use
+of
+TLSv1.3
+KDF
+
+ECC
+DiffieHellman
+
+hash type:
+SHA256,
+key length:
+2048-bits
+
+Page 38 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Algorit
+hm or
+Test
+KDF
+SSH
+
+Test
+Properties
+
+Test
+Meth
+od
+KAT
+
+Test
+Typ
+e
+CAS
+T
+
+RSAPCT
+
+key size:
+2048,3072,4
+096
+
+PCT
+
+PCT
+
+ECCPCT
+
+curve size:
+224, 256,
+384, 521
+
+PCT
+
+DHPCT
+
+key size:
+2048, 3072,
+4096
+
+DRBG
+
+DRBG
+mode:
+SHA2-256
+
+hashType:
+SHA2-256
+
+Indicator
+
+Details
+
+Conditio
+ns
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+Service is successful or
+an error code
+RSA_KEY_PAIR_E
+
+Derive
+Keying
+Material
+
+PCT
+
+Service is successful or
+an error code
+ECC_PCT_E
+
+Sign/Verify
+
+PCT
+
+PCT
+
+Service is successful or
+an error code
+MP_CMP_E
+
+Modulus
+Exponentia
+tion
+
+KAT
+
+CAS
+T
+
+FIPS_CAST_STATE_SU
+CCESS or
+FIPS_CAST_STATE_FAI
+LURE
+
+Health-Test
+with subelements:
+Instantiate,
+Generate,
+Reseed
+
+Before
+first use
+of KDF
+SSH
+Invoked
+automatic
+ally during
+generate
+key pair
+service
+Invoked
+automatic
+ally during
+generate
+key pair
+service
+Invoked
+automatic
+ally during
+generate
+key pair
+service
+Before
+first use
+of
+algorithm(
+s) DBRG
+or
+Immediat
+ely upon
+registerin
+g an
+external
+entropy
+source
+with the
+module
+
+Table 19: Conditional Self-Tests
+
+Sign/Verify
+
+Once the module is powered on and has passed the POST, calls to any cryptographic algorithm
+will trigger the CAST on first operational use of the algorithm. The POST and CASTS are
+available on demand after power on and can be executed by the cryptographic officer (CO) at
+any time. The CO may optionally invoke any CAST ahead of algorithm use at a more
+convenient time rather than letting it run automatically on first use. Regardless of the CAST
+running manually or automatically, once it has passed the CO may manually re-run any CAST
+at any time in a periodic fashion, a CAST will no longer run automatically after it has passed the
+first time.
+Page 39 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+10.3 Periodic Self-Test Information
+Algorithm or
+Test
+HMAC-SHA2256
+
+Test Method
+
+Test Type
+
+Period
+
+KAT
+
+SW/FW Integrity
+
+P2
+
+Algorithm or
+Test
+AES-CBC
+AES-CBC
+AES-GCM
+AES-GCM
+HMAC-SHA1
+HMAC-SHA2256
+HMAC-SHA2512
+HMAC-SHA3256
+RSA-PKCSv1.5
+RSA-PKCSv1.5
+ECC DiffieHellman
+FFC DiffieHellman
+ECDSA
+ECDSA
+TLSv1.2 KDF
+TLSv1.3 KDF
+KDF SSH
+RSA-PCT
+ECC-PCT
+DH-PCT
+DRBG
+
+Test Method
+
+Test Type
+
+Period
+
+KAT
+KAT
+KAT
+KAT
+KAT
+KAT
+
+CAST
+CAST
+CAST
+CAST
+CAST
+CAST
+
+P1
+P1
+P1
+P1
+P1
+P2
+
+KAT
+
+CAST
+
+P1
+
+Periodic
+Method
+Manually
+Manually
+Manually
+Manually
+Manually
+Automatic or
+Manually
+Manually
+
+KAT
+
+CAST
+
+P1
+
+Manually
+
+KAT
+KAT
+KAT
+
+CAST
+CAST
+CAST
+
+P1
+P1
+P1
+
+Manually
+Manually
+Manually
+
+KAT
+
+CAST
+
+P1
+
+Manually
+
+KAT
+KAT
+KAT
+KAT
+KAT
+PCT
+PCT
+PCT
+KAT
+
+CAST
+CAST
+CAST
+CAST
+CAST
+PCT
+PCT
+PCT
+CAST
+
+P1
+P1
+P1
+P1
+P1
+P3
+P3
+P3
+P4
+
+Manually
+Manually
+Manually
+Manually
+Manually
+Automatic
+Automatic
+Automatic
+Automatic or
+Manually
+
+Table 20: Pre-Operational Periodic Information
+
+Table 21: Conditional Periodic Information
+
+Name
+P1
+
+P2
+
+Periodic
+Method
+Automatic or
+Manually
+
+Description
+Periodic method 1: Automatically by the module when
+algorithm is first invoked. CO may opt to invoke prior to first
+algorithm use to avoid delay at time of first operational use of
+an algorithm or at a later time manually.
+Periodic method 2: Automatically by the module during power
+on. CO may opt to invoke manually thereafter.
+Page 40 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+P3
+P4
+
+Description
+Periodic method 3: Automatically during key generation
+service
+Automatically by the module upon first operational use of the
+DRBG algorithm. When an external entropy source is
+registered with the module by application level entropy
+callback function it is considered the first operational use of
+the DRBG. Does a periodic reseed every 1 million invocations,
+during the reseed the DRBG health test will be automatically
+executed.
+
+Table 22: Periodic Method Descriptions
+
+10.4 Error States
+Name
+
+Description
+
+Conditi
+ons
+
+FIPS_MODE_FAILED
+
+Module has failed
+its software integrity
+check
+
+FIPS_CAST_STATE_F
+AILURE
+
+One or more
+algorithm(s) are no
+longer usable and
+the module mode is
+set to
+FIPS_MODE_DEG
+RADED (2)
+
+HMACSHA2256
+CAST
+Failure
+Module
+Integrity
+Check
+Failure
+AESCBC
+AESGCM
+HMACSHA1
+HMACSHA2256
+HMACSHA2512
+HMACSHA3256
+RSAPKCSv1
+.5
+DRBG
+ECC
+DiffieHellman
+
+Page 41 of 45
+
+Recov
+ery
+Metho
+d
+Power
+Cycle
+
+Indicator
+
+Power
+Cycle
+
+One or more algorithms
+CAST status values set
+to
+FIPS_CAST_STATE_F
+AILURE (3)
+
+fipsModeId set to
+FIPS_MODE_FAILED
+(3)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+Name
+
+FIPS_MODE_DEGRA
+DED
+
+RSA_KEY_PAIR_E
+
+Description
+
+Conditi
+ons
+FFC
+DiffieHellman
+ECDSA
+TLSv1.2
+KDF
+TLSv1.3
+KDF
+KDF
+SSH
+Any
+CAST
+Failure
+
+One or more of the
+CASTS have failed
+anytime following a
+successful power on
+and integrity check.
+Upon entering this
+mode the module
+will automatically
+run all CASTS prior
+to the operational
+use of any
+cryptographic
+algorithm.
+RSA Pairwise
+RSAConsistency Test
+PCT
+Failure
+
+ECC_PCT_E
+
+ECC Pairwise
+Consistency Test
+Failure
+
+ECCPCT
+
+MP_CMP_E
+
+DH Pairwise
+Consistency Test
+Failure
+
+DH-PCT
+
+Table 23: Error States
+
+Page 42 of 45
+
+Recov
+ery
+Metho
+d
+
+Indicator
+
+Power
+Cycle
+
+fipsModeId set to
+FIPS_MODE_DEGRA
+DED (2)
+
+Manual
+selftest
+service
+call or
+power
+cycle
+Manual
+selftest
+service
+call or
+power
+cycle
+Manual
+selftest
+service
+call or
+power
+cycle
+
+RSA_KEY_PAIR_E (262)
+
+ECC_PCT_E (-286)
+
+MP_CMP_E (-120)
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+10.5 Operator Initiation of Self-Tests
+For calling applications the following is required:
+1. Include the library configuration header wolfssl/options.h (or user_settings.h via
+wolfssl/wolfcrypt/settings.h) first.
+2. After including the library configuration header, include wolfssl/wolfcrypt/fips_test.h then
+use the API specified below to execute a given self-test.
+CO may initiate all CAST self-tests in one-shot. The API wc_RunAllCast_fips() is provided as a
+public API to applications using the module that have included the headers above in proper
+order.
+CO may initiate CAST self-tests individually using the API wc_RunCast_fips(algorithm type) with
+any of the below “algorithm type” inputs:
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+
+FIPS_CAST_AES_CBC
+FIPS_CAST_AES_GCM
+FIPS_CAST_HMAC_SHA1
+FIPS_CAST_HMAC_SHA2_256
+FIPS_CAST_HMAC_SHA2_512
+FIPS_CAST_HMAC_SHA3_256
+FIPS_CAST_DRBG
+FIPS_CAST_RSA_SIGN_PKCS1v15
+FIPS_CAST_ECC_PRIMITIVE_Z
+FIPS_CAST_DH_PRIMITIVE_Z
+FIPS_CAST_ECDSA
+FIPS_CAST_KDF_TLS12
+FIPS_CAST_KDF_TLS13
+FIPS_CAST_KDF_SSH
+
+CO may re-run the POST at any time after power on using the public API
+wolfCrypt_IntegrityTest_fips(). This function always returns a value of zero regardless if the
+integrity check passed or failed so the CO shall then check the status of the module using the
+API wolfCrypt_GetStatus_fips(). The return value of the GetStatus API shall then be checked
+against the status indicators below:
+•
+•
+•
+
+FIPS_MODE_INIT status indicator value is 0. This indicator means then integrity test
+has not completed and is likely running in another thread (multi-threaded)
+FIPS_MODE_NORMAL status indicator value is 1. This indicator means the integrity test
+passed and the module is in a state without errors
+FIPS_MODE_FAILED status indicator value is 3. This indicator means the integrity test
+failed and the module is unusable. The CO shall power cycle or reloaded (equivalent to
+power cycle) to restore the module.
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+Page 43 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+The CO shall use the provided wolfCrypt FIPS 140-3 User Guide hereafter referred to as [UG].
+A common name for this document is also the Cryptographic Officer Guidance Manual [COGM].
+[UG] and [COGM] are one and the same for this module and include all administrative guidance.
+The [UG] will have a section specific to each Operational Environment [OE] that appears on the
+modules FIPS certificate and/or in Table 6: Tested Operational Environments - Software,
+Firmware, Hybrid. The instructions provided in the [UG] shall be followed or the module will
+never have been properly initialized and built and therefore non-compliant. To create the
+compliant module, as per this Security Policy, the configuration steps shall be followed.
+• [UG] will include library configuration settings that are: required, allowed and not
+allowed.
+o For any setting that is not specifically covered the CO shall contact wolfSSL by
+emailing “support at wolfssl dot com” for clarification about that settings impact
+on compiling the compliant module.
+
+•
+
+[UG] will include details about the toolchain, compiler, compiler configuration settings
+and methods to compile the source code into an executable form.
+o While the module is not “open source” since it is only shipped under a
+commercial license, open source practice of source code delivery with a
+commercial license is standard for the module. As such the module (while not
+required to) will abide by ISO/IEC 19790:2012 B.2.5 “If the module is open
+source, specify the compilers and control parameters required to compile the
+code into an executable format” even though the module is not claiming “open
+source”.
+
+The following initialization instructions apply to all use-cases for the module generically by a
+consuming application. [OE] specific details will be covered in the [UG].
+•
+
+When planning on using the module the CO shall first include the library settings
+headers so the application knows how the library was configured.
+o On Unix or Linux like systems where auto-tools were used to configure the library
+(./configure && make) the CO shall include wolfssl/options.h as the very first
+header.
+o When working with IDEs or Makefile setups the CO shall include
+wolfssl/wolfcrypt/settings.h as the very first header and ensure that the define
+WOLFSSL_USER_SETTINGS is set globally at the project level. No other
+wolfSSL specific build options should be set globally, all configurations will be
+managed by a custom user_settings.h header that is included anytime
+WOLFSSL_USER_SETTINGS is defined globally.
+ Once the library configuration settings have been included only then shall
+the CO include other wolfSSL headers as needed, any other headers
+shall always come after the configuration settings header.
+
+•
+
+Upon entry into main() of an application the vendor recommends that the CO first
+register a fips callback. The fips callback will trigger anytime the module is in an
+unusable state. A sample of such a callback is provided below.
+static void myFipsCb(int ok, int err, const char* hash)
+{
+printf("in my Fips callback, ok = %d, err = %d\n", ok, err);
+Page 44 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+printf("message = %s\n", wc_GetErrorString(err));
+printf("hash = %s\n", hash);
+if (err == IN_CORE_FIPS_E) {
+printf("In core integrity hash check failure,"
+"copy above hash\n");
+printf("into verifyCore[] in fips_test.c and rebuild\n");
+}
+
+}
+Figure 2: Code Sample A
+
+If using a FIPS callback the CO will register the FIPS callback by passing the
+function pointer of the FIPS callback function to the following API like so:
+wolfCrypt_SetCb_fips(myFipsCb);
+Prior to operational use of the module the CO shall register an entropy callback to load
+entropy into the module from an external entropy source. A portable callback is available
+but must be registered by the application on startup since the entropy source is external
+to the module. To register the portable callback provided with the module the application
+will call “ret = wc_SetSeed_Cb(wc_GenerateSeed);” where “ret” is an integer to capture
+the status return of the call and should be checked against the value 0 for success or < 0
+for failure. A successful register of any entropy callback function is considered the first
+operational use of the module outside of pre-operational tests and the DBRG CAST will
+run during registration of the callback.
+When working with a private key the application must programmatically unlock access to
+private key material with the API: wolfCrypt_SetPrivateKeyReadEnable_fips(true/false,
+key-type).
+o To unlock key access pass true (1) as the first input. CO shall pass
+WC_KEYTYPE_ALL as the second input parameter.
+o Once done working with the private key CO shall lock access to private key
+materials before resuming operations by calling the same API with input false (0)
+as the first parameter and WC_KEYTYPE_ALL as the second input parameter.
+o
+
+•
+
+•
+
+11.2 Administrator Guidance
+The CO shall use the provided wolfCrypt FIPS 140-3 User Guide [UG].
+
+11.3 Non-Administrator Guidance
+The Module supports the Cryptographic Officer (CO) operator role and does not support nonadministrators or non-administrative roles.
+
+11.7 Additional Information
+Please defer to wolfCrypt FIPS 140-3 User Guide [UG].
+
+12 Mitigation of Other Attacks
+The module does not claim mitigation of other attacks.
+
+Page 45 of 45
+
+Copyright © wolfSSL Inc., 2025
+wolfSSL Inc. Public Material – May be reproduced only in its original entirety (without revision).
+
+

@@ -50,6 +50,9 @@ Everything runs from the repo root (scripts use root-relative paths).
 ```
 corpus140_3/records/*.json   provided corpus snapshot (138 fetched CMVP records)
                              — the analysis operates on this; no re-fetch needed
+sp_text/<cert>.txt           per-page Security-Policy text (form-feed separated),
+                             extracted once from the SP PDFs; drives the full
+                             page-anchored document reconstruction, no PDFs needed
 
 components.py                generic component identification (full-record scan vs a CPE catalog)
 motifs.py                    TCB-surface motifs (the architectural patterns a review should check)
@@ -141,6 +144,10 @@ NVD snapshot.
   reference date 2026-07. The fetched, normalized records are provided under
   `corpus140_3/records/`. The upstream fetch and PDF-extraction toolchain is not
   shipped here; the corpus it produced is.
+- **Security-Policy text**: the per-page text of each module's Security Policy,
+  extracted once from the source PDFs with `pdftotext` and committed under
+  `sp_text/` (12 MB of text, versus 207 MB of PDFs). This is what lets the full
+  page-anchored document reconstruction rebuild without the PDFs present.
 - **Vulnerability data**: NVD CVE API v2 (CPE `virtualMatchString`), cached in
   this repo for offline replay.
 - External anchor cited in the boot-chain analysis: Binarly, "Unfit to Boot:

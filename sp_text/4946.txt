@@ -1,0 +1,3005 @@
+FIPS 140‐3 Non-Proprietary Security Policy for:
+
+KIOXIA FIPS TC58NC1030GTB Crypto Sub-Chip
+
+KIOXIA CORPORATION
+Rev 3.0.5
+
+1
+
+Dec 23, 2024
+
+SECTION 1 - GENERAL........................................................................................................................... 3
+SECTION 1.1 - ACRONYMS ............................................................................................................................... 3
+SECTION 2 – CRYPTOGRAPHIC MODULE SPECIFICATION ............................................................ 4
+SECTION 2.1 – PRODUCT VERSION .................................................................................................................. 4
+SECTION 2.2 – SECURITY FUNCTIONS .............................................................................................................. 4
+SECTION 2.3 – MODULE CONFIGURATION ........................................................................................................ 6
+SECTION 3 – CRYPTOGRAPHIC MODULE INTERFACES .................................................................. 6
+SECTION 4 – ROLES, SERVICES, AND AUTHENTICATION ............................................................. 7
+SECTION 4.1 – ROLES AND AUTHENTICATION................................................................................................... 9
+SECTION 4.2 – SERVICES............................................................................................................................... 10
+SECTION 5 – SOFTWARE/FIRMWARE SECURITY .......................................................................... 14
+SECTION 6 – OPERATIONAL ENVIRONMENT ................................................................................. 14
+SECTION 7 – PHYSICAL SECURITY .................................................................................................. 14
+SECTION 8 – NON-INVASIVE SECURITY ......................................................................................... 15
+SECTION 9 – SENSITIVE SECURITY PARAMETER MANAGEMENT ............................................. 15
+SECTION 10 – SELF TESTS ................................................................................................................. 18
+SECTION 11 – LIFE-CYCLE ASSURANCE .......................................................................................... 19
+SECTION 12 – MITIGATION OF OTHER ATTACKS .......................................................................... 20
+
+2
+
+Dec 23, 2024
+
+Section 1 - General
+This document explains precise specification of the security rules about KIOXIA FIPS
+TC58NC1030GTB Crypto Sub-Chip. The Cryptographic Module (CM) meets the requirements of
+FIPS 140-3 Security Level 2 Overall. The Table below shows the security level detail.
+ISO/IEC 24759 Section 6.
+[Number Below]
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+FIPS 140-3 Section Title
+
+Security Level
+
+General
+Cryptographic Module Specification
+Cryptographic Module Interfaces
+Roles, Services, and Authentication
+Software/Firmware Security
+Operational Environment
+Physical Security
+Non-invasive Security
+Sensitive Security Parameter Management
+Self-tests
+Life-cycle Assurance
+Mitigation of Other Attacks
+
+2
+2
+2
+2
+2
+N/A
+2
+N/A
+2
+2
+2
+N/A
+
+Table 1 ‐ Security Levels
+This document is non-proprietary and may be reproduced in its original entirety.
+
+Section 1.1 - Acronyms
+AES
+
+Advanced Encryption Standard
+
+CM
+
+Cryptographic Module
+
+SSP
+
+Sensitive Security Parameter
+
+DRBG
+
+Deterministic Random Bit Generator
+
+HMAC
+
+The Keyed-Hash Message Authentication code
+
+KAT
+
+Known Answer Test
+
+POST
+
+Power on Self-Test
+
+CAST
+
+Cryptographic Algorithm Self-Test
+
+PSID
+
+Printed SID
+
+SED
+
+Self-Encrypting Drive
+
+SHA
+
+Secure Hash Algorithm
+
+SID
+
+Security ID
+
+TCG
+
+Trusted Computing Group
+
+3
+
+Dec 23, 2024
+
+Section 2 – Cryptographic Module Specification
+KIOXIA FIPS TC58NC1030GTB Crypto Sub-Chip (listed in Section2.1 Product Version) is used
+for solid state drive data security. The CM is a single chip hardware module implemented as a
+sub-chip compliant with IG 2.3.B in the TC58NC1030GTB 0002 SoC (see Figure 1 in Section 7).
+Overall Security Rating of the CM is Level 2 (See Table 1 in Section 1 for individual security area
+levels). The CM is embedded in TCG OPAL compliant solid state drive controllers which provides
+user data encryption/decryption through build-in HW engines.
+The CM provides various cryptographic services using approved algorithms. The CM has
+multiple functions, but they do not support the degraded operation. The physical boundary of
+the CM is the TC58NC1030GTB 0002 SoC and the logical boundary of the CM is
+TC58NC1030GTB CRPT module.
+The CM has one approved mode of operation and CM is always in approved mode of operation
+after initial operations are performed (See Section 11). In approved mode, the CM provides
+services defined in Table 7 in Section 4.2.
+
+Section 2.1 – Product Version
+The CM is validated with the following versions:
+Physical single-chip
+
+The sub-chip cryptographic
+subsystem soft circuitry core
+
+The associated
+firmware
+
+TC58NC1030GTB 0002
+
+TC58NC1030GTB CRPT module 0001
+
+SC01CN
+
+Table 2 ‐ Cryptographic Module Tested Configuration
+
+Section 2.2 – Security Functions
+The CM executes the following approved algorithms:
+
+CAVP Cert
+
+Algorithm and
+Standard
+
+Mode/
+Method
+
+Description/Key
+Size(s)/ Key
+
+Use/Function
+
+Strength(s)
+#A2402
+
+AES256
+(FIPS 197 / SP800-38A)
+
+Key Size: 256 bits/
+
+CBC
+
+Key Strength: 256 bits
+
+4
+
+Data
+
+and
+
+Key
+
+Encryption/
+Decryption
+
+Dec 23, 2024
+
+#A2402
+
+AES256
+(FIPS 197 / SP800-38A,
+SP800-38E)
+
+XTS,
+ECB1
+
+Key Size: 256 bits/
+Key Strength: 256 bits
+
+#A2402
+
+SHA2-256
+(FIPS 180-4)
+
+N/A
+
+N/A
+
+#A2402
+
+HMAC-SHA2-256
+(FIPS 198-1)
+
+Hashing
+messages
+
+Key Size: 256 bits/
+
+N/A
+
+Data Encryption/
+Decryption
+
+Key Strength: 256 bits
+
+Message
+Authentication
+Code
+
+Key Size:
+#A2402
+
+RSASSA-PKCS#1-v1_5
+(FIPS 186-4)
+
+N/A
+
+2048, 3072 bits/
+
+Signature
+
+Key Strength:
+
+verification
+
+112, 128 bits
+#A2450
+
+ECDSA
+(FIPS 186-4)
+
+N/A
+
+#A2432
+
+Hash_DRBG
+(SP800-90A Rev.1)
+
+N/A
+
+Curve: P-256/
+Key Strength: 128 bits
+Hash
+
+based:
+
+SHA2-256
+
+Signature
+generation/
+verification
+Deterministic
+Random Bit
+Generation
+
+MACs:
+#A2433
+
+#A2402
+
+KBKDF
+(SP800-108 Revised)
+
+KTS
+(IG D.G)
+
+Counter
+
+Key Strength: 256 bits
+Combination
+of
+AES256 CBC Mode and
+HMAC-SHA2-256 /
+Key Size: 256 bits/
+
+N/A
+
+Vendor
+Affirmation
+
+CKG
+(SP800-133 Rev.2)
+
+#E143
+
+Entropy Source
+(SP800-90B)
+
+HMAC-SHA2-256/
+Key Size: 256 bits/
+
+Key Strength: 256 bits
+Methods described in
+section
+4
+of
+the
+SP800-133 Rev.2
+
+N/A
+
+N/A
+
+N/A
+
+Key derivation
+
+Key
+
+Transport
+
+Scheme
+Cryptographic
+Key Generation
+Hardware RNG
+used to seed the
+approved
+Hash_DRBG.
+
+Note 1: The “CAVP Cert” of KTS comes from the fact that KTS is composed of AES256-CBC and HMAC-SHA2-256 (#A2402).
+Note 2: There are algorithms, modes, and keys that have been CAVP tested but not used by the module. Only the algorithms,
+modes/methods, and key lengths/curves/moduli shown in this table are used by the module.
+
+Table 3 ‐ Approved Algorithms
+The CM does not have any Non-approved algorithms allowed in the approved mode of
+operation.
+1
+
+ECB mode is used as a prerequisite of XTS mode. ECB is not directly used in services of the
+
+Cryptographic Module. The CM performs a check that the XTS Key1 and XTS Key2 are different
+according to IG C.I. AES-XTS is only used for encryption/decryption of data stored in solid state
+drives equipped with this CM.
+
+5
+
+Dec 23, 2024
+
+Section 2.3 – Module Configuration
+Overview block diagram of the CM is shown below.
+
+Figure 1 – Configuration of module and peripheral components
+Components of the CM is shown with gray background blocks include processor, memories
+(volatile and non-volatile memory) and HW circuitry for cryptographic processing.
+Cryptographic algorithms implemented as FW are shown in light-gray background block.
+Physical ports bordering outside the CM’s boundary and the data passing over them are also
+indicated (see Section 3 for details on physical ports and interfaces).
+
+Section 3 – Cryptographic Module Interfaces
+Physical port
+Mailbox
+AES circuit
+DMAC
+Lock Checker
+Mailbox
+AES circuit
+DMAC
+Mailbox
+Lock Checker
+Mailbox
+Lock Checker
+Power PIN
+
+Logical
+Interface
+Data Input
+
+Data that passes over port/interface
+Mailbox input parameter.
+User data.
+Read/Write destination address information.
+
+Data Output
+
+Mailbox output parameter.
+User data.
+
+Control Input
+
+Mailbox command information.
+Lock status confirmation request signal.
+Mailbox command result.
+Lock status confirmation result signal.
+Power
+
+Status Output
+Power Input
+
+Note 1: Control output is omitted in the table above because the CM does not implement this type of interface.
+
+Table 4 ‐ Ports and Interfaces
+
+6
+
+Dec 23, 2024
+
+Section 4 – Roles, Services, and Authentication
+The relation between Roles and Services in this CM is shown below.
+Role
+
+Service
+
+Input
+
+Output
+
+Download Port Lock/Unlock
+Firmware Download2
+Set PIN (for AdminSP.SID and
+AdminSP.Admin1)
+FIPS Crypto Officer
+(AdminSP.SID)
+
+Authority Enable/Disable
+Revert
+
+Mailbox command
+
+Mailbox command result
+
+Mailbox command
+
+Mailbox command result
+
+Mailbox command
+
+Mailbox command result
+
+Encrypted/Decrypted data
+
+Decrypted/Encrypted data
+
+Mailbox command
+
+Mailbox command result
+
+Data Locking protection Enable
+Sanitize
+Format Namespace
+Namespace Create/Delete
+Set PIN (for AdminSP.Admin1)
+FIPS Crypto Officer
+(AdminSP.Admin1)
+
+Revert
+Sanitize
+Format Namespace
+Namespace Create/Delete
+Band Lock/Unlock
+Cryptographic Erase
+Cryptographic Erase and Initialize
+Band State
+Set Band position and Size,
+Set Band position and Size for Band
+of Single User Mode
+Set PIN(for LockingSP.Admin1-4
+
+FIPS Crypto Officer
+
+and LockingSP.User1-192)
+
+(LockingSP.Admin1-4)
+
+Authority Enable/Disable
+Revert
+Data Locking protection Enable
+Sanitize
+Format Namespace
+Namespace Create/Delete
+Band Set Enable
+Band Set Disable
+Data Read/Write
+Band Lock/Unlock for Band of
+
+FIPS Crypto Officer
+(LockingSP.User1)
+
+Single User Mode (for GlobalRange)
+Cryptographic Erase for Band of
+Single User Mode (for GlobalRange)
+Cryptographic Erase and Initialize
+
+2
+
+“Firmware Download” service is controlled by AdminSP.SID role and signature of downloaded
+
+external firmware is verified (RSASSA-PKCS#1-v1_5).
+
+7
+
+Dec 23, 2024
+
+Band State (for GlobalRange)
+Set Band position and Size for Band
+of Single user Mode (for
+GlobalRange
+Set PIN (for LockingSP.User1),
+Set PIN for Band of Single User
+Mode (for LockingSP.Use1)
+Format Namespace
+Namespace Create/Delete
+Data Read/Write
+
+Encrypted/Decrypted data
+
+Decrypted/Encrypted data
+
+Mailbox command
+
+Mailbox command result
+
+Encrypted/Decrypted data
+
+Decrypted/Encrypted data
+
+…
+
+…
+
+Band Lock/Unlock for Band of
+Single User Mode (for Band1)
+Cryptographic Erase for Band of
+Single User Mode (for Band1)
+Cryptographic Erase and Initialize
+FIPS Crypto Officer
+(LockingSP.User2)
+
+Band State (for Band1)
+Set Band position and Size for Band
+of Single user Mode (for Band1)
+Set PIN (for LockingSP.User2),
+Set PIN for Band of Single User
+Mode (for LockingSP.User2)
+Format Namespace
+Data Read/Write
+
+…
+
+…
+Band Lock/Unlock for Band of
+Single User Mode (for Band191)
+Cryptographic Erase for Band of
+Single User Mode (for Band191)
+Cryptographic Erase and Initialize
+
+Mailbox command result
+
+Band State (for Band191)
+FIPS Crypto Officer
+
+Set Band position and Size for Band
+
+(LockingSP.User192)
+
+of Single user Mode (for Band191)
+
+Mailbox command
+
+Exported encryption key
+Range information
+
+Set PIN (for LockingSP.User192),
+Set PIN for Band of Single User
+Mode (for LockingSP.User192)
+Format Namespace
+Data Read/Write
+
+Encrypted/Decrypted data
+
+Decrypted/Encrypted data
+
+Mailbox command
+
+Mailbox command result
+
+Read/Write Command
+
+Lock state of each Band
+
+Firmware Verification
+Random Number Generation
+Show Status
+Zeroisation
+None
+
+Signature Generation
+Signature Verification
+Calculate Hash Digest
+Check Lock State
+Reset
+
+Power
+
+N/A
+
+Note: There are LockingSP.Users from user 1 to user 192, but user 3 to user 191 are omitted in the table above.
+
+8
+
+Dec 23, 2024
+
+Table 5 ‐ Roles, Service Commands, Input and output
+The CM supports the configuration of roles and services. The authenticated operator is expected
+to configure locked bands for data storage, the associated role and the lock-based
+authentication data (PIN) per Table 5 (refer to section 11 for detail settings to maintain secure
+operation). Bands that are not configured are considered unprotected or plaintext. This
+configuration enables Data Read/Write service using the lock-based authentication model (IG
+4.1.A). To Read/Write data from/to each band, an operator must unlock the bands with
+appropriate authenticated roles. Once the bands are unlocked, Read and Write access to the
+bands must be controlled by a trusted operator outside of the module who has authenticated
+the associated role until powered off. The module prevents Data read/write service for locked
+bands. If Read and Write access needs to be inhibited prior to power off, the operator who
+authenticates the role must set the bands to the locked state again.
+
+Section 4.1 – Roles and Authentication
+This section describes roles, authentication method, and strength of authentication.
+Role
+
+Authentication Method
+
+AdminSP.SID
+
+Role based PIN authentication
+
+AdminSP.Admin1
+
+Role based PIN authentication
+
+LockingSP.Admin1-4
+
+Role based PIN authentication
+
+LockingSP.User1
+
+Role based PIN authentication
+
+LockingSP.User2
+
+Role based PIN authentication
+
+…
+
+…
+
+LockingSP.User192
+
+Authentication Strength
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+…
+
+Role based PIN authentication
+
+Single random attempt: 1 / 264 < 1 / 1,000,000
+Multi attempt per minute: 60,000 / 264 < 1 / 100,000
+
+Note 1: All roles to be authenticated are FIPS Crypto Officer
+Note 2: There are LockingSP.Users from user 1 to user 192, but user 3 to user 191 are omitted in the table above.
+
+Table 6 ‐ Identification and Authentication Policy
+The CM provides a role-based PIN authentication function. The CM stores PINs that has been
+previously hashed with SHA2-256, and verifies the PIN entered by the operator matches the
+stored information at the time of authentication.
+PINs can be changed by executing the Set PIN Service (see Section4.2) with appropriate roles
+authenticated. The CM refuses to set a PIN less than 8 bytes, and responds with an error if such
+
+9
+
+Dec 23, 2024
+
+a setting is attempted. Therefore, the probability that a random attempt will succeed is 1 / 264
+< 1 / 1,000,000 (the CM accepts any value (0x00-0xFF) as each byte of PIN). The CM waits 1ms
+when authentication attempt fails, so the maximum number of authentication attempts is
+60,000 times in 1 min.
+succeed is 60,000 / 2
+
+64
+
+Consequently, the probability that random attempts in 1min will
+
+< 1 / 100,000.
+
+Initial PINs of AdminSP.Admin1, LockingSP.Admin2-4 and LockingSP.User1-192 are set to null
+(i.e., data length is 0). These role’s authentication data are need to be replaced upon the
+first-time authentication. Otherwise, the operator who assumes these roles cannot execute
+services except Set PIN and services that does not need authorized roles.
+
+Section 4.2 – Services
+This section describes services which the CM provides.
+Access
+Approved
+Service
+
+Description
+
+Security
+
+rights to
+
+Keys and/or
+
+Role(s)
+
+SSPs
+
+Function
+
+Keys
+
+Indicator
+
+and/or
+SSPs3
+
+Band Lock/Unlock
+
+Lock or unlock read /
+
+KBKDF
+
+write of user data in a
+band.
+
+HMAC-SHA2-256
+
+KDK
+
+LockingSP.Admin
+
+E
+
+MEKs
+
+1-4
+
+G
+
+System MAC Key
+
+E
+
+Band Lock/Unlock
+
+Lock or unlock read /
+
+LockingSP.User”X
+
+for Band of Single
+
+write of user data in
+
++1”
+
+User Mode
+
+band ”X” of single user
+
+Check Lock State
+
+Check a lock state of
+
+Mailbox
+command result
+
+mode.
+N/A
+
+N/A
+
+None
+
+N/A
+
+band that read / write
+
+Band Lock state
+
+user data.
+
+Data Read/Write
+
+Encryption /
+
+AES256-XTS
+
+MEKs
+
+LockingSP.Admin
+
+E
+
+Readable/Writab
+
+decryption of user
+
+1-4
+
+le signal
+
+data to/from unlocked
+
+LockingSP.User1-
+
+from lock check
+
+band of SSD4.
+
+192
+
+Cryptographic
+
+Erase user data (in
+
+Erase
+
+module
+
+DRBG Internal
+
+LockingSP.Admin
+
+cryptographic means)
+
+Value
+
+1-4
+
+by changing the key
+
+KDK
+
+G, Z
+
+KDK
+
+E
+
+MEKs
+
+G, Z
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+W, R
+
+that derives the data
+
+CKG(Hash_DRBG)
+
+KBKDF
+
+encryption key.
+
+E
+
+Mailbox
+command result
+
+3
+
+The letters (G, R, W, E, Z) mean Generate, Read, Write, Execute and Zeroise respectively.
+
+4
+
+The band has to be unlocked by the corresponding role beforehand.
+
+10
+
+Dec 23, 2024
+
+Cryptographic
+
+Erase user data in
+
+LockingSP.user”X
+
+Erase for Band of
+
+band ”X” of single user
+
++1”
+
+Single User Mode
+
+mode (in
+cryptographic means)
+by changing the key
+that derives the data
+encryption key.
+
+Cryptographic
+
+Erase user data in
+
+Erase and Initialize
+
+band ”X” of single user
+
+Band State
+
+mode (in
+cryptographic means)
+
+CKG(Hash_DRBG)
+
+KBKDF
+
+by changing the key
+that derives the data
+encryption key, and
+initialize the band
+state.
+
+DRBG Internal
+
+LockingSP.Admin
+
+Value
+
+1-4
+
+E
+
+KDK
+
+LockingSP.user”X
+
+G, Z
+
+KDK
+
++1”
+
+E
+
+MEKs
+
+G, Z
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+W, R
+
+N/A
+
+N/A
+
+AdminSP.SID
+
+N/A
+
+Mailbox
+command result
+
+Download Port
+
+Lock / unlock firmware
+
+Lock/Unlock
+
+download.
+
+Firmware
+
+Digital signature
+
+RSASSA-PKCS#1-
+
+Public Key
+
+Verification
+
+verification for
+
+v1_5
+
+embedded on
+
+Mailbox
+
+firmware outside the
+
+the
+
+command result
+
+CM.
+
+CM’s code
+
+command result
+
+Firmware
+
+Download a firmware
+
+SHA2-256
+
+PubKey1
+
+Download
+
+image5.
+
+RSASSA-PKCS#1-
+
+PubKey1
+
+None
+
+AdminSP.SID
+
+E
+
+W, E
+E
+
+v1_5
+
+Random Number
+
+Provide a random
+
+Generation
+
+number generated by
+
+Hash_DRBG
+
+DRBG Internal
+
+None
+
+Set the location and
+
+and Size
+
+size of the band.
+
+command result
+
+Mailbox
+command result
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+LockingSP.Admin
+
+Value
+
+1-4
+
+E
+
+KDK
+
+G, Z
+
+KDK
+
+E
+
+MEKs
+
+G, Z
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+W, R
+
+KBKDF
+
+Set Band Position
+
+Set the location and
+
+LockingSP.Admin
+
+and Size for Band
+
+size of the band ”X” of
+
+1-4
+
+of Single User
+
+single user mode
+
+LockingSP.User”X
+
+Mailbox
+command result
+
++1”
+
+Mode
+Set PIN
+
+Mailbox
+
+E
+
+Value
+
+the CM.
+
+Set Band Position
+
+Mailbox
+
+Set PIN
+
+SHA2-256
+
+PINs
+
+AdminSP.SID,
+
+W, E
+
+(authentication data).
+
+HMAC-SHA2-256
+
+System MAC Key
+
+AdminSP.Admin1
+
+E
+
+AES256-CBC
+
+System ENC Key
+
+,
+
+E
+
+KTS
+
+PINs
+
+LockingSP.Admin
+1-4,
+
+W, R
+
+LockingSP.User1-
+
+Mailbox
+
+192
+
+command result
+
+Set PIN for Band of
+
+Set PIN
+
+LockingSP.User1-
+
+Single User Mode
+
+(authentication
+
+192
+
+data) of authority for
+band “X” of single use
+mode
+
+Authority
+
+5
+
+Enable/Disable the
+
+HMAC-SHA2-256
+
+System MAC Key
+
+AdminSP.SID
+
+E
+
+Mailbox
+
+Only the CMVP validated version is to be used
+
+11
+
+Dec 23, 2024
+
+Enable/Disable
+
+authority.
+
+AES256-CBC
+
+System Enc Key
+
+LockingSP.Admin
+
+E
+
+command result
+
+1-4
+
+Revert
+
+Initialize the band
+
+SHA2-256
+
+PINs
+
+AdminSP.SID,
+
+W, E
+
+State and disable band
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+AdminSP.Admin1
+
+E
+
+Value
+
+LockingSP.Admin
+
+KDK
+
+1-4,
+
+lock setting.
+KBKDF
+
+G, Z
+
+KDK
+
+E
+
+Mailbox
+
+MEKs
+
+G, Z
+
+command result
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+PINs
+
+W, R
+
+KDK
+
+W, R
+
+Data Locking
+
+Enable Data protection
+
+SHA2-256
+
+PINs
+
+AdminSP.SID
+
+W, E
+
+Protection Enable
+
+with band lock setting.
+
+HMAC-SHA2-256
+
+System MAC Key
+
+LockingSP.Admin
+
+E
+
+Mailbox
+
+AES256-CBC
+
+System Enc Key
+
+1-4
+
+E
+
+command result
+
+KTS
+
+PINs
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+AdminSP.SID,
+
+Value
+
+AdminSP.Admin1
+
+KDK
+
+,
+
+G, Z
+
+KDK
+
+LockingSP.Admin
+
+E
+
+Mailbox
+
+MEKs
+
+1-4
+
+G, Z
+
+command result
+
+Sanitize
+
+Erase all user data (in
+cryptographic means)
+by changing the key
+that derives the data
+
+KBKDF
+
+encryption key.
+
+Format
+
+Erase user data (in
+
+Namespace
+
+cryptographic means)
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+AdminSP.SID,
+
+Value
+
+AdminSP.Admin1
+
+KDK
+
+,
+
+G, Z
+
+KDK
+
+LockingSP.Admin
+
+E
+
+Mailbox
+
+MEKs
+
+1-4,
+
+G, Z
+
+command result
+
+HMAC-SHA2-256
+
+System MAC Key
+
+LockingSP.User1-
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+192
+
+E
+
+KTS
+
+KDK
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+AdminSP.SID,
+
+Value
+
+AdminSP.Admin1
+
+KDK
+
+,
+
+G, Z
+
+KDK
+
+LockingSP.Admin
+
+E
+
+Mailbox
+
+MEKs
+
+1-4,
+
+G, Z
+
+command result
+
+HMAC-SHA2-256
+
+System MAC Key
+
+LockingSP.User1
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+KTS
+
+KDK
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+LockinSP.Admin1
+
+Value
+
+-4
+
+KBKDF
+
+derives the data
+encryption key.
+
+Namespace
+
+Create and delete
+
+Create/Delete
+
+Namespace.
+KBKDF
+
+Band Set Enable
+
+Set the location, size
+and lock state of the
+band.
+
+Initialize the location,
+
+W, R
+E
+
+W, R
+E
+
+E
+W, R
+E
+
+KDK
+
+G, Z
+
+KDK
+
+E
+
+Mailbox
+
+MEKs
+
+G, Z
+
+command result
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+CKG(Hash_DRBG)
+
+DRBG Internal
+
+LockingSP.Admin
+
+Value
+
+1-4
+
+KBKDF
+
+Band Set Disable
+
+E
+
+HMAC-SHA2-256
+
+on Namespace by
+changing the key that
+
+W, R
+
+size and lock state of
+the band.
+
+W, R
+E
+
+KDK
+
+G, Z
+
+KDK
+
+E
+
+Mailbox
+
+MEKs
+
+G, Z
+
+command result
+
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+W, R
+
+KBKDF
+
+12
+
+Dec 23, 2024
+
+Signature
+
+Generate a signature
+
+Generation
+
+of the data by using a
+
+ECDSA
+
+Key Pair Private
+
+None
+
+W, E, Z
+
+Key
+
+Mailbox
+
+private key entered
+
+command result
+
+from outside of the
+CM.
+
+Signature
+
+Verify input signature
+
+Verification
+
+by using a public key
+
+ECDSA
+
+Key Pair Public
+
+None
+
+W, E, Z
+
+Key
+
+Mailbox
+
+entered from outside
+
+command result
+
+of the CM.
+
+Calculate Hash
+
+Hash the data entered
+
+Digest
+
+from outside of the
+
+Mailbox
+
+CM.
+
+command result
+
+Show Status
+
+Zeroisation
+
+Report status of the
+
+SHA2-256
+
+N/A
+
+N/A
+
+N/A
+
+None
+
+None
+
+N/A
+
+N/A
+
+CM and versioning
+
+Mailbox
+
+information.
+
+command result
+
+Erase SSPs.
+
+N/A
+
+RKey
+
+None6
+
+Z
+
+KDK
+
+Z
+
+MEKs
+
+Z
+
+PINs
+
+Z
+
+System MAC Key
+
+Z
+
+System Enc Key
+
+Z
+
+DRBG Internal
+
+Z
+
+Mailbox
+command result
+
+Value
+
+Reset
+
+Power-OFF:
+
+N/A
+
+Delete SSPs in RAM.
+
+System MAC Key
+
+None
+
+Z
+
+System Enc Key
+
+Z
+
+KDK
+
+Z
+
+MEKs
+
+Z
+
+PINs
+
+Z
+
+DRBG Internal
+
+Z
+
+Value
+
+Power-ON:
+
+RSASSA-PKCS#1-
+
+PubKey1
+
+Z
+
+PubKey1
+
+W, E
+
+RKey
+
+E
+
+System MAC Key
+
+G
+
+v1_5
+Runs various self-tests
+
+KBKDF
+
+to be performed at
+
+System Enc Key
+
+G
+
+power-on ( POSTs,
+
+Entropy Source
+
+DRBG Seed
+
+G
+
+CASTs, Firmware Load
+
+Hash_DRBG
+
+DRBG Seed
+
+E, Z
+
+DRBG Internal
+
+G
+
+test ) and generate /
+import some SSPs.
+
+N/A
+
+Value
+HMAC-SHA2-256
+
+System MAC Key
+
+E
+
+AES256-CBC
+
+System Enc Key
+
+E
+
+KTS
+
+KDK
+
+W
+
+PINs
+
+W
+
+Note 1: “CKG(Hash_DRBG)” means direct use of Hash_DRBG output as a key.
+Note 2: A cryptographic module is required to provide services “Show module’s versioning information”, “Show status”,
+“Perform self-tests”, “Perform approved security functions” and “Perform zeroisation”. In this CM, “Show module’s information”
+and “Show status” are included in the Show Status service and “Perform self-tests” is included in the Reset service. “Perform
+zeroisation” is executed by the Zeroisation service. All other services fall under “Perform approved security functions”.
+
+6
+
+Need to input PSID, which is public drive-unique value used for the zeroisation service.
+
+13
+
+Dec 23, 2024
+
+Table 7 ‐ Approved services
+The CM does not provide Non-approved services.
+
+Section 5 – Software/Firmware Security
+Firmware Security of components in this CM is shown below.
+ROM Code:
+・ Form of the executable code: ELF format
+・ Integrity verification method: 32bit CRC
+・ Method for integrity test on demand: Power cycling
+Firmware image (User Code):
+・ Form of the executable code: ELF format
+・ Integrity verification method: Approved signature verification (RSASSA-PKCS#1-v1_5, see
+table 3)
+・ Method for integrity test on demand: Power cycling
+The CM supports the partial loading that replaces the current Firmware image, excluding the
+ROM Code, with a new Firmware image loaded from outside the module. In this case the CM
+becomes another validated one.
+
+Section 6 – Operational Environment
+Operational Environment requirements are not applicable because the CM does not employ
+operating systems and operates in a limited operational environment under the FIPS 140-3
+definitions.
+
+Section 7 – Physical Security
+The CM is a sub-chip enclosed in a single chip that is an opaque package. Gathering information
+of the module’s internal construction or components is impossible without forcing the package
+to open. In this case, it is confirmed package damage as a tamper-evidence. Operators of the
+CM can ensure that the physical security is maintained to confirm the package has no obvious
+attack damage. If the operator discovers tamper evidence, the CM should be removed.
+
+14
+
+Dec 23, 2024
+
+Front
+
+Back
+
+Figure 2 - TC58NC1030GTB 0002 SoC
+Recommended Frequency of
+
+Physical Security Mechanism
+Passivated opaque package
+
+Inspection/Test Guidance Detail
+
+Inspection/Test
+Every month or every two months
+
+Confirmation that there is no visual damage
+
+Table 8 ‐ Physical Security Inspection Guidelines
+
+Section 8 – Non-invasive security
+The CM does not apply Non-invasive security.
+
+Section 9 – Sensitive security parameter management
+The CM uses keys and SSPs in the following table.
+
+Key/SSP
+Name/
+Type
+
+Security
+Strength
+
+Function
+
+(bit)
+
+and Cert
+
+Generation
+
+Import/
+Export
+
+Use &
+
+Establishment
+
+Storage
+
+Zeroisation
+
+Installation
+
+Plaintext in
+
+Explicit
+
+Derivation
+
+OTP
+
+Zeroisation
+
+System Enc Key and
+
+service
+
+System MAC Key
+
+Plaintext in
+
+Explicit
+
+Data
+
+RAM
+
+Zeroisation
+
+Encryption
+
+service
+
+Decryption for KTS
+
+related keys
+
+Number
+
+Critical Security Parameters (CSPs)
+RKey
+
+256
+
+KBKDF
+
+Hash_DRBG
+
+(#A2433)
+
+(Method
+
+N/A
+
+SP800-133
+Rev.2
+
+of
+
+Section
+
+4)
+System Enc
+
+256
+
+Key
+
+AES-CBC
+
+KDF in Counter
+
+(#A2402)
+
+Mode
+
+N/A
+
+Power-On
+
+and
+
+Key
+/
+
+Implicit
+Power-Off
+
+System MAC
+Key
+
+256
+
+HMAC
+
+KDF in Counter
+
+(#A2402)
+
+Mode
+
+N/A
+
+Power-On
+
+15
+
+Plaintext in
+
+Explicit
+
+Message
+
+RAM
+
+Zeroisation
+
+Authentication
+
+service
+
+Code
+
+generation
+
+Dec 23, 2024
+
+KDK
+
+256
+
+KBKDF
+
+Hash_DRBG
+
+Imported
+
+Key
+
+(#A2433)
+
+(Method
+
+and Exported
+
+services7
+
+SP800-133
+
+by KTS (see
+
+Rev.2 Section
+
+Table 3)
+
+update
+
+Implicit
+
+and verification for
+
+Power-Off
+
+KTS
+
+Plaintext in
+
+Explicit
+
+Derivation of MEKs
+
+RAM
+
+Zeroisation
+service,
+
+4)
+
+Encrypted
+
+Key
+
+in
+
+services
+
+System
+
+update
+
+Area
+
+Implicit
+
+outside the
+
+Power-Off
+
+module
+using
+
+the
+
+Approved
+KTS
+MEKs
+
+256
+
+AES-XTS
+
+KDF in Counter
+
+(#A2402)
+
+Mode
+
+N/A
+
+Band Lock/Unlock
+service,
+Key
+
+Plaintext in
+AES register
+
+update
+
+Explicit
+
+Data encryption /
+
+Zeroisation
+service,
+
+services
+
+decryption
+Key
+
+update services
+Implicit
+Power-Off
+
+PINs
+
+Referred to
+
+SHA2-256
+
+in
+
+(#A2402)
+
+Section
+
+Electric input
+
+Imported
+
+Set PIN service
+
+and Exported
+
+4.1 (Table
+
+by KTS (see
+
+6)
+
+Table 3)
+
+Hashed
+
+in
+
+RAM
+
+Explicit
+
+User authentication
+
+Zeroisation
+service
+
+Hashed
+
++
+
+Encrypted
+in
+
+System
+
+Implicit
+Power-Off
+
+Area
+outside the
+module
+using
+
+the
+
+Approved
+KTS
+Key
+
+Pair
+
+128
+
+Private Key
+
+ECDSA
+
+Electric input
+
+(#A2450)
+
+Imported
+
+Signature
+
+Plaintext in
+
+Implicit
+
+Signature
+
+during
+
+Generation
+
+RAM
+
+Immediately
+
+generation
+
+Signature
+
+service
+
+after use8
+
+arbitrary data
+
+Plaintext in
+
+Explicit
+
+Random
+
+RAM
+
+Zeroisation
+
+generation
+
+for
+
+Generation
+Service
+DRBG
+
+V: 440 bits
+
+Hash_DRBG
+
+SP800-90A
+
+Internal
+
+C: 440 bits
+
+(#A2432)
+
+Instantiation of
+
+Value
+
+N/A
+
+Power-On
+
+Hash_DRBG
+
+number
+
+service
+Implicit
+Power-Off
+
+DRBG Seed
+
+7
+
+Entropy
+
+Hash_DRBG
+
+Entropy
+
+Input
+
+(#A2432)
+
+collected from
+
+String and
+
+Entropy Source
+
+Nonce:
+
+at instantiation
+
+1024 bits
+
+(Minimum
+
+N/A
+
+Power-On
+
+Plaintext in
+
+Implicit
+
+Random
+
+RAM
+
+Immediately
+
+generation
+
+number
+
+after use8
+
+The following service are applicable, Cryptographic Erase, Cryptographic Erase for Band of
+
+Single User Mode, Cryptographic Erase and Initialize Band State, Set Band Position and Size, Set
+Band Position and Size for Band of Single User Mode, Revert, Sanitize, Format Namespace,
+Namespace Create/Delete and Band Set Enable.
+8
+
+Zeroised after input to related algorithm.
+
+16
+
+Dec 23, 2024
+
+entropy
+
+of
+
+8
+
+bits:3.00)
+
+Public Security Parameters (PSPs)
+PubKey1
+
+112
+
+RSA
+
+Electric input
+
+(#A2402)
+
+Imported
+during
+
+FW
+
+load.
+
+Power-on,
+
+Plaintext in
+
+Implicit
+
+Signature
+
+FW
+
+RAM
+
+Power-Off
+
+verification
+
+Download
+
+service
+
+(Data in RAM)
+Hashed
+
+in
+
+OTP
+Key
+
+Pair
+
+128
+
+ECDSA
+
+Public Key
+
+Electric input
+
+(#A2450)
+
+Imported
+
+Signature
+
+Plaintext in
+
+Implicit
+
+Signature
+
+during
+
+Verification
+
+RAM
+
+Immediately
+
+verification
+
+Signature
+
+service
+
+after use8
+
+arbitrary data
+
+Verification
+Service
+
+Table 9 ‐ SSPs
+Entropy source
+Entropy Source9
+
+Minimum
+number of bits
+of entropy
+Minimum
+entropy of 8 bits
+is 3.00.
+
+Details
+Hardware RNG
+Hash_DRBG.
+
+used
+
+to
+
+seed
+
+the
+
+approved
+
+Table 10 ‐ Non-Deterministic Random Number Generation Specification
+For the Entropy Source listed in the table above, self-tests are performed each time before data
+is obtained (see Section 10 for details of these self-tests). When these tests detect that the
+Entropy Source cannot generate the sufficient amount of entropy, the CM is transient to error
+state. The CM can be recovered from the error state by rebooting the module, and the obtaining
+of Entropy data is attempted again. If the CM continuously enters in error state in spite of
+several trials of reboot, the CM may be sent back to factory to recover from error state.
+
+9
+
+The Entropy Source is a hardware module inside the CM boundary. The Entropy Source
+
+supplies the Hash_DRBG with 1024 bits entropy input. From Table 10 this input contains about
+384 bits of entropy, which is sufficient entropy to obtain 256 bits of security strength.
+
+17
+
+Dec 23, 2024
+
+for
+
+Section 10 – Self Tests
+The CM runs self-tests in the following table.
+Function
+
+Self-Test Type
+
+Execution
+
+Abstract
+
+Failure Behavior
+
+Encrypt KAT
+
+Enters Boot Error State.
+
+Decrypt KAT
+
+(Indicated Error Code: 0x24)
+
+Encrypt KAT
+
+Enters Boot Error State.
+
+Decrypt KAT
+
+(Indicated Error Code: 0x23)
+
+Digest KAT
+
+Enters Boot Error State.
+
+Condition
+AES256-CBC
+
+Conditional
+
+AES256-XTS
+
+Conditional
+
+SHA2-256
+
+Conditional
+
+Power-On
+
+Power-On
+
+Power-On
+
+(Indicated Error Code: 0x25)
+HMAC-SHA2-256
+
+Conditional
+
+Power-On
+
+Digest KAT
+
+Enters Boot Error State.
+(Indicated Error Code: 0x26)
+
+Hash_DRBG
+
+Conditional
+
+Power-On
+
+DRBG KAT
+
+Enters Boot Error State.
+(Indicated Error Code: 0x18/0x19)
+
+RSASSA-PKCS#1
+
+Conditional
+
+Power-On
+
+Signature verification KAT
+
+-v1_5
+
+Enters Boot Error State.
+(Indicated Error Code: 0x27)
+
+ECDSA
+
+Conditional
+
+Power-On
+
+Signature generation KAT
+
+Enters Boot Error State
+(Indicated Error Code: 0x10)
+
+ECDSA
+
+Conditional
+
+Before first use
+
+Signature verification KAT
+
+Enters Error State
+(Indicated Error Code: 0x10)
+
+KDF in Counter
+
+Conditional
+
+Power-On
+
+KDF KAT
+
+Mode
+
+Enters Boot Error State
+(Indicated Error Code: 0x28)
+
+Entropy
+
+Source
+
+Conditional
+
+Power-On
+
+Verify not deviating from
+
+(Health
+
+tests
+
+of
+
+the intended behavior of the
+
+noise
+
+source
+
+at
+
+noise source by Repetition
+
+startup.)
+
+Count
+
+Enters Boot Error State
+(Indicated Error Code: 0x2C/0x2D)
+
+Test and Adaptive
+
+Proportion Test specified in
+SP800-90B.
+Entropy
+
+Source
+
+(Continuous
+
+noise
+
+Conditional
+
+Entropy output
+request
+
+Verify not deviating from
+
+Enters Error State (Conditional Test).
+
+the intended behavior of the
+
+(Indicated Error Code: 0x2C/0x2D)
+
+source health tests
+
+noise source by Repetition
+
+during operation.)
+
+Count
+
+Test and Adaptive
+
+Proportion Test specified in
+SP800-90B.
+
+18
+
+Dec 23, 2024
+
+Firmware
+
+load
+
+Conditional10
+
+Power-On
+
+test
+
+Verify signature of loaded
+firmware
+
+image
+
+by
+
+Enters Power Up Load Test Error State
+(Indicated Error Code: 0x13)
+
+RSASSA-PKCS#1-v1_5
+FW download
+
+Verify
+
+signature
+
+of
+
+Enters Conditional Load Test Error
+
+downloaded firmware image
+
+State.
+
+After reporting Error code,
+
+by RSASSA-PKCS#1-v1_5
+
+transition from error state to normal
+state and continue to operate with FW
+before download.
+(Indicated Error Code: 0x13)
+
+Firmware
+
+Pre-operational
+
+Power-On
+
+integrity test
+
+Verify ROM code integrity
+with 32bit CRC.
+
+Enters Boot Error State
+(Implicit error reporting by stopping the
+startup sequence)
+
+Table 11 ‐ Self Tests
+As shown in the table above, self-tests are performed automatically at the CM startup and
+before execution certain security functions. Operator can also initiate self-test on-demand for
+periodic testing by using the Reset service which is automatically invoked when the module is
+powered-off and powered-on (rebooted).
+If the self-tests fail, the CM reports error status and enters to the error state. In this case, the
+CM must be powered-off to clear error condition. When power-on is executed again, self-tests
+are also executed like an on-demand operator reset. If the CM continuously enters in error state
+in spite of several trials of reboot, the CM may be sent back to factory to recover from error
+state.
+
+Section 11 – Life-cycle Assurance
+In the SSD’s manufacturing process, installation is executed as below:
+1. The Firmware described in Section 2.1 is downloaded into the CM.
+2. Initial SSPs are generated.
+3. Initial authentication information is set to the CM.
+4. System area including SSPs generated in Step2 and Step3 are encrypted and calculated
+message authentication code.
+Initial operations to setup this CM are following:
+1. Load Firmware into the CM.
+10
+
+Firmware load test is also run at the time of Power-up, and the integrity of the Firmware
+
+loaded into the CM can be confirmed.
+
+19
+
+Dec 23, 2024
+
+2. Load system area including SSPs into the CM.
+3. Execute range state setting method.
+4. Execute download port setting method.
+5. Execute service execution state setting method.
+6. Execute namespace setting method.
+The CM switches to approved mode after the initial operation success. When the initial
+operation succeeds, the CM indicates success on the Status Output interface. Users can confirm
+that the CM is in approved mode by executing Show Status service and checking that the
+startup is successfully completed.
+For secure operation, the following settings must be maintained:
+
+
+Data Locking Protection is Enabled
+
+
+
+Each Band is set to be locked when power-on. Bands that are not configured are considered
+unprotected or plaintext.
+
+(Refer to SSD setting procedure11 )
+As described in Section 2, the CM is used by being embedded in the solid state drive. Therefore,
+there are no maintenance requirements for the CM alone. Guidance for this module is provided
+to solid state drive developers who embed the CM. The usage and maintenance of solid state
+drives with the CM built-in are outside of the scope of this document.
+
+Section 12 – Mitigation of Other Attacks
+The CM does not mitigate other attacks beyond the scope of FIPS 140-3 requirements.
+
+11
+
+For maintaining secure condition, the SSD needs several setting at least.
+Owners of the SSD that embeds the CM must use it securely according to the followings:
+1. TCG LockingSP is enabled by Activate method.
+2. Both ReadLockEnabled and WriteLockEnabled are set to “True” for each band (included
+Global Range) and it must not be modified.
+3. For each band, “Power Cycle" of LockOnReset setting is not change.
+4. If the LockingSP has been made disabled, the Activate method is re-executed before
+PowerCycle is performed.
+
+20
+
+Dec 23, 2024
+
+

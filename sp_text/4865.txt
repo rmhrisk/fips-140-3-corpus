@@ -1,0 +1,3336 @@
+Broadcom Inc.
+VMware’s Linux Kernel Cryptographic
+Module
+
+FIPS 140-3 Non-Proprietary
+Security Policy
+
+Table of Contents
+1 General ................................................................................................................................... 5
+1.1 Overview .......................................................................................................................... 5
+1.2 Security Levels ................................................................................................................. 5
+2 Cryptographic Module Specification ........................................................................................ 6
+2.1 Description ....................................................................................................................... 6
+2.2 Tested and Vendor Affirmed Module Version and Identification ........................................ 7
+2.3 Excluded Components...................................................................................................... 8
+2.4 Modes of Operation .......................................................................................................... 8
+2.5 Algorithms ........................................................................................................................ 9
+2.6 Security Function Implementations ..................................................................................11
+2.7 Algorithm Specific Information .........................................................................................13
+2.8 RBG and Entropy ............................................................................................................13
+2.9 Key Generation................................................................................................................14
+2.10 Key Establishment .........................................................................................................14
+2.11 Industry Protocols ..........................................................................................................14
+3 Cryptographic Module Interfaces............................................................................................14
+3.1 Ports and Interfaces ........................................................................................................14
+4 Roles, Services, and Authentication .......................................................................................15
+4.1 Authentication Methods ...................................................................................................15
+4.2 Roles ...............................................................................................................................15
+4.3 Approved Services ..........................................................................................................15
+4.4 Non-Approved Services ...................................................................................................18
+4.5 External Software/Firmware Loaded ................................................................................19
+5 Software/Firmware Security ...................................................................................................19
+5.1 Integrity Techniques ........................................................................................................19
+5.2 Initiate on Demand ..........................................................................................................19
+6 Operational Environment........................................................................................................19
+6.1 Operational Environment Type and Requirements ..........................................................19
+7 Physical Security ....................................................................................................................20
+8 Non-Invasive Security ............................................................................................................20
+9 Sensitive Security Parameters Management ..........................................................................20
+9.1 Storage Areas .................................................................................................................20
+9.2 SSP Input-Output Methods ..............................................................................................20
+Page 2 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+9.3 SSP Zeroization Methods ................................................................................................20
+9.4 SSPs ...............................................................................................................................21
+10 Self-Tests .............................................................................................................................24
+10.1 Pre-Operational Self-Tests ............................................................................................24
+10.2 Conditional Self-Tests....................................................................................................24
+10.3 Periodic Self-Test Information........................................................................................26
+10.4 Error States ...................................................................................................................28
+10.5 Operator Initiation of Self-Tests .....................................................................................28
+11 Life-Cycle Assurance ...........................................................................................................28
+11.1 Installation, Initialization, and Startup Procedures..........................................................28
+11.2 Administrator Guidance .................................................................................................29
+11.3 Non-Administrator Guidance..........................................................................................29
+12 Mitigation of Other Attacks ...................................................................................................29
+
+Page 3 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+List of Tables
+Table 1: Security Levels ............................................................................................................. 5
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets) .... 7
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid .................................. 8
+Table 4: Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid ................... 8
+Table 5: Modes List and Description .......................................................................................... 9
+Table 6: Approved Algorithms ...................................................................................................11
+Table 7: Non-Approved, Not Allowed Algorithms.......................................................................11
+Table 8: Security Function Implementations..............................................................................13
+Table 9: Entropy Certificates .....................................................................................................13
+Table 10: Entropy Sources ........................................................................................................14
+Table 11: Ports and Interfaces ..................................................................................................14
+Table 12: Roles .........................................................................................................................15
+Table 13: Approved Services ....................................................................................................18
+Table 14: Non-Approved Services.............................................................................................19
+Table 15: Storage Areas ...........................................................................................................20
+Table 16: SSP Input-Output Methods........................................................................................20
+Table 17: SSP Zeroization Methods ..........................................................................................21
+Table 18: SSP Table 1 ..............................................................................................................23
+Table 19: SSP Table 2 ..............................................................................................................24
+Table 20: Pre-Operational Self-Tests ........................................................................................24
+Table 21: Conditional Self-Tests ...............................................................................................26
+Table 22: Pre-Operational Periodic Information.........................................................................26
+Table 23: Conditional Periodic Information ................................................................................28
+Table 24: Error States ...............................................................................................................28
+
+List of Figures
+Figure 1: Block Diagram............................................................................................................. 7
+
+Page 4 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+1 General
+1.1 Overview
+This is a non-proprietary Cryptographic Module Security Policy for the VMware's Linux Kernel
+Cryptographic Module 5.0.0 from Broadcom Inc. This Security Policy describes how the
+VMware's Linux Kernel Cryptographic Module 5.0.0 meets the security requirements of Federal
+Information Processing Standards (FIPS) Publication 140-3, which details the U.S. and
+Canadian Government requirements for cryptographic modules.
+More information about the FIPS 140-3 standard and validation program is available on the
+National Institute of Standards and Technology (NIST) and the Canadian Centre for Cyber
+Security (CCCS), a branch of the Communications Security Establishment (CSE),
+Cryptographic Module Validation Program (CMVP) website at
+https://csrc.nist.gov/projects/cryptographic-module-validation-program.
+This document also describes how to run the module in a secure Approved mode of operation.
+This policy was prepared as part of the Software Level 1 FIPS 140-3 validation of the module.
+The VMware's Linux Kernel Cryptographic Module 5.0.0 is also referred to in this document as
+the “Module.” It also provides instructions to individuals and organizations on how to deploy or
+operate the product in a secure approved mode.
+This document has been written for the following audiences:
+• The FIPS testing laboratory.
+• The Cryptographic Module Validation Program (CMVP).
+• Anyone wishing to deploy this Module in a FIPS compliant manner.
+
+1.2 Security Levels
+The module has been validated at the FIPS 140-3 section levels shown in the table below.
+Section
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+Title
+General
+Cryptographic module specification
+Cryptographic module interfaces
+Roles, services, and authentication
+Software/Firmware security
+Operational environment
+Physical security
+Non-invasive security
+Sensitive security parameter management
+Self-tests
+Life-cycle assurance
+Mitigation of other attacks
+Overall Level
+Table 1: Security Levels
+
+Security Level
+1
+1
+1
+1
+1
+1
+N/A
+N/A
+1
+1
+1
+N/A
+1
+
+Page 5 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+2 Cryptographic Module Specification
+2.1 Description
+Purpose and Use:
+The VMware’s Linux Kernel Cryptographic Module is a software cryptographic module with a
+multiple-chip standalone embodiment. The overall security level of the module is 1.
+As a software module, the module must rely on the physical characteristics of the host system.
+The physical perimeter of the cryptographic module is defined by the hard enclosure around the
+host system on which it runs. The module supports the physical interfaces of the Dell
+PowerEdge R650 Server. These interfaces include the integrated circuits of the system board,
+processor, RAM, hard disk, device case, power supply, and fans. See Figure 1 below for a
+hardware block diagram of the Dell PowerEdge R650 Server.
+Module Type: Software
+Module Embodiment: MultiChipStand
+Module Characteristics:
+Cryptographic Boundary:
+As a software module, the module must rely on the physical characteristics of the host system.
+The physical perimeter of the cryptographic module is defined by the hard enclosure around the
+host system on which it runs. The module supports the physical interfaces of the Dell
+PowerEdge R650 Server. These interfaces include the integrated circuits of the system board,
+processor, RAM, hard disk, device case, power supply, and fans. See Figure 1 below for a
+hardware block diagram of the Dell PowerEdge R650 Server.
+
+Page 6 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Figure 1: Block Diagram
+
+2.2 Tested and Vendor Affirmed Module Version and Identification
+Tested Module Identification – Hardware:
+N/A for this module.
+Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets):
+Package or File Name
+fips_canister.o
+
+Software/ Firmware
+Version
+5.0.0
+
+Features
+
+Integrity Test
+
+software cryptographic
+HMAC-SHA2-256
+module
+Table 2: Tested Module Identification – Software, Firmware, Hybrid (Executable Code Sets)
+
+Tested Operational Environments - Software, Firmware, Hybrid:
+Page 7 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Operating
+Hardware Platform
+Processors
+PAA/PAI
+System
+Photon OS
+Dell PowerEdge R650 Intel® Xeon® Gold Yes
+4.0
+Server
+6330
+Photon OS
+Dell PowerEdge R650 Intel® Xeon® Gold No
+4.0
+Server
+6330
+Photon OS
+Dell PowerEdge R650 Intel® Xeon® Gold Yes
+5.0
+Server
+6330
+Photon OS
+Dell PowerEdge R650 Intel® Xeon® Gold No
+5.0
+Server
+6330
+Table 3: Tested Operational Environments - Software, Firmware, Hybrid
+
+Hypervisor or
+Host OS
+VMware ESXi
+8.0
+VMware ESXi
+8.0
+VMware ESXi
+8.0
+VMware ESXi
+8.0
+
+Version(s)
+5.0.0
+5.0.0
+5.0.0
+5.0.0
+
+Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid:
+Operating System
+Hardware Platform
+Photon OS 5.0/Photon OS 4.0 on VMware
+Dell PowerEdge R650 with an Intel® Xeon® Gold
+ESXi 8.0/ VMware ESXi 7.0
+6330 with/without PAA
+Photon OS 5.0/ Photon OS 4.0 on VMware
+Dell PowerEdge R740 with an Intel® Xeon® Gold
+ESXi 8.0/ VMware ESXi 7.0
+6230R with/without PAA
+Photon OS 5.0/Photon OS 4.0 on VMware
+Dell PowerEdge R640 with an Intel(R) Xeon(R) Silver
+ESXi 8.0/ VMware ESXi 7.0
+4214 with/without PAA
+Photon OS 5.0/Photon OS 4.0 on VMware
+Dell PowerEdge R630 with an Intel(R) Xeon(R) CPU
+ESXi 8.0/ VMware ESXi 7.0
+E5-2660 v4 with/without PAA
+Photon OS 5.0/Photon OS 4.0 on VMware
+PowerEdge R6625 with an AMD EPYC 9124
+ESXi 8.0/ VMware ESXi 7.0
+with/without PAA
+Photon OS 5.0/Photon OS 4.0 on VMware
+ProLiant DL385 Gen10 Plus v2 with an AMD EPYC
+ESXi 8.0/ VMware ESXi 7.0
+7343 16-Core Processor with/without PAA
+Cloud computing environment executing
+General-purpose computing platform with/without PAA
+VMware ESXi or other hypervisors
+Table 4: Vendor-Affirmed Operational Environments - Software, Firmware, Hybrid
+
+CMVP makes no statement as to the correct operation of the module or the security strengths of
+the generated keys when so ported if the specific operational environment is not listed on the
+validation certificate.
+
+2.3 Excluded Components
+There are no excluded components.
+
+2.4 Modes of Operation
+Modes List and Description:
+Mode Name
+Approved
+NonApproved
+
+Description
+Approved Mode of
+Operation
+Non-Approved Mode of
+Operation
+
+Type
+Approved
+
+Status Indicator
+API return value
+
+NonApproved
+
+Non-Approved service log message and
+API return value
+
+Page 8 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Table 5: Modes List and Description
+
+The module supports an FIPS 140-3 Approved mode and non-Approved mode of operation.
+The module will be in Approved mode when all pre-operational self-tests have completed
+successfully, and only Approved services are invoked, and the success API return indicator is
+provided.
+The module implements non-Approved Algorithms Not Allowed in the Approved Mode of
+Operation. When a non-Approved security function is invoked, the module will no longer be in
+the Approved mode of operation. A status indicator in the form of an API return code and log
+entry indicating the service name and “non-approved” will be provided when the module enters
+and exits the non-Approved mode of operation.
+
+2.5 Algorithms
+Approved Algorithms:
+Algorithm
+AES-CBC
+
+CAVP
+Cert
+A4971
+
+AES-CBC-CS3
+
+A4971
+
+AES-CCM
+AES-CFB128
+
+A4971
+A4971
+
+AES-CMAC
+
+A4971
+
+AES-CTR
+
+A4971
+
+AES-ECB
+
+A4971
+
+AES-GCM
+
+A4971
+
+AES-XTS Testing
+Revision 2.0
+Counter DRBG
+
+A4971
+
+ECDSA KeyGen
+(FIPS186-4)
+ECDSA KeyVer
+(FIPS186-4)
+ECDSA SigVer
+(FIPS186-4)
+
+A4971
+
+A4971
+
+A4971
+A4971
+
+Properties
+
+Reference
+
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - decrypt, encrypt
+Key Length - 128, 192, 256
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Generation, Verification
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+IV Generation - External
+IV Generation Mode - 8.2.2
+Key Length - 128, 192, 256
+Direction - Decrypt, Encrypt
+Key Length - 128, 256
+Prediction Resistance - No, Yes
+Mode - AES-128, AES-192, AES-256
+Derivation Function Enabled - Yes
+Curve - P-256, P-384
+Secret Generation Mode - Extra Bits
+Curve - P-256, P-384
+
+SP 800-38A
+
+Curve - P-256, P-384
+Hash Algorithm - SHA-1, SHA2-224, SHA2256, SHA2-384, SHA2-512
+
+FIPS 186-4
+
+SP 800-38A
+SP 800-38C
+SP 800-38A
+SP 800-38B
+SP 800-38A
+SP 800-38A
+SP 800-38D
+
+SP 800-38E
+SP 800-90A
+Rev. 1
+FIPS 186-4
+FIPS 186-4
+
+Page 9 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm
+Hash DRBG
+
+CAVP
+Cert
+A4971
+
+HMAC DRBG
+
+A4971
+
+HMAC-SHA-1
+
+A4971
+
+HMAC-SHA2-224
+
+A4971
+
+HMAC-SHA2-256
+
+A4971
+
+HMAC-SHA2-384
+
+A4971
+
+HMAC-SHA2-512
+
+A4971
+
+HMAC-SHA3-224
+
+A4971
+
+HMAC-SHA3-256
+
+A4971
+
+HMAC-SHA3-384
+
+A4971
+
+HMAC-SHA3-512
+
+A4971
+
+KAS-ECC-SSC
+Sp800-56Ar3
+
+A4971
+
+RSA SigGen
+(FIPS186-4)
+RSA SigVer
+(FIPS186-4)
+SHA-1
+
+A4971
+
+SHA2-224
+
+A4971
+
+SHA2-256
+
+A4971
+
+SHA2-384
+
+A4971
+
+SHA2-512
+
+A4971
+
+SHA3-224
+
+A4971
+
+SHA3-256
+
+A4971
+
+SHA3-384
+
+A4971
+
+SHA3-512
+
+A4971
+
+A4971
+A4971
+
+Properties
+
+Reference
+
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+Prediction Resistance - No, Yes
+Mode - SHA-1, SHA2-256, SHA2-512
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Key Length - Key Length: 128-2048 Increment
+8
+Domain Parameter Generation Methods - P256, P-384
+Scheme ephemeralUnified KAS Role - initiator, responder
+Signature Type - PKCS 1.5
+Modulo - 2048, 3072, 4096
+Signature Type - PKCS 1.5
+Modulo - 2048, 3072, 4096
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+Message Length - Message Length: 0-65536
+Increment 8
+
+SP 800-90A
+Rev. 1
+SP 800-90A
+Rev. 1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+FIPS 198-1
+SP 800-56A
+Rev. 3
+
+FIPS 186-4
+FIPS 186-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 180-4
+FIPS 202
+FIPS 202
+FIPS 202
+FIPS 202
+
+Page 10 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm
+AES-GCM
+
+CAVP
+Cert
+A4972
+
+Table 6: Approved Algorithms
+
+Properties
+
+Reference
+
+Direction - Decrypt, Encrypt
+IV Generation - External, Internal
+IV Generation Mode - 8.2.1, 8.2.2
+Key Length - 128, 192, 256
+
+SP 800-38D
+
+The module implements the approved algorithms listed in the table above.
+Vendor-Affirmed Algorithms:
+N/A for this module.
+The module does not implement any vendor-affirmed algorithms.
+Non-Approved, Allowed Algorithms:
+N/A for this module.
+The module does not implement any non-Approved Algorithms Allowed in the Approved Mode
+of Operation.
+Non-Approved, Allowed Algorithms with No Security Claimed:
+N/A for this module.
+The module does not implement any Non-Approved Allowed in the Approved Mode of Operation
+with No Security Claimed.
+Non-Approved, Not Allowed Algorithms:
+Name
+AES CBC-MAC (SP 800-38C)
+GHASH (SP 800-38D)
+AES GCM
+RSA PKCS1v1.5
+AES using modes using RFC 3686 (CTR)
+AES using modes using RFC 4543 (GCM) and
+RFC 4309 (CCM)
+Table 7: Non-Approved, Not Allowed Algorithms
+
+Use and Function
+CBC-MAC as an authentication mode outside of
+the CCM context.
+GHASH as a keyed hash function outside of GCM
+context
+Encryption (External IV)
+Key Transport
+Encryption and Decryption
+Authenticated Encryption and Decryption
+
+The module does implement the non-approved algorithms listed in the table above.
+
+2.6 Security Function Implementations
+Page 11 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+Symmetric
+Ciphers
+
+Type
+BC-Auth
+BC-UnAuth
+
+Description
+Symmetric
+Encrypt/Decrypt
+
+Properties
+Strength:>= 128
+bits
+
+Random Number
+Generation
+
+DRBG
+
+Strength:>= 128
+bits
+
+Digital Signature
+
+DigSig-SigGen
+DigSig-SigVer
+
+Deterministic
+Random Number
+Generation
+Generate or verify
+data integrity
+
+Message
+Authentication
+
+BC-Auth
+MAC
+
+Generate or verify
+data integrity
+
+Strength:=>112
+
+Key Agreement
+
+KAS-SSC
+
+Strength:=> 112
+bits
+
+Asymmetric Key
+Generation
+
+AsymKeyPairKeyGen
+
+Strength:>= 112
+bits
+
+ECDSA KeyGen
+(FIPS186-4)
+
+Message Digest
+
+SHA
+
+Perform key
+agreement
+primitives on
+behalf of the
+calling process
+(does not
+establish keys into
+the module)
+Generate an
+asymmetric
+keypair
+Hashing
+
+Algorithms
+AES-CBC
+AES-CBC-CS3
+AES-CCM
+AES-CFB128
+AES-CTR
+AES-ECB
+AES-GCM
+AES-XTS Testing
+Revision 2.0
+AES-GCM
+Counter DRBG
+Hash DRBG
+HMAC DRBG
+ECDSA SigVer
+(FIPS186-4)
+RSA SigVer
+(FIPS186-4)
+RSA SigGen
+(FIPS186-4)
+AES-CMAC
+HMAC-SHA-1
+HMAC-SHA2-224
+HMAC-SHA2-256
+HMAC-SHA2-384
+HMAC-SHA2-512
+HMAC-SHA3-224
+HMAC-SHA3-256
+HMAC-SHA3-384
+HMAC-SHA3-512
+KAS-ECC-SSC
+Sp800-56Ar3
+
+Strength: >= 112
+bits
+
+Asymmetric Key
+Verification
+
+AsymKeyPairKeyVer
+
+Verify an
+asymmetric
+keypair
+
+Strength:>= 112
+bits
+
+SHA-1
+SHA2-224
+SHA2-256
+SHA2-384
+SHA2-512
+SHA3-224
+SHA3-256
+SHA3-384
+SHA3-512
+ECDSA KeyVer
+(FIPS186-4)
+
+Strength:=> 112
+bits
+
+Page 12 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Table 8: Security Function Implementations
+
+The module implements the security functions listed in the table above.
+
+2.7 Algorithm Specific Information
+IG Compliance:
+•
+•
+•
+
+•
+
+•
+
+•
+
+Per IG C.C, all FIPS 202 functions are CAVP tested in all operating environments - see
+cert. #A4971.
+Per IG C.F, for RSA Signature and key generation, all 2048, 3072, and 4096 modulus
+sizes are CAVP tested in all operating environments - see cert. #A4971.
+Per IG C.H, GCM IVs Construct the IV in compliance with the provisions of a peer-topeer industry standard protocol whose mechanism for generating the IVs for AES-GCM
+has been reviewed and deemed acceptable. GCM IV internally generated used by the
+IPsec-v3 protocol, as described in RFC 4106 following scenario 1 b. The AES GCM is
+generated internally using SP800-38D section 8.2.1.
+Per IG C.H scenario 1, AES GCM with internal IV generation in Approved mode is in
+compliance with RFC 4106 and shall only be used in conjunction with the IPsec stack of
+the kernel.
+Per IG C.I, AES-XTS keys are generated by the calling application. Additionally, the
+module implements a conditional AES-XTS duplicate key test which checks that Key_1 ≠
+Key_2.
+Per IG D.R, Hash DRBG and HMAC DRBG use hash function SHA2-256 and SHA2-512
+excluding SHA2-224 and SHA2-384.
+
+2.8 RBG and Entropy
+The following entropy sources are available to the module and have been tested to NIST
+SP800-90B. 256 bits of entropy input are provided to the module's DRBG from the CPU Jitter
+entropy source certified by ESV #E115.
+The VMware CPU Jitter implementation generates an output that is considered to have full
+entropy. A request for 256 bits of entropy results in 256 bits of entropy per output sample, or full
+entropy.
+Cert
+Vendor Name
+Number
+E115
+Broadcom Inc.
+Table 9: Entropy Certificates
+
+Page 13 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+
+Type
+
+Operational Environment
+
+Sample
+Size
+
+VMware’s Linux
+Kernel CPU
+Time Jitter RNG
+Entropy Source
+
+NonPhysical
+
+Photon OS 4.0 on VMware ESXi
+8.0 with Intel® Xeon® Gold 6330
+without PAA; Photon OS 5.0 on
+VMware ESXi 8.0 with Intel®
+Xeon® Gold 6330 without PAA
+
+64 bits
+
+Table 10: Entropy Sources
+
+Entropy
+per
+Sample
+0.333
+
+Conditioning
+Component
+A4658
+
+2.9 Key Generation
+The module implements asymmetric key generation using ECDSA as per FIPS 186-4.
+
+2.10 Key Establishment
+The module does perform key agreement primitives on behalf of the calling process but does
+not establish keys into the module.
+
+2.11 Industry Protocols
+The module does not implement any industry protocols.
+
+3 Cryptographic Module Interfaces
+3.1 Ports and Interfaces
+Physical Port
+Physical data input
+port(s) of the host
+platform
+Physical data
+output port(s) of
+the host platform
+
+Logical
+Interface(s)
+Data Input
+
+Data Output
+
+Physical control
+Control
+input port(s) of the
+Input
+host platform
+Physical status
+Status
+output port(s) of
+Output
+the host platform
+Table 11: Ports and Interfaces
+
+Data That Passes
+Data to be encrypted, decrypted, signed, verified, or hashed. Keys
+to be used in cryptographic services. Random seed material for
+the module’s DRBG. Keying material to be used as input to key
+establishment services
+Data that has been encrypted, decrypted, or verified. Digital
+signatures, Hashes, Random values generated by the module’s
+DRBG. Keys established using module’s key establishment
+methods
+API commands invoking cryptographic services. Modes, key
+sizes, etc. used with cryptographic services
+Status Output API call return values
+
+Page 14 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+The table above lists the module's physical ports and logical interfaces.
+
+4 Roles, Services, and Authentication
+4.1 Authentication Methods
+N/A for this module.
+The module does not support an authentication mechanism.
+
+4.2 Roles
+Name
+Crypto Officer
+User
+Table 12: Roles
+
+Type
+Role
+Role
+
+Operator Type
+Crypto Officer
+User
+
+Authentication Methods
+None
+None
+
+There are two roles in the module that operators may assume: a Cryptographic Officer (CO) role
+and a User role. Roles are assumed implicitly through the execution of either a CO or User
+service. The module does not support an authentication mechanism. Each role and their
+corresponding services are detailed in the sections below.
+The CO and User roles share many services, including encryption, decryption, and random
+number generation services. The CO performs installation and initialization, show status, selftests on demand, and key zeroization services. Table 7 below describes the Approved CO and
+User roles.
+
+4.3 Approved Services
+Name
+
+Description
+
+Installation
+and
+initialization
+
+Installation
+and
+initialization
+of the
+module
+Return
+module
+status
+Perform preoperational
+self-tests by
+rebooting the
+OS
+Return
+module
+
+Show Status
+On demand
+self-test
+
+Show
+version
+
+Indicato
+r
+Status
+output
+
+Inputs
+
+Outputs
+
+SSP Access
+
+Status
+
+Security
+Functions
+None
+
+N/A
+
+Status
+output
+
+Command
+input
+
+Status
+
+None
+
+Crypto
+Officer
+
+Status
+output
+
+N/A
+
+Status
+
+None
+
+Crypto
+Officer
+
+Status
+output,
+
+Command
+input
+
+Status
+output,
+
+None
+
+Crypto
+Officer
+
+Crypto
+Officer
+
+Page 15 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+
+Description
+
+Key
+Zeroization
+
+versioning
+information
+Zeroize and
+de-allocate
+memory
+containing
+sensitive
+data
+
+Indicato
+r
+Module
+version
+N/A
+
+Inputs
+
+Outputs
+
+N/A
+
+Module
+version
+Status
+
+Security
+Functions
+
+SSP Access
+
+None
+
+Crypto
+Officer
+- AES Key: Z
+- Entropy: Z
+- RSA Public
+Key: Z
+- RSA Private
+Key: Z
+- ECDSA
+Public Key: Z
+- ECDSA
+Private Key:
+Z
+- HMAC Key:
+Z
+Hash_DRBG
+V value: Z
+Hash_DRBG
+C value: Z
+HMAC_DRB
+G V value: Z
+HMAC_DRB
+G Key value:
+Z
+CTR_DRBG
+V value: Z
+CTR_DRBG
+Key value: Z
+User
+- AES Key:
+W,E
+- AES XTS
+key: W,E
+User
+- AES Key:
+W,E
+- AES XTS
+key: W,E
+User
+- GCM Key:
+W,E
+- GCM IV:
+W,E
+
+Symmetric
+Encryption
+
+Encrypt
+plaintext
+data
+
+API
+return
+value
+
+API
+Parameters
+, plaintext
+data
+
+Status,
+ciphertext
+data
+
+Symmetric
+Ciphers
+
+Symmetric
+Decryption
+
+Decrypt
+ciphertext
+data
+
+API
+return
+value
+
+API
+Parameters
+, ciphertext
+data
+
+Status,
+plaintext data
+
+Symmetric
+Ciphers
+
+Authenticate
+d Symmetric
+Encryption
+
+Encrypt
+plaintext
+using AES
+GCM key
+
+API
+return
+value
+
+API
+Parameters
+, plaintext
+data
+
+Status,
+ciphertext
+data
+
+Symmetric
+Ciphers
+
+Page 16 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+
+Description
+
+Authenticate
+d Symmetric
+Decryption
+
+with IV or
+CCM
+Decrypt
+ciphertext
+using AES
+GCM key
+with IV or
+CCM
+
+Indicato
+r
+
+Inputs
+
+Outputs
+
+Security
+Functions
+
+API
+return
+value
+
+API
+Parameters
+, ciphertext
+data
+
+Status,
+plaintext data
+
+Symmetric
+Ciphers
+
+Generate
+random
+number
+
+Return
+random bits
+to the calling
+application
+
+API
+return
+value
+
+API
+Parameters
+
+Status,
+random
+number
+
+Random
+Number
+Generation
+
+Generate
+Symmetric
+Digest
+
+Generate
+Symmetric
+Digest
+
+API
+return
+value
+
+API
+Parameters
+
+Status,
+Symmetric
+Digest
+
+Verify
+Symmetric
+Digest
+
+Verify
+Symmetric
+Digest
+
+API
+return
+value
+
+API
+Parameters
+
+Status
+
+Perform
+Keyed Hash
+Operations
+
+Compute a
+message
+authenticatio
+n code
+
+API
+return
+value
+
+API
+Parameters
+
+Status,
+Message
+Authenticatio
+n Code
+
+Symmetric
+Ciphers
+Message
+Authenticatio
+n
+Symmetric
+Ciphers
+Message
+Authenticatio
+n
+Message
+Authenticatio
+n
+
+SSP Access
+- AES CCM
+Key: W,E
+User
+- GCM Key:
+W,E
+- GCM IV:
+W,E
+- AES CCM
+Key: W,E
+User
+- Entropy:
+W,E
+- DRBG
+Random
+Number: W,E
+Hash_DRBG
+V value: G,E
+Hash_DRBG
+C value: G,E
+HMAC_DRB
+G V value:
+G,E
+HMAC_DRB
+G Key value:
+G,E
+CTR_DRBG
+V value: G,E
+CTR_DRBG
+Key value:
+G,E
+User
+- AES CMAC
+Key: W,E
+User
+- AES CMAC
+Key: W,E
+User
+- HMAC Key:
+W,E
+
+Page 17 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+
+Description
+
+Inputs
+
+Outputs
+
+Compute a
+message
+digest
+Generate a
+public/private
+key pair
+
+Indicato
+r
+API
+return
+value
+API
+return
+value
+
+Perform
+hash
+operation
+Generate
+asymmetric
+key pair
+
+API
+Parameters
+
+Status,
+Message
+Digest
+Status
+
+Verify
+ECDSA
+public key
+
+Verify an
+ECDSA
+public key
+
+API
+return
+value
+
+API
+Parameters
+
+Status
+
+Asymmetric
+Key
+Verification
+
+Generate
+Digital
+Signature
+Verify digital
+signature
+
+Generate
+Digital
+Signature
+Verify digital
+signature
+
+API
+return
+value
+API
+return
+value
+
+API
+Parameters
+
+Status
+
+Digital
+Signature
+
+API
+Parameters
+
+Status
+
+Digital
+Signature
+
+Compute
+Shared
+Secret
+
+Compute
+ECDH
+shared
+secret
+
+API
+return
+value
+
+API
+Parameters
+
+Status
+
+Key
+Agreement
+
+API
+Parameters
+
+Security
+Functions
+Message
+Digest
+
+SSP Access
+
+Asymmetric
+Key
+Generation
+
+User
+- ECDSA
+Public Key:
+G,R
+- ECDSA
+Private Key:
+G,R
+User
+- ECDSA
+Public Key:
+W
+User
+- RSA Private
+Key: W,E
+User
+- RSA Public
+Key: W,E
+- ECDSA
+Public Key:
+W,E
+User
+- ECDH
+Private
+Component:
+W,E
+- ECDH
+public
+component:
+W,E
+
+Table 13: Approved Services
+
+User
+
+The table above lists the approved services available to module operators.
+Access rights are indicated using the following notation:
+•
+•
+•
+•
+•
+
+G – Generate: The module generates or derives the SSP.
+R – Read: The SSP is read from the module (e.g., the SSP is output).
+W – Write: The SSP is updated, imported, or written to the module.
+E – Execute: The module uses the SSP in performing a cryptographic operation.
+Z – Zeroize: The module zeroizes the SSP.
+
+4.4 Non-Approved Services
+Name
+Perform authenticated symmetric
+encryption/decryption
+
+Description
+Encryption/decryption
+
+Algorithms
+AES CBC-MAC (SP 800-38C)
+
+Page 18 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Role
+User
+
+Name
+Perform keyed hash function
+Perform authenticated symmetric
+encryption
+RSA Key Transport
+Perform symmetric
+encryption/decryption
+Perform authenticated symmetric
+encryption/decryption
+
+Description
+Hashing
+Encryption with External
+IV
+Key padding / Key
+transport
+Encryption/decryption
+Authenticated
+encryption/decryption
+
+Table 14: Non-Approved Services
+
+Algorithms
+GHASH (SP 800-38D)
+AES GCM
+
+Role
+User
+User
+
+RSA PKCS1v1.5
+
+User
+
+AES using modes using RFC
+3686 (CTR)
+AES using modes using RFC
+4543 (GCM) and RFC 4309
+(CCM)
+
+User
+User
+
+The module implements the non-approved services listed in the table above.
+
+4.5 External Software/Firmware Loaded
+The module does not implement external software loading.
+
+5 Software/Firmware Security
+5.1 Integrity Techniques
+The integrity of the module’s cryptographic boundary is verified by a hash generated by HMACSHA2-256 digest. The software integrity test is performed by VMware’s Linux Kernel
+Cryptographic Module. The module automatically invokes separate KATs for the HMAC and
+SHA2-256 algorithms then the module will invoke the HMAC-SHA2-256 integrity test preoperationally during the boot sequence.
+
+5.2 Initiate on Demand
+An operator can initiate the integrity test on-demand by rebooting the OS. If an integrity test
+fails, the module will enter the critical error state.
+
+6 Operational Environment
+6.1 Operational Environment Type and Requirements
+Type of Operational Environment: Modifiable
+How Requirements are Satisfied:
+The VMware’s Linux Kernel Cryptographic Module 5.0.0 comprises a software cryptographic
+library that executes in a modifiable operational environment. The cryptographic module has
+control over its own SSPs. The process and memory management functionality of the host
+Page 19 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+device’s OS prevents unauthorized access to plaintext, private and secret keys, intermediate
+key generation values and other SSPs by external processes during module execution.
+The module only allows access to SSPs through its well-defined API. The operational
+environments provide the capability to separate individual application processes from each
+other by preventing uncontrolled access to CSPs and uncontrolled modifications of SSPs
+regardless of whether this data is in the process memory or stored on persistent storage within
+the operational environment. Processes that are spawned by the module are owned by the
+module and are not owned by external processes/operators.
+
+7 Physical Security
+The cryptographic module is a software module and does not include physical security
+mechanisms. Therefore, per ISO/IEC 19790:2021 section 7.7.1, requirements for physical
+security are not applicable.
+
+8 Non-Invasive Security
+This section is not applicable. There are currently no approved non-invasive mitigation metrics
+defined at the time of writing. (Ref: ISO/IEC 19790:2012 Annex F).
+
+9 Sensitive Security Parameters Management
+9.1 Storage Areas
+Storage Description
+Area
+Name
+RAM
+Memory
+Table 15: Storage Areas
+
+Persistence
+Type
+Dynamic
+
+All SSPs are only stored in memory.
+
+9.2 SSP Input-Output Methods
+Name
+
+From
+
+To
+
+External to RAM External RAM
+RAM to External RAM
+External
+Table 16: SSP Input-Output Methods
+
+Format
+Type
+Plaintext
+Plaintext
+
+Distribution
+Type
+Automated
+Automated
+
+Entry
+Type
+Electronic
+Electronic
+
+SFI or
+Algorithm
+
+All SSPs are passed to the module via a well-defined API.
+
+9.3 SSP Zeroization Methods
+Page 20 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Zeroization Description
+Method
+Reboot OS Reboot Operating System
+Table 17: SSP Zeroization Methods
+
+Rationale
+Memory is zeroized upon reboot
+
+Operator
+Initiation
+Operator Initiated
+
+There is no mechanism within the module boundary for the persistent storage of keys and
+CSPs. Maintenance, including protection and zeroization, of any keys and CSPs that exist
+outside the module’s boundary are the responsibility of the end-user. For the zeroization of keys
+in volatile memory, module operators can reboot the OS.
+
+9.4 SSPs
+Name
+
+Descriptio
+n
+AES Key
+
+AES Key
+
+Entropy
+
+Hash_DRBG
+V value
+
+Externally
+generated
+entropy
+used to
+seed the
+DRBG
+Internal
+state for
+DRBG
+
+Size Strength
+128, 192,
+256-bit key 128 to 256
+bits
+256 bits - 256
+bits
+
+Type Category
+Symmetric
+Key - CSP
+
+440 bits - 256
+bits
+
+DRBG
+Internal
+State CSP
+DRBG
+Internal
+State CSP
+DRBG
+Internal
+State CSP
+DRBG
+Internal
+State CSP
+DRBG
+Internal
+State CSP
+DRBG
+Internal
+State CSP
+RSA
+Keypair PSP
+
+Hash_DRBG
+C value
+
+Internal
+state for
+DRBG
+
+440 bits - 256
+bits
+
+HMAC_DRB
+G V value
+
+Internal
+state for
+DRBG
+
+256 bits - 256
+bits
+
+HMAC_DRB
+G Key value
+
+Internal
+state for
+DRBG
+
+256 bits - 256
+bits
+
+CTR_DRBG
+V value
+
+Internal
+state for
+DRBG
+
+128 bits - 128
+bits
+
+CTR_DRBG
+Key value
+
+Internal
+state for
+DRBG
+
+128, 192, 256
+bits - 128 to
+256 bits
+
+RSA Public
+Key
+
+Key used
+for RSA
+
+≥ 2048 bits 112 to 150
+bits
+
+Generated
+By
+
+Entropy CSP
+
+Establishe
+d By
+
+Used By
+Symmetric
+Ciphers
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Random
+Number
+Generation
+
+Asymmetri
+c Key
+Generation
+
+Digital
+Signature
+
+Page 21 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+
+RSA Private
+Key
+ECDSA
+Public Key
+ECDSA
+Private Key
+HMAC Key
+AES CCM
+Key
+
+Descriptio
+n
+Signature
+Verification
+Key used
+for RSA
+Signature
+Generation
+Key used
+for ECDSA
+Signature
+Verification
+Key used
+for ECDSA
+Signature
+Generation
+Key used
+for HMAC
+Operations
+CCM Key
+
+GCM Key
+
+GCM Key
+
+GCM IV
+
+GCM IV
+
+AES XTS key
+
+AES XTS
+Key
+
+AES CMAC
+Key
+
+AES CMAC
+Key
+
+DRBG
+Random
+Number
+
+DRBG
+Random
+Number
+
+Size Strength
+
+Type Category
+
+Generated
+By
+
+≥ 2048 bits 112 to 150
+bits
+
+RSA
+Keypair CSP
+
+Asymmetri
+c Key
+Generation
+
+Digital
+Signature
+
+P-256, P-384
+- 128 or 256
+bits
+
+ECDSA
+Keypair PSP
+
+Asymmetri
+c Key
+Generation
+
+Digital
+Signature
+
+P-256, P-384
+- 128 or 256
+bits
+
+ECDSA
+Keypair CSP
+
+Asymmetri
+c Key
+Generation
+
+Digital
+Signature
+
+≥ 112 bits - ≥
+112 bits
+
+HMAC Key
+- CSP
+
+128, 192, 256
+bits - 128 to
+256 bits
+128, 192, 256
+bits - 128 to
+256 bits
+96 bits - 96
+bits
+128, 256-bit
+key - 128 or
+256 bits
+128, 192, 256
+bits - 128 to
+256 bits
+CTR_DRBG:
+AES-128,
+AES-192,
+AES-256 with
+DF, with,
+without PR /
+Hash_DRBG:
+SHA-1,
+SHA2-256,
+SHA2-512
+with/without
+PR /
+HMAC_DRBG
+: SHA-1,
+SHA2256,SHA2512
+with/without
+PR -
+
+CCM Key CSP
+
+Message
+Authenticatio
+n
+Symmetric
+Ciphers
+
+GCM Key CSP
+
+Symmetric
+Ciphers
+
+GCM IV CSP
+AES XTS
+Key - CSP
+
+Symmetric
+Ciphers
+Symmetric
+Ciphers
+
+AES
+CMAC Key
+- CSP
+DRBG
+Random
+Number CSP
+
+Symmetric
+Ciphers
+Random
+Number
+Generation
+
+Establishe
+d By
+
+Used By
+
+Symmetric
+Ciphers
+Message
+Authenticatio
+n
+Asymmetric
+Key
+Generation
+
+Page 22 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Name
+ECDH
+Private
+Component
+ECDH public
+component
+
+Descriptio
+n
+ECDH
+Private
+Component
+
+Size Strength
+P-256, P-384
+- 128 or 256
+bits
+
+ECDH
+public
+component
+
+P-256, P-384
+- 128 or 256
+bits
+
+Table 18: SSP Table 1
+
+Type Category
+ECDH
+Private
+Componen
+t - CSP
+ECDH
+public
+component
+- PSP
+
+Name
+
+Input - Output
+
+Storage
+
+AES Key
+
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+
+Entropy
+Hash_DRBG V value
+Hash_DRBG C value
+HMAC_DRBG V value
+HMAC_DRBG Key value
+CTR_DRBG V value
+CTR_DRBG Key value
+RSA Public Key
+RSA Private Key
+ECDSA Public Key
+ECDSA Private Key
+HMAC Key
+AES CCM Key
+GCM Key
+GCM IV
+AES XTS key
+AES CMAC Key
+
+Generated
+By
+Key
+Agreement
+
+Establishe
+d By
+
+Key
+Agreement
+
+Used By
+Key
+Agreement
+Key
+Agreement
+
+Zeroization
+
+RAM:Plaintext
+
+Storage
+Duration
+Until Reboot
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+Reboot OS
+
+Page 23 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Related
+SSPs
+
+Name
+
+Input - Output
+
+Storage
+
+DRBG Random Number
+
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+External to RAM
+RAM to External
+
+ECDH Private Component
+ECDH public component
+Table 19: SSP Table 2
+
+Zeroization
+
+RAM:Plaintext
+
+Storage
+Duration
+Until Reboot
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+RAM:Plaintext
+
+Until Reboot
+
+Reboot OS
+
+Reboot OS
+
+Related
+SSPs
+
+The module manages the SSPs, and keys listed in the table above.
+
+10 Self-Tests
+The Module performs both pre-operational and conditional self-tests. Once invoked, the Module
+will not perform functions or services until the self-test(s) has been completed. The following
+sections list the self-tests performed by the Module, their expected error status, and any error
+resolutions.
+
+10.1 Pre-Operational Self-Tests
+Algorithm or Test
+
+Test
+Properties
+HMAC-SHA2-256
+HMAC-SHA2(A4971)
+256
+Table 20: Pre-Operational Self-Tests
+
+Test Method
+
+Test Type
+
+Indicator
+
+Software Integrity
+Test
+
+SW/FW
+Integrity
+
+Status
+Output
+
+Details
+
+If any of the pre-operational self-tests fail, the module enters the critical error state, and an error
+message is logged. In this state, cryptographic operations are halted, and the module inhibits all
+data output from the module as the API interface is disabled. In order to attempt to exit the error
+state, the module must be restarted by rebooting the OS. If the error persists, the module must
+be reinitialized.
+Pre-operational self-tests are automatically performed by the module at module initialization or
+when the module powers on. The list of pre-operational self-tests that follows may also be run
+on-demand when the CO reboots the Operating System. The Module performs the required
+HMAC and SHS Cryptographic Algorithm Self-Tests (CASTs) that are required for the
+subsequent software integrity tests. During the execution of self-tests, cryptographic functions
+and data output from the module are inhibited. The VMware’s Linux Kernel Cryptographic
+Module performs a software integrity check (HMAC with SHA2-256 Integrity Test) preoperationally.
+
+10.2 Conditional Self-Tests
+
+Page 24 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm
+or Test
+AES-CBC
+(A4971)
+AES-CBCCS3
+(A4971)
+AES-CCM
+(A4971)
+AESCFB128
+(A4971)
+AES-CTR
+(A4971)
+AES-ECB
+(A4971)
+AES-GCM
+(A4972)
+AES-GCM
+(A4971)
+AES-CMAC
+(A4971)
+AES-XTS
+Testing
+Revision 2.0
+(A4971)
+AES-CMAC
+(A4971)
+Counter
+DRBG
+(A4971)
+ECDSA
+KeyGen
+(FIPS186-4)
+(A4971)
+ECDSA
+SigVer
+(FIPS186-4)
+(A4971)
+Hash DRBG
+(A4971)
+
+Test Properties
+
+Test
+Method
+KAT
+
+Test
+Type
+CAST
+
+Indicator
+
+Details
+
+Conditions
+
+Status
+Output
+Status
+Output
+
+Encrypt/Decrypt
+
+Module
+Initialization
+Module
+Initialization
+
+KAT
+
+CAST
+
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+
+KAT
+
+CAST
+
+Status
+Output
+Status
+Output
+
+Encrypt/Decrypt
+
+KAT
+
+CAST
+
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+128, 256-bit keys
+
+KAT
+
+CAST
+
+Status
+Output
+Status
+Output
+Status
+Output
+Status
+Output
+Status
+Output
+Status
+Output
+
+Encrypt/Decrypt
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+128, 192, 256-bit
+keys
+AES-128, AES256, AES-192
+
+KAT
+
+CAST
+
+Status
+Output
+Status
+Output
+Status
+Output
+
+Message
+Authentication
+instantiate,
+generate, and
+reseed
+Key Generation /
+Key Verification
+
+Module
+Initialization
+On instantiate,
+generate, and
+reseed
+After key pair
+generation
+
+KAT
+
+CAST
+
+P-256, P-384
+
+PCT
+
+PCT
+
+P-256, P-384
+
+KAT
+
+CAST
+
+Status
+Output
+
+Signature
+Verification
+
+After
+Signature
+Verification
+
+SHA-1, SHA2-256,
+SHA2-512
+
+KAT
+
+CAST
+
+Status
+Output
+
+SHA-1, SHA2-256,
+SHA2-512
+
+KAT
+
+CAST
+
+Status
+Output
+
+SHA-1, SHA2-224,
+SHA2-256, SHA2384, SHA2-512
+SHA3-224, SHA3256, SHA3-384,
+SHA3-512
+
+KAT
+
+CAST
+
+Status
+Output
+
+instantiate,
+generate, and
+reseed
+instantiate,
+generate, and
+reseed
+Message
+Authentication
+
+On instantiate,
+generate, and
+reseed
+On instantiate,
+generate, and
+reseed
+Module
+Initialization
+
+HMAC
+DRBG
+(A4971)
+HMAC
+
+128, 192, 256-bit
+keys
+128, 192, 256-bit
+keys
+
+Encrypt/Decrypt
+
+Encrypt/Decrypt
+
+Encrypt/Decrypt
+Encrypt/Decrypt
+Encrypt/Decrypt
+Encrypt/Decrypt
+Encrypt/Decrypt
+
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+Module
+Initialization
+
+Page 25 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm
+or Test
+KAS-ECCSSC
+Sp80056Ar3
+(A4971)
+KAS-ECCSSC
+Sp80056Ar3
+(A4971)
+RSA
+SigGen
+(FIPS186-4)
+(A4971)
+
+Test Properties
+
+Test
+Type
+CAST
+
+Indicator
+
+Details
+
+Conditions
+
+P-256, P-384
+
+Test
+Method
+KAT
+
+Status
+Output
+
+Shared Secret
+Computation
+
+Module
+Initialization
+
+P-256, P-384
+
+PCT
+
+PCT
+
+Status
+Output
+
+Shared Secret
+Computation
+
+After Key pair
+generation
+
+KAT
+
+CAST
+
+Status
+Output
+
+Signature
+Generation
+
+Module
+Initialization
+
+KAT
+
+CAST
+
+Status
+Output
+
+Signature
+Verification
+
+Module
+Initialization
+
+KAT
+
+CAST
+
+Status
+Output
+
+Message Digest
+
+Module
+Initialization
+
+DRBG
+health
+tests
+
+CAST
+
+Status
+Output
+
+Message Digest
+
+Continuously
+while the
+Module is
+loaded
+
+PKCS1v1.5 Mod
+(2048, 3072, 4096)
+Hash (SHA2-224,
+SHA2-256, SHA2384, SHA2-512)
+RSA SigVer PKCS1v1.5 Mod
+(FIPS186-4) (2048, 3072, 4096)
+(A4971)
+Hash (SHA1,
+SHA2-224, SHA2256, SHA2-384,
+SHA2-512)
+SHS
+SHA-1, SHA2-224,
+SHA2-256, SHA2384, SHA2-512
+SHA3-224, SHA3256, SHA3-384,
+SHA3-512
+SP800Hash_DRBG,
+90Ar1
+HMAC_DRBG and
+Continual
+CTR_DRBG SP
+Health
+800-90Ar1 Health
+Tests
+Tests
+Table 21: Conditional Self-Tests
+
+Conditional self-tests are performed by the Module during operation when specific conditions
+occur.
+The Module performs the conditional self-tests listed in the table above.
+
+10.3 Periodic Self-Test Information
+Algorithm or
+Test Method
+Test Type
+Test
+HMAC-SHA2-256 Software Integrity
+SW/FW Integrity
+(A4971)
+Test
+Table 22: Pre-Operational Periodic Information
+
+Period
+
+Periodic Method
+
+User initiated
+module reboot
+
+On demand selftest service
+
+Page 26 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm or
+Test
+AES-CBC
+(A4971)
+AES-CBC-CS3
+(A4971)
+AES-CCM
+(A4971)
+AES-CFB128
+(A4971)
+AES-CTR (A4971)
+
+Test Method
+
+Test Type
+
+Period
+
+Periodic Method
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+AES-ECB (A4971)
+
+KAT
+
+CAST
+
+AES-GCM
+(A4972)
+AES-GCM
+(A4971)
+AES-CMAC
+(A4971)
+AES-XTS Testing
+Revision 2.0
+(A4971)
+AES-CMAC
+(A4971)
+Counter DRBG
+(A4971)
+ECDSA KeyGen
+(FIPS186-4)
+(A4971)
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+PCT
+
+PCT
+
+User initiated
+module reboot
+User initiated
+module reboot
+After key pair
+generation
+
+ECDSA SigVer
+(FIPS186-4)
+(A4971)
+
+KAT
+
+CAST
+
+After Signature
+Verification
+
+Hash DRBG
+(A4971)
+HMAC DRBG
+(A4971)
+HMAC
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAT
+
+CAST
+
+KAS-ECC-SSC
+Sp800-56Ar3
+(A4971)
+KAS-ECC-SSC
+Sp800-56Ar3
+(A4971)
+
+KAT
+
+CAST
+
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+User initiated
+module reboot
+
+On demand selftest service
+On demand selftest service
+After key pair
+generation / On
+demand self-test
+service
+After Signature
+Verification/ On
+demand self-test
+service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+On demand selftest service
+
+PCT
+
+PCT
+
+After Key pair
+generation
+
+RSA SigGen
+(FIPS186-4)
+(A4971)
+
+KAT
+
+CAST
+
+User initiated
+module reboot
+
+After Key pair
+generation / On
+demand self-test
+service
+On demand selftest service
+
+Page 27 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+Algorithm or
+Test
+RSA SigVer
+(FIPS186-4)
+(A4971)
+SHS
+
+Test Method
+
+Test Type
+
+Period
+
+Periodic Method
+
+KAT
+
+CAST
+
+User initiated
+module reboot
+
+On demand selftest service
+
+KAT
+
+CAST
+
+User initiated
+module reboot
+Continuously
+while the Module
+is loaded
+
+On demand selftest service
+On demand selftest service
+
+SP800-90Ar1
+DRBG health
+CAST
+Continual Health
+tests
+Tests
+Table 23: Conditional Periodic Information
+
+Periodic Self-Tests can be executed by rebooting the OS.
+
+10.4 Error States
+Name
+
+Description
+
+Critical Error The module's error state.
+Table 24: Error States
+
+Conditions
+Any Self-test failure
+
+Recovery
+Method
+Reboot OS
+
+Indicator
+Status Return Code
+
+If any of the power-up self-tests fail, the module enters the critical error state, and an error
+message is logged. In this state, cryptographic operations are halted, and the module inhibits all
+data output from the module as the API interface is disabled. In order to attempt to exit the error
+state, the module must be restarted by rebooting OS. If the error persists, the module must be
+reinitialized.
+
+10.5 Operator Initiation of Self-Tests
+Operator initiated Self-Tests can be executed by rebooting the OS.
+
+11 Life-Cycle Assurance
+11.1 Installation, Initialization, and Startup Procedures
+Prior to the secure installation of Photon OS, the CO shall prepare the virtual environment
+required to securely operate it. This includes installing VMware vSphere Hypervisor (ESXi) 8.0
+(see vSphere Installation and Setup). Both virtual environments require the Dell PowerEdge
+R650 server to run the installation.
+The tar archive containing VMware's Linux Kernel Cryptographic Module prior to build time,
+contains the HMAC-SHA2-256 digest:
+•
+
+ea4629447ae187005ca7a12a75220f283cde801c160aa6bfc74f63e9f9409119
+
+The CO will then install Photon OS as the guest OS in the virtual machine and verify the full
+canister version as “5.0.0.”
+Page 28 of 29
+
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+The cryptographic functionality of VMware’s Linux Kernel Cryptographic Module comes installed
+with Photon OS and cannot be “unloaded”.
+To run Photon OS kernel in an Approved mode, the Crypto Officer shall perform following
+actions using root access on kernel command line interface:
+1. Edit the “/boot/photon.cfg” kernel file and append ‘fips=1’ to the “photon_cmdline” line
+2. Reboot the OS using the “reboot” command.
+3. To check the Approved mode, run “cat /proc/sys/crypto/fips_enabled”, which will show ‘1’
+when Approved mode is enabled or ‘0’ when Approved mode is not enabled.
+4. To verify that the OS is running certified version of VMware’s Linux Kernel Cryptographic
+Module run command “dmesg | grep canister”. It should print following output:
+• FIPS (fips_integrity_init): canister 5.0.0 found (based on 6.1.75-2.ph5-secure)
+• FIPS canister HMAC:
+o
+•
+
+ea4629447ae187005ca7a12a75220f283cde801c160aa6bfc74f63e9f9409119
+
+FIPS canister verification passed!
+
+11.2 Administrator Guidance
+Installation and operation of the VMware’s Linux Kernel Cryptographic Module requires the
+proper installation of Photon OS. There are no additional steps that must be performed to use
+the module correctly.
+There are no known CVEs with this module. The CO should ensure that the operating
+environment is patched and updated in a timely fashion to reduce exposure to security
+vulnerabilities.
+
+11.3 Non-Administrator Guidance
+There is no additional guidance for non-administrators.
+
+12 Mitigation of Other Attacks
+This section is not applicable. The module does not claim to mitigate any attacks beyond the
+FIPS 140-3 Level 1 requirements for this validation.
+
+Page 29 of 29
+© 2024 Broadcom Inc.
+This document may be freely reproduced and distributed whole and intact including this copyright notice.
+
+
