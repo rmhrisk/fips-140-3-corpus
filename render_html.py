@@ -117,13 +117,16 @@ def _bulletize(text: str) -> str:
         html += (f"<ol class='prose' start='{esc(pairs[0][0])}'>"
                  + "".join(f"<li>{esc(it.strip())}</li>" for _, it in pairs) + "</ol>")
         return html
-    # bulleted list (glyphs / "o" sub-bullets / dashes)
+    # bulleted list (glyphs / "o" sub-bullets / dashes) — only a real list, i.e. >=2
+    # items. A single split ("1 AI - Artificial Intelligence") is a glossary line
+    # ("term - definition"), NOT a lead + bullet, so keep it as one prose line.
     segs = [s.strip() for s in _BULLET_RE.split(" " + text)]
     lead, items = segs[0], [s for s in segs[1:] if s]
-    html = f"<p class='prose'>{esc(lead)}</p>" if lead else ""
-    if items:
+    if len(items) >= 2:
+        html = f"<p class='prose'>{esc(lead)}</p>" if lead else ""
         html += "<ul class='prose'>" + "".join(f"<li>{esc(it)}</li>" for it in items) + "</ul>"
-    return html
+        return html
+    return f"<p class='prose'>{esc(text.strip())}</p>"
 
 
 _SECNUM_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)\s+\S")
