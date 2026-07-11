@@ -127,11 +127,27 @@ def _bulletize(text: str) -> str:
 
 
 _SECNUM_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)\s+\S")
+_GAP_RE = re.compile(r" {2,}")   # column-gap runs left by pdftotext in flattened tables
 
 
 def _render_prose(paras: list[str]) -> str:
     out = []
     for p in paras:
+        ps = p.strip()
+        # Drop stray extraction fragments (a lone number or one/two symbols on a line).
+        if len(ps) <= 3 and re.fullmatch(r"[\d\W]{1,3}", ps):
+            continue
+        # A table or TOC that pdfplumber did not capture as structure falls into the
+        # verbatim prose with its COLUMN-GAP spacing (runs of 2+ spaces) intact. Real
+        # narrative prose is single-spaced, so a high density of gaps marks a flattened
+        # table. Present those as a collapsed, monospace "extracted as text" block that
+        # keeps the column alignment, instead of letting them masquerade as prose.
+        _gaps = len(_GAP_RE.findall(p))
+        if _gaps >= 6 and _gaps / max(1, len(p.split())) >= 0.10:
+            out.append("<details class='rawtbl'><summary>Table, extracted as text "
+                       "(did not parse into structured rows)</summary>"
+                       f"<pre class='rawtxt'>{esc(p)}</pre></details>")
+            continue
         m = _SECNUM_RE.match(p)
         # A real section heading is short AND, unlike a flattened security-level table
         # row or an acronym-glossary line, does not end in a level value ("... 1",
@@ -640,6 +656,12 @@ DOCUMENT = """<!DOCTYPE html>
   tbody tr:last-child td {{ border-bottom:none; }}
   .typed td:first-child {{ font-weight:600; color:var(--navy); }}
   .scroll {{ display:block; max-height:400px; overflow:auto; }}
+  .rawtbl {{ margin:.4rem 0 .8rem; }}
+  .rawtbl > summary {{ cursor:pointer; font-size:var(--fs-xs); color:var(--muted); list-style:revert; }}
+  .rawtbl > summary:hover {{ color:var(--navy); }}
+  .rawtbl pre.rawtxt {{ white-space:pre-wrap; word-break:break-word; margin:.35rem 0 0; padding:10px 12px;
+     font:11.5px/1.55 ui-monospace,'SF Mono',Menlo,Consolas,monospace; color:var(--ink);
+     background:var(--pill); border:1px solid var(--line); border-radius:8px; overflow-x:auto; }}
 
   /* key/value card (certificate) */
   table.kv {{ font-size:var(--fs-body); }}
