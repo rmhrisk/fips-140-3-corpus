@@ -130,29 +130,41 @@ _SECNUM_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)\s+\S")
 _GAP_RE = re.compile(r" {2,}")   # column-gap runs left by pdftotext in flattened tables
 
 
+def _raw_table_block(rows: list[str]) -> str:
+    block = "\n".join(r.rstrip() for r in rows)
+    return ("<details class='rawtbl'><summary>Table, extracted as text "
+            "(did not parse into structured rows)</summary>"
+            f"<pre class='rawtxt'>{esc(block)}</pre></details>")
+
+
 def _render_prose(paras: list[str]) -> str:
-    out = []
-    for p in paras:
+    # A table or TOC that pdfplumber did not capture as structure falls into the
+    # verbatim prose keeping its COLUMN-GAP spacing (runs of 2+ spaces); narrative
+    # prose is single-spaced. So a paragraph is "gappy" (a table row) if it has >=2
+    # gap runs. A RUN of consecutive gappy paragraphs — or a single very-gappy one —
+    # is a flattened table: collapse it into a monospace block that keeps the columns,
+    # with the rows on their own lines, instead of letting it masquerade as prose.
+    def gaps(p): return len(_GAP_RE.findall(p))
+    out, i, n = [], 0, len(paras)
+    while i < n:
+        if gaps(paras[i]) >= 2:
+            j = i
+            while j < n and gaps(paras[j]) >= 2:
+                j += 1
+            run = paras[i:j]
+            if len(run) >= 2 or sum(gaps(r) for r in run) >= 6:
+                out.append(_raw_table_block(run))
+                i = j
+                continue
+        p = paras[i]; i += 1
         ps = p.strip()
         # Drop stray extraction fragments (a lone number or one/two symbols on a line).
         if len(ps) <= 3 and re.fullmatch(r"[\d\W]{1,3}", ps):
             continue
-        # A table or TOC that pdfplumber did not capture as structure falls into the
-        # verbatim prose with its COLUMN-GAP spacing (runs of 2+ spaces) intact. Real
-        # narrative prose is single-spaced, so a high density of gaps marks a flattened
-        # table. Present those as a collapsed, monospace "extracted as text" block that
-        # keeps the column alignment, instead of letting them masquerade as prose.
-        _gaps = len(_GAP_RE.findall(p))
-        if _gaps >= 6 and _gaps / max(1, len(p.split())) >= 0.10:
-            out.append("<details class='rawtbl'><summary>Table, extracted as text "
-                       "(did not parse into structured rows)</summary>"
-                       f"<pre class='rawtxt'>{esc(p)}</pre></details>")
-            continue
         m = _SECNUM_RE.match(p)
         # A real section heading is short AND, unlike a flattened security-level table
         # row or an acronym-glossary line, does not end in a level value ("... 1",
-        # "... N/A") and has no spaced dash ("ACRONYM - Definition"). pdftotext
-        # flattens those tables into numbered text that otherwise mimics headings.
+        # "... N/A") and has no spaced dash ("ACRONYM - Definition").
         if (m and len(p) <= 70
                 and not re.search(r"\s(?:n/?a|\d{1,3})$", p, re.I)
                 and not re.search(r"\s[–—-]\s", p)):
