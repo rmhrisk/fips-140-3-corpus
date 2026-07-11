@@ -148,11 +148,17 @@ def _render_prose(paras: list[str]) -> str:
     # is a flattened table: collapse it into a monospace block that keeps the columns,
     # with the rows on their own lines, instead of letting it masquerade as prose.
     def gaps(p): return len(_GAP_RE.findall(p))
+    def gappy(p):
+        # A table ROW is gap-DENSE (gaps relative to length); a long prose paragraph
+        # can carry a stray gap or two (a list marker, an embedded header) at low
+        # density, so length-relative density is what separates rows from prose.
+        g = gaps(p)
+        return g >= 2 and g / max(1, len(p.split())) >= 0.10
     out, i, n = [], 0, len(paras)
     while i < n:
-        if gaps(paras[i]) >= 2:
+        if gappy(paras[i]):
             j = i
-            while j < n and gaps(paras[j]) >= 2:
+            while j < n and gappy(paras[j]):
                 j += 1
             run = paras[i:j]
             if len(run) >= 2 or sum(gaps(r) for r in run) >= 6:
