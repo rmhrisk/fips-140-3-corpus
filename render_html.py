@@ -133,9 +133,13 @@ def _render_prose(paras: list[str]) -> str:
     out = []
     for p in paras:
         m = _SECNUM_RE.match(p)
-        # A real section heading is short. A long paragraph that merely starts with
-        # a section number (a run-on pdftotext blob) is body prose, not a heading.
-        if m and len(p) <= 80:
+        # A real section heading is short AND, unlike a flattened security-level table
+        # row or an acronym-glossary line, does not end in a level value ("... 1",
+        # "... N/A") and has no spaced dash ("ACRONYM - Definition"). pdftotext
+        # flattens those tables into numbered text that otherwise mimics headings.
+        if (m and len(p) <= 70
+                and not re.search(r"\s(?:n/?a|\d{1,3})$", p, re.I)
+                and not re.search(r"\s[–—-]\s", p)):
             depth = min(m.group(1).count(".") + 1, 4)
             out.append(f"<div class='sec sec{depth}'>{esc(p)}</div>")
         else:
