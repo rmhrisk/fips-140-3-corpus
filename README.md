@@ -16,8 +16,9 @@ every output byte-for-byte.
 
 ## At a glance (reference date 2026-07, n = 415 modules, a near-census of certs #4650 to #5159)
 
-Lifecycle / archetype / algorithm figures use all **415** modules; Security-Policy
-structure figures use the **136** with full SP extraction (see *Corpus scope* below).
+Lifecycle / archetype / algorithm figures use all **415** modules, and every
+module renders its Security-Policy tables as tables; the deeper typed-structure
+figures use the **136** with the full typed extraction (see *Corpus scope* below).
 
 - **78%** of modules have never been re-validated since their initial certificate.
 - **60 months** median certificate active window (validation to sunset).
@@ -164,20 +165,25 @@ keyless rate limit. The key only affects live fetches, never the cached results.
 The corpus is a **near-census** of the FIPS 140-3 modules validated in the
 certificate-number window it covers, in two tiers:
 
-- **Full extraction** — records with the complete pdfplumber Security-Policy
-  reconstruction (typed tables, services, ports, SSPs). This is the originally
-  provided snapshot.
-- **Metadata + text** — records fetched from the public CMVP site by
+- **Full typed extraction** — records with the complete pdfplumber Security-Policy
+  reconstruction (typed tables, services, ports, SSPs, and the motif/quality
+  signals that ride on them). This is the originally provided snapshot.
+- **Metadata + text + table grids** — records fetched from the public CMVP site by
   `fetch_cmvp.py`: full certificate metadata (module, vendor, level, type,
   embodiment, validation history, approved algorithms) plus the verbatim
-  Security-Policy text via `pdftotext`, but not the structured table extraction.
+  Security-Policy text via `pdftotext`, **and** raw table grids added by
+  `extract_tables.py` (a `pdfplumber` pass over the SP PDF), so their tables
+  render as tables. They do not carry the typed profiles, so they stay outside the
+  typed-structure metrics.
 
 The analysis is **denominator-honest** about this split. Lifecycle, archetype,
-algorithm and component-drift findings use the whole corpus; the
-Security-Policy-structure findings (TCB surfaces, review-priority, document
-quality) are computed over the full-extraction subset and labelled with that
-count. To broaden further, run `python fetch_cmvp.py --range <lo> <hi>` and
-rebuild — the analysis, joins, and site regenerate from the new records.
+algorithm and component-drift findings use the whole corpus, and every module
+renders its SP tables as tables; the typed-structure findings (TCB surfaces,
+review-priority, document quality) are computed over the full-typed-extraction
+subset and labelled with that count. To broaden further, run
+`python fetch_cmvp.py --range <lo> <hi>` then, in a venv with `pdfplumber`,
+`python extract_tables.py`, and rebuild — the analysis, joins, and site regenerate
+from the new records.
 
 ## Data provenance
 

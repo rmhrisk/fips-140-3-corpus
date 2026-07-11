@@ -64,9 +64,10 @@ def main():
         "<b>CMVP FIPS 140-3 validation certificate</b> and its validation-history events — <b>not</b> an X.509/TLS certificate.</p>"
         f"<p class='fine'><b>Corpus composition.</b> The corpus is a near-census of the {s['n']} FIPS 140-3 modules "
         f"validated in cert window {esc(cov['cert_number_span'])}. Lifecycle, archetype, algorithm and component-drift "
-        f"findings use all {s['n']}. The Security-Policy-structure findings, TCB surfaces (§6), review-priority (§9, §10) "
-        f"and document quality (§11), require the full pdfplumber SP extraction and are computed over the <b>{NF}</b> "
-        f"modules that carry it; the rest are metadata-and-text records fetched from CMVP.</p>"
+        f"findings use all {s['n']}. Every module's Security Policy renders its tables as tables (pdfplumber table "
+        f"grids). The deeper typed-structure findings, TCB surfaces (§6), review-priority (§9, §10) and document quality "
+        f"(§11), need the full typed SP extraction and are computed over the <b>{NF}</b> modules that carry it; the rest "
+        f"are metadata-and-text records fetched from CMVP (with table grids, but not the typed profiles).</p>"
     )
     P = []
 

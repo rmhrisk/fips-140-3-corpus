@@ -56,14 +56,14 @@ flowchart TD
 | FIPS 140-3 modules included | 415 (span #4650–#5159) |
 | status distribution | {'Active': 382, 'Historical': 33} |
 | with validation-history dates | 414/415 (~100%) |
-| with dated SP revision tables | 3/415 (minority — dev-span is directional) |
+| with dated SP revision tables | 7/415 (minority — dev-span is directional) |
 | dedup rule | one record per certificate number; cross-cert rebrand/re-validation chains NOT yet merged |
 
 Field provenance — **cert page:** level, type, embodiment, vendor, standard, status, validationHistory (dates/lab), sunset, approvedAlgorithms. **Security Policy:** sections, revisionHistory, ports/interfaces, services, SSPs, approvedAlgorithmsDetailed, tables.
 
 ## 1 · Lifecycle & certificate window
 - **CMVP certificate active window:** median **60 months** (mean 51), n=381 — the initial-validation→sunset life (~5 years). This is *certificate lifetime*, not vulnerability exposure (see §8).
-- **Development→certificate (directional, n=3):** where the SP ships a dated revision table, the first-draft→initial-validation span is ~32 months. Small sample — treat as anecdote, not a corpus statistic. It is consistent with a published *external* industry estimate of **~19 months post-CMVP-submission; ~24–36 months end-to-end** (industry reports, provided — not derived from this corpus).
+- **Development→certificate (directional, n=7):** where the SP ships a dated revision table, the first-draft→initial-validation span is ~32 months. Small sample — treat as anecdote, not a corpus statistic. It is consistent with a published *external* industry estimate of **~19 months post-CMVP-submission; ~24–36 months end-to-end** (industry reports, provided — not derived from this corpus).
 - **Volume context** *(external input, provided — not derived from this corpus):* active FIPS 140-3 certs by year run **2022:6 · 2023:6 · 2024:176 · 2025:163 · 2026-YTD:265**, a transition-driven surge (~500/yr run-rate). The population is therefore dominated by very recent certificates; the freeze/exposure patterns below are structural and will bite as the 2024–26 cohort ages inside its window without updates.
 
 ## 2 · What kind of assurance backs the CMVP certificate?
