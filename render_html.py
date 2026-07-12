@@ -291,6 +291,37 @@ def kv_card(title, pairs):
     return f"<section class='card'><h2>{esc(title)}</h2><table class='kv'>{rows}</table></section>"
 
 
+def _prune_empty_cols(rows):
+    """Drop table columns empty in every row (pdfplumber phantom columns from stray
+    ruling lines)."""
+    if not rows:
+        return rows
+    ncols = max(len(r) for r in rows)
+    cell = lambda r, c: (r[c] if c < len(r) and r[c] else "")
+    keep = [c for c in range(ncols) if any(cell(r, c).strip() for r in rows)]
+    return [[cell(r, c) for c in keep] for r in rows]
+
+
+def _merge_header_wrap(rows):
+    """Fold a multi-line header cell that pdfplumber split into follow-on rows back
+    into the header. A continuation row fills only columns the header already fills,
+    and fewer of them, so it is a wrapped header line rather than a data row."""
+    if len(rows) < 2:
+        return rows
+    hdr = [(c or "") for c in rows[0]]
+    hcols = {c for c, v in enumerate(hdr) if v.strip()}
+    i = 1
+    while i < len(rows):
+        nz = [c for c, v in enumerate(rows[i]) if (v or "").strip()]
+        if nz and set(nz) <= hcols and len(nz) < len(hcols):
+            for c in nz:
+                hdr[c] = (hdr[c] + " " + rows[i][c]).strip()
+            i += 1
+        else:
+            break
+    return [hdr] + list(rows[i:])
+
+
 def html_table(headers, rows, cls=""):
     thead = ("<thead><tr>" + "".join(f"<th>{esc(h)}</th>" for h in headers) + "</tr></thead>") if headers else ""
     body = "".join("<tr>" + "".join(f"<td>{linkify_all(esc(c))}</td>" for c in r) + "</tr>" for r in rows)
@@ -582,8 +613,9 @@ def render(record: dict, page_texts=None) -> str:
                             + html_table(headers, trows, cls="typed") + "</div>")
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
-                headers = t["rows"][0] if t["rows"] else None
-                trows = t["rows"][1:] if t["rows"] else []
+                rows = _prune_empty_cols(_merge_header_wrap(t["rows"]))
+                headers = rows[0] if rows else None
+                trows = rows[1:] if rows else []
                 body.append(f"<div class='tbl'>"
                             + html_table(headers, trows, cls="raw") + "</div>")
         ai_md = (sp.get("proseMarkdown") or {}).get(str(pg))
