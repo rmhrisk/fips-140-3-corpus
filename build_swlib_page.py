@@ -146,9 +146,11 @@ page = f"""<!doctype html><meta charset=utf-8><meta name=viewport content='width
 <h1>FIPS 140-3 software-library fingerprints</h1>
 <p class="dek">Probabilistic identifiers — filename, version, and hash — for the {n} validated
 <b>software</b> cryptographic modules in the corpus, each with an explicit confidence. An
-identifier match is evidence the validated library is present; for most modules a published
-hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Signals come from each module's CMVP
-certificate and its <b>Security Policy</b> — the public FIPS validation document, abbreviated <b>SP</b> below.
+identifier match is evidence the validated library is present. Because most builds are <b>not
+reproducible</b>, a whole-file hash pins <i>one specific build</i>, not the module in general — so
+<b>filename / soname, version, and component</b> are the identifiers that generalize, and a matching hash is
+exact-build confirmation when you happen to have that byte-identical artifact. Signals come from each module's
+CMVP certificate and its <b>Security Policy</b> — the public FIPS validation document, abbreviated <b>SP</b> below.
 Reference {html.escape(doc.get('reference','2026-07'))} · generated {html.escape(doc.get('generated',''))}.</p>
 <div class="stats">
 {stat(n,'software modules')}{stat(n_file,'with SP filename')}{stat(n_comp,'known component')}
@@ -156,8 +158,9 @@ Reference {html.escape(doc.get('reference','2026-07'))} · generated {html.escap
 </div>
 <div class="key">
 <span class="kt">How confidence is scored</span>
-<div class="krow"><span class="ktag strong">strong</span>known upstream component · a verified <b>on-disk-file</b> hash (the exact .so/.dll/.jar) · pinned version · a filename named in the Security Policy</div>
-<div class="krow"><span class="ktag soft">adds a little</span>a source-tarball or package hash (identifies the version, not the file on disk) · a Security-Policy digest · a downloadable artifact with no hash</div>
+<div class="krow"><span class="ktag strong">strong (generalize across builds)</span>known upstream component · pinned version · a filename / soname named in the Security Policy</div>
+<div class="krow"><span class="ktag soft">exact-build only</span>a verified <b>on-disk-file</b> hash confirms one byte-identical build · a source/package hash pins the version · a Security-Policy digest</div>
+<div class="krow" style="color:var(--ink-3);font-size:12px"><b>A hash that doesn't match is uninformative — a different (non-reproducible) build, not a different module.</b> Rely on filename + version + component first; treat a hash match as a bonus.</div>
 <span class="knote">A tag on each hash says what it identifies: <span class="idtag id-file">on-disk file</span> the exact shipped binary · <span class="idtag id-pkg">inside package</span> the file is in this RPM/deb, whose hash differs · <span class="idtag id-src">source only</span> source code, whose compiled hash is build-dependent. Signals add up (capped at 1.0). Hashes are only recorded from a cited source or extracted from a verified package — never guessed.</span>
 </div>
 <div class="key">
