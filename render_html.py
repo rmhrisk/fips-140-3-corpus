@@ -322,6 +322,47 @@ def _merge_header_wrap(rows):
     return [hdr] + list(rows[i:])
 
 
+def _merge_split_cols(rows):
+    """Merge adjacent columns pdfplumber split from one logical column.
+
+    Some SP tables render each logical column across two physical columns, with
+    alternating rows landing in the left or the right half (a zig-zag), so neither
+    half is ever empty and _prune_empty_cols cannot drop it. The tell is a pair of
+    neighbouring columns that are never both filled in the same row (mutually
+    exclusive) yet whose union is filled in most rows. Fold each such pair into one
+    column, taking whichever side carries the value. Lossless: mutual exclusivity
+    guarantees no row contributes two values. A no-op on aligned tables, where every
+    row fills both neighbours so they co-occur and are never merged."""
+    if len(rows) < 3:
+        return rows
+    ncols = max(len(r) for r in rows)
+    if ncols < 2:
+        return rows
+    nrows = len(rows)
+    cell = lambda r, c: (r[c] if c < len(r) and r[c] else "")
+    filled = lambda c: [bool(cell(r, c).strip()) for r in rows]
+    groups, c = [], 0
+    while c < ncols:
+        grp = [c]
+        while c + 1 < ncols:
+            gf = [any(cell(r, g).strip() for g in grp) for r in rows]
+            nf = filled(c + 1)
+            if any(a and b for a, b in zip(gf, nf)):          # ever both filled -> distinct
+                break
+            union = sum(1 for a, b in zip(gf, nf) if a or b)
+            if sum(gf) >= 2 and sum(nf) >= 2 and union >= 0.75 * nrows:
+                grp.append(c + 1)
+                c += 1
+            else:
+                break
+        groups.append(grp)
+        c += 1
+    if len(groups) == ncols:
+        return rows
+    return [[" ".join(v for g in grp if (v := cell(r, g).strip())) for grp in groups]
+            for r in rows]
+
+
 def html_table(headers, rows, cls=""):
     thead = ("<thead><tr>" + "".join(f"<th>{esc(h)}</th>" for h in headers) + "</tr></thead>") if headers else ""
     body = "".join("<tr>" + "".join(f"<td>{linkify_all(esc(c))}</td>" for c in r) + "</tr>" for r in rows)
@@ -613,7 +654,7 @@ def render(record: dict, page_texts=None) -> str:
                             + html_table(headers, trows, cls="typed") + "</div>")
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
-                rows = _prune_empty_cols(_merge_header_wrap(t["rows"]))
+                rows = _merge_split_cols(_prune_empty_cols(_merge_header_wrap(t["rows"])))
                 filled = lambda r: sum(1 for c in r if (c or "").strip())
                 # Prose pdfplumber boxed as a "table": a single row (a boxed sentence),
                 # one real column, or no row that ever fills two columns together (a
