@@ -97,9 +97,14 @@ th:hover{color:var(--accent)}tbody tr:hover{background:var(--surface-2)}
 .knote{width:100%;color:var(--ink-3);font-size:12px;margin-top:3px}
 .conf{font:600 12px var(--mono);border-radius:5px;padding:2px 7px}
 .c-hi{color:var(--low-fg);background:var(--low-bg)}.c-md{color:var(--med-fg);background:var(--med-bg)}.c-lo{color:var(--ink-3)}
-.k{font-size:11px;color:var(--ink-3)}.artline{margin:2px 0}
-.metaline{font-size:11.5px;color:var(--ink-3);margin:0 0 6px 14px;line-height:1.55;padding-left:8px;border-left:2px solid var(--accent-line)}
-td.name{max-width:260px}.small{font-size:12px;color:var(--ink-3)}"""
+.k{font-size:11px;color:var(--ink-3)}.artline{margin:3px 0;line-height:1.5}
+details.dd{margin:4px 0 2px}
+details.dd>summary{cursor:pointer;font-size:11.5px;color:var(--accent);list-style:none;user-select:none;padding:1px 0}
+details.dd>summary::-webkit-details-marker{display:none}
+details.dd>summary::before{content:'▸';font-size:9px;margin-right:5px;display:inline-block}
+details.dd[open]>summary::before{content:'▾'}
+.metarow{font-size:11.5px;color:var(--ink-3);margin:4px 0 4px 10px;line-height:1.55;padding-left:9px;border-left:2px solid var(--accent-line)}
+td.name{max-width:230px}td.pub{min-width:430px}.small{font-size:12px;color:var(--ink-3)}"""
 
 JS = """const D=window.__D__;const tb=document.getElementById('tb');const q=document.getElementById('q');
 const oh=document.getElementById('oh');const cnt=document.getElementById('cnt');let sortK='conf',sortDir=-1;
@@ -108,18 +113,38 @@ function esc(s){return (s==null?'':(''+s)).replace(/[&<>]/g,m=>({'&':'&amp;','<'
 const vmLabel={'sp-text-confirmed':'policy-verified','web-reverified':'web-verified','peer-corrected':'peer-verified','package-extracted':'file-verified','package-extracted-unconfirmed':'file-extracted','unconfirmed':'unverified'};
 const idLabel={'on-disk-file':'on-disk file','package':'inside package','source':'source only','vendor-archive':'vendor archive','container':'container','reference':'reference'};
 const idCls={'on-disk-file':'id-file','package':'id-pkg','source':'id-src'};
-function pubHtml(p){let h='';for(const a of p){const vt=a.h?(vmLabel[a.vm]||(a.ver?'verified':'unverified')):'';const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${vt}</span>`:'';
+function artLine(a){const vt=a.h?(vmLabel[a.vm]||(a.ver?'verified':'unverified')):'';
+ const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${vt}</span>`:'';
  const idt=a.id&&idLabel[a.id]?`<span class="idtag ${idCls[a.id]||'id-other'}">${idLabel[a.id]}</span>`:'';
  const hash=a.h?`<span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${a.h}')">${a.h.slice(0,20)}…</span>`:'<span class="small">no published hash</span>';
  const src=a.u?` <a href="${esc(a.u)}" target="_blank" rel="noopener">src</a>`:'';
- h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${idt} ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`;
- if(a.m){const m=a.m,b=[];
-  if(m.soname)b.push(`soname <span class="mono">${esc(m.soname)}</span>`);
-  if(m.version_strings&&m.version_strings.length)b.push(`version <span class="mono">${esc(m.version_strings.slice(0,3).join(', '))}</span>`);
-  if(m.symbol_signature)b.push(`sym-sig <span class="mono">${m.symbol_signature}</span>·${m.exported_symbols} exports`);
-  if(m.notable_symbols&&m.notable_symbols.length)b.push(`FIPS symbols <span class="mono">${esc(m.notable_symbols.slice(0,4).join(', '))}</span>`);
-  if(b.length)h+=`<div class="metaline">build-robust metadata — ${b.join(' · ')}</div>`}
- }return h}
+ const kind=a.k==='shared-object'?'':`<span class="k">${esc(a.k)}</span> `;  // redundant with the on-disk-file tag
+ return `<div class="artline"><span class="chip">${esc(a.f)}</span> ${idt} ${hash}${src} ${badge} ${kind}</div>`}
+function metaBits(m){const b=[];
+ if(m.soname)b.push(`soname <span class="mono">${esc(m.soname)}</span>`);
+ if(m.version_strings&&m.version_strings.length)b.push(`version <span class="mono">${esc(m.version_strings.slice(0,3).join(', '))}</span>`);
+ if(m.symbol_signature)b.push(`sym-sig <span class="mono">${m.symbol_signature}</span>·${m.exported_symbols} exports`);
+ if(m.notable_symbols&&m.notable_symbols.length)b.push(`FIPS symbols <span class="mono">${esc(m.notable_symbols.slice(0,4).join(', '))}</span>`);
+ return b}
+function hasMeta(a){return a.m&&metaBits(a.m).length}
+function pubHtml(p){
+ const files=p.filter(a=>a.id==='on-disk-file');
+ const sec=p.filter(a=>a.id!=='on-disk-file');
+ let h='';
+ // primary: on-disk file hashes, one compact line each
+ for(const a of files) h+=artLine(a);
+ // build-robust metadata, collapsed
+ const wm=files.filter(hasMeta);
+ if(wm.length){
+  const inner=wm.map(a=>`<div class="metarow"><span class="chip">${esc(a.f)}</span> ${metaBits(a.m).join(' · ')}</div>`).join('');
+  h+=`<details class="dd"><summary>build-robust metadata · ${wm.length} file${wm.length>1?'s':''} (soname, versions, symbols)</summary>${inner}</details>`}
+ // secondary package/source artifacts: expanded if they are the only hashes, else collapsed
+ if(sec.length){
+  const inner=sec.map(artLine).join('');
+  if(files.length)
+   h+=`<details class="dd"><summary>${sec.length} package / source hash${sec.length>1?'es':''} (version, not the file)</summary>${inner}</details>`;
+  else h+=inner}
+ return h}
 function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`).join('');
  const comp=d.comp?`${esc(d.comp)}${d.cver?' '+esc(d.cver):''}`:'<span class="small">—</span>';
  const mver=d.mver.length?`<div class="small">v ${esc(d.mver.join(', '))}</div>`:'';
@@ -129,7 +154,7 @@ function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`
  return `<tr><td class="mono"><a href="${esc(d.sp)}" target="_blank" rel="noopener">#${d.cert}</a></td>
  <td class="name">${esc(d.name)}<div class="small">${esc(d.vendor)}</div></td>
  <td>${comp}${mver}</td><td>${files||'<span class="small">—</span>'}${dig}</td>
- <td>${pubs}</td><td><span class="conf ${confCls(d.conf)}">${d.conf.toFixed(2)}</span><div class="small">${d.ev.join(', ')}</div></td></tr>`}
+ <td class="pub">${pubs}</td><td><span class="conf ${confCls(d.conf)}">${d.conf.toFixed(2)}</span><div class="small">${d.ev.join(', ')}</div></td></tr>`}
 function render(){const term=q.value.toLowerCase();const only=oh.checked;
  let r=D.filter(d=>{if(only&&!d.pubs.some(p=>p.h))return false;if(!term)return true;
   const meta=d.pubs.map(p=>p.m?[p.m.soname,(p.m.version_strings||[]).join(' '),(p.m.notable_symbols||[]).join(' '),p.m.symbol_signature].join(' '):'').join(' ');
