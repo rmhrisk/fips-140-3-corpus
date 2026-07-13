@@ -81,6 +81,9 @@ th:hover{color:var(--accent)}tbody tr:hover{background:var(--surface-2)}
 .hash:hover{color:var(--accent)}
 .badge{font:600 10.5px/1 var(--mono);border-radius:4px;padding:2px 5px;white-space:nowrap}
 .v-yes{color:var(--low-fg);background:var(--low-bg)}.v-no{color:var(--high-fg);background:var(--high-bg)}
+.key{display:flex;flex-wrap:wrap;gap:8px 20px;margin:14px 0;padding:13px 16px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;font-size:12.5px}
+.key .kt{font:600 11px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);width:100%;margin-bottom:2px}
+.keyitem{display:flex;align-items:center;gap:7px;color:var(--ink-2)}
 .conf{font:600 12px var(--mono);border-radius:5px;padding:2px 7px}
 .c-hi{color:var(--low-fg);background:var(--low-bg)}.c-md{color:var(--med-fg);background:var(--med-bg)}.c-lo{color:var(--ink-3)}
 .k{font-size:11px;color:var(--ink-3)}.artline{margin:2px 0}
@@ -142,6 +145,13 @@ kept only when the document labels what they are (module integrity HMAC, publish
 self-test expected value). A published hash is <b>SP-confirmed</b> when the exact hash also appears in the module's
 own Security Policy text (authoritative, checked deterministically), <b>web-verified</b> when an independent agent
 re-fetched its checksum source and matched it, else <b>unverified</b>. No hash is ever guessed.</div>
+<div class="key">
+<span class="kt">Hash verification key</span>
+<span class="keyitem"><span class="badge v-yes">SP-confirmed</span> the exact hash also appears in the module's own Security Policy (authoritative)</span>
+<span class="keyitem"><span class="badge v-yes">web-verified</span> an independent agent re-fetched the checksum source and it matched</span>
+<span class="keyitem"><span class="badge v-yes">peer-verified</span> equals a verified hash for the identical artifact on another module</span>
+<span class="keyitem"><span class="badge v-no">unverified</span> reported from a named source but not independently re-confirmed</span>
+</div>
 <div class="controls">
 <input id="q" type="search" placeholder="filter by module, vendor, component, filename, artifact…">
 <label class="tog"><input id="oh" type="checkbox"> only rows with a published hash</label>
