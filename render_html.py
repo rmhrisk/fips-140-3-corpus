@@ -332,7 +332,13 @@ def _merge_split_cols(rows):
     exclusive) yet whose union is filled in most rows. Fold each such pair into one
     column, taking whichever side carries the value. Lossless: mutual exclusivity
     guarantees no row contributes two values. A no-op on aligned tables, where every
-    row fills both neighbours so they co-occur and are never merged."""
+    row fills both neighbours so they co-occur and are never merged.
+
+    A second split shape is the header/body horizontal offset: pdfplumber bins a
+    column's header text and its body text into different physical columns, leaving a
+    label-only column (filled solely in the header row) beside a body-only column
+    (empty header, real data). That pair is one column too, and is merged even though
+    the label side has just a single cell."""
     if len(rows) < 3:
         return rows
     ncols = max(len(r) for r in rows)
@@ -341,6 +347,8 @@ def _merge_split_cols(rows):
     nrows = len(rows)
     cell = lambda r, c: (r[c] if c < len(r) and r[c] else "")
     filled = lambda c: [bool(cell(r, c).strip()) for r in rows]
+    hdr_only = lambda f: f[0] and sum(f) == 1                    # only the header row
+    body_only = lambda f: (not f[0]) and sum(f) >= 2            # empty header, real data
     groups, c = [], 0
     while c < ncols:
         grp = [c]
@@ -350,7 +358,11 @@ def _merge_split_cols(rows):
             if any(a and b for a, b in zip(gf, nf)):          # ever both filled -> distinct
                 break
             union = sum(1 for a, b in zip(gf, nf) if a or b)
-            if sum(gf) >= 2 and sum(nf) >= 2 and union >= 0.75 * nrows:
+            if union < 0.75 * nrows:
+                break
+            zigzag = sum(gf) >= 2 and sum(nf) >= 2
+            offset = (hdr_only(gf) and body_only(nf)) or (body_only(gf) and hdr_only(nf))
+            if zigzag or offset:
                 grp.append(c + 1)
                 c += 1
             else:
@@ -361,6 +373,35 @@ def _merge_split_cols(rows):
         return rows
     return [[" ".join(v for g in grp if (v := cell(r, g).strip())) for grp in groups]
             for r in rows]
+
+
+def _merge_wrap_rows(rows):
+    """Fold wrapped-cell continuation rows into the record above.
+
+    pdfplumber emits a long cell that wraps onto several physical lines as separate
+    rows in which only that one column is filled; a real record — even a row-span
+    sub-record like `Decrypt | X | Y` — fills two or more columns. So a data row that
+    fills exactly one column is a continuation: append its cell to the same column of
+    the nearest preceding multi-field row. Conservative by design; rows that fill two
+    or more columns are never merged, so genuine records are left intact."""
+    if len(rows) < 3:
+        return rows
+    fcols = lambda r: [c for c in range(len(r)) if (r[c] or "").strip()]
+    out = [list(rows[0])]
+    anchor = None
+    for r in rows[1:]:
+        fc = fcols(r)
+        if len(fc) == 1 and anchor is not None:
+            c = fc[0]
+            while len(out[anchor]) <= c:
+                out[anchor].append("")
+            cur = (out[anchor][c] or "").strip()
+            out[anchor][c] = (cur + " " + r[c].strip()).strip() if cur else r[c].strip()
+        else:
+            out.append(list(r))
+            if len(fc) >= 2:
+                anchor = len(out) - 1
+    return out
 
 
 def html_table(headers, rows, cls=""):
@@ -654,7 +695,7 @@ def render(record: dict, page_texts=None) -> str:
                             + html_table(headers, trows, cls="typed") + "</div>")
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
-                rows = _merge_split_cols(_prune_empty_cols(_merge_header_wrap(t["rows"])))
+                rows = _merge_split_cols(_merge_wrap_rows(_prune_empty_cols(_merge_header_wrap(t["rows"]))))
                 filled = lambda r: sum(1 for c in r if (c or "").strip())
                 # Prose pdfplumber boxed as a "table": a single row (a boxed sentence),
                 # one real column, or no row that ever fills two columns together (a
