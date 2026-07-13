@@ -97,7 +97,7 @@ JS = """const D=window.__D__;const tb=document.getElementById('tb');const q=docu
 const oh=document.getElementById('oh');const cnt=document.getElementById('cnt');let sortK='conf',sortDir=-1;
 function confCls(c){return c>=0.8?'c-hi':c>=0.5?'c-md':'c-lo'}
 function esc(s){return (s==null?'':(''+s)).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-const vmLabel={'sp-text-confirmed':'SP-confirmed','web-reverified':'web-verified','peer-corrected':'peer-verified','unconfirmed':'unverified'};
+const vmLabel={'sp-text-confirmed':'policy-verified','web-reverified':'web-verified','peer-corrected':'peer-verified','unconfirmed':'unverified'};
 function pubHtml(p){let h='';for(const a of p){const vt=a.h?(vmLabel[a.vm]||(a.ver?'verified':'unverified')):'';const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${vt}</span>`:'';
  const hash=a.h?`<span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${a.h}')">${a.h.slice(0,20)}…</span>`:'<span class="small">no published hash</span>';
  const src=a.u?` <a href="${esc(a.u)}" target="_blank" rel="noopener">src</a>`:'';
@@ -137,7 +137,9 @@ page = f"""<!doctype html><meta charset=utf-8><meta name=viewport content='width
 <p class="dek">Probabilistic identifiers — filename, version, and hash — for the {n} validated
 <b>software</b> cryptographic modules in the corpus, each with an explicit confidence. An
 identifier match is evidence the validated library is present; for most modules a published
-hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Reference {html.escape(doc.get('reference','2026-07'))} · generated {html.escape(doc.get('generated',''))}.</p>
+hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Signals come from each module's CMVP
+certificate and its <b>Security Policy</b> — the public FIPS validation document, abbreviated <b>SP</b> below.
+Reference {html.escape(doc.get('reference','2026-07'))} · generated {html.escape(doc.get('generated',''))}.</p>
 <div class="stats">
 {stat(n,'software modules')}{stat(n_file,'with SP filename')}{stat(n_comp,'known component')}
 {stat(n_pub,'public artifact')}{stat(n_hash,'published hashes')}{stat(n_verified,'verified')}{stat(n_hi,'confidence ≥ 0.8')}
@@ -145,12 +147,12 @@ hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Referen
 <div class="key">
 <span class="kt">How confidence is scored</span>
 <div class="krow"><span class="ktag strong">strong</span>known upstream component · a verified or Security-Policy-published hash · pinned version · a filename named in the Security Policy</div>
-<div class="krow"><span class="ktag soft">adds a little</span>an unverified web hash · a module-integrity HMAC or self-test digest from the SP · a downloadable artifact with no published hash</div>
+<div class="krow"><span class="ktag soft">adds a little</span>an unverified web hash · a module-integrity HMAC or self-test digest from the Security Policy · a downloadable artifact with no published hash</div>
 <span class="knote">Signals add up (capped at 1.0) — higher means more confident that a file matching these identifiers is this module. Hashes are only recorded from a cited source, never guessed.</span>
 </div>
 <div class="key">
 <span class="kt">Hash verification key</span>
-<span class="keyitem"><span class="badge v-yes">SP-confirmed</span> the exact hash also appears in the module's own Security Policy (authoritative)</span>
+<span class="keyitem"><span class="badge v-yes">policy-verified</span> the exact hash also appears in the module's own FIPS Security Policy (authoritative)</span>
 <span class="keyitem"><span class="badge v-yes">web-verified</span> an independent agent re-fetched the checksum source and it matched</span>
 <span class="keyitem"><span class="badge v-yes">peer-verified</span> equals a verified hash for the identical artifact on another module</span>
 <span class="keyitem"><span class="badge v-no">unverified</span> reported from a named source but not independently re-confirmed</span>
@@ -161,7 +163,7 @@ hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Referen
 <span class="count" id="cnt"></span></div>
 <table><thead><tr>
 <th data-k="cert">Cert</th><th data-k="name">Module / vendor</th><th data-k="comp">Component</th>
-<th>SP fingerprints</th><th>Published artifact · hash</th><th data-k="conf">Confidence</th>
+<th>Security Policy fingerprints</th><th>Published artifact · hash</th><th data-k="conf">Confidence</th>
 </tr></thead><tbody id="tb"></tbody></table>
 </div>
 <script>window.__D__={json.dumps(disp,separators=(',',':'),ensure_ascii=False)};
