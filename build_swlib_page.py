@@ -38,6 +38,7 @@ for r in rows:
             "f": a["filename"], "k": a["artifact_kind"], "v": a["version"],
             "h": a["sha256"], "ver": a["verified"], "vm": a.get("verify_method"),
             "u": a["sha256_source_url"], "d": a["download_url"], "c": a["confidence"],
+            "id": a.get("identifies"),
         } for a in pubs],
         "conf": r["identity_confidence"],
         "ev": r["identity_evidence"],
@@ -52,6 +53,7 @@ n_pub = sum(1 for d in disp if d["pubs"])
 n_file = sum(1 for d in disp if d["files"])
 n_comp = sum(1 for d in disp if d["comp"])
 n_hi = sum(1 for d in disp if d["conf"] >= 0.8)
+n_filehash = sum(1 for d in disp if any(p["h"] and p.get("id") == "on-disk-file" for p in d["pubs"]))
 
 PALETTE = """:root{--paper:#f4f6f8;--surface:#fff;--surface-2:#f8fafb;--ink:#0f1720;--ink-2:#47535f;--ink-3:#7c8894;--line:#e2e7ec;--line-2:#eef1f4;--accent:#0e6e6e;--accent-2:#0a5a5a;--accent-wash:#e6f0ef;--accent-line:#bcdad7;--crit-fg:#9e1f24;--crit-bg:#f8e4e4;--high-fg:#8a5410;--high-bg:#f7e8d3;--med-fg:#535f6c;--med-bg:#e9edf1;--low-fg:#2f6b58;--low-bg:#e2efe9;--serif:'Iowan Old Style',Palatino,Georgia,serif;--sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
 @media(prefers-color-scheme:dark){:root{--paper:#0d1216;--surface:#141b21;--surface-2:#101820;--ink:#e6ecf1;--ink-2:#a6b2bc;--ink-3:#72808b;--line:#243039;--line-2:#1b242c;--accent:#43b9af;--accent-2:#5fc9bf;--accent-wash:#12302e;--accent-line:#1f4b48;--crit-fg:#e98a8f;--crit-bg:#341d1f;--high-fg:#dba766;--high-bg:#31261a;--med-fg:#9fabb6;--med-bg:#1e262d;--low-fg:#6fc2a8;--low-bg:#16281f}}
@@ -80,6 +82,11 @@ th:hover{color:var(--accent)}tbody tr:hover{background:var(--surface-2)}
 .hash{font-family:var(--mono);font-size:.84em;color:var(--ink-2);cursor:pointer;border-bottom:1px dotted var(--line)}
 .hash:hover{color:var(--accent)}
 .badge{font:600 10.5px/1 var(--mono);border-radius:4px;padding:2px 5px;white-space:nowrap}
+.idtag{font:600 10px/1 var(--sans);letter-spacing:.02em;border-radius:4px;padding:2px 6px;white-space:nowrap;border:1px solid transparent}
+.id-file{color:var(--low-fg);background:var(--low-bg);border-color:var(--low-fg)}
+.id-pkg{color:var(--med-fg);background:var(--med-bg)}
+.id-src{color:var(--high-fg);background:var(--high-bg)}
+.id-other{color:var(--ink-3);background:var(--surface-2)}
 .v-yes{color:var(--low-fg);background:var(--low-bg)}.v-no{color:var(--high-fg);background:var(--high-bg)}
 .key{display:flex;flex-wrap:wrap;gap:8px 20px;margin:14px 0;padding:13px 16px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;font-size:12.5px}
 .key .kt{font:600 11px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);width:100%;margin-bottom:2px}
@@ -97,11 +104,14 @@ JS = """const D=window.__D__;const tb=document.getElementById('tb');const q=docu
 const oh=document.getElementById('oh');const cnt=document.getElementById('cnt');let sortK='conf',sortDir=-1;
 function confCls(c){return c>=0.8?'c-hi':c>=0.5?'c-md':'c-lo'}
 function esc(s){return (s==null?'':(''+s)).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-const vmLabel={'sp-text-confirmed':'policy-verified','web-reverified':'web-verified','peer-corrected':'peer-verified','unconfirmed':'unverified'};
+const vmLabel={'sp-text-confirmed':'policy-verified','web-reverified':'web-verified','peer-corrected':'peer-verified','package-extracted':'file-verified','package-extracted-unconfirmed':'file-extracted','unconfirmed':'unverified'};
+const idLabel={'on-disk-file':'on-disk file','package':'inside package','source':'source only','vendor-archive':'vendor archive','container':'container','reference':'reference'};
+const idCls={'on-disk-file':'id-file','package':'id-pkg','source':'id-src'};
 function pubHtml(p){let h='';for(const a of p){const vt=a.h?(vmLabel[a.vm]||(a.ver?'verified':'unverified')):'';const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${vt}</span>`:'';
+ const idt=a.id&&idLabel[a.id]?`<span class="idtag ${idCls[a.id]||'id-other'}">${idLabel[a.id]}</span>`:'';
  const hash=a.h?`<span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${a.h}')">${a.h.slice(0,20)}…</span>`:'<span class="small">no published hash</span>';
  const src=a.u?` <a href="${esc(a.u)}" target="_blank" rel="noopener">src</a>`:'';
- h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`}return h}
+ h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${idt} ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`}return h}
 function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`).join('');
  const comp=d.comp?`${esc(d.comp)}${d.cver?' '+esc(d.cver):''}`:'<span class="small">—</span>';
  const mver=d.mver.length?`<div class="small">v ${esc(d.mver.join(', '))}</div>`:'';
@@ -142,13 +152,13 @@ certificate and its <b>Security Policy</b> — the public FIPS validation docume
 Reference {html.escape(doc.get('reference','2026-07'))} · generated {html.escape(doc.get('generated',''))}.</p>
 <div class="stats">
 {stat(n,'software modules')}{stat(n_file,'with SP filename')}{stat(n_comp,'known component')}
-{stat(n_pub,'public artifact')}{stat(n_hash,'published hashes')}{stat(n_verified,'verified')}{stat(n_hi,'confidence ≥ 0.8')}
+{stat(n_pub,'public artifact')}{stat(n_filehash,'on-disk file hash')}{stat(n_verified,'verified hashes')}{stat(n_hi,'confidence ≥ 0.8')}
 </div>
 <div class="key">
 <span class="kt">How confidence is scored</span>
-<div class="krow"><span class="ktag strong">strong</span>known upstream component · a verified or Security-Policy-published hash · pinned version · a filename named in the Security Policy</div>
-<div class="krow"><span class="ktag soft">adds a little</span>an unverified web hash · a module-integrity HMAC or self-test digest from the Security Policy · a downloadable artifact with no published hash</div>
-<span class="knote">Signals add up (capped at 1.0) — higher means more confident that a file matching these identifiers is this module. Hashes are only recorded from a cited source, never guessed.</span>
+<div class="krow"><span class="ktag strong">strong</span>known upstream component · a verified <b>on-disk-file</b> hash (the exact .so/.dll/.jar) · pinned version · a filename named in the Security Policy</div>
+<div class="krow"><span class="ktag soft">adds a little</span>a source-tarball or package hash (identifies the version, not the file on disk) · a Security-Policy digest · a downloadable artifact with no hash</div>
+<span class="knote">A tag on each hash says what it identifies: <span class="idtag id-file">on-disk file</span> the exact shipped binary · <span class="idtag id-pkg">inside package</span> the file is in this RPM/deb, whose hash differs · <span class="idtag id-src">source only</span> source code, whose compiled hash is build-dependent. Signals add up (capped at 1.0). Hashes are only recorded from a cited source or extracted from a verified package — never guessed.</span>
 </div>
 <div class="key">
 <span class="kt">Hash verification key</span>

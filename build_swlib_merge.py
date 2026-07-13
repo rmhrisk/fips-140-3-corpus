@@ -38,8 +38,21 @@ OUT_CSV = os.path.join(HERE, "fips_swlib.csv")
 STAMP = datetime.date.today().isoformat()
 
 
+# What a published hash actually lets you match, relative to a file on disk.
+IDENTIFIES = {
+    "shared-object": "on-disk-file",     # the exact .so/.dll a scanner would find
+    "maven-jar": "on-disk-file",         # the jar IS the shipped file
+    "distro-package": "package",         # the file is inside; package hash != file hash
+    "source-tarball": "source",          # source code; no canonical binary hash
+    "vendor-binary": "vendor-archive",
+    "container-image": "container",
+    "nvd-cpe": "reference",
+    "other": "other",
+}
+
+
 def recompute_confidence(row):
-    """Track A score, plus a Track B bonus for a verified published hash."""
+    """Confidence a file matching these identifiers is this module."""
     score, reasons = 0.0, []
     if row["component"]:
         score += 0.40; reasons.append("known-upstream-component")
@@ -54,13 +67,31 @@ def recompute_confidence(row):
         score += 0.12; reasons.append("sp-module-hmac")        # asserted, key-dependent
     elif digs:
         score += 0.10; reasons.append("sp-selftest-digest")
+    # published-hash block: a hash of the actual on-disk file beats a hash of the
+    # source tarball or the containing package.
     pubs = row["fingerprints"]["published_artifacts"]
-    if any(a.get("sha256") and a.get("verified") for a in pubs):
-        score += 0.35; reasons.append("verified-published-hash")
-    elif any(a.get("sha256") for a in pubs):
-        score += 0.15; reasons.append("published-hash-unverified")
+
+    def has(pred, verified=None):
+        for a in pubs:
+            if not a.get("sha256"):
+                continue
+            if verified is not None and bool(a.get("verified")) != verified:
+                continue
+            if pred(a):
+                return True
+        return False
+
+    is_file = lambda a: a.get("identifies") == "on-disk-file"
+    if has(is_file, verified=True):
+        score += 0.35; reasons.append("verified-file-hash")
+    elif has(lambda a: True, verified=True):
+        score += 0.22; reasons.append("verified-source/package-hash")
+    elif has(is_file):
+        score += 0.20; reasons.append("file-hash-unverified")
+    elif has(lambda a: True):
+        score += 0.12; reasons.append("hash-unverified")
     elif any(a.get("download_url") for a in pubs):
-        score += 0.05; reasons.append("published-artifact-no-hash")
+        score += 0.05; reasons.append("artifact-no-hash")
     return round(min(score, 1.0), 2), reasons
 
 
@@ -85,7 +116,35 @@ def main():
             if a.get("verified") and HEX64.match(h):
                 canon.setdefault(a.get("filename"), h)
 
-    n_enriched = n_hash = n_verified = n_searched_empty = n_malformed = n_corrected = 0
+    # Track C: real on-disk .so hashes extracted from distro packages.
+    so_by_cert = {}
+    so_path = os.path.join(HERE, "so_hashes.json")
+    if os.path.exists(so_path):
+        for pkg in json.load(open(so_path)).get("results", []):
+            if pkg.get("status") != "ok":
+                continue
+            ok = bool(pkg.get("package_sha256_ok"))
+            for s in pkg.get("shared_objects", []):
+                if s.get("is_hmac_sidecar"):
+                    continue
+                for cert in pkg.get("certs", []):
+                    so_by_cert.setdefault(cert, []).append({
+                        "filename": s["filename"],
+                        "artifact_kind": "shared-object",
+                        "version": None,
+                        "sha256": s["sha256"],
+                        "sha256_source_url": pkg.get("download_url"),
+                        "download_url": pkg.get("download_url"),
+                        "verified": ok,
+                        "verify_method": "package-extracted" if ok else "package-extracted-unconfirmed",
+                        "confidence": 0.9 if ok else 0.7,
+                        "evidence": f"SHA-256 of {s['filename']} extracted from {pkg['package']}"
+                                    + (" (package hash independently confirmed)" if ok else ""),
+                        "identifies": "on-disk-file",
+                        "source": "package-extracted",
+                    })
+
+    n_enriched = n_hash = n_verified = n_searched_empty = n_malformed = n_corrected = n_so = 0
     for row in rows:
         g = fished.get(row["cert"])
         if g is not None:
@@ -141,6 +200,7 @@ def main():
                     "verify_method": method,
                     "confidence": a.get("confidence"),
                     "evidence": ev,
+                    "identifies": IDENTIFIES.get(a.get("artifact_kind"), "other"),
                     "source": "web-fished",
                 })
             row["fingerprints"]["published_artifacts"] = arts
@@ -149,6 +209,15 @@ def main():
             n_verified += sum(1 for a in arts if a["sha256"] and a["verified"])
         elif g is not None:
             n_searched_empty += 1
+        # append extracted .so hashes (dedup by filename+sha256)
+        sos = so_by_cert.get(row["cert"])
+        if sos:
+            pubs = row["fingerprints"]["published_artifacts"]
+            have = {(a.get("filename"), a.get("sha256")) for a in pubs}
+            for s in sos:
+                if (s["filename"], s["sha256"]) not in have:
+                    pubs.append(s); have.add((s["filename"], s["sha256"])); n_so += 1
+            row.setdefault("provenance", {})["trackC"] = f"package-extracted-{STAMP}"
         conf, reasons = recompute_confidence(row)
         row["identity_confidence"] = conf
         row["identity_evidence"] = reasons
@@ -162,6 +231,7 @@ def main():
         "generated": STAMP,
         "n": len(rows),
         "tracks": {
+            "C": "on-disk .so/.dll hashes extracted from distro packages",
             "A": "deterministic extraction from CMVP certs + Security-Policy text",
             "B": "web-fished published artifact hashes, each with source URL + skeptic verification",
         },
@@ -198,6 +268,7 @@ def main():
     print(f"  enriched (Track B):{n_enriched}")
     print(f"  searched, no public specimen: {n_searched_empty}")
     print(f"  malformed hashes: {n_malformed} omitted, {n_corrected} peer-corrected")
+    print(f"  on-disk .so hashes extracted (Track C): {n_so}")
     print(f"  published hashes:  {n_hash} ({n_verified} verified)")
     print(f"  confidence >= 0.8: {sum(1 for r in rows if r['identity_confidence'] >= 0.8)}")
     print(f"wrote {os.path.relpath(OUT_JSON, HERE)} and {os.path.relpath(OUT_CSV, HERE)}")

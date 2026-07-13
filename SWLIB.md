@@ -18,8 +18,10 @@ downloadable artifact and its published hash — and it is honest, via a
 |---|---|---|
 | `build_swlib.py` | Track A builder — deterministic extraction from the committed corpus | yes, stdlib only |
 | `fips_swlib.trackA.json` | Track A output | yes |
-| `build_swlib_merge.py` | Track B merge — folds web-fished hashes into the base | mechanical |
-| `fips_swlib.json` | **the merged deliverable** (Track A + Track B) | Track A part yes; hashes are web-sourced |
+| `build_swlib_sohash.py` | Track C — download distro packages, hash the actual `.so` inside | network |
+| `so_hashes.json` | Track C output (extracted on-disk `.so` hashes) | — |
+| `build_swlib_merge.py` | merge — folds Track B + Track C into the base | mechanical |
+| `fips_swlib.json` | **the merged deliverable** (Track A + B + C) | Track A part yes; hashes are web/package-sourced |
 | `fips_swlib.csv` | flattened one-row-per-artifact view | — |
 
 Rebuild Track A: `python3 build_swlib.py`. Merge fished hashes:
@@ -59,6 +61,19 @@ specific published URL** (`sha256_source_url`); a hash that could not be sourced
 is left `null` rather than guessed. Every reported hash is then re-checked by an
 independent skeptic agent that re-fetches the source URL — the result is the
 `verified` flag.
+
+**Track C — on-disk `.so` hashes (network, deterministic).** A source-tarball or
+RPM hash does **not** identify the `.so` a scanner finds on disk. But the `.so`
+*is inside* the RPM, so `build_swlib_sohash.py` downloads each distro package,
+verifies its own hash against what Track B recorded, extracts it with `bsdtar`
+(libarchive reads the RPM/cpio payload — no `rpm` tooling), and SHA-256s the
+actual shared objects. Those hashes (`artifact_kind: shared-object`) are the ones
+that match a file on a running system.
+
+Every published hash carries an **`identifies`** field so its meaning is explicit:
+`on-disk-file` (the exact `.so`/`.dll`/`.jar` — Maven jars and Track-C `.so`s),
+`package` (the file is inside this RPM/deb, whose hash differs), or `source`
+(source code, whose compiled hash is build-dependent).
 
 ## The `confidence` field
 
