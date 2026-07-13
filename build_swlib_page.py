@@ -38,7 +38,7 @@ for r in rows:
             "f": a["filename"], "k": a["artifact_kind"], "v": a["version"],
             "h": a["sha256"], "ver": a["verified"], "vm": a.get("verify_method"),
             "u": a["sha256_source_url"], "d": a["download_url"], "c": a["confidence"],
-            "id": a.get("identifies"),
+            "id": a.get("identifies"), "m": a.get("metadata"),
         } for a in pubs],
         "conf": r["identity_confidence"],
         "ev": r["identity_evidence"],
@@ -98,6 +98,7 @@ th:hover{color:var(--accent)}tbody tr:hover{background:var(--surface-2)}
 .conf{font:600 12px var(--mono);border-radius:5px;padding:2px 7px}
 .c-hi{color:var(--low-fg);background:var(--low-bg)}.c-md{color:var(--med-fg);background:var(--med-bg)}.c-lo{color:var(--ink-3)}
 .k{font-size:11px;color:var(--ink-3)}.artline{margin:2px 0}
+.metaline{font-size:11.5px;color:var(--ink-3);margin:0 0 6px 14px;line-height:1.55;padding-left:8px;border-left:2px solid var(--accent-line)}
 td.name{max-width:260px}.small{font-size:12px;color:var(--ink-3)}"""
 
 JS = """const D=window.__D__;const tb=document.getElementById('tb');const q=document.getElementById('q');
@@ -111,7 +112,14 @@ function pubHtml(p){let h='';for(const a of p){const vt=a.h?(vmLabel[a.vm]||(a.v
  const idt=a.id&&idLabel[a.id]?`<span class="idtag ${idCls[a.id]||'id-other'}">${idLabel[a.id]}</span>`:'';
  const hash=a.h?`<span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${a.h}')">${a.h.slice(0,20)}…</span>`:'<span class="small">no published hash</span>';
  const src=a.u?` <a href="${esc(a.u)}" target="_blank" rel="noopener">src</a>`:'';
- h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${idt} ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`}return h}
+ h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${idt} ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`;
+ if(a.m){const m=a.m,b=[];
+  if(m.soname)b.push(`soname <span class="mono">${esc(m.soname)}</span>`);
+  if(m.version_strings&&m.version_strings.length)b.push(`version <span class="mono">${esc(m.version_strings.slice(0,3).join(', '))}</span>`);
+  if(m.symbol_signature)b.push(`sym-sig <span class="mono">${m.symbol_signature}</span>·${m.exported_symbols} exports`);
+  if(m.notable_symbols&&m.notable_symbols.length)b.push(`FIPS symbols <span class="mono">${esc(m.notable_symbols.slice(0,4).join(', '))}</span>`);
+  if(b.length)h+=`<div class="metaline">build-robust metadata — ${b.join(' · ')}</div>`}
+ }return h}
 function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`).join('');
  const comp=d.comp?`${esc(d.comp)}${d.cver?' '+esc(d.cver):''}`:'<span class="small">—</span>';
  const mver=d.mver.length?`<div class="small">v ${esc(d.mver.join(', '))}</div>`:'';
@@ -124,7 +132,8 @@ function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`
  <td>${pubs}</td><td><span class="conf ${confCls(d.conf)}">${d.conf.toFixed(2)}</span><div class="small">${d.ev.join(', ')}</div></td></tr>`}
 function render(){const term=q.value.toLowerCase();const only=oh.checked;
  let r=D.filter(d=>{if(only&&!d.pubs.some(p=>p.h))return false;if(!term)return true;
-  return (d.name+' '+d.vendor+' '+(d.comp||'')+' '+d.files.join(' ')+' '+d.pubs.map(p=>p.f).join(' ')).toLowerCase().includes(term)});
+  const meta=d.pubs.map(p=>p.m?[p.m.soname,(p.m.version_strings||[]).join(' '),(p.m.notable_symbols||[]).join(' '),p.m.symbol_signature].join(' '):'').join(' ');
+  return (d.name+' '+d.vendor+' '+(d.comp||'')+' '+d.files.join(' ')+' '+d.pubs.map(p=>p.f).join(' ')+' '+meta).toLowerCase().includes(term)});
  r.sort((a,b)=>{let x,y;if(sortK==='conf'){x=a.conf;y=b.conf}else if(sortK==='cert'){x=a.cert;y=b.cert}
   else if(sortK==='comp'){x=a.comp||'~';y=b.comp||'~'}else{x=a.name.toLowerCase();y=b.name.toLowerCase()}
   return x<y?-sortDir:x>y?sortDir:0});

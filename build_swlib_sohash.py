@@ -13,6 +13,8 @@ Uses curl + bsdtar (libarchive understands the RPM/cpio payload); no rpm tooling
 """
 import json
 import os
+import re
+import struct
 import subprocess
 import tempfile
 import hashlib
@@ -31,6 +33,124 @@ def sha256(path):
     return h.hexdigest()
 
 
+# --- minimal ELF reader (build-robust metadata, no external tools) ----------
+# Enough of ELF32/64 little-endian (x86_64 / aarch64) to read DT_SONAME,
+# DT_NEEDED and the exported dynamic symbols. These identifiers survive a
+# rebuild far better than a whole-file hash.
+DT_NEEDED, DT_SONAME = 1, 14
+
+
+def elf_metadata(path):
+    try:
+        data = open(path, "rb").read()
+    except OSError:
+        return {}
+    if data[:4] != b"\x7fELF":
+        return {}
+    is64 = data[4] == 2
+    if data[5] != 1:  # only little-endian
+        return {}
+    if is64:
+        e_shoff = struct.unpack_from("<Q", data, 0x28)[0]
+        e_shentsize, e_shnum, e_shstrndx = struct.unpack_from("<HHH", data, 0x3A)
+    else:
+        e_shoff = struct.unpack_from("<I", data, 0x20)[0]
+        e_shentsize, e_shnum, e_shstrndx = struct.unpack_from("<HHH", data, 0x30)
+    if not e_shoff or not e_shnum:
+        return {}
+    secs = []
+    for i in range(e_shnum):
+        off = e_shoff + i * e_shentsize
+        if is64:
+            name, typ, _fl, _ad, s_off, s_size, s_link, _inf, _al, s_ent = \
+                struct.unpack_from("<IIQQQQIIQQ", data, off)
+        else:
+            name, typ, _fl, _ad, s_off, s_size, s_link, _inf, _al, s_ent = \
+                struct.unpack_from("<IIIIIIIIII", data, off)
+        secs.append(dict(name=name, type=typ, off=s_off, size=s_size, link=s_link, ent=s_ent))
+    shstr = secs[e_shstrndx]
+    def secname(s):
+        base = shstr["off"] + s["name"]
+        end = data.index(b"\0", base)
+        return data[base:end].decode("latin1")
+    byname = {secname(s): s for s in secs}
+
+    def strat(strtab, idx):
+        base = strtab["off"] + idx
+        end = data.index(b"\0", base)
+        return data[base:end].decode("latin1")
+
+    meta = {"soname": None, "needed": [], "exported_symbols": 0,
+            "symbol_signature": None, "notable_symbols": []}
+    dynstr = byname.get(".dynstr")
+    # .dynamic -> SONAME / NEEDED
+    dyn = byname.get(".dynamic")
+    if dyn and dynstr:
+        entsz = 16 if is64 else 8
+        for o in range(dyn["off"], dyn["off"] + dyn["size"], entsz):
+            tag, val = struct.unpack_from("<qQ" if is64 else "<iI", data, o)
+            if tag == 0:
+                break
+            if tag == DT_SONAME:
+                meta["soname"] = strat(dynstr, val)
+            elif tag == DT_NEEDED:
+                meta["needed"].append(strat(dynstr, val))
+    # .dynsym -> exported (defined, non-local) symbol names
+    dynsym = byname.get(".dynsym")
+    if dynsym and dynstr and dynsym["ent"]:
+        names = []
+        for o in range(dynsym["off"], dynsym["off"] + dynsym["size"], dynsym["ent"]):
+            if is64:
+                st_name, st_info, _oth, st_shndx = struct.unpack_from("<IBBH", data, o)
+            else:
+                st_name, st_value, st_size, st_info, _oth, st_shndx = \
+                    struct.unpack_from("<IIIBBH", data, o)
+            if st_shndx == 0 or (st_info >> 4) == 0:  # undefined or LOCAL
+                continue
+            nm = strat(dynstr, st_name)
+            if nm:
+                names.append(nm)
+        names = sorted(set(names))
+        meta["exported_symbols"] = len(names)
+        if names:
+            meta["symbol_signature"] = hashlib.sha256("\n".join(names).encode()).hexdigest()[:16]
+        notable = re.compile(r"fips|FIPS|OSSL|provider|NSC_|softoken|freebl|kcapi|gcry_|nettle_|wolf|EVP_CIPHER", re.I)
+        meta["notable_symbols"] = [n for n in names if notable.search(n)][:12]
+    return meta
+
+
+# named upstream banners (e.g. "OpenSSL 3.0.7 1 Nov 2022", "NSS 3.90")
+BANNER_RE = re.compile(r"(OpenSSL\s+\d[\w.\- ]*|BoringSSL[\w.\- ]*|NSS\s+\d[\w.\- ]*|NSPR\s+\d[\w.\-]*"
+                      r"|libgcrypt\s+\d[\w.\-]*|GnuTLS\s+\d[\w.\-]*|nettle\s+\d[\w.\-]*"
+                      r"|wolfSSL\s+\d[\w.\-]*|libkcapi\s+\d[\w.\-]*)")
+# a bare version, optionally with a build suffix ("3.0.7", "3.0.7-b27cdeb3ba51be46")
+VER_LINE_RE = re.compile(r"^\d+\.\d+\.\d+[a-z]?([-+][0-9A-Za-z][0-9A-Za-z.]*)?$")
+VER_BUILD_RE = re.compile(r"\b\d+\.\d+\.\d+[a-z]?[-+][0-9a-f]{7,}\b")  # version + build hash
+OID_LIKE = re.compile(r"\d+\.\d+\.\d+\.\d+")  # skip ASN.1 OIDs / cipher maps
+
+
+def version_strings(path):
+    try:
+        out = subprocess.run(["strings", "-a", path], capture_output=True, timeout=30).stdout.decode("latin1", "ignore")
+    except Exception:
+        return []
+    hits = []
+    for line in out.splitlines():
+        line = line.strip()
+        if not (4 <= len(line) <= 90) or ":" in line or OID_LIKE.search(line):
+            continue
+        m = VER_BUILD_RE.search(line)
+        if m:
+            hits.append(m.group(0))
+        elif BANNER_RE.search(line) or VER_LINE_RE.match(line):
+            hits.append(line)
+    seen, keep = set(), []
+    for h in hits:
+        if h not in seen:
+            seen.add(h); keep.append(h)
+    return keep[:12]
+
+
 def fetch(url, dest):
     r = subprocess.run(["curl", "-sL", "--max-time", "90", "--max-filesize", "80m",
                         "-A", "Mozilla/5.0", "-o", dest, url],
@@ -39,7 +159,7 @@ def fetch(url, dest):
 
 
 def extract_sos(rpm, workdir):
-    """Return {relpath: sha256} for every real .so* file in the package."""
+    """Return {relpath: {sha256, metadata...}} for every real .so* file."""
     subprocess.run(["bsdtar", "-xf", rpm, "-C", workdir], capture_output=True)
     out = {}
     for root, _, files in os.walk(workdir):
@@ -50,7 +170,11 @@ def extract_sos(rpm, workdir):
             if os.path.islink(p) or not os.path.isfile(p):
                 continue
             rel = os.path.relpath(p, workdir)
-            out[rel] = sha256(p)
+            rec = {"sha256": sha256(p)}
+            if not rel.endswith(".hmac"):
+                rec.update(elf_metadata(p))
+                rec["version_strings"] = version_strings(p)
+            out[rel] = rec
     return out
 
 
@@ -85,9 +209,9 @@ def main():
             sos = extract_sos(rpm, wd)
             rec["status"] = "ok" if sos else "no-so-found"
             rec["shared_objects"] = [
-                {"path": rel, "filename": os.path.basename(rel), "sha256": h,
-                 "is_hmac_sidecar": rel.endswith(".hmac")}
-                for rel, h in sorted(sos.items())]
+                {"path": rel, "filename": os.path.basename(rel),
+                 "is_hmac_sidecar": rel.endswith(".hmac"), **info}
+                for rel, info in sorted(sos.items())]
             shutil.rmtree(wd, ignore_errors=True)
             os.remove(rpm)
             results.append(rec)

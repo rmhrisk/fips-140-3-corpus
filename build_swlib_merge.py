@@ -142,6 +142,16 @@ def main():
                                     + (" (package hash independently confirmed)" if ok else ""),
                         "identifies": "on-disk-file",
                         "source": "package-extracted",
+                        # build-robust metadata: generalizes across rebuilds better
+                        # than the whole-file hash (which is exact-build only).
+                        "metadata": {
+                            "soname": s.get("soname"),
+                            "version_strings": s.get("version_strings") or [],
+                            "symbol_signature": s.get("symbol_signature"),
+                            "exported_symbols": s.get("exported_symbols"),
+                            "notable_symbols": s.get("notable_symbols") or [],
+                            "needed": s.get("needed") or [],
+                        },
                     })
 
     n_enriched = n_hash = n_verified = n_searched_empty = n_malformed = n_corrected = n_so = 0
