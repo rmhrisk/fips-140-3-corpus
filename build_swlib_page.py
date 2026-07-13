@@ -33,7 +33,7 @@ for r in rows:
         "cver": r["component_version"],
         "mver": r["module_software_versions"],
         "files": [a["file"] for a in fp["filenames"]],
-        "ndig": sum(1 for d in fp["declared_digests"] if d["integrity_context"]),
+        "digs": [{"h": d["digest"], "k": d["kind"]} for d in fp["declared_digests"]],
         "pubs": [{
             "f": a["filename"], "k": a["artifact_kind"], "v": a["version"],
             "h": a["sha256"], "ver": a["verified"], "u": a["sha256_source_url"],
@@ -97,7 +97,8 @@ function pubHtml(p){let h='';for(const a of p){const badge=a.h?`<span class="bad
 function row(d){const files=d.files.map(f=>`<span class="chip">${esc(f)}</span>`).join('');
  const comp=d.comp?`${esc(d.comp)}${d.cver?' '+esc(d.cver):''}`:'<span class="small">—</span>';
  const mver=d.mver.length?`<div class="small">v ${esc(d.mver.join(', '))}</div>`:'';
- const dig=d.ndig?`<div class="small">${d.ndig} SP digest${d.ndig>1?'s':''}</div>`:'';
+ const digName={'module-integrity-hmac':'Module HMAC-SHA256','published-download-sha256':'Published SHA-256','published-file-sha256':'Published SHA-256','selftest-expected-digest':'Self-test digest'};
+ const dig=d.digs.map(x=>`<div class="artline"><span class="k">${digName[x.k]||x.k}</span> <span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${x.h}')">${x.h.slice(0,20)}…</span></div>`).join('');
  const pubs=d.pubs.length?pubHtml(d.pubs):(d.b===false?'<span class="small">searched — no public specimen</span>':'');
  return `<tr><td class="mono"><a href="${esc(d.sp)}" target="_blank" rel="noopener">#${d.cert}</a></td>
  <td class="name">${esc(d.name)}<div class="small">${esc(d.vendor)}</div></td>
@@ -133,9 +134,12 @@ hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Referen
 {stat(n,'software modules')}{stat(n_file,'with SP filename')}{stat(n_comp,'known component')}
 {stat(n_pub,'public artifact')}{stat(n_hash,'published hashes')}{stat(n_verified,'verified')}{stat(n_hi,'confidence ≥ 0.8')}
 </div>
-<div class="legend"><b>confidence</b> = known-component (.40) + verified-hash (.35) + version (.20) + SP-filename (.20)
-+ unverified-hash (.15) + SP-digest (.10) + artifact-no-hash (.05), capped at 1.0. <b>verified</b> = an independent
-agent re-fetched the hash's source URL and confirmed it. Hashes are recorded only when read from a cited source, never guessed.</div>
+<div class="legend"><b>confidence</b> = known-component (.40) + web-verified-hash (.35) + version (.20) + SP-filename (.20)
++ SP-published-hash (.20) + unverified-web-hash (.15) + SP-module-HMAC (.12) + SP-self-test-digest (.10)
++ artifact-no-hash (.05), capped at 1.0. <b>SP digests</b> are hashes the Security Policy prints in its own text,
+kept only when the document labels what they are (module integrity HMAC, published download/file SHA-256, or
+self-test expected value). <b>verified</b> = an independent agent re-fetched a <i>web</i> hash's source URL and
+confirmed it. No hash is ever guessed.</div>
 <div class="controls">
 <input id="q" type="search" placeholder="filter by module, vendor, component, filename, artifact…">
 <label class="tog"><input id="oh" type="checkbox"> only rows with a published hash</label>

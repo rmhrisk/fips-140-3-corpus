@@ -36,8 +36,13 @@ def recompute_confidence(row):
         score += 0.20; reasons.append("version-pinned")
     if row["fingerprints"]["filenames"]:
         score += 0.20; reasons.append("filename-in-SP")
-    if any(d["integrity_context"] for d in row["fingerprints"]["declared_digests"]):
-        score += 0.10; reasons.append("declared-integrity-digest")
+    digs = row["fingerprints"]["declared_digests"]
+    if any(d["kind"] in ("published-download-sha256", "published-file-sha256") for d in digs):
+        score += 0.20; reasons.append("sp-published-hash")     # directly matchable
+    elif any(d["kind"] == "module-integrity-hmac" for d in digs):
+        score += 0.12; reasons.append("sp-module-hmac")        # asserted, key-dependent
+    elif digs:
+        score += 0.10; reasons.append("sp-selftest-digest")
     pubs = row["fingerprints"]["published_artifacts"]
     if any(a.get("sha256") and a.get("verified") for a in pubs):
         score += 0.35; reasons.append("verified-published-hash")

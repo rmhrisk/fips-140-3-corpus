@@ -59,20 +59,31 @@ def artifacts(text):
 
 
 # --- integrity digests the SP prints in its own text ------------------------
-HEX_RE = re.compile(r"\b([0-9a-fA-F]{40}|[0-9a-fA-F]{64})\b")
-INTEG_CUE = re.compile(r"integrity|HMAC|SHA-?256|SHA-?512|SHA-?1|digest|checksum|hash", re.I)
+# We only keep a hex digest when the text immediately preceding it *names* what
+# it is. That both classifies the digest and rejects incidental hex (ACVP ids,
+# certificate thumbprints, key material, generic test vectors).
+HEX_RE = re.compile(r"\b([0-9a-fA-F]{64})\b")  # SHA-256 only; the useful case
+_S = r"sha[-‐ ]?2?[-‐ ]?2?56"  # SHA-256 / SHA256 / SHA2-256 / SHA2 256
+DIGEST_KINDS = [
+    # (pattern matched against the ~90 chars before the hash, kind)
+    (re.compile(r"module\s+" + _S + r"\s+hmac", re.I), "module-integrity-hmac"),
+    (re.compile(r"(expected|below)\s+" + _S + r"\s+digest", re.I), "selftest-expected-digest"),
+    (re.compile(r"boringssl[-/]?fips", re.I), "published-download-sha256"),
+    (re.compile(r"hash\s+(should\s+be|values?\s+for\s+this\s+file|sum)", re.I), "published-file-sha256"),
+]
 
 
 def integrity_digests(text):
     seen = {}
-    lines = text.splitlines()
-    for i, ln in enumerate(lines):
-        for h in HEX_RE.findall(ln):
-            ctx = " ".join(lines[max(0, i - 2):i + 1])
-            near = bool(INTEG_CUE.search(ctx))
-            if h not in seen or (near and not seen[h]["integrity_context"]):
-                seen[h] = {"digest": h.lower(), "bits": len(h) * 4,
-                           "integrity_context": near, "source": "security-policy"}
+    for m in HEX_RE.finditer(text):
+        h = m.group(1).lower()
+        pre = re.sub(r"\s+", " ", text[max(0, m.start() - 90):m.start()])
+        kind = next((k for pat, k in DIGEST_KINDS if pat.search(pre)), None)
+        if kind is None:
+            continue  # unlabeled hex -> not a trustworthy module digest, drop
+        if h not in seen:
+            seen[h] = {"digest": h, "bits": 256, "kind": kind,
+                       "label": pre[-42:].strip(), "source": "security-policy"}
     return list(seen.values())
 
 
@@ -109,7 +120,10 @@ def confidence(row):
         score += 0.20; reasons.append("version-pinned")
     if row["fingerprints"]["filenames"]:
         score += 0.25; reasons.append("filename-in-SP")
-    if any(d["integrity_context"] for d in row["fingerprints"]["declared_digests"]):
+    digs = row["fingerprints"]["declared_digests"]
+    if any(d["kind"] in ("published-download-sha256", "published-file-sha256") for d in digs):
+        score += 0.20; reasons.append("sp-published-hash")
+    elif digs:
         score += 0.15; reasons.append("declared-integrity-digest")
     return round(min(score, 1.0), 2), reasons
 
@@ -170,7 +184,7 @@ if __name__ == "__main__":
     rows = build()
     with_comp = sum(1 for r in rows if r["component"])
     with_file = sum(1 for r in rows if r["fingerprints"]["filenames"])
-    with_dig = sum(1 for r in rows if any(x["integrity_context"] for x in r["fingerprints"]["declared_digests"]))
+    with_dig = sum(1 for r in rows if r["fingerprints"]["declared_digests"])
     print(f"software modules:        {len(rows)}")
     print(f"  with known component:  {with_comp}")
     print(f"  with SP filename(s):   {with_file}")
