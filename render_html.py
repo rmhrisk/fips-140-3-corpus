@@ -614,10 +614,19 @@ def render(record: dict, page_texts=None) -> str:
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
                 rows = _prune_empty_cols(_merge_header_wrap(t["rows"]))
-                headers = rows[0] if rows else None
-                trows = rows[1:] if rows else []
-                body.append(f"<div class='tbl'>"
-                            + html_table(headers, trows, cls="raw") + "</div>")
+                filled = lambda r: sum(1 for c in r if (c or "").strip())
+                # Prose pdfplumber boxed as a "table": a single row (a boxed sentence),
+                # one real column, or no row that ever fills two columns together (a
+                # staircase of single fragments in alternating columns, not aligned
+                # rows). The narrative already excluded it via token dedup, so render
+                # its cells as prose rather than as a spurious table.
+                if rows and (len(rows) <= 1 or len(rows[0]) <= 1 or not any(filled(r) >= 2 for r in rows)):
+                    body.append(_render_prose([c for r in rows for c in r if (c or "").strip()]))
+                else:
+                    headers = rows[0] if rows else None
+                    trows = rows[1:] if rows else []
+                    body.append(f"<div class='tbl'>"
+                                + html_table(headers, trows, cls="raw") + "</div>")
         ai_md = (sp.get("proseMarkdown") or {}).get(str(pg))
         if ai_md and _MD:  # AI-structured markdown for this page (preferred)
             body.append("<div class='aimd'>"
