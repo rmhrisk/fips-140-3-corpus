@@ -36,8 +36,8 @@ for r in rows:
         "digs": [{"h": d["digest"], "k": d["kind"]} for d in fp["declared_digests"]],
         "pubs": [{
             "f": a["filename"], "k": a["artifact_kind"], "v": a["version"],
-            "h": a["sha256"], "ver": a["verified"], "u": a["sha256_source_url"],
-            "d": a["download_url"], "c": a["confidence"],
+            "h": a["sha256"], "ver": a["verified"], "vm": a.get("verify_method"),
+            "u": a["sha256_source_url"], "d": a["download_url"], "c": a["confidence"],
         } for a in pubs],
         "conf": r["identity_confidence"],
         "ev": r["identity_evidence"],
@@ -90,7 +90,8 @@ JS = """const D=window.__D__;const tb=document.getElementById('tb');const q=docu
 const oh=document.getElementById('oh');const cnt=document.getElementById('cnt');let sortK='conf',sortDir=-1;
 function confCls(c){return c>=0.8?'c-hi':c>=0.5?'c-md':'c-lo'}
 function esc(s){return (s==null?'':(''+s)).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-function pubHtml(p){let h='';for(const a of p){const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${a.ver?'verified':'unverified'}</span>`:'';
+const vmLabel={'sp-text-confirmed':'SP-confirmed','web-reverified':'web-verified','peer-corrected':'peer-verified','unconfirmed':'unverified'};
+function pubHtml(p){let h='';for(const a of p){const vt=a.h?(vmLabel[a.vm]||(a.ver?'verified':'unverified')):'';const badge=a.h?`<span class="badge ${a.ver?'v-yes':'v-no'}">${vt}</span>`:'';
  const hash=a.h?`<span class="hash" title="click to copy" onclick="navigator.clipboard.writeText('${a.h}')">${a.h.slice(0,20)}…</span>`:'<span class="small">no published hash</span>';
  const src=a.u?` <a href="${esc(a.u)}" target="_blank" rel="noopener">src</a>`:'';
  h+=`<div class="artline"><span class="chip">${esc(a.f)}</span> ${hash}${src} ${badge} <span class="k">${esc(a.k)} · c=${a.c}</span></div>`}return h}
@@ -138,8 +139,9 @@ hash pins the <b>family + version</b>, not the exact CMVP-tested binary. Referen
 + SP-published-hash (.20) + unverified-web-hash (.15) + SP-module-HMAC (.12) + SP-self-test-digest (.10)
 + artifact-no-hash (.05), capped at 1.0. <b>SP digests</b> are hashes the Security Policy prints in its own text,
 kept only when the document labels what they are (module integrity HMAC, published download/file SHA-256, or
-self-test expected value). <b>verified</b> = an independent agent re-fetched a <i>web</i> hash's source URL and
-confirmed it. No hash is ever guessed.</div>
+self-test expected value). A published hash is <b>SP-confirmed</b> when the exact hash also appears in the module's
+own Security Policy text (authoritative, checked deterministically), <b>web-verified</b> when an independent agent
+re-fetched its checksum source and matched it, else <b>unverified</b>. No hash is ever guessed.</div>
 <div class="controls">
 <input id="q" type="search" placeholder="filter by module, vendor, component, filename, artifact…">
 <label class="tog"><input id="oh" type="checkbox"> only rows with a published hash</label>

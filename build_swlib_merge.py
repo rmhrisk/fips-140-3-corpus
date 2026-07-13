@@ -15,12 +15,23 @@ verified flag (an independent skeptic agent re-checked the URL).
 """
 import json
 import os
+import re
 import sys
 import csv
 import datetime
 
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
 HERE = os.path.dirname(os.path.abspath(__file__))
+SPT = os.path.join(HERE, "sp_text")
 TRACKA = os.path.join(HERE, "fips_swlib.trackA.json")
+
+
+def sp_text_lower(cert):
+    p = os.path.join(SPT, f"{cert}.txt")
+    if not os.path.exists(p):
+        return ""
+    return open(p, encoding="utf-8", errors="ignore").read().lower()
 GOFISH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "gofish_results.json")
 OUT_JSON = os.path.join(HERE, "fips_swlib.json")
 OUT_CSV = os.path.join(HERE, "fips_swlib.csv")
@@ -64,7 +75,17 @@ def main():
     else:
         print(f"WARNING: {GOFISH} not found; emitting Track A only", file=sys.stderr)
 
-    n_enriched = n_hash = n_verified = n_searched_empty = 0
+    # canonical hash per exact filename, from agent-verified, well-formed digests.
+    # A versioned artifact filename (bc-fips-2.0.0.jar) uniquely identifies content,
+    # so a verified 64-hex hash for it is authoritative for peer-correction.
+    canon = {}
+    for g in fished.values():
+        for a in (g.get("artifacts") or []):
+            h = (a.get("sha256") or "").strip().lower()
+            if a.get("verified") and HEX64.match(h):
+                canon.setdefault(a.get("filename"), h)
+
+    n_enriched = n_hash = n_verified = n_searched_empty = n_malformed = n_corrected = 0
     for row in rows:
         g = fished.get(row["cert"])
         if g is not None:
@@ -74,18 +95,52 @@ def main():
             if g.get("notes"):
                 row["provenance"]["trackB_notes"] = g["notes"]
         if g and g.get("artifacts"):
+            sp_low = sp_text_lower(row["cert"])
             arts = []
             for a in g["artifacts"]:
+                h = (a.get("sha256") or "").strip().lower() or None
+                note_extra = None
+                # Reject malformed digests (a SHA-256 is exactly 64 hex). If the
+                # bad value is a clean prefix of a canonical verified hash for the
+                # same filename, it is a truncation we can correct; else drop it.
+                if h and not HEX64.match(h):
+                    cf = canon.get(a.get("filename"))
+                    if cf and cf.startswith(h):
+                        note_extra = f"[peer-corrected from truncated '{h}']"
+                        h = cf
+                        n_corrected += 1
+                    else:
+                        note_extra = f"[malformed digest omitted: '{h}']"
+                        h = None
+                        n_malformed += 1
+                # Deterministic check: does this exact hash appear in the module's
+                # own Security Policy text? That is authoritative and beats an
+                # agent's re-fetch (which fails on PDF-only sources).
+                sp_confirmed = bool(h and h in sp_low)
+                if note_extra and "peer-corrected" in note_extra:
+                    verified, method = True, "peer-corrected"
+                elif sp_confirmed:
+                    verified, method = True, "sp-text-confirmed"
+                elif h and a.get("verified"):
+                    verified, method = True, "web-reverified"
+                elif h:
+                    verified, method = False, "unconfirmed"
+                else:
+                    verified, method = False, ("malformed-omitted" if note_extra else None)
+                ev = a.get("evidence")
+                if note_extra:
+                    ev = f"{ev} {note_extra}" if ev else note_extra
                 arts.append({
                     "filename": a.get("filename"),
                     "artifact_kind": a.get("artifact_kind"),
                     "version": a.get("version"),
-                    "sha256": (a.get("sha256") or None),
+                    "sha256": h,
                     "sha256_source_url": a.get("sha256_source_url"),
                     "download_url": a.get("download_url"),
-                    "verified": bool(a.get("verified")),
+                    "verified": verified,
+                    "verify_method": method,
                     "confidence": a.get("confidence"),
-                    "evidence": a.get("evidence"),
+                    "evidence": ev,
                     "source": "web-fished",
                 })
             row["fingerprints"]["published_artifacts"] = arts
@@ -142,6 +197,7 @@ def main():
     print(f"modules:             {len(rows)}")
     print(f"  enriched (Track B):{n_enriched}")
     print(f"  searched, no public specimen: {n_searched_empty}")
+    print(f"  malformed hashes: {n_malformed} omitted, {n_corrected} peer-corrected")
     print(f"  published hashes:  {n_hash} ({n_verified} verified)")
     print(f"  confidence >= 0.8: {sum(1 for r in rows if r['identity_confidence'] >= 0.8)}")
     print(f"wrote {os.path.relpath(OUT_JSON, HERE)} and {os.path.relpath(OUT_CSV, HERE)}")
