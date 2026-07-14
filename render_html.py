@@ -291,6 +291,51 @@ def kv_card(title, pairs):
     return f"<section class='card'><h2>{esc(title)}</h2><table class='kv'>{rows}</table></section>"
 
 
+def _merge_duplicated_cols(rows):
+    """Merge adjacent columns pdfplumber duplicated from one logical column.
+
+    A wide cell (or a header spanning two ruled columns) is sometimes emitted as two
+    neighbouring columns carrying the SAME text — e.g. a `Details` header duplicated
+    across the span, or a value binned into both an empty-header column and the real
+    one. The tell: the two columns never conflict (no row where both are non-empty
+    with different text) AND share at least one identical non-empty cell (proof they
+    are the same logical column, not two sparse distinct ones). Fold each such pair,
+    de-duplicating the shared value. Guarded so it is a no-op on real tables: any row
+    where the neighbours hold different values blocks the merge, and two-up
+    `Name | Value | Name | Value` layouts are safe because their repeated headers are
+    not adjacent."""
+    if len(rows) < 2:
+        return rows
+    ncols = max(len(r) for r in rows)
+    if ncols < 2:
+        return rows
+    cell = lambda r, c: (r[c] if c < len(r) and r[c] else "").strip()
+    groups, c = [], 0
+    while c < ncols:
+        grp = [c]
+        while c + 1 < ncols:
+            gcell = lambda r: next((cell(r, g) for g in grp if cell(r, g)), "")
+            nxt = c + 1
+            conflict = any(gcell(r) and cell(r, nxt) and gcell(r) != cell(r, nxt) for r in rows)
+            shared = any(gcell(r) and cell(r, nxt) and gcell(r) == cell(r, nxt) for r in rows)
+            if not conflict and shared:
+                grp.append(nxt); c += 1
+            else:
+                break
+        groups.append(grp); c += 1
+    if len(groups) == ncols:
+        return rows
+
+    def merged(r, grp):
+        out = []
+        for g in grp:
+            v = cell(r, g)
+            if v and v not in out:
+                out.append(v)
+        return " ".join(out)
+    return [[merged(r, grp) for grp in groups] for r in rows]
+
+
 def _prune_empty_cols(rows):
     """Drop table columns empty in every row (pdfplumber phantom columns from stray
     ruling lines)."""
@@ -695,7 +740,8 @@ def render(record: dict, page_texts=None) -> str:
                             + html_table(headers, trows, cls="typed") + "</div>")
             else:  # raw table — treat its first row as the (bold) header
                 t = payload
-                rows = _merge_split_cols(_merge_wrap_rows(_prune_empty_cols(_merge_header_wrap(t["rows"]))))
+                rows = _merge_split_cols(_merge_wrap_rows(_prune_empty_cols(
+                    _merge_duplicated_cols(_merge_header_wrap(t["rows"])))))
                 filled = lambda r: sum(1 for c in r if (c or "").strip())
                 # Prose pdfplumber boxed as a "table": a single row (a boxed sentence),
                 # one real column, or no row that ever fills two columns together (a
