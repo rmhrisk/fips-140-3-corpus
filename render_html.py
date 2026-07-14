@@ -140,6 +140,72 @@ def _raw_table_block(rows: list[str]) -> str:
             f"<pre class='rawtxt'>{esc(block)}</pre></details>")
 
 
+# A body table whose grid pdfplumber missed spills into the page text as aligned
+# key/value LINES: a short key, a run of 2+ spaces, then the value (e.g. an acronym
+# glossary or a references list). Each line is one row; wrapped values continue on
+# an indented line. Reconstruct the 2-column table from that alignment — no content
+# heuristics, just the column gap the PDF preserved.
+GRID_SENTINEL = "\x00GRID\x00"
+_KEYED_RE = re.compile(r"^(\S.{0,38}?) {2,}(\S.*)$")   # short key + gap + value
+_CONT_RE = re.compile(r"^ {2,}\S")                     # indented value continuation
+
+
+def _codelike(key: str) -> bool:
+    """A glossary/reference key is short and terse (an acronym or a spec label like
+    'SP 800-38A'), not a sentence. Long, many-word left cells are a multi-column
+    table collapsed to two, a TOC entry, or a title-page address."""
+    return len(key) <= 20 and len(key.split()) <= 3
+
+
+def _codelike_key(line: str) -> bool:
+    m = _KEYED_RE.match(line)
+    return bool(m) and _codelike(m.group(1))
+
+
+def _segment_grids(lines: list[str]):
+    """Split page lines into ('grid', rows) and ('prose', lines) segments. A grid is
+    a run with >=2 keyed rows whose keys are mostly code-like; else it is prose."""
+    segs, i, n = [], 0, len(lines)
+    while i < n:
+        if _KEYED_RE.match(lines[i]):
+            j = i + 1
+            while j < n and (_KEYED_RE.match(lines[j]) or _CONT_RE.match(lines[j])):
+                j += 1
+            keyed = [l for l in lines[i:j] if _KEYED_RE.match(l)]
+            codelike = sum(_codelike_key(l) for l in keyed)
+            # a true 2-column glossary has exactly ONE column gap per row; several
+            # gaps mean a multi-column table collapsed to text — leave those as raw.
+            single_gap = sum(len(_GAP_RE.findall(l)) == 1 for l in keyed)
+            if (len(keyed) >= 3 and codelike >= 0.8 * len(keyed)
+                    and single_gap >= 0.8 * len(keyed)):
+                segs.append(("grid", lines[i:j])); i = j; continue
+        if segs and segs[-1][0] == "prose":
+            segs[-1][1].append(lines[i])
+        else:
+            segs.append(("prose", [lines[i]]))
+        i += 1
+    return segs
+
+
+def _grid_html(rows: list[str]) -> str:
+    parsed = []
+    for r in rows:
+        m = _KEYED_RE.match(r)
+        if m:
+            parsed.append([m.group(1).strip(), m.group(2).strip()])
+        elif parsed:                                   # wrapped value continuation
+            parsed[-1][1] = (parsed[-1][1] + " " + r.strip()).strip()
+        else:
+            parsed.append(["", r.strip()])
+    # trim running header/footer rows (non-code-like keys) that bracket the glossary
+    while parsed and not _codelike(parsed[0][0]):
+        parsed.pop(0)
+    while parsed and not _codelike(parsed[-1][0]):
+        parsed.pop()
+    body = "".join(f"<tr><td>{esc(k)}</td><td>{esc(v)}</td></tr>" for k, v in parsed)
+    return f"<div class='tw'><table class='kvgrid'>{body}</table></div>"
+
+
 def _render_prose(paras: list[str]) -> str:
     # A table or TOC that pdfplumber did not capture as structure falls into the
     # verbatim prose keeping its COLUMN-GAP spacing (runs of 2+ spaces); narrative
@@ -156,6 +222,9 @@ def _render_prose(paras: list[str]) -> str:
         return g >= 2 and g / max(1, len(p.split())) >= 0.10
     out, i, n = [], 0, len(paras)
     while i < n:
+        if paras[i].startswith(GRID_SENTINEL):   # pre-rendered key/value grid table
+            out.append(paras[i][len(GRID_SENTINEL):]); i += 1
+            continue
         if gappy(paras[i]):
             j = i
             while j < n and gappy(paras[j]):
@@ -199,12 +268,19 @@ def _page_prose(page_texts, pg: int, table_tokens=frozenset()) -> list[str]:
         if tk and table_tokens and len(tk & table_tokens) / len(tk) >= 0.6:
             continue  # this line's content is already shown in a table on this page
         narrative.append(l)
-    paras = _reflow(narrative)
-    # keep only substantive paragraphs: a section heading, or real prose (>=4 words).
-    # This drops stray table-cell fragments that leak onto table pages ("E",
-    # "R W W E", "2.4.A", "C.A") which tokenize to nothing and evade the dedup.
-    return [p for p in paras
-            if _SECNUM_RE.match(p) or len(re.findall(r"[A-Za-z]{2,}", p)) >= 4]
+    # Pull aligned key/value grids (glossaries, reference lists whose body grid
+    # pdfplumber missed) out before _reflow flattens their line breaks; reflow only
+    # the true prose. keep only substantive paragraphs: a section heading, or real
+    # prose (>=4 words). This drops stray table-cell fragments ("E", "R W W E",
+    # "2.4.A", "C.A") which tokenize to nothing and evade the dedup.
+    out = []
+    for kind, payload in _segment_grids(narrative):
+        if kind == "grid":
+            out.append(GRID_SENTINEL + _grid_html(payload))
+        else:
+            out += [p for p in _reflow(payload)
+                    if _SECNUM_RE.match(p) or len(re.findall(r"[A-Za-z]{2,}", p)) >= 4]
+    return out
 
 
 def esc(x) -> str:
